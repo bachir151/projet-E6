@@ -1,5 +1,11 @@
 # Journal de travail – Projets E6
 
+## Session du 11 novembre 2026 (suite) : Lorenzo, recentrage validé
+
+### Décidé
+- L'enseignant valide le recentrage de Lorenzo : V1 = boîtier + blocage + messages signés + filet GPO + physique R1–R5 + réseau ; V2 = installations pendant les absences + serveur + tableau de bord du parc + essai R6 ; domaine commun ; veille du soir et fiche de conformité en extension. Le formulaire et la page sont déjà conformes.
+- Reste : faire valider la physique réduite par le collègue de physique ; mettre à jour le dossier V2 (PDF) si l'enseignant le souhaite.
+
 ## Session du 11 novembre 2026 (suite) : formulaire académique de Lorenzo
 
 ### Fait

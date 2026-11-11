@@ -11,7 +11,7 @@
 - [x] Extensions ajoutées : assistant de réglage (seuils proposés par le poste), détection d'un radar masqué. Refusés : radar multi-cibles LD2450 (trop long), veille du soir (déjà en extension).
 - [x] Page de présentation : `livrables/page-html/poste-attentif.html` (https://claude.ai/artifact/UG9LExYjDUDHFMyMRyhCZ9), à jour.
 
-## Proposé par la revue du 11/11 (à valider par l'enseignant)
+## Recentrage de la revue du 11/11 : **validé par l'enseignant (11/11)**
 | Aujourd'hui | Proposition |
 |---|---|
 | Défi toutes les 10 min, messages « présent » non signés (faille : faux boîtier branché entre deux défis) | Chaque message signé (HMAC + compteur) ; nouveau défi dès que le boîtier est rebranché |
@@ -22,12 +22,12 @@
 | 0 h pour le réseau | 8 h réservées à l'exploitation réseau |
 | Charge réaliste ≈ 178 h avec IA | V1 ≈ 108 h, V2 ≈ 40 h (avec les ajouts du 11/11), marge ≈ 2 h |
 
-## Physique (à valider avec le collègue de physique)
+## Physique (validée par l'enseignant ; reste à valider avec le collègue de physique)
 - Garder : R1 seuils, R2 + R3 zone de détection, R4 délai de détection (indicateur clé), R5 court ; exposition en calcul seul.
 - Mettre de côté : E1–E3 (wattmètre, bilan énergétique), sauf E1 court si la sobriété revient.
 
 ## À faire
-- [ ] Valider les propositions ci-dessus
+- [x] Propositions ci-dessus validées (11/11)
 - [ ] Mettre à jour le dossier V2 (V1/V2, faille corrigée, physique réduite)
 - [x] Formulaire académique rempli (version corrigée et enrichie) : `fiche-academique/Fiche_presentation_E6_Lorenzo.docx` et `.pdf` (13 p.). À compléter à la main : adresse, site, téléphone, mail de l'entreprise ; nom et fonction du tuteur
 - [ ] Validation de la réalisation au lycée par l'académie
