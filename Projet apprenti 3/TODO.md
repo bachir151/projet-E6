@@ -4,6 +4,13 @@
 - [x] Répartition de la sécurité entre apprentis (voir `docs/apprentis.md`) : Lorenzo **garde** le défi-réponse HMAC et la démonstration du faux boîtier.
 - [x] Lorenzo **laisse** la vérification d'authenticité des paquets à Aziza : son catalogue devient une simple liste de paquets en attente. Sa question = **quand installer sans déranger l'agent**.
 
+- [x] **Ajouts en V2 (décidés le 11/11)**, pour renforcer la « valorisation de la donnée » :
+  - tableau de bord du parc, sans aucune donnée sur les agents : installations réussies du premier coup, reports et leurs raisons, temps pour que le parc soit à jour, postes en retard (≈ 6 h) ;
+  - mesure de l'apport (essai R6 remis) : séance de travail jouée, nombre d'installations qui seraient tombées devant l'agent avec l'outil classique, puis avec le boîtier (≈ 3 h).
+  - Nouveau bilan : V1 ≈ 108 h, V2 ≈ 40 h, marge ≈ 2 h.
+- [x] Extensions ajoutées : assistant de réglage (seuils proposés par le poste), détection d'un radar masqué. Refusés : radar multi-cibles LD2450 (trop long), veille du soir (déjà en extension).
+- [x] Page de présentation : `livrables/page-html/poste-attentif.html` (https://claude.ai/artifact/UG9LExYjDUDHFMyMRyhCZ9), à jour.
+
 ## Proposé par la revue du 11/11 (à valider par l'enseignant)
 | Aujourd'hui | Proposition |
 |---|---|
@@ -13,7 +20,7 @@
 | Sobriété (veille du soir) en V2 | Extension (la GPO de veille fait déjà presque la même chose) |
 | Fiche de conformité (BitLocker, Defender…) | Extension (proche du diagnostic de l'apprenti 1) |
 | 0 h pour le réseau | 8 h réservées à l'exploitation réseau |
-| Charge réaliste ≈ 178 h avec IA | V1 ≈ 108 h, V2 ≈ 31 h, marge ≈ 11 h |
+| Charge réaliste ≈ 178 h avec IA | V1 ≈ 108 h, V2 ≈ 40 h (avec les ajouts du 11/11), marge ≈ 2 h |
 
 ## Physique (à valider avec le collègue de physique)
 - Garder : R1 seuils, R2 + R3 zone de détection, R4 délai de détection (indicateur clé), R5 court ; exposition en calcul seul.

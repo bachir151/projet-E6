@@ -495,7 +495,7 @@ footer{padding-block:40px 60px;color:var(--muted);font-size:.85rem}
   <div class="priv">
     <div class="panel keep"><h3>Reste sur le poste</h3><ul><li>Présent ou absent, chaque seconde</li><li>L'heure des départs et des retours</li><li>La couleur de la lumière</li></ul></div>
     <div class="arrow">rien de tout ça<br>ne part →</div>
-    <div class="panel send"><h3>Part au serveur</h3><ul><li>« Logiciel installé », avec le jour, sans l'heure</li><li>Le bilan d'installation d'un poste neuf</li><li>Les pannes du boîtier</li></ul></div>
+    <div class="panel send"><h3>Part au serveur</h3><ul><li>« Logiciel installé », avec le jour, sans l'heure</li><li>Les reports et leurs raisons (« logiciel ouvert »…)</li><li>Le bilan d'installation d'un poste neuf</li><li>Les pannes du boîtier</li></ul></div>
   </div>
   <p class="big-quote">On sait si le bureau est occupé. <em>Jamais qui, ni combien de temps.</em></p>
 </section>
@@ -506,18 +506,18 @@ footer{padding-block:40px 60px;color:var(--muted);font-size:.85rem}
     <p class="lead">Environ 150 heures, de janvier à mai. D'abord ce qui est obligatoire, ensuite ce qui est visé, le reste seulement s'il reste du temps.</p></div>
   <div class="road">
     <div class="stage v1"><p class="h">≈ 108 h</p><h3>Version 1 · obligatoire</h3><ul><li>Le boîtier : radar, lumière, ESP32</li><li>Le blocage de l'écran avec avertissement</li><li>Le code secret sur chaque message</li><li>Le filet de sécurité de Windows</li><li>Les mesures R1 à R4</li><li>Les échanges réseau vérifiés et capturés</li></ul></div>
-    <div class="stage v2"><p class="h">≈ 31 h</p><h3>Version 2 · visée</h3><ul><li>Les installations pendant les absences</li><li>Le retour de l'agent au milieu : rien n'est touché</li><li>Un petit serveur : liste des installations, résultats</li><li>L'installation d'un poste neuf, d'abord en simulation</li></ul></div>
-    <div class="stage ext"><p class="h">s'il reste du temps</p><h3>Extensions</h3><ul><li>La veille du soir et le bilan d'énergie</li><li>La fiche de contrôle d'un poste neuf</li><li>Un radar qui sépare l'agent et l'usager</li></ul></div>
+    <div class="stage v2"><p class="h">≈ 40 h</p><h3>Version 2 · visée</h3><ul><li>Les installations pendant les absences</li><li>Le retour de l'agent au milieu : rien n'est touché</li><li>Un petit serveur : liste des installations, résultats</li><li><strong>Tableau de bord du parc</strong> : réussites du premier coup, reports et leurs raisons, postes en retard, sans aucune donnée sur les agents</li><li><strong>Mesure de l'apport</strong> : sur une journée jouée, combien d'installations seraient tombées devant l'agent, avec et sans le boîtier (essai R6)</li><li>L'installation d'un poste neuf, d'abord en simulation</li></ul></div>
+    <div class="stage ext"><p class="h">s'il reste du temps</p><h3>Extensions</h3><ul><li>Un assistant de réglage : l'agent s'assoit, se lève, le poste propose les seuils</li><li>Détecter un radar masqué</li><li>La veille du soir et le bilan d'énergie</li><li>La fiche de contrôle d'un poste neuf</li><li>Un radar qui sépare l'agent et l'usager</li></ul></div>
   </div>
   <div class="hours" aria-label="Répartition des heures">
     <span style="width:72%;background:var(--radar)">V1 · 108 h</span>
-    <span style="width:21%;background:var(--agent)">V2 · 31 h</span>
-    <span style="width:7%;background:var(--off)">marge</span>
+    <span style="width:26.5%;background:var(--agent)">V2 · 40 h</span>
+    <span style="width:1.5%;background:var(--off)" title="marge ≈ 2 h"></span>
   </div>
   <div class="revues">
     <div class="revue"><b>Revue 1 · fin janvier</b>Besoin chiffré validé par le tuteur, maquette prête, le radar détecte.</div>
     <div class="revue"><b>Revue 2 · mi-mars</b>Version 1 complète : on se lève, l'écran se bloque ; le faux boîtier est refusé.</div>
-    <div class="revue"><b>Revue 3 · mi-mai</b>Version 2 : installation pendant la pause, démonstration complète.</div>
+    <div class="revue"><b>Revue 3 · mi-mai</b>Version 2 : installation pendant la pause, tableau de bord du parc, chiffre de l'apport, démonstration complète.</div>
   </div>
 </section>
 
@@ -528,7 +528,7 @@ footer{padding-block:40px 60px;color:var(--muted);font-size:.85rem}
     <p class="phrase">Le poste se protège quand l'agent part, et travaille quand l'agent n'est pas là.</p>
     <div class="kpis">
       <div class="kpi"><b>~10 s</b><span>avant le blocage, au lieu de 10 minutes (à mesurer, essai R4)</span></div>
-      <div class="kpi"><b>0</b><span>installation lancée devant l'agent</span></div>
+      <div class="kpi"><b>0</b><span>installation lancée devant l'agent, contre N avec l'outil classique (à mesurer, essai R6)</span></div>
       <div class="kpi"><b>0</b><span>image filmée : un radar, pas une caméra</span></div>
     </div>
   </div>

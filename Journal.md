@@ -1,5 +1,11 @@
 # Journal de travail – Projets E6
 
+## Session du 11 novembre 2026 (suite) : Lorenzo, enrichissement
+
+### Décidé
+- Partie « solutions existantes » de la page renforcée (outils de l'administration : image master, GPO, WSUS, SCCM, WAPT, Intune… ; le boîtier les complète, il ne les remplace pas).
+- V2 enrichie côté « valorisation de la donnée » : tableau de bord du parc non nominatif + mesure de l'apport (essai R6). Marge réduite à ≈ 2 h : pas d'autre ajout.
+
 ## Session du 11 novembre 2026 (suite) : page de présentation de Lorenzo
 
 ### Fait
