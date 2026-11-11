@@ -1,5 +1,11 @@
 # Journal de travail – Projets E6
 
+## Session du 11 novembre 2026 (suite) : page de présentation de Lorenzo
+
+### Fait
+- Page HTML interactive « Poste attentif » (version corrigée du projet) : `Projet apprenti 3/livrables/page-html/poste-attentif.html`, publiée en lien privé : https://claude.ai/artifact/UG9LExYjDUDHFMyMRyhCZ9
+- 10 parties : problème (compteur, scène du guichet) ; solutions existantes (11 cartes à retourner + test des trois situations) ; solution (boîtier pièce par pièce, onde radar) ; journée de Martine (6 étapes, avec / sans le projet) ; schéma animé et cliquable ; faux boîtier (démonstration avec / sans protection) ; physique (curseur de distance, formules, essais R1–R5) ; vie privée ; parcours V1 / V2 / extensions ; en bref.
+
 ## Session du 11 novembre 2026 (suite) : revue de Lorenzo et répartition de la sécurité
 
 ### Fait
