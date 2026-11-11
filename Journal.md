@@ -1,5 +1,18 @@
 # Journal de travail – Projets E6
 
+## Session du 11 novembre 2026 (suite) : formulaire académique de Yaksan (apprenti 2)
+
+### Fait
+- Hypothèse : Yaksan = apprenti 2 (« Boîte noire du poste »), seul apprenti sans prénom dans le dépôt. **À confirmer**, puis ajouter le prénom dans `docs/apprentis.md`.
+- **Formulaire officiel rempli** à partir de la synthèse de 3 pages → `Projet apprenti 2/fiche-academique/Fiche_presentation_E6_Yaksan.docx` et `.pdf` (13 pages). Parties 1 à 6 ; partie 7 laissée à la commission.
+- Mêmes choix que pour Aziza : nom réel (Ministère de l'Intérieur, service carrière et paye), case « Entreprise », R1 29/01, R2 19/03, R3 + remise 14/05, soutenance en juin.
+- Schémas : synoptique, SysML (exigences E1–E8, contexte, cas d'utilisation, séquence « mise à jour interrompue par un arrêt forcé »), Gantt reprenant les heures de la synthèse (150 h).
+
+### À vérifier
+- Adresse, site, téléphone, mail de l'entreprise ; nom et fonction du tuteur.
+- « Temps de résolution d'un incident carte divisé… » : la synthèse est coupée ; écrit « réduit » sans chiffre.
+- Même incohérence possible case « Entreprise » / texte « maquette au lycée ».
+
 ## Session du 11 novembre 2026 (suite) : formulaire académique d'Aziza
 
 ### Fait
