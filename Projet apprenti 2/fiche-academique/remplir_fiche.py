@@ -250,14 +250,14 @@ R.titre("Contexte")
 R.texte("Yaksan est apprenti au support informatique du service carrière et paye d’une administration. Il aide "
         "les usagers et accueille les nouveaux arrivants. Le réseau du service est isolé d’Internet. Le support "
         "reçoit deux plaintes récurrentes : des ", ("mises à jour obligatoires qui échouent", "g"),
-        " (environ deux par mois) et un ", ("navigateur qui ne détecte pas la carte", "g"),
-        " au moment de se connecter. Dans les deux cas, on répare « à l’aveugle » (redémarrer, effacer les "
-        "cookies) sans connaître la cause.")
+        " (environ deux par mois) et une ", ("carte qui dysfonctionne au moment du badgeage", "g"),
+        " pour l’accès à la plateforme sécurisée qui contient l’ensemble des logiciels métiers. Dans les deux "
+        "cas, on répare « à l’aveugle » (redémarrer, effacer les cookies) sans connaître la cause.")
 R.titre("La question de départ")
 R.texte("Qui sait ce qui s’est passé ? Windows ne peut rien écrire quand il est coupé net, arrêté de force au "
         "bouton ou figé, et il ne voit pas si la puce d’une carte est alimentée. Il faut donc un ",
         ("témoin extérieur", "g"), ", comme la boîte noire d’un avion, et un outil qui remonte la chaîne "
-        "carte → navigateur maillon par maillon.")
+        "carte → plateforme sécurisée maillon par maillon.")
 R.titre("Principe de la solution")
 R.texte("Un ", ("boîtier ESP32", "g"), ", posé sans ouvrir le PC et relié seulement par USB, observe les voyants "
         "du poste, le 5 V de l’USB et le courant du lecteur de carte. Il horodate les événements et les garde "
@@ -312,7 +312,7 @@ for p in cell.paragraphs:
 R = Redac(P[47])
 R.titre("Besoins exprimés par le tuteur")
 R.puce(("Besoin 1 – ", "g"), "comprendre et réduire les mises à jour obligatoires qui échouent sur les postes.")
-R.puce(("Besoin 2 – ", "g"), "diagnostiquer vite les échecs de connexion par carte (le navigateur ne détecte pas la carte).")
+R.puce(("Besoin 2 – ", "g"), "diagnostiquer vite les dysfonctionnements de la carte au badgeage pour l’accès à la plateforme sécurisée des logiciels métiers.")
 R.puce(("Besoin 3 – ", "g"), "mieux accompagner les usagers et les nouveaux arrivants (cœur du métier de l’apprenti).")
 R.titre("Hypothèses chiffrées (à valider par le tuteur)")
 R.puce("Environ deux mises à jour ratées par mois sur les postes suivis.")
