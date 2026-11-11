@@ -29,7 +29,7 @@
 ## À faire
 - [ ] Valider les propositions ci-dessus
 - [ ] Mettre à jour le dossier V2 (V1/V2, faille corrigée, physique réduite)
-- [ ] Remplir le formulaire académique (`Projet apprenti 3/Fiche presentation projet E6-projet-IR v2.docx`), comme pour Aziza et Yaksan
+- [x] Formulaire académique rempli (version corrigée et enrichie) : `fiche-academique/Fiche_presentation_E6_Lorenzo.docx` et `.pdf` (13 p.). À compléter à la main : adresse, site, téléphone, mail de l'entreprise ; nom et fonction du tuteur
 - [ ] Validation de la réalisation au lycée par l'académie
 
 ## Questions pour la visite du tuteur

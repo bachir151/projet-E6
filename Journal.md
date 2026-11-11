@@ -1,5 +1,15 @@
 # Journal de travail – Projets E6
 
+## Session du 11 novembre 2026 (suite) : formulaire académique de Lorenzo
+
+### Fait
+- Formulaire officiel rempli (parties 1 à 6) pour la version corrigée et enrichie → `Projet apprenti 3/fiche-academique/Fiche_presentation_E6_Lorenzo.docx` et `.pdf` (13 pages). Mêmes choix que pour les autres : nom réel (DGFiP), case « Entreprise », R1 29/01, R2 19/03, R3 + remise 14/05.
+- Schémas : synoptique (avec l'outil de déploiement réel en extension), exigences E1–E8, contexte, cas d'utilisation, séquence, Gantt.
+
+### À vérifier
+- Compléter à la main les coordonnées de l'entreprise et du tuteur ; mettre à jour la table des matières dans Word.
+- Les propositions de recentrage du TODO de Lorenzo sont reprises dans le formulaire : à confirmer par l'enseignant.
+
 ## Session du 11 novembre 2026 (suite) : Lorenzo, enrichissement
 
 ### Décidé
