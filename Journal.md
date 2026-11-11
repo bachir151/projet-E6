@@ -1,5 +1,13 @@
 # Journal de travail – Projets E6
 
+## Session du 11 novembre 2026 (suite) : revue du projet de Yaksan (apprenti 2)
+
+### Fait
+- Revue critique : bonne idée (témoin extérieur) et physique utile, mais périmètre trop gros (≈ 204 h sans IA, ≈ 183 h avec IA) et deux indicateurs impossibles à mesurer sur maquette. Recentrage proposé (voir `Projet apprenti 2/TODO.md`).
+
+### ⏳ En attente
+- **Réponses du tuteur de Yaksan aux 5 questions de visite** (fixes ou portables, filtrage USB, arrivée des mises à jour, durée d'un incident carte, boîtier pilote). Le recentrage et la mise à jour du formulaire académique sont bloqués jusque-là.
+
 ## Session du 11 novembre 2026 (suite) : formulaire académique de Yaksan (apprenti 2)
 
 ### Fait
