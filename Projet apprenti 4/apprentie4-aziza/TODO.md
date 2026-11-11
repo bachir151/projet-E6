@@ -1,0 +1,33 @@
+# Aziza – suivi (au 11 novembre 2026)
+
+## Fait
+- [x] Revue critique du projet (forces, faiblesses, risques, faisabilité 150 h, améliorations)
+- [x] Fiche de présentation d'une page à signer (`livrables/fiche/Fiche_projet_E6_Aziza.pdf`), mise à jour avec les réponses du tuteur
+- [x] Fiche technique détaillée (doc Claude, résumé dans `projet.md`)
+- [x] Brouillon de réponse au tuteur pour la visite de la semaine 50
+- [x] PowerPoint 22 diapositives (`livrables/powerpoint/`) et présentation animée style 3Blue1Brown (`livrables/presentation-animee/`, publiée : https://claude.ai/artifact/5QmQjfLHFvt1T8ps5yHTca)
+- [x] Prompts : image du banc (ChatGPT), présentation 3D (Gemini)
+
+## À faire
+- [ ] **12 nov.** : signature et cachet de la fiche par le tuteur ; retour au plus tard le **13 nov.**
+- [ ] Choisir le jour de la visite (7, 8, 9 ou 10 déc. 2026, 8 h 30–16 h 30) et répondre au tuteur
+- [ ] Demander la validation de la réalisation au lycée à l'académie (commission de validation des sujets)
+- [ ] Faire valider le volet physique par le collègue de physique avant janvier
+- [x] Modèles disponibles : `Projet apprenti 1/` (dossier V3) et `Projet apprenti 2/` (synthèse)
+- [ ] Reporter les corrections du 11/11 dans la fiche technique (doc Claude) et le PowerPoint
+- [ ] **Étape 3** : dossier complet PDF A4 (même mise en page que le dossier de l'apprenti 1), puis synthèse de 3 pages
+- [ ] Après la visite : mettre à jour les hypothèses chiffrées (diapo 5 du PowerPoint, fiche technique, dossier)
+- [ ] Commander le matériel en décembre
+- [ ] Vérifier les licences Windows 11 du lycée (ou VM avec TPM virtuel)
+- [ ] Remplacer l'illustration générée du banc par des photos réelles au fil du projet
+
+## Décisions prises
+- V1 : serveur + catalogue signé, agent PowerShell, borne RFID, tableau de bord, réseau, physique sur banc
+- V2 : archive seule (recherche simple SQL `LIKE`)
+- Extensions : propositions des techniciens, boîtier de sacoche e-ink, lien SharePoint réel, installation de programmes
+- Physique : condensation seulement (si confirmée à la visite) + test court RFID ; plan B = RFID ; chute, énergie et formule LC retirées
+- Sécurité ajoutée (11/11) : numéro de version dans le catalogue signé (anti-retour), `catalogue.json` signé, jeton par PC et par borne (T14, T15)
+- Distribution en HTTPS + BITS (pas SFTP + VPN) ; SFTP pour la publication seulement
+- Programmes : fichiers et paramètres en V1, installation de programmes en extension
+- Tableau de bord qui alimente Excel (export CSV) au lieu de le remplacer
+- Vocabulaire : « kit de maintenance », « fichiers métier », jamais « mises à jour Windows »

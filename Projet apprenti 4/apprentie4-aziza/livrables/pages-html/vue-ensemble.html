@@ -1,0 +1,723 @@
+<title>Kit de maintenance signé</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Mise en page : une seule colonne de lecture, sommaire collant en haut, schémas en pleine largeur.
+   Monde visuel : signalisation et schéma technique (feux vert / rouge / jaune = états réels de la borne). */
+:root{
+  --bg:#f3f6f7; --surface:#ffffff; --ink:#13222c; --muted:#56656f; --line:#d3dde2;
+  --accent:#1d5a86; --accent-soft:#e3eef6; --amber:#c98a00; --amber-soft:#fbf1d6;
+  --ok:#23824f; --ok-soft:#e1f2e8; --ko:#c2382e; --ko-soft:#f8e3e1;
+  --f-display:"Barlow Condensed","Arial Narrow",Arial,sans-serif;
+  --f-body:"Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Consolas,monospace;
+  --r:10px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0e161c; --surface:#16222b; --ink:#e4ecf0; --muted:#9aabb5; --line:#2a3a45;
+  --accent:#6fb0de; --accent-soft:#1a3245; --amber:#f0b93a; --amber-soft:#3a2f12;
+  --ok:#4cc17f; --ok-soft:#173527; --ko:#ef6b5f; --ko-soft:#3d1d1a; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0e161c; --surface:#16222b; --ink:#e4ecf0; --muted:#9aabb5; --line:#2a3a45;
+  --accent:#6fb0de; --accent-soft:#1a3245; --amber:#f0b93a; --amber-soft:#3a2f12;
+  --ok:#4cc17f; --ok-soft:#173527; --ko:#ef6b5f; --ko-soft:#3d1d1a; color-scheme:dark}
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:64px}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:17px;line-height:1.6;margin:0}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--surface)}
+.wrap{max-width:1080px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.prose{max-width:68ch}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;line-height:1.1;margin:0}
+h1{font-size:clamp(2.6rem,7vw,4.6rem);font-weight:700;letter-spacing:.005em}
+h2{font-size:clamp(2rem,4.4vw,2.8rem);font-weight:700}
+h3{font-size:1.45rem;font-weight:600}
+p{margin:0}
+.eyebrow{font-family:var(--f-mono);font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;color:var(--accent)}
+.muted{color:var(--muted)}
+code,.mono{font-family:var(--f-mono);font-size:.88em}
+a{color:var(--accent)}
+:focus-visible{outline:3px solid var(--amber);outline-offset:2px;border-radius:4px}
+
+/* sommaire */
+nav.toc{position:sticky;top:env(safe-area-inset-top,0px);z-index:9;background:var(--surface);border-bottom:1px solid var(--line)}
+nav.toc .wrap{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;padding-block:8px}
+nav.toc a{flex:none;text-decoration:none;color:var(--muted);font-family:var(--f-display);font-weight:600;font-size:1rem;padding:6px 10px;border-radius:6px;white-space:nowrap}
+nav.toc a:hover{color:var(--ink);background:var(--accent-soft)}
+nav.toc a.on{color:var(--accent);background:var(--accent-soft)}
+nav.toc a b{font-family:var(--f-mono);font-weight:500;font-size:.75rem;margin-right:5px;opacity:.7}
+
+/* en-tête */
+header.hero{padding-block:48px 36px}
+.hero-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:40px;align-items:center}
+.hero .lead{font-size:1.2rem;margin-top:16px;max-width:52ch}
+.tags{display:flex;flex-wrap:wrap;gap:8px;margin-top:20px}
+.tag{font-family:var(--f-mono);font-size:.78rem;padding:4px 10px;border:1px solid var(--line);border-radius:999px;background:var(--surface);color:var(--muted)}
+.notice{margin-top:22px;font-size:.92rem;padding:12px 14px;border-left:4px solid var(--amber);background:var(--amber-soft);border-radius:0 8px 8px 0;max-width:60ch}
+
+/* sections */
+section{padding-block:56px;border-top:1px solid var(--line)}
+.sec-head{display:grid;gap:10px;margin-bottom:28px}
+.sec-head .num{font-family:var(--f-display);font-weight:700;font-size:1.1rem;color:var(--amber)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:28px;align-items:start}
+.grid2>*{min-width:0}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:20px}
+.stack{display:grid;gap:14px}
+.big{font-family:var(--f-display);font-weight:700;font-size:2.6rem;line-height:1;font-variant-numeric:tabular-nums}
+.figs{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.fig{padding:14px;border-radius:var(--r);background:var(--surface);border:1px solid var(--line)}
+.fig small{display:block;color:var(--muted);font-size:.85rem;line-height:1.35;margin-top:6px}
+.hyp{font-family:var(--f-mono);font-size:.72rem;color:var(--amber);letter-spacing:.06em;text-transform:uppercase}
+.svgbox{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:12px;overflow-x:auto}
+svg text{font-family:var(--f-body)}
+.btn{font:600 1rem var(--f-display);letter-spacing:.02em;border:1px solid var(--accent);background:var(--accent);color:var(--surface);padding:8px 16px;border-radius:8px;cursor:pointer}
+.btn.ghost{background:transparent;color:var(--accent)}
+.btn:hover{filter:brightness(1.08)}
+.controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:12px}
+
+/* problème */
+.pcgrid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
+.pc{position:relative;border:2px solid var(--line);border-radius:8px;padding:10px 6px 8px;text-align:center;background:var(--bg);transition:border-color .4s,background .4s}
+.pc .scr{height:34px;border-radius:4px;background:var(--line);display:grid;place-items:center;font-family:var(--f-mono);font-size:.78rem;transition:background .4s,color .4s}
+.pc .lbl{font-size:.75rem;color:var(--muted);margin-top:4px}
+.pc.ok{border-color:var(--ok)} .pc.ok .scr{background:var(--ok-soft);color:var(--ok)}
+.pc.ko{border-color:var(--ko)} .pc.ko .scr{background:var(--ko-soft);color:var(--ko)}
+.pc.work{border-color:var(--amber)} .pc.work .scr{background:var(--amber-soft);color:var(--amber)}
+.pc.gone{opacity:.45}
+.pc .out{position:absolute;top:-9px;right:-6px;font-size:.66rem;font-family:var(--f-mono);background:var(--ko);color:var(--surface);padding:1px 6px;border-radius:99px}
+.clock{font-family:var(--f-mono);font-size:.9rem;color:var(--muted)}
+.pains{display:grid;gap:10px;margin:0;padding:0;list-style:none}
+.pains li{display:grid;grid-template-columns:28px 1fr;gap:10px;align-items:start}
+.dot{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font:700 .8rem var(--f-mono);color:var(--surface);margin-top:2px}
+.dot.r{background:var(--ko)} .dot.a{background:var(--amber)} .dot.b{background:var(--accent)}
+
+/* comparatif */
+.tablebox{overflow-x:auto;border:1px solid var(--line);border-radius:var(--r);background:var(--surface)}
+table{border-collapse:collapse;width:100%;min-width:780px;font-size:.93rem}
+th,td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+thead th{font-family:var(--f-display);font-size:1rem;font-weight:600;background:var(--bg);position:sticky;top:0}
+tbody tr:last-child td{border-bottom:none}
+td.c{text-align:center;font-family:var(--f-mono);font-weight:500;white-space:nowrap}
+.y{color:var(--ok)} .n{color:var(--ko)} .m{color:var(--amber)}
+tr.ours td{background:var(--accent-soft)}
+tr.ours td:first-child{font-weight:700}
+.why{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:22px}
+.why .card h3{font-size:1.2rem;margin-bottom:6px}
+.files{display:grid;gap:6px;margin-top:10px;font-family:var(--f-mono);font-size:.82rem}
+.files div{display:flex;justify-content:space-between;gap:10px;padding:6px 10px;border-radius:6px;background:var(--bg)}
+
+/* solution */
+.oneline{font-family:var(--f-display);font-size:clamp(1.5rem,3.4vw,2.1rem);font-weight:600;line-height:1.2;max-width:34ch;text-wrap:balance}
+.principles{display:grid;gap:12px;margin-top:26px;counter-reset:p}
+.pr{display:grid;grid-template-columns:52px 1fr 1fr;gap:16px;align-items:center;padding:16px;border:1px solid var(--line);border-radius:var(--r);background:var(--surface)}
+.pr>*{min-width:0}
+.pr .n{font-family:var(--f-display);font-weight:700;font-size:2rem;color:var(--accent);text-align:center}
+.pr .fact{font-weight:700}
+.pr .ans{color:var(--muted)}
+.pr .ans b{color:var(--ink)}
+
+/* architecture */
+#archi .node rect{fill:var(--surface);stroke:var(--line);stroke-width:2;transition:stroke .3s,fill .3s}
+#archi .node{cursor:pointer}
+#archi .node:hover rect,#archi .node.sel rect{stroke:var(--accent);fill:var(--accent-soft)}
+#archi .node:focus{outline:none}
+#archi .node:focus-visible rect{stroke:var(--amber);stroke-width:3}
+#archi .t1{font-family:var(--f-display);font-weight:700;font-size:19px;fill:var(--ink)}
+#archi .t2{font-size:12.5px;fill:var(--muted)}
+#archi .chip{fill:var(--bg);stroke:var(--line)}
+#archi .chipt{font-family:var(--f-mono);font-size:10.5px;fill:var(--ink)}
+#archi .lnk{fill:none;stroke:var(--line);stroke-width:2.5}
+#archi .lnk.phys{stroke-dasharray:6 6;stroke:var(--amber)}
+#archi .lt{font-family:var(--f-mono);font-size:10.5px;fill:var(--accent)}
+#archi .lt.a{fill:var(--amber)}
+#archi .pk{fill:var(--accent)}
+#archi .pk.back{fill:var(--ok)}
+#archi .stage{font-family:var(--f-mono);font-size:10px;font-weight:500}
+.detail{min-height:180px}
+.detail dl{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;margin:12px 0 0}
+.detail dt{font-family:var(--f-mono);font-size:.78rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;padding-top:3px}
+.detail dd{margin:0}
+.pill{display:inline-block;font-family:var(--f-mono);font-size:.72rem;padding:2px 8px;border-radius:99px;border:1px solid currentColor}
+.pill.v1{color:var(--ok)} .pill.v2{color:var(--accent)} .pill.ext{color:var(--amber)}
+.legend{display:flex;flex-wrap:wrap;gap:16px;font-size:.85rem;color:var(--muted);margin-top:10px}
+.legend span{display:inline-flex;gap:6px;align-items:center}
+.sw{width:22px;height:0;border-top:3px solid var(--line);display:inline-block}
+.sw.d{border-top:3px dashed var(--amber)}
+
+/* journée */
+.steps{display:grid;grid-template-columns:260px 1fr;gap:22px}
+.steps>*{min-width:0}
+.steplist{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.steplist button{width:100%;text-align:left;display:grid;grid-template-columns:34px 1fr;gap:8px;align-items:center;font:inherit;font-size:.95rem;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:8px 10px;cursor:pointer}
+.steplist button .k{font-family:var(--f-mono);font-size:.8rem;color:var(--muted)}
+.steplist button.on{border-color:var(--accent);background:var(--accent-soft)}
+.stage{position:relative}
+.scene{display:grid;gap:14px}
+.scene h3{font-size:1.6rem}
+.bar{height:26px;border-radius:6px;background:var(--bg);border:1px solid var(--line);overflow:hidden;position:relative}
+.bar i{position:absolute;inset:0 auto 0 0;width:0;background:var(--accent);transition:width .25s linear}
+.bar.cut i{background:var(--ko)}
+.bar b{position:absolute;inset:0;display:grid;place-items:center;font:500 .8rem var(--f-mono);color:var(--ink);mix-blend-mode:normal}
+.term{font-family:var(--f-mono);font-size:.82rem;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:12px;white-space:pre-wrap;line-height:1.55;min-height:120px}
+.lamp{display:inline-flex;gap:8px;align-items:center;font-weight:700}
+.lamp i{width:18px;height:18px;border-radius:50%;background:var(--line);box-shadow:0 0 0 3px var(--bg)}
+.lamp.g i{background:var(--ok);box-shadow:0 0 14px var(--ok)}
+.lamp.r i{background:var(--ko);box-shadow:0 0 14px var(--ko)}
+.lamp.blink i{animation:blink 1s steps(2) infinite}
+@keyframes blink{0%{background:var(--ok)}50%{background:var(--ko)}}
+
+/* sécurité */
+.attacks{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+.atk{display:grid;gap:10px}
+.atk ol{margin:0;padding-left:20px;font-size:.92rem;color:var(--muted)}
+.atk ol li.done{color:var(--ink)}
+.atk ol li.bad{color:var(--ko);font-weight:700}
+.verdict{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.stamp{font:700 1.15rem var(--f-display);letter-spacing:.08em;color:var(--ko);border:2px solid var(--ko);padding:2px 10px;border-radius:6px;transform:rotate(-3deg)}
+.stamp.pop{animation:pop .4s ease-out}
+@keyframes pop{0%{transform:scale(1.6) rotate(-3deg);opacity:0}100%{transform:scale(1) rotate(-3deg);opacity:1}}
+.tst{font-family:var(--f-mono);font-size:.75rem;color:var(--muted)}
+
+/* réseau */
+.proto td:first-child{font-family:var(--f-mono);font-weight:500;white-space:nowrap}
+.vol{display:grid;gap:10px}
+.vrow{display:grid;grid-template-columns:150px 1fr 90px;gap:10px;align-items:center;font-size:.9rem}
+.vrow .b{height:22px;border-radius:4px;background:var(--accent);width:0;transition:width 1.2s ease-out}
+.vrow .b.small{background:var(--ok)}
+.vrow span:last-child{font-family:var(--f-mono);text-align:right;font-variant-numeric:tabular-nums}
+
+/* recette */
+.tests{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px}
+.t{display:grid;grid-template-columns:auto 1fr;gap:4px 10px;padding:12px;border:1px solid var(--line);border-radius:8px;background:var(--surface);font-size:.92rem;line-height:1.4}
+.t .id{font-family:var(--f-mono);font-weight:500;color:var(--accent);grid-row:span 2}
+.t .pill{justify-self:start}
+.t.new{border-color:var(--amber)}
+
+/* planning */
+.hours{display:grid;gap:8px;margin-top:8px}
+.hbar{display:flex;height:40px;border-radius:8px;overflow:hidden;border:1px solid var(--line)}
+.hbar div{display:grid;place-items:center;font:600 .95rem var(--f-display);color:var(--surface);white-space:nowrap;overflow:hidden}
+.gantt{display:grid;grid-template-columns:120px repeat(6,1fr);gap:4px;font-size:.85rem;min-width:620px}
+.gantt .h{font-family:var(--f-mono);font-size:.75rem;color:var(--muted);text-align:center}
+.gantt .rl{color:var(--muted)}
+.gantt .g{height:24px;border-radius:5px}
+.limits{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.limits ul{margin:8px 0 0;padding-left:20px;display:grid;gap:6px}
+footer{padding-block:40px 60px;border-top:1px solid var(--line);color:var(--muted);font-size:.9rem}
+footer .next{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;padding:20px;border-radius:var(--r);background:var(--accent-soft);color:var(--ink);margin-bottom:24px}
+
+@media (max-width:820px){
+  .hero-grid,.grid2,.limits,.steps{grid-template-columns:1fr}
+  .why,.attacks{grid-template-columns:1fr}
+  .pr{grid-template-columns:40px 1fr}
+  .pr .ans{grid-column:2}
+  .figs{grid-template-columns:1fr 1fr}
+}
+@media (max-width:480px){
+  body{font-size:16px}
+  .pcgrid{grid-template-columns:repeat(5,1fr);gap:6px}
+  .pc .lbl{font-size:.65rem}
+  .figs{grid-template-columns:1fr}
+  .vrow{grid-template-columns:100px 1fr 70px}
+}
+@media (prefers-reduced-motion:reduce){
+  *{animation:none!important;transition:none!important;scroll-behavior:auto!important}
+}
+</style>
+
+<nav class="toc" aria-label="Sommaire">
+  <div class="wrap">
+    <a href="#probleme"><b>1</b>Le problème</a>
+    <a href="#existant"><b>2</b>Ce qui existe</a>
+    <a href="#solution"><b>3</b>La solution</a>
+    <a href="#architecture"><b>4</b>Architecture</a>
+    <a href="#journee"><b>5</b>Une journée</a>
+    <a href="#securite"><b>6</b>Sécurité</a>
+    <a href="#reseau"><b>7</b>Réseau</a>
+    <a href="#recette"><b>8</b>Recette</a>
+    <a href="#planning"><b>9</b>Planning</a>
+    <a href="#limites"><b>10</b>Limites</a>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="wrap hero-grid">
+    <div>
+      <p class="eyebrow">BTS CIEL option A · Épreuve E6 · Apprentie 4 · Session 2027</p>
+      <h1>Des PC de maintenance à jour, un parc tracé</h1>
+      <p class="lead">Dix PC partent chaque jour en intervention, avec pour seul accès Internet le téléphone de l'agent. Le projet garantit qu'ils emportent la bonne version des documents et des paramètres, et le prouve.</p>
+      <div class="tags">
+        <span class="tag">PowerShell</span><span class="tag">Ubuntu · nginx · Flask</span><span class="tag">SHA-256 + signature</span><span class="tag">BITS</span><span class="tag">ESP32 + RFID</span>
+      </div>
+      <p class="notice"><b>Besoin issu de l'entreprise, réalisation au lycée</b> sur maquette, avec des données fictives. La réalisation au lycée doit être validée par l'académie (arrêté du 25 janvier 2023).</p>
+    </div>
+    <div class="svgbox" aria-hidden="true">
+      <svg viewBox="0 0 400 300" width="100%" role="img">
+        <defs><marker id="ar0" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="var(--accent)"/></marker></defs>
+        <rect x="20" y="30" width="110" height="70" rx="8" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="2"/>
+        <text x="75" y="60" text-anchor="middle" font-size="15" font-weight="700" fill="var(--ink)">Kit v13</text>
+        <text x="75" y="80" text-anchor="middle" font-size="11" fill="var(--muted)" font-family="IBM Plex Mono,monospace">signé</text>
+        <path id="hp" d="M130 65 C 220 65, 220 200, 280 200" fill="none" stroke="var(--line)" stroke-width="3" stroke-dasharray="4 6"/>
+        <circle r="6" fill="var(--accent)"><animateMotion dur="2.6s" repeatCount="indefinite"><mpath href="#hp"/></animateMotion></circle>
+        <text x="205" y="120" font-size="11" fill="var(--muted)" font-family="IBM Plex Mono,monospace">4G</text>
+        <rect x="270" y="160" width="110" height="80" rx="8" fill="var(--surface)" stroke="var(--ok)" stroke-width="2.5"/>
+        <rect x="282" y="172" width="86" height="40" rx="4" fill="var(--ok-soft)"/>
+        <text x="325" y="198" text-anchor="middle" font-size="13" font-weight="700" fill="var(--ok)" font-family="IBM Plex Mono,monospace">v13 ✓</text>
+        <text x="325" y="230" text-anchor="middle" font-size="11" fill="var(--muted)">PC de maintenance</text>
+        <circle cx="75" cy="200" r="22" fill="var(--surface)" stroke="var(--line)" stroke-width="2"/>
+        <circle cx="75" cy="200" r="10" fill="var(--ok)"><animate attributeName="opacity" values="1;.35;1" dur="2s" repeatCount="indefinite"/></circle>
+        <text x="75" y="245" text-anchor="middle" font-size="11" fill="var(--muted)">borne : feu vert</text>
+      </svg>
+    </div>
+  </div>
+</header>
+
+<main>
+<!-- 1 PROBLÈME -->
+<section id="probleme">
+  <div class="wrap">
+    <div class="sec-head"><span class="num">1 · Le problème</span><h2>Une nouvelle version, dix PC, et personne ne sait lesquels sont à jour</h2></div>
+    <div class="grid2">
+      <div class="stack">
+        <p class="prose">Le service entretient les équipements de télécommande d'un réseau électrique ferroviaire. Chaque agent part en intervention avec un PC portable qui contient des documents techniques, des paramètres d'équipements et des petits programmes. Ce contenu forme le <b>kit de maintenance</b>. Il est rangé sur un SharePoint.</p>
+        <p class="prose">Quand le kit change, quelqu'un doit mettre à jour chaque PC à la main. Pendant ce temps, d'autres PC partent sur le terrain.</p>
+        <ul class="pains">
+          <li><span class="dot r">!</span><span><b>Mauvaise version sur le terrain.</b> Un PC part avec l'ancien kit, et rien ne le signale.</span></li>
+          <li><span class="dot a">4G</span><span><b>Pas de réseau de l'entreprise dehors.</b> Internet passe seulement par le partage de connexion du téléphone (confirmé par le tuteur).</span></li>
+          <li><span class="dot b">?</span><span><b>Aucune preuve.</b> Impossible de dire quelle version était sur quel PC à quelle date.</span></li>
+          <li><span class="dot b">▤</span><span><b>Archives dispersées.</b> Les documents de modification sont difficiles à retrouver (besoin 2 du tuteur).</span></li>
+        </ul>
+      </div>
+      <div class="card stack">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
+          <h3>Mise à jour à la main</h3><span class="clock" id="pbClock">Durée cumulée : 3 h 20</span>
+        </div>
+        <div class="pcgrid" id="pcGrid" aria-label="État des 10 PC"></div>
+        <p class="muted" id="pbMsg" style="font-size:.92rem">Kit v13 publié. 8 PC mis à jour en 3 h 20. Les PC 4 et 9 sont partis avec la version v12.</p>
+        <div class="controls"><button class="btn" id="pbPlay" type="button">▶ Rejouer la matinée</button>
+          <span class="legend" style="margin:0"><span><i class="lamp g"><i></i></i>v13</span><span><i class="lamp r"><i></i></i>v12 sur le terrain</span></span></div>
+      </div>
+    </div>
+    <div class="figs" style="margin-top:26px">
+      <div class="fig"><span class="hyp">hypothèse tuteur</span><div class="big">10</div><small>PC de maintenance sous Windows 11</small></div>
+      <div class="fig"><span class="hyp">hypothèse à confirmer</span><div class="big">20–30 min</div><small>par PC pour une mise à jour manuelle</small></div>
+      <div class="fig"><span class="hyp">hypothèse à confirmer</span><div class="big">3 à 10 h</div><small>par mois, si le kit change 1 à 2 fois (10 PC × 20–30 min)</small></div>
+    </div>
+  </div>
+</section>
+
+<!-- 2 EXISTANT -->
+<section id="existant">
+  <div class="wrap">
+    <div class="sec-head"><span class="num">2 · Les solutions qui existent</span><h2>Pourquoi ne pas prendre un outil du marché ?</h2>
+      <p class="prose muted">Ces outils sont bons. La question est de savoir s'ils répondent à <b>ce</b> besoin, et si le service peut les mettre en place lui-même.</p></div>
+    <div class="tablebox">
+      <table>
+        <thead><tr><th>Solution</th><th>Ce qu'elle fait</th><th>Kit complet d'un bloc</th><th>Hors réseau</th><th>Preuve de version par PC</th><th>Alerte « kit périmé »</th><th>Le service peut l'installer seul</th></tr></thead>
+        <tbody>
+          <tr><td>Clé USB et mode opératoire</td><td>Copie à la main, PC par PC</td><td class="c m">~</td><td class="c y">✓</td><td class="c n">✗</td><td class="c n">✗</td><td class="c y">✓</td></tr>
+          <tr><td>Synchronisation OneDrive / SharePoint</td><td>Copie chaque fichier modifié sur le PC</td><td class="c n">✗</td><td class="c m">~</td><td class="c n">✗</td><td class="c n">✗</td><td class="c y">✓</td></tr>
+          <tr><td>Microsoft Intune</td><td>Gestion des PC par le cloud (applications, réglages)</td><td class="c m">~</td><td class="c y">✓</td><td class="c y">✓</td><td class="c n">✗</td><td class="c n">✗ DSI</td></tr>
+          <tr><td>Configuration Manager (SCCM)</td><td>Gestion des PC depuis des serveurs internes</td><td class="c m">~</td><td class="c y">✓</td><td class="c y">✓</td><td class="c n">✗</td><td class="c n">✗ DSI</td></tr>
+          <tr><td>PDQ Deploy</td><td>Envoi de logiciels depuis une console</td><td class="c m">~</td><td class="c n">✗</td><td class="c y">✓</td><td class="c n">✗</td><td class="c n">✗</td></tr>
+          <tr><td>PDQ Connect</td><td>Même chose, par un agent et le cloud</td><td class="c m">~</td><td class="c y">✓</td><td class="c y">✓</td><td class="c n">✗</td><td class="c n">✗</td></tr>
+          <tr class="ours"><td>Projet d'Aziza</td><td>Kit signé, vérifié, distribué par la 4G, contrôlé à la sortie</td><td class="c y">✓</td><td class="c y">✓</td><td class="c y">✓</td><td class="c y">✓</td><td class="c y">✓</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="muted" style="font-size:.85rem;margin-top:8px">✓ oui · ~ en partie, ou avec beaucoup de réglages · ✗ non. « Kit complet d'un bloc » : tous les fichiers de la nouvelle version, vérifiés ensemble, ou aucun.</p>
+
+    <div class="why">
+      <div class="card"><h3>OneDrive : la piste la plus proche</h3>
+        <p>Le SharePoint existe déjà, donc c'est la première idée. Mais OneDrive travaille <b>fichier par fichier</b> : un PC peut partir avec la moitié du nouveau kit. Par défaut, beaucoup de fichiers restent « en ligne seulement » et <b>ne s'ouvrent pas sans Internet</b>. Il faut cocher « Toujours conserver sur cet appareil » sur chaque PC.</p>
+        <div class="files" aria-label="Exemple d'état OneDrive">
+          <div><span>procedure_poste_A.pdf</span><span class="y">✓ v13</span></div>
+          <div><span>parametres_RTU.xml</span><span class="m">☁ en ligne</span></div>
+          <div><span>schema_armoire.pdf</span><span class="n">v12</span></div>
+        </div>
+      </div>
+      <div class="card"><h3>Intune et SCCM : le bon outil, mais pas pour le service</h3>
+        <p>Ces outils savent faire beaucoup de choses. Ils sont gérés par la <b>direction informatique</b>, pas par un service de maintenance. Ils demandent des licences, des PC enrôlés et un droit d'administration que le service n'a pas. Ils ne bloquent pas un PC qui part avec un kit périmé.</p>
+        <p class="muted" style="margin-top:8px;font-size:.9rem">Si la DSI gère déjà ces PC, l'agent d'Aziza devient un <b>contrôle de conformité</b> à côté d'Intune. Ce point sera vérifié lors de la visite.</p>
+      </div>
+      <div class="card"><h3>PDQ : pensé pour un réseau de bureau</h3>
+        <p><b>PDQ Deploy</b> pousse les logiciels depuis une console : il doit joindre chaque PC par le réseau interne (DNS, partage Windows). Un PC en 4G est hors de portée. <b>PDQ Connect</b> passe par Internet, mais c'est un service cloud payant et externe : l'installer sur les PC d'un service industriel demande l'accord de la sécurité informatique.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 3 SOLUTION -->
+<section id="solution">
+  <div class="wrap">
+    <div class="sec-head"><span class="num">3 · La solution proposée</span></div>
+    <p class="oneline">Un référent publie un kit signé. Chaque PC le vérifie et se met à jour seul par la 4G. Une borne vérifie le PC avant chaque départ.</p>
+    <div class="principles">
+      <div class="pr"><span class="n">1</span><span class="fact">Avoir un fichier ne prouve pas que c'est le bon.</span><span class="ans">Chaque fichier a une <b>empreinte SHA-256</b>, comparée à la liste du référent.</span></div>
+      <div class="pr"><span class="n">2</span><span class="fact">La 4G et Internet ne sont pas de confiance.</span><span class="ans">Seul le <b>catalogue signé</b> par le référent fait foi, peu importe le chemin du fichier.</span></div>
+      <div class="pr"><span class="n">3</span><span class="fact">Un PC éteint ne peut rien affirmer.</span><span class="ans">La borne lit le <b>dernier rapport</b> du PC. Serveur muet : « vérification impossible », jamais « à jour ».</span></div>
+      <div class="pr"><span class="n">4</span><span class="fact">Sur le terrain, le réseau manque.</span><span class="ans">On télécharge <b>seulement ce qui a changé</b>, avec reprise après coupure (BITS), et une alerte si le kit est périmé.</span></div>
+      <div class="pr"><span class="n">5</span><span class="fact">Chaque version a une valeur.</span><span class="ans">Rien n'est écrasé : <b>l'historique des versions forme l'archive</b> (besoin 2).</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- 4 ARCHITECTURE -->
+<section id="architecture">
+  <div class="wrap">
+    <div class="sec-head"><span class="num">4 · Architecture de la maquette</span><h2>Sept briques, une seule source de vérité</h2>
+      <p class="prose muted">Cliquez sur une brique pour voir son rôle, sa technologie et l'étape où elle est réalisée.</p></div>
+    <div class="grid2" style="grid-template-columns:1.6fr 1fr">
+      <div class="svgbox">
+        <svg id="archi" viewBox="0 0 1000 540" width="100%" style="min-width:640px" role="group" aria-label="Schéma d'architecture">
+          <defs>
+            <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10z" fill="var(--muted)"/></marker>
+          </defs>
+          <!-- liens -->
+          <path class="lnk" id="L-pub" d="M210 100 H390" marker-end="url(#ar)"/>
+          <text class="lt" x="300" y="90" text-anchor="middle">SFTP</text>
+          <path class="lnk" id="L-dl" d="M500 200 V300" marker-end="url(#ar)"/>
+          <text class="lt" x="510" y="255">HTTPS</text>
+          <path class="lnk" id="L-pc" d="M610 335 H760" marker-end="url(#ar)"/>
+          <text class="lt" x="685" y="325" text-anchor="middle">HTTPS · BITS</text>
+          <path class="lnk" id="L-rep" d="M760 355 H610" marker-end="url(#ar)"/>
+          <path class="lnk" id="L-borne" d="M760 105 H610" marker-end="url(#ar)"/>
+          <text class="lt" x="685" y="95" text-anchor="middle">HTTPS · Wi-Fi bureau</text>
+          <path class="lnk" id="L-dash" d="M390 160 H300 V280 H210" marker-end="url(#ar)"/>
+          <text class="lt" x="305" y="230">HTTPS</text>
+          <path class="lnk phys" id="L-tag" d="M860 150 V290"/>
+          <text class="lt a" x="870" y="225">étiquette RFID</text>
+          <text class="lt a" x="870" y="240">collée sur le PC</text>
+          <path class="lnk phys" id="L-banc" d="M210 470 H860 V380"/>
+          <text class="lt a" x="535" y="460" text-anchor="middle">résultat : temps d'attente avant d'allumer un PC froid</text>
+
+          <!-- noeuds -->
+          <g class="node" tabindex="0" data-k="ref" transform="translate(40,60)"><rect width="170" height="80" rx="10"/><text class="t1" x="14" y="32">Poste du référent</text><text class="t2" x="14" y="54">Windows 11 · PowerShell</text><text class="stage" x="14" y="70" fill="var(--ok)">V1</text></g>
+          <g class="node" tabindex="0" data-k="srv" transform="translate(390,40)"><rect width="220" height="160" rx="10"/><text class="t1" x="14" y="32">Serveur</text><text class="t2" x="14" y="52">Ubuntu Server 24.04</text>
+            <g transform="translate(14,66)"><rect class="chip" width="58" height="22" rx="5"/><text class="chipt" x="29" y="15" text-anchor="middle">nginx</text></g>
+            <g transform="translate(78,66)"><rect class="chip" width="58" height="22" rx="5"/><text class="chipt" x="29" y="15" text-anchor="middle">Flask</text></g>
+            <g transform="translate(142,66)"><rect class="chip" width="64" height="22" rx="5"/><text class="chipt" x="32" y="15" text-anchor="middle">SQLite</text></g>
+            <g transform="translate(14,94)"><rect class="chip" width="64" height="22" rx="5"/><text class="chipt" x="32" y="15" text-anchor="middle">chrony</text></g>
+            <g transform="translate(84,94)"><rect class="chip" width="122" height="22" rx="5" style="stroke:var(--accent)"/><text class="chipt" x="61" y="15" text-anchor="middle">archive · V2</text></g>
+            <text class="stage" x="14" y="146" fill="var(--ok)">V1</text></g>
+          <g class="node" tabindex="0" data-k="net" transform="translate(390,300)"><rect width="220" height="80" rx="10"/><text class="t1" x="14" y="32">Lien « 4G » simulé</text><text class="t2" x="14" y="54">tc netem sur le serveur</text><text class="stage" x="14" y="70" fill="var(--ok)">V1</text></g>
+          <g class="node" tabindex="0" data-k="pc" transform="translate(760,290)"><rect width="200" height="90" rx="10"/><text class="t1" x="14" y="32">PC de maintenance</text><text class="t2" x="14" y="54">3 × Windows 11 · agent signé</text><text class="stage" x="14" y="74" fill="var(--ok)">V1</text></g>
+          <g class="node" tabindex="0" data-k="borne" transform="translate(760,60)"><rect width="200" height="90" rx="10"/><text class="t1" x="14" y="32">Borne de sortie</text><text class="t2" x="14" y="54">ESP32 · RC522 · LED · buzzer</text><text class="stage" x="14" y="74" fill="var(--ok)">V1</text>
+            <circle cx="170" cy="30" r="8" fill="var(--ok)"><animate attributeName="opacity" values="1;.3;1" dur="2.4s" repeatCount="indefinite"/></circle></g>
+          <g class="node" tabindex="0" data-k="dash" transform="translate(40,240)"><rect width="170" height="80" rx="10"/><text class="t1" x="14" y="32">Tableau de bord</text><text class="t2" x="14" y="54">navigateur · export CSV</text><text class="stage" x="14" y="70" fill="var(--ok)">V1</text></g>
+          <g class="node" tabindex="0" data-k="banc" transform="translate(40,430)"><rect width="170" height="80" rx="10"/><text class="t1" x="14" y="32">Banc de mesure</text><text class="t2" x="14" y="54">ESP32 · SHT40 · DS18B20</text><text class="stage" x="14" y="70" fill="var(--ok)">V1</text></g>
+          <g id="pkts"></g>
+        </svg>
+      </div>
+      <div class="card detail" id="detail" aria-live="polite"></div>
+    </div>
+    <div class="legend">
+      <span><i class="sw" style="border-color:var(--muted)"></i>flux réseau</span>
+      <span><i class="sw d"></i>lien physique (montages ESP32)</span>
+      <span><i class="lamp" style="font-weight:400"><i style="background:var(--accent);width:12px;height:12px"></i></i>le kit descend</span>
+      <span><i class="lamp" style="font-weight:400"><i style="background:var(--ok);width:12px;height:12px"></i></i>le rapport remonte</span>
+    </div>
+  </div>
+</section>
+
+<!-- 5 JOURNÉE -->
+<section id="journee">
+  <div class="wrap">
+    <div class="sec-head"><span class="num">5 · Une journée type</span><h2>Du bureau du référent au camion de l'agent</h2></div>
+    <div class="steps">
+      <ol class="steplist" id="stepList"></ol>
+      <div class="card stage">
+        <div class="scene" id="scene"></div>
+        <div class="controls"><button class="btn ghost" id="stPrev" type="button">← Précédent</button><button class="btn" id="stNext" type="button">Suivant →</button></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 6 SÉCURITÉ -->
+<section id="securite">
+  <div class="wrap">
+    <div class="sec-head"><span class="num">6 · Cybersécurité</span><h2>Quatre tentatives, quatre refus</h2>
+      <p class="prose muted">Le système doit dire non tout seul. Lancez chaque tentative pour voir à quelle étape l'agent ou le serveur l'arrête.</p></div>
+    <div class="attacks" id="attacks"></div>
+    <p class="notice" style="margin-top:20px">Règles de code pour Aziza (charte IA, liste rouge) : jamais <code>setInsecure()</code> sur l'ESP32, jamais de contournement de certificat en PowerShell, jamais <code>Set-ExecutionPolicy Bypass</code>, jamais de mot de passe ou de jeton écrit dans le code, jamais <code>debug=True</code> dans Flask. Une seule occurrence = test T10 échoué.</p>
+  </div>
+</section>
+
+<!-- 7 RÉSEAU -->
+<section id="reseau">
+  <div class="wrap">
+    <div class="sec-head"><span class="num">7 · Exploiter le réseau (C10)</span><h2>Observer, mesurer, expliquer ce qui passe sur le câble</h2>
+      <p class="prose muted">Aziza exploite le réseau en place : elle ne configure pas de VLAN ni d'ACL (ce serait l'épreuve E5). Elle observe et mesure.</p></div>
+    <div class="grid2">
+      <div class="tablebox">
+        <table class="proto" style="min-width:0">
+          <thead><tr><th>Protocole</th><th>Où</th><th>Ce qu'elle montre</th></tr></thead>
+          <tbody>
+            <tr><td>DHCP</td><td>PC, borne</td><td>Adresse reçue, bail, passerelle</td></tr>
+            <tr><td>DNS · 53</td><td>tous</td><td>Le nom du serveur résolu avant chaque connexion</td></tr>
+            <tr><td>NTP · 123</td><td>serveur, borne</td><td>Heure juste : sans elle, un certificat est refusé et les rapports sont faux</td></tr>
+            <tr><td>HTTPS · 443</td><td>agent, borne</td><td>Poignée de main TLS dans Wireshark, contenu illisible</td></tr>
+            <tr><td>BITS (HTTP)</td><td>agent</td><td>Requêtes <code>Range</code> et réponses <code>206</code> : la reprise après coupure, en vrai</td></tr>
+            <tr><td>SFTP · 22</td><td>référent</td><td>Publication chiffrée du kit</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="card stack">
+        <h3>Ce que la 4G coûte en données</h3>
+        <p class="muted" style="font-size:.92rem">Exemple pour une mise à jour où 3 fichiers sur 140 ont changé. <b>Valeurs d'exemple</b>, à remplacer par les mesures d'Aziza.</p>
+        <div class="vol" id="vol">
+          <div class="vrow"><span>Copie complète</span><div><div class="b" data-w="100" style="width:100%"></div></div><span>1 200 Mo</span></div>
+          <div class="vrow"><span>Seuls les fichiers modifiés</span><div><div class="b small" data-w="3" style="width:3%"></div></div><span>35 Mo</span></div>
+        </div>
+        <p style="font-size:.92rem"><b>Mesurer, puis reproduire.</b> Avec son téléphone, Aziza mesure un vrai partage de connexion : débit, latence, pertes. Elle reproduit ensuite ces valeurs avec une seule commande <code>tc netem</code> sur le serveur, pour couper le réseau à volonté pendant les tests. Il n'y a aucun routage à configurer.</p>
+        <p style="font-size:.92rem">Indicateurs mesurés : volume transféré, durée de mise à jour, reprise sans erreur après coupure, temps de réponse de la borne (&lt; 5 s).</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 8 RECETTE -->
+<section id="recette">
+  <div class="wrap">
+    <div class="sec-head"><span class="num">8 · Recette</span><h2>Quinze tests écrits avant le code</h2>
+      <p class="prose muted">Chaque test a un résultat attendu et une preuve (capture, journal, mesure). Les tests encadrés en jaune ont été ajoutés pour fermer deux failles.</p></div>
+    <div class="tests" id="tests"></div>
+  </div>
+</section>
+
+<!-- 9 PLANNING -->
+<section id="planning">
+  <div class="wrap">
+    <div class="sec-head"><span class="num">9 · V1, V2, extensions et planning</span><h2>136 heures prévues sur 150</h2></div>
+    <div class="hours">
+      <div class="hbar" role="img" aria-label="V1 116 heures, V2 20 heures, marge 14 heures">
+        <div style="flex:116;background:var(--ok)">V1 obligatoire · 116 h</div>
+        <div style="flex:20;background:var(--accent)">V2 · 20 h</div>
+        <div style="flex:14;background:var(--line);color:var(--ink)">marge 14 h</div>
+      </div>
+      <p class="muted" style="font-size:.9rem">Estimation avec une IA encadrée par la charte. L'IA accélère le code, pas le câblage, les mesures ni la recette.</p>
+    </div>
+    <div class="grid2" style="margin-top:24px">
+      <div class="card"><span class="pill v1">V1 obligatoire</span><p style="margin-top:8px">Serveur et catalogue signé · agent PowerShell (3 niveaux : simulation, confirmation, automatique) · borne RFID · tableau de bord · lien 4G simulé · banc de mesure et expérience de condensation · tests T01 à T10, T14, T15.</p></div>
+      <div class="card"><span class="pill v2">V2 visée</span><p style="margin-top:8px">Archive des documents de modification : métadonnées (qui a validé, quand, pourquoi, quel équipement), recherche simple, contrôle d'intégrité. Test T11.</p>
+        <p style="margin-top:12px"><span class="pill ext">Extensions</span> Propositions des techniciens (T12, T13) · boîtier de sacoche · lien SharePoint réel · installation de programmes.</p></div>
+    </div>
+    <div class="tablebox" style="margin-top:24px;padding:14px">
+      <div class="gantt" role="img" aria-label="Planning de janvier à juin">
+        <span></span><span class="h">janv.</span><span class="h">févr.</span><span class="h">mars</span><span class="h">avril</span><span class="h">mai</span><span class="h">juin</span>
+        <span class="rl">Serveur, catalogue</span><span class="g" style="grid-column:2/3;background:var(--ok)"></span><span style="grid-column:3/8"></span>
+        <span class="rl">Agent PowerShell</span><span></span><span class="g" style="grid-column:3/4;background:var(--ok)"></span><span style="grid-column:4/8"></span>
+        <span class="rl">Borne, banc</span><span style="grid-column:2/4"></span><span class="g" style="grid-column:4/5;background:var(--ok)"></span><span style="grid-column:5/8"></span>
+        <span class="rl">Recette V1</span><span style="grid-column:2/5"></span><span class="g" style="grid-column:5/6;background:var(--amber)"></span><span style="grid-column:6/8"></span>
+        <span class="rl">V2, dossier</span><span style="grid-column:2/6"></span><span class="g" style="grid-column:6/7;background:var(--accent)"></span><span></span>
+        <span class="rl">Soutenance</span><span style="grid-column:2/7"></span><span class="g" style="grid-column:7/8;background:var(--ink)"></span>
+      </div>
+      <p class="muted" style="font-size:.85rem;margin-top:10px">Revue 2 en avril : feu vert pour la V2 si la recette V1 est passée. Dates des revues fixées par le lycée.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 10 LIMITES -->
+<section id="limites">
+  <div class="wrap">
+    <div class="sec-head"><span class="num">10 · Limites et suite</span><h2>Ce que le projet ne fait pas, et comment il irait en entreprise</h2></div>
+    <div class="limits">
+      <div class="card"><h3>Limites assumées</h3>
+        <ul>
+          <li>Ne touche à <b>aucun système du réseau électrique</b> (supervision, télécommandes, automates) : ni connexion, ni copie, ni test.</li>
+          <li>Données fictives, maquette au lycée, aucun accès à la production.</li>
+          <li>Le badge <b>identifie</b> une sortie, il ne <b>prouve</b> rien : un badge simple se copie.</li>
+          <li>L'archive aide à retrouver un document. Elle ne remplace pas l'original et ne revendique pas de valeur probante.</li>
+        </ul></div>
+      <div class="card"><h3>Pour un vrai déploiement</h3>
+        <ul>
+          <li>Accord de la direction informatique ; si elle gère les PC, l'agent devient un contrôle de conformité.</li>
+          <li>Information des salariés et consultation du CSE (Code du travail, L1222-4 et L2312-38) : on trace des PC, pas des personnes.</li>
+          <li>Documents d'une mission de service public : aucune destruction d'original sans visa (Code du patrimoine, L211-4).</li>
+          <li>Lien réel avec le SharePoint par Microsoft Graph (extension).</li>
+        </ul></div>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="next"><div><b>La partie physique en détail</b><br><span class="muted">Borne RFID, banc de mesure, expérience de condensation, arguments pour le jury.</span></div><a class="btn" id="physLink" href="https://claude.ai/artifact/UA5s2RPduhQ5rM9qhdqb4G" style="text-decoration:none">Voir la partie physique →</a></div>
+    <p>Projet E6 · BTS CIEL option A · apprentie 4 · session 2027. Contexte anonymisé, données fictives. Les valeurs marquées « exemple » ou « hypothèse » seront remplacées par les mesures et les réponses du tuteur.</p>
+  </div>
+</footer>
+
+<script>
+(function(){
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const $ = s => document.querySelector(s);
+
+  /* ---------- sommaire actif ---------- */
+  const links=[...document.querySelectorAll('nav.toc a')];
+  const secs=links.map(a=>document.querySelector(a.getAttribute('href')));
+  const io=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting){links.forEach(l=>l.classList.toggle('on',l.getAttribute('href')==='#'+e.target.id));}})},{rootMargin:'-45% 0px -50% 0px'});
+  secs.forEach(s=>s&&io.observe(s));
+
+  /* ---------- 1. problème : 10 PC ---------- */
+  const grid=$('#pcGrid');
+  const finalState=[1,1,1,0,1,1,1,1,0,1]; // 0 = parti en v12
+  const pcs=[];
+  for(let i=0;i<10;i++){
+    const d=document.createElement('div'); d.className='pc';
+    d.innerHTML='<div class="scr">v12</div><div class="lbl">PC '+(i+1)+'</div>';
+    grid.appendChild(d); pcs.push(d);
+  }
+  function setFinal(){
+    pcs.forEach((p,i)=>{p.className='pc '+(finalState[i]?'ok':'ko gone');p.querySelector('.scr').textContent=finalState[i]?'v13':'v12';
+      const o=p.querySelector('.out'); if(o)o.remove();
+      if(!finalState[i]){const s=document.createElement('span');s.className='out';s.textContent='terrain';p.appendChild(s);}});
+    $('#pbClock').textContent='Durée cumulée : 3 h 20';
+    $('#pbMsg').textContent='Kit v13 publié. 8 PC mis à jour en 3 h 20. Les PC 4 et 9 sont partis avec la version v12.';
+  }
+  setFinal();
+  let pbTimer=null;
+  function playPb(){
+    clearTimeout(pbTimer);
+    pcs.forEach(p=>{p.className='pc';p.querySelector('.scr').textContent='v12';const o=p.querySelector('.out');if(o)o.remove();});
+    $('#pbMsg').textContent='8 h 00 · Le référent publie le kit v13 sur le SharePoint.';
+    $('#pbClock').textContent='Durée cumulée : 0 min';
+    const order=[0,1,2,4,5,6,7,9]; let k=0, mins=0;
+    const leave={2:3,6:8}; // après le k-ième PC, un PC part
+    function step(){
+      if(k>=order.length){setFinal();return;}
+      const i=order[k]; const p=pcs[i];
+      p.className='pc work'; p.querySelector('.scr').textContent='…';
+      $('#pbMsg').textContent='Mise à jour à la main du PC '+(i+1)+' (environ 25 min).';
+      pbTimer=setTimeout(()=>{
+        p.className='pc ok'; p.querySelector('.scr').textContent='v13'; mins+=25;
+        $('#pbClock').textContent='Durée cumulée : '+(mins>=60?Math.floor(mins/60)+' h '+String(mins%60).padStart(2,'0'):mins+' min');
+        if(leave[k]!==undefined){const j=leave[k];const q=pcs[j];q.className='pc ko gone';
+          const s=document.createElement('span');s.className='out';s.textContent='terrain';q.appendChild(s);
+          $('#pbMsg').textContent='Le PC '+(j+1)+' part en intervention… avec la version v12. Personne ne le voit.';}
+        k++; pbTimer=setTimeout(step, leave[k-1]!==undefined?1500:350);
+      },650);
+    }
+    pbTimer=setTimeout(step,900);
+  }
+  $('#pbPlay').addEventListener('click',playPb);
+  if(!reduce){const o=new IntersectionObserver(es=>{if(es[0].isIntersecting){playPb();o.disconnect();}},{threshold:.5});o.observe(grid);}
+
+  /* ---------- 4. architecture ---------- */
+  const D={
+    ref:{t:'Poste du référent',s:'v1',role:"Le référent prépare la nouvelle version du kit. Un script calcule l'empreinte de chaque fichier, signe la liste, puis publie le tout sur le serveur.",tech:'Windows 11, PowerShell 5.1 : New-FileCatalog (SHA-256), Set-AuthenticodeSignature, publication SFTP',why:"La signature prouve que le kit vient bien du référent et qu'aucun fichier n'a changé depuis."},
+    srv:{t:'Serveur',s:'v1',role:"Range les versions du kit, donne les fichiers aux PC, reçoit leurs rapports et répond à la borne. Garde l'historique (archive en V2).",tech:'Ubuntu Server 24.04, nginx (HTTPS, téléchargement par morceaux), API Flask, SQLite, chrony (heure), contrôle d\'intégrité chaque nuit',why:"Le serveur ne peut pas « pousser » vers un PC en 4G : c'est toujours le PC qui l'interroge."},
+    net:{t:'Lien « 4G » simulé',s:'v1',role:"Reproduit au lycée le partage de connexion du téléphone : débit faible, latence, pertes, coupures.",tech:'Une commande tc netem sur la carte réseau du serveur, activée seulement pendant les tests de l\'agent ; profil réglé avec une vraie mesure de partage de connexion faite lors de la visite',why:"Le serveur reste sur le réseau du lycée, exploité tel quel : aucun routage à configurer. La vraie 4G sert à mesurer, netem sert à reproduire et à couper à volonté."},
+    pc:{t:'PC de maintenance',s:'v1',role:"Un agent vérifie le catalogue, télécharge seulement ce qui a changé, contrôle chaque fichier, bascule vers la nouvelle version et envoie un rapport.",tech:'3 PC ou VM Windows 11, agent PowerShell signé (stratégie AllSigned), tâche planifiée, BITS, journal Windows, notifications',why:"Trois niveaux de sécurité : simulation, confirmation par l'agent, automatique. Retour arrière en moins de 2 min."},
+    borne:{t:'Borne de sortie',s:'v1',role:"Avant de partir, l'agent passe son badge et l'étiquette du PC. Vert : kit à jour, sortie enregistrée. Rouge : mettre à jour d'abord. Clignotant : serveur injoignable.",tech:'ESP32 + lecteur RFID RC522 (SPI), LED verte et rouge, buzzer ; HTTPS par le Wi-Fi du bureau',why:"Un PC éteint ne peut rien dire : la borne lit le dernier rapport sur le serveur. Montage ESP32 n° 1."},
+    dash:{t:'Tableau de bord',s:'v1',role:"Montre la version de chaque PC, la date de son dernier rapport et les sorties. Exporte un fichier CSV pour les tableaux Excel du service.",tech:'Pages Flask, export CSV',why:"Il alimente l'Excel existant au lieu de le remplacer."},
+    banc:{t:'Banc de mesure',s:'v1',role:"Mesure comment un PC froid se réchauffe pour calculer combien de minutes attendre avant de l'allumer sans risque de buée.",tech:'ESP32, capteur SHT40 (température et humidité, I²C), 2 sondes DS18B20 (1-Wire)',why:"Montage ESP32 n° 2. Le résultat devient un tableau collé sur chaque PC. Détails dans la page « partie physique »."}
+  };
+  const SL={v1:['v1','V1 obligatoire'],v2:['v2','V2 visée'],ext:['ext','Extension']};
+  const det=$('#detail'); const nodes=[...document.querySelectorAll('#archi .node')];
+  function show(k){const d=D[k];nodes.forEach(n=>n.classList.toggle('sel',n.dataset.k===k));
+    det.innerHTML='<span class="pill '+SL[d.s][0]+'">'+SL[d.s][1]+'</span><h3 style="margin-top:8px">'+d.t+'</h3><p style="margin-top:8px">'+d.role+'</p><dl><dt>Techno</dt><dd>'+d.tech+'</dd><dt>À retenir</dt><dd>'+d.why+'</dd></dl>';}
+  nodes.forEach(n=>{n.addEventListener('click',()=>show(n.dataset.k));n.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();show(n.dataset.k);}});});
+  show('pc');
+
+  // paquets qui circulent
+  const svgNS='http://www.w3.org/2000/svg'; const pk=$('#pkts');
+  const routes=[
+    {d:'M210 100 H390',c:'pk',dur:2200,off:0},
+    {d:'M500 200 V300 M500 300',c:'pk',dur:1800,off:600},
+    {d:'M610 335 H760',c:'pk',dur:1800,off:1200},
+    {d:'M760 355 H610',c:'pk back',dur:1800,off:2400},
+    {d:'M610 105 H760',c:'pk back',dur:1800,off:300},
+    {d:'M390 160 H300 V280 H210',c:'pk',dur:2600,off:1500}
+  ].map(r=>{const p=document.createElementNS(svgNS,'path');p.setAttribute('d',r.d);const c=document.createElementNS(svgNS,'circle');c.setAttribute('r','6');c.setAttribute('class',r.c);pk.appendChild(c);r.p=p;r.c=c;r.L=null;return r;});
+  // les chemins doivent être dans le DOM pour être mesurés
+  routes.forEach(r=>{r.p.setAttribute('fill','none');r.p.setAttribute('stroke','none');pk.appendChild(r.p);r.L=r.p.getTotalLength();});
+  function placeAt(r,t){const pt=r.p.getPointAtLength(r.L*t);r.c.setAttribute('cx',pt.x);r.c.setAttribute('cy',pt.y);}
+  if(reduce){routes.forEach(r=>placeAt(r,.5));}
+  else{let t0=null;function tick(ts){if(t0===null)t0=ts;routes.forEach(r=>{const t=((ts-t0+r.off)%r.dur)/r.dur;placeAt(r,t);r.c.style.opacity=t<.05||t>.95?0:1;});requestAnimationFrame(tick);}requestAnimationFrame(tick);}
+
+  /* ---------- 5. journée type ---------- */
+  const S=[
+    {k:'7 h 30',t:'Le référent publie le kit v13',b:"Il modifie 3 fichiers. Son script calcule les empreintes, signe le catalogue (version 13, valable 30 jours) et l'envoie au serveur en SFTP.",term:'PS> New-FileCatalog -Path .\\kit -CatalogFilePath kit.cat -CatalogVersion 2\nPS> Set-AuthenticodeSignature kit.cat -Certificate $certReferent\n→ Statut : Valid\n→ Publication SFTP : 3 fichiers modifiés + catalogue'},
+    {k:'8 h 00',t:'Le PC 4 démarre au bureau',b:"La tâche planifiée lance l'agent. Il télécharge le catalogue, vérifie la signature, puis le numéro de version : 13 est plus grand que 12, on continue.",term:'[agent] catalogue reçu · signature : référent ✓\n[agent] version 13 > version installée 12 ✓\n[agent] empreintes comparées : 3 fichiers différents\n[agent] niveau : confirmation → notification à l\'agent'},
+    {k:'8 h 05',t:'Téléchargement par la 4G, avec une coupure',b:"L'agent accepte. BITS télécharge les 3 fichiers dans un dossier de préparation. La connexion coupe à 60 %, puis BITS reprend là où il s'était arrêté.",bar:true},
+    {k:'8 h 12',t:'Vérification et bascule',b:"Chaque fichier est revérifié avec le catalogue. Tout est bon : l'ancien kit devient « précédent », le nouveau devient « actif ». Le PC envoie son rapport au serveur, avec son jeton.",term:'PS> Test-FileCatalog -Detailed .\\preparation kit.cat\n→ Status : Valid (140 fichiers)\n[agent] actif → precedent · preparation → actif\n[agent] POST /pc/PC-04/rapport (jeton ✓) → 200'},
+    {k:'8 h 20',t:'Passage à la borne',b:"L'agent passe son badge puis l'étiquette du PC 4. La borne demande au serveur : dernier rapport il y a 8 minutes, version 13 = version publiée.",lamp:'g',lampT:'Vert : sortie enregistrée'},
+    {k:'8 h 21',t:'Le PC 9 n\'a pas fait sa mise à jour',b:"Le PC 9 est resté éteint depuis hier. Son dernier rapport date de la veille, avec la version 12.",lamp:'r',lampT:'Rouge : mettre à jour avant de partir'},
+    {k:'14 h 00',t:'Sur le terrain, sans réseau',b:"Le kit a une date de validité. Si elle est dépassée, l'agent voit une alerte « kit périmé » à l'ouverture de session, même sans réseau. Le tableau de bord montre l'état de tout le parc au référent.",term:'[agent] ouverture de session · aucun réseau\n[agent] kit v13 valable jusqu\'au 12/02 ✓\n→ aucune alerte'}
+  ];
+  const list=$('#stepList'), scene=$('#scene'); let cur=0, barT=null;
+  S.forEach((s,i)=>{const li=document.createElement('li');li.innerHTML='<button type="button"><span class="k">'+s.k+'</span><span>'+s.t+'</span></button>';li.firstChild.addEventListener('click',()=>go(i));list.appendChild(li);});
+  function go(i){
+    cur=Math.max(0,Math.min(S.length-1,i)); clearInterval(barT);
+    [...list.querySelectorAll('button')].forEach((b,j)=>b.classList.toggle('on',j===cur));
+    const s=S[cur]; let h='<p class="eyebrow">Étape '+(cur+1)+' / '+S.length+' · '+s.k+'</p><h3>'+s.t+'</h3><p>'+s.b+'</p>';
+    if(s.term)h+='<div class="term">'+s.term.replace(/</g,'&lt;')+'</div>';
+    if(s.bar)h+='<div class="bar" id="bar"><i></i><b id="barT">0 %</b></div><div class="term" id="barLog" style="min-height:90px"></div><button class="btn ghost" id="barRe" type="button">Rejouer</button>';
+    if(s.lamp)h+='<div class="card" style="display:flex;gap:16px;align-items:center;flex-wrap:wrap"><span class="lamp '+s.lamp+'"><i></i>'+s.lampT+'</span></div>';
+    scene.innerHTML=h;
+    if(s.bar){runBar();$('#barRe').addEventListener('click',runBar);}
+    $('#stPrev').disabled=cur===0; $('#stNext').disabled=cur===S.length-1;
+  }
+  function runBar(){
+    clearInterval(barT); const bar=$('#bar'),fill=bar.querySelector('i'),lab=$('#barT'),log=$('#barLog');
+    let p=0, paused=0; log.textContent='[BITS] travail créé · 3 fichiers · 35 Mo\n'; bar.classList.remove('cut');
+    if(reduce){fill.style.width='100%';lab.textContent='100 %';log.textContent+='[BITS] coupure à 60 % · reprise à 60 %\n[BITS] terminé · 35 Mo';return;}
+    barT=setInterval(()=>{
+      if(paused>0){paused--; if(paused===0){bar.classList.remove('cut');log.textContent+='[BITS] réseau revenu · reprise à 60 % (Range: bytes=21000000-)\n';} return;}
+      p+=2; fill.style.width=p+'%'; lab.textContent=p+' %';
+      if(p===60){bar.classList.add('cut');paused=14;lab.textContent='coupure à 60 %';log.textContent+='[BITS] coupure réseau · travail en attente\n';}
+      if(p>=100){clearInterval(barT);log.textContent+='[BITS] terminé · 35 Mo · rien n\'est retéléchargé';}
+    },90);
+  }
+  $('#stPrev').addEventListener('click',()=>go(cur-1)); $('#stNext').addEventListener('click',()=>go(cur+1));
+  go(0);
+
+  /* ---------- 6. sécurité ---------- */
+  const A=[
+    {t:'Un fichier modifié',d:"Quelqu'un change un seul octet d'un fichier de paramètres sur le serveur.",s:['Catalogue reçu, signature valide','Fichier téléchargé','Empreinte SHA-256 calculée','Empreinte différente de celle du catalogue'],v:'Fichier refusé, l\'ancien kit reste actif',test:'T02'},
+    {t:'Un faux référent',d:"Un catalogue est signé avec un autre certificat que celui du référent.",s:['Catalogue reçu','Signature lue','Empreinte du certificat comparée à celle du référent'],v:'Catalogue refusé',test:'T03'},
+    {t:'Le retour d\'un ancien kit',d:"Quelqu'un renvoie le catalogue v11, ancien mais correctement signé, pour faire revenir les PC en arrière.",s:['Catalogue reçu, signature valide','Version lue dans le catalogue signé : 11','Version installée : 12. 11 n\'est pas plus grand que 12'],v:'Catalogue refusé',test:'T14'},
+    {t:'Un faux rapport « à jour »',d:"Quelqu'un envoie au serveur « PC 9 : version 13 » pour faire passer la borne au vert.",s:['Requête reçue par le serveur','Jeton du PC 9 recherché dans la requête','Aucun jeton valide'],v:'Rapport refusé, la borne reste rouge',test:'T15'}
+  ];
+  const at=$('#attacks');
+  A.forEach((a,i)=>{const c=document.createElement('div');c.className='card atk';
+    c.innerHTML='<div class="verdict"><h3>'+a.t+'</h3><span class="tst">'+a.test+'</span></div><p>'+a.d+'</p><ol>'+a.s.map((x,j)=>'<li class="'+(j===a.s.length-1?'bad':'done')+'">'+x+'</li>').join('')+'</ol><div class="verdict"><span class="stamp">REFUSÉ</span><button class="btn ghost" type="button">Lancer la tentative</button></div><p class="muted" style="font-size:.9rem">'+a.v+'</p>';
+    at.appendChild(c);
+    const lis=[...c.querySelectorAll('li')], st=c.querySelector('.stamp');
+    c.querySelector('button').addEventListener('click',()=>{
+      lis.forEach(l=>l.className=''); st.style.visibility='hidden'; st.classList.remove('pop');
+      lis.forEach((l,j)=>setTimeout(()=>{l.className=j===lis.length-1?'bad':'done'; if(j===lis.length-1){st.style.visibility='visible';void st.offsetWidth;st.classList.add('pop');}},reduce?0:500*(j+1)));
+    });
+  });
+
+  /* ---------- 7. volume ---------- */
+  if(!reduce){const bars=[...document.querySelectorAll('#vol .b')];bars.forEach(b=>b.style.width='0');
+    const ov=new IntersectionObserver(es=>{if(es[0].isIntersecting){bars.forEach(b=>b.style.width=b.dataset.w+'%');ov.disconnect();}},{threshold:.4});ov.observe($('#vol'));
+    setTimeout(()=>bars.forEach(b=>b.style.width=b.dataset.w+'%'),4000);}
+
+  /* ---------- 8. recette ---------- */
+  const T=[
+    ['T01','Kit ancien : seuls les fichiers modifiés sont téléchargés','v1'],
+    ['T02','Un octet modifié : fichier refusé','v1'],
+    ['T03','Autre certificat : catalogue refusé','v1'],
+    ['T04','Coupure réseau : reprise, puis vérification','v1'],
+    ['T05','Retour arrière en moins de 2 minutes','v1'],
+    ['T06','Borne verte : PC à jour, sortie enregistrée','v1'],
+    ['T07','Borne rouge : rapport trop ancien','v1'],
+    ['T08','Serveur arrêté : « vérification impossible »','v1'],
+    ['T09','Kit périmé hors réseau : notification','v1'],
+    ['T10','Liste rouge de la charte IA : aucune occurrence','v1'],
+    ['T14','Ancien kit bien signé : refusé','v1',1],
+    ['T15','Rapport sans jeton valide : refusé, borne pas verte','v1',1],
+    ['T11','Ancienne version d\'un document retrouvée en moins d\'1 min','v2'],
+    ['T12','Proposition hors réseau, puis refusée par le chef','ext'],
+    ['T13','Proposition validée, reçue par les autres PC','ext']
+  ];
+  const tg=$('#tests');
+  T.forEach(t=>{const d=document.createElement('div');d.className='t'+(t[3]?' new':'');d.innerHTML='<span class="id">'+t[0]+'</span><span>'+t[1]+'</span><span class="pill '+t[2]+'">'+SL[t[2]][1]+'</span>';tg.appendChild(d);});
+})();
+</script>

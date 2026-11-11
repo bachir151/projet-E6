@@ -1,0 +1,773 @@
+<title>Partie physique du kit</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Mise en page : même identité que la page « vue d'ensemble » (signalisation, schéma technique).
+   Une colonne de lecture, schémas et graphiques interactifs en pleine largeur. */
+:root{
+  --bg:#f3f6f7; --surface:#ffffff; --ink:#13222c; --muted:#56656f; --line:#d3dde2;
+  --accent:#1d5a86; --accent-soft:#e3eef6; --amber:#c98a00; --amber-soft:#fbf1d6;
+  --ok:#23824f; --ok-soft:#e1f2e8; --ko:#c2382e; --ko-soft:#f8e3e1;
+  --cold:#2f7fc1; --warm:#d0632a; --dew:#7a4fb5; --dew-soft:#eee7f7;
+  --f-display:"Barlow Condensed","Arial Narrow",Arial,sans-serif;
+  --f-body:"Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Consolas,monospace;
+  --r:10px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0e161c; --surface:#16222b; --ink:#e4ecf0; --muted:#9aabb5; --line:#2a3a45;
+  --accent:#6fb0de; --accent-soft:#1a3245; --amber:#f0b93a; --amber-soft:#3a2f12;
+  --ok:#4cc17f; --ok-soft:#173527; --ko:#ef6b5f; --ko-soft:#3d1d1a;
+  --cold:#6fb7f0; --warm:#f08a52; --dew:#b48ff0; --dew-soft:#2a2140; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0e161c; --surface:#16222b; --ink:#e4ecf0; --muted:#9aabb5; --line:#2a3a45;
+  --accent:#6fb0de; --accent-soft:#1a3245; --amber:#f0b93a; --amber-soft:#3a2f12;
+  --ok:#4cc17f; --ok-soft:#173527; --ko:#ef6b5f; --ko-soft:#3d1d1a;
+  --cold:#6fb7f0; --warm:#f08a52; --dew:#b48ff0; --dew-soft:#2a2140; color-scheme:dark}
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:64px}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:17px;line-height:1.6;margin:0}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--surface)}
+.wrap{max-width:1080px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.prose{max-width:68ch}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;line-height:1.1;margin:0}
+h1{font-size:clamp(2.6rem,7vw,4.4rem);font-weight:700}
+h2{font-size:clamp(2rem,4.4vw,2.8rem);font-weight:700}
+h3{font-size:1.45rem;font-weight:600}
+p{margin:0}
+.eyebrow{font-family:var(--f-mono);font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;color:var(--accent)}
+.muted{color:var(--muted)}
+code,.mono{font-family:var(--f-mono);font-size:.88em}
+a{color:var(--accent)}
+:focus-visible{outline:3px solid var(--amber);outline-offset:2px;border-radius:4px}
+nav.toc{position:sticky;top:env(safe-area-inset-top,0px);z-index:9;background:var(--surface);border-bottom:1px solid var(--line)}
+nav.toc .wrap{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;padding-block:8px}
+nav.toc a{flex:none;text-decoration:none;color:var(--muted);font-family:var(--f-display);font-weight:600;font-size:1rem;padding:6px 10px;border-radius:6px;white-space:nowrap}
+nav.toc a:hover{color:var(--ink);background:var(--accent-soft)}
+nav.toc a.on{color:var(--accent);background:var(--accent-soft)}
+nav.toc a b{font-family:var(--f-mono);font-weight:500;font-size:.75rem;margin-right:5px;opacity:.7}
+header.hero{padding-block:44px 34px}
+.hero .lead{font-size:1.2rem;margin-top:16px;max-width:60ch}
+.notice{margin-top:22px;font-size:.92rem;padding:12px 14px;border-left:4px solid var(--amber);background:var(--amber-soft);border-radius:0 8px 8px 0;max-width:64ch}
+section{padding-block:56px;border-top:1px solid var(--line)}
+.sec-head{display:grid;gap:10px;margin-bottom:26px}
+.sec-head .num{font-family:var(--f-display);font-weight:700;font-size:1.1rem;color:var(--amber)}
+.sub{margin-top:40px;display:grid;gap:12px}
+.sub>h3{font-size:1.7rem}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:26px;align-items:start}
+.grid2>*,.grid3>*{min-width:0}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:20px}
+.stack{display:grid;gap:12px}
+.svgbox{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:12px;overflow-x:auto}
+svg text{font-family:var(--f-body)}
+.btn{font:600 1rem var(--f-display);letter-spacing:.02em;border:1px solid var(--accent);background:var(--accent);color:var(--surface);padding:8px 14px;border-radius:8px;cursor:pointer}
+.btn.ghost{background:transparent;color:var(--accent)}
+.btn.on{background:var(--ink);border-color:var(--ink);color:var(--surface)}
+.controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.pill{display:inline-block;font-family:var(--f-mono);font-size:.72rem;padding:2px 8px;border-radius:99px;border:1px solid currentColor}
+.pill.v1{color:var(--ok)} .pill.ext{color:var(--amber)} .pill.ex{color:var(--amber)}
+.formula{font-family:var(--f-mono);font-size:1rem;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:12px 14px;overflow-x:auto;white-space:nowrap}
+.formula small{display:block;font-family:var(--f-body);color:var(--muted);font-size:.85rem;white-space:normal;margin-top:6px}
+.tablebox{overflow-x:auto;border:1px solid var(--line);border-radius:var(--r);background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:.93rem}
+th,td{padding:9px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+thead th{font-family:var(--f-display);font-size:1rem;font-weight:600;background:var(--bg)}
+tbody tr:last-child td{border-bottom:none}
+td.n{font-family:var(--f-mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+
+/* montages */
+.mont{display:grid;gap:10px}
+.mont .ic{height:110px;border-radius:8px;background:var(--bg);display:grid;place-items:center}
+/* schémas de câblage */
+.wiring .board{fill:var(--accent-soft);stroke:var(--accent);stroke-width:2}
+.wiring .mod{fill:var(--bg);stroke:var(--muted);stroke-width:2}
+.wiring .pinl{font-family:var(--f-mono);font-size:11px;fill:var(--ink)}
+.wiring .tt{font-family:var(--f-display);font-weight:700;font-size:18px;fill:var(--ink)}
+.wiring .ts{font-size:11px;fill:var(--muted)}
+.wiring .pin{fill:var(--surface);stroke:var(--muted);stroke-width:1.5}
+.wiring .w{fill:none;stroke-width:3;stroke-linecap:round;transition:stroke-width .2s,opacity .2s}
+.wiring .grp{cursor:pointer}
+.wiring .grp:hover .w,.wiring .grp.sel .w{stroke-width:5.5}
+.wiring.has-sel .grp:not(.sel){opacity:.28}
+.wiring .grp:focus{outline:none}
+.wiring .grp:focus-visible .w{stroke-width:6}
+.w.pwr{stroke:var(--ko)} .w.gnd{stroke:var(--ink)} .w.spi{stroke:var(--accent)} .w.rst{stroke:var(--amber)}
+.w.led1{stroke:var(--ok)} .w.led2{stroke:var(--ko)} .w.bz{stroke:var(--dew)} .w.i2c{stroke:var(--accent)} .w.ow{stroke:var(--amber)}
+.wiring .res{fill:var(--surface);stroke:var(--ink);stroke-width:1.5}
+.wireinfo{min-height:190px}
+.wireinfo h3{font-size:1.35rem;margin-top:6px}
+.wireinfo .formula{margin-top:10px}
+/* borne */
+.borne{display:grid;grid-template-columns:200px 1fr;gap:20px;align-items:center}
+.borne>*{min-width:0}
+.bx{width:180px;border-radius:14px;background:var(--ink);padding:16px;display:grid;gap:12px;justify-items:center;margin:auto}
+.bx .leds{display:flex;gap:18px}
+.bx .led{width:30px;height:30px;border-radius:50%;background:#33424c;border:2px solid #4b5a64;transition:background .15s,box-shadow .15s}
+.bx .led.g.on{background:#3fdc84;box-shadow:0 0 18px #3fdc84}
+.bx .led.r.on{background:#ff5a4d;box-shadow:0 0 18px #ff5a4d}
+.bx .pad{width:120px;height:70px;border-radius:8px;border:2px dashed #6c7d88;display:grid;place-items:center;color:#9fb0bb;font:500 .72rem var(--f-mono);text-align:center;line-height:1.3;position:relative;overflow:hidden}
+.bx .pad .wave{position:absolute;inset:0;border-radius:8px;border:2px solid #6fb0de;opacity:0}
+.bx .pad.read .wave{animation:wave .7s ease-out}
+@keyframes wave{0%{transform:scale(.4);opacity:1}100%{transform:scale(1.15);opacity:0}}
+.bx .bz{font:500 .72rem var(--f-mono);color:#9fb0bb;min-height:1.2em}
+.log{font-family:var(--f-mono);font-size:.8rem;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:12px;white-space:pre-wrap;line-height:1.5;min-height:150px}
+
+/* graphiques */
+.chart text{font-size:12px;fill:var(--muted)}
+.chart .ax{stroke:var(--muted);stroke-width:1}
+.chart .gr{stroke:var(--line);stroke-width:1}
+.chart .lab{fill:var(--ink);font-weight:700}
+.sliders{display:grid;grid-template-columns:repeat(2,1fr);gap:12px 20px}
+.sl{display:grid;gap:4px}
+.sl label{display:flex;justify-content:space-between;font-size:.92rem}
+.sl output{font-family:var(--f-mono);font-weight:500;color:var(--accent)}
+input[type=range]{width:100%;accent-color:var(--accent)}
+.result{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.res{padding:12px;border-radius:8px;background:var(--bg);border:1px solid var(--line)}
+.res b{display:block;font:700 1.9rem var(--f-display);line-height:1.05;font-variant-numeric:tabular-nums}
+.res span{font-size:.82rem;color:var(--muted)}
+.res.dew b{color:var(--dew)} .res.t b{color:var(--ok)}
+/* scène PC froid */
+.scene{display:grid;grid-template-columns:1fr;gap:10px}
+.sticker{border:2px solid var(--ink);border-radius:10px;padding:14px;background:var(--surface);max-width:360px;font-size:.92rem}
+.sticker h4{margin:0 0 8px;font:700 1.15rem var(--f-display);display:flex;gap:8px;align-items:center}
+.sticker table{font-size:.9rem}
+.sticker td,.sticker th{padding:5px 8px}
+/* Q/R */
+details{border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+details+details{margin-top:8px}
+summary{cursor:pointer;padding:12px 16px;font-weight:700;list-style:none;display:flex;justify-content:space-between;gap:12px}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"+";font-family:var(--f-mono);color:var(--accent)}
+details[open] summary::after{content:"–"}
+details>div{padding:0 16px 14px;color:var(--ink)}
+details>div p+p{margin-top:6px}
+.qcat{font-family:var(--f-mono);font-size:.72rem;color:var(--amber);letter-spacing:.06em;text-transform:uppercase;margin:22px 0 8px}
+.steps{counter-reset:s;display:grid;gap:10px;list-style:none;padding:0;margin:0}
+.steps li{display:grid;grid-template-columns:34px 1fr;gap:10px;align-items:start}
+.steps li::before{counter-increment:s;content:counter(s);width:28px;height:28px;border-radius:50%;background:var(--accent);color:var(--surface);display:grid;place-items:center;font:600 .9rem var(--f-display)}
+footer{padding-block:40px 60px;border-top:1px solid var(--line);color:var(--muted);font-size:.9rem}
+footer .next{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;padding:20px;border-radius:var(--r);background:var(--accent-soft);color:var(--ink);margin-bottom:24px}
+
+@media (max-width:820px){
+  .grid2,.borne{grid-template-columns:1fr}
+  .grid3{grid-template-columns:1fr}
+  .result{grid-template-columns:1fr 1fr}
+}
+@media (max-width:480px){
+  body{font-size:16px}
+  .sliders{grid-template-columns:1fr}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+</style>
+
+<nav class="toc" aria-label="Sommaire">
+  <div class="wrap">
+    <a href="#montages"><b>1</b>Les montages</a>
+    <a href="#borne"><b>2</b>La borne</a>
+    <a href="#banc"><b>3</b>Le banc</a>
+    <a href="#condensation"><b>4</b>Condensation</a>
+    <a href="#rfid"><b>5</b>Test RFID</a>
+    <a href="#jury"><b>6</b>Arguments jury</a>
+    <a href="#boitier"><b>7</b>Extension</a>
+    <a href="#materiel"><b>8</b>Matériel</a>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="wrap">
+    <p class="eyebrow">BTS CIEL option A · Épreuve E6 · Apprentie 4 · Partie physique</p>
+    <h1>Deux montages ESP32 et une vraie question de physique</h1>
+    <p class="lead">La borne vérifie qu'un PC est à jour avant qu'il parte. Le banc de mesure répond à une question de terrain : un PC qui sort d'un véhicule froid, combien de minutes faut-il attendre avant de l'allumer sans risque de buée ?</p>
+    <p class="notice">Les valeurs marquées <span class="pill ex">exemple</span> sont calculées ou simulées pour illustrer la méthode. Aziza les remplacera par ses propres mesures, horodatées et gardées brutes (charte IA). L'expérience de condensation dépend d'une confirmation du tuteur lors de la visite ; sinon, le test RFID devient l'expérience principale (plan B).</p>
+  </div>
+</header>
+
+<main>
+<!-- 1 -->
+<section id="montages">
+  <div class="wrap">
+    <div class="sec-head"><span class="num">1 · Les montages</span><h2>Ce qu'Aziza câble et programme</h2></div>
+    <div class="grid3">
+      <div class="card mont"><span class="pill v1">V1</span><h3>Borne de sortie</h3><p>ESP32, lecteur RFID RC522, LED verte et rouge, buzzer. Lit le badge de l'agent et l'étiquette du PC, demande l'état au serveur, allume le bon voyant.</p><p class="muted" style="font-size:.9rem">Compétences : C08 (code embarqué, HTTPS), C10 (Wi-Fi, DNS, NTP).</p></div>
+      <div class="card mont"><span class="pill v1">V1</span><h3>Banc de mesure</h3><p>ESP32, capteur SHT40 (température et humidité de l'air), 2 sondes DS18B20 (surface et intérieur du PC). Enregistre une mesure toutes les 10 s.</p><p class="muted" style="font-size:.9rem">Évalué aussi par le professeur de physique.</p></div>
+      <div class="card mont"><span class="pill ext">Extension</span><h3>Boîtier de sacoche</h3><p>ESP32-S3, écran e-ink, capteurs, batterie. Affiche sur place « attendre encore X min » grâce au modèle du banc.</p><p class="muted" style="font-size:.9rem">Seulement s'il reste du temps.</p></div>
+    </div>
+    <p class="notice">Sécurité du montage : tout est alimenté en <b>5 V par USB</b> et en <b>3,3 V</b> par l'ESP32. Aucun câblage en 230 V. Aucune caméra.</p>
+  </div>
+</section>
+
+<!-- 2 BORNE -->
+<section id="borne">
+  <div class="wrap">
+    <div class="sec-head"><span class="num">2 · La borne de sortie</span><h2>Un badge, une étiquette, un feu vert ou rouge</h2>
+      <p class="prose muted">Cliquez sur un fil (ou sur sa légende) pour savoir à quoi il sert et pourquoi il est branché là.</p></div>
+    <div class="grid2" style="grid-template-columns:1.5fr 1fr">
+      <div class="svgbox">
+        <svg class="wiring" id="wBorne" viewBox="0 0 780 420" width="100%" style="min-width:600px" role="group" aria-label="Câblage de la borne">
+          <!-- RC522 -->
+          <rect class="mod" x="20" y="60" width="170" height="320" rx="8"/>
+          <text class="tt" x="34" y="88">RC522</text><text class="ts" x="34" y="104">lecteur RFID 13,56 MHz</text>
+          <rect x="44" y="300" width="110" height="64" rx="6" fill="none" stroke="var(--line)" stroke-width="2" stroke-dasharray="5 4"/>
+          <text class="ts" x="99" y="336" text-anchor="middle">antenne</text>
+          <!-- ESP32 -->
+          <rect class="board" x="300" y="40" width="170" height="350" rx="10"/>
+          <text class="tt" x="385" y="215" text-anchor="middle">ESP32</text><text class="ts" x="385" y="232" text-anchor="middle">WROOM-32</text>
+          <!-- fils RC522 -> ESP32 -->
+          <g class="grp" tabindex="0" data-w="spi"><path class="w spi" d="M190 130H300"/><path class="w spi" d="M190 160H300"/><path class="w spi" d="M190 190H300"/><path class="w spi" d="M190 220H300"/></g>
+          <g class="grp" tabindex="0" data-w="gnd"><path class="w gnd" d="M190 250H300"/><path class="w gnd" d="M470 340H700V300"/><path class="w gnd" d="M700 300V120"/></g>
+          <g class="grp" tabindex="0" data-w="rst"><path class="w rst" d="M190 280H300"/></g>
+          <g class="grp" tabindex="0" data-w="pwr"><path class="w pwr" d="M190 310H240V360H300"/></g>
+          <!-- pins RC522 -->
+          <g class="pinl">
+            <text x="182" y="134" text-anchor="end">SDA</text><text x="182" y="164" text-anchor="end">SCK</text><text x="182" y="194" text-anchor="end">MOSI</text><text x="182" y="224" text-anchor="end">MISO</text>
+            <text x="182" y="254" text-anchor="end">GND</text><text x="182" y="284" text-anchor="end">RST</text><text x="182" y="314" text-anchor="end">3.3V</text>
+            <text x="308" y="134">GPIO 5</text><text x="308" y="164">GPIO 18</text><text x="308" y="194">GPIO 23</text><text x="308" y="224">GPIO 19</text>
+            <text x="308" y="254">GND</text><text x="308" y="284">GPIO 22</text><text x="308" y="364">3V3</text>
+            <text x="462" y="124" text-anchor="end">GPIO 25</text><text x="462" y="204" text-anchor="end">GPIO 26</text><text x="462" y="284" text-anchor="end">GPIO 27</text><text x="462" y="344" text-anchor="end">GND</text>
+          </g>
+          <!-- LED verte -->
+          <g class="grp" tabindex="0" data-w="led1">
+            <path class="w led1" d="M470 120H520"/><rect class="res" x="520" y="112" width="46" height="16" rx="3"/><text class="pinl" x="543" y="105" text-anchor="middle">220 Ω</text>
+            <path class="w led1" d="M566 120H610"/><path d="M610 108L610 132L632 120Z" fill="var(--ok)"/><path class="w led1" d="M634 108V132"/><path class="w led1" d="M634 120H700"/>
+            <text class="pinl" x="620" y="150" text-anchor="middle">LED verte</text></g>
+          <!-- LED rouge -->
+          <g class="grp" tabindex="0" data-w="led2">
+            <path class="w led2" d="M470 200H520"/><rect class="res" x="520" y="192" width="46" height="16" rx="3"/><text class="pinl" x="543" y="185" text-anchor="middle">220 Ω</text>
+            <path class="w led2" d="M566 200H610"/><path d="M610 188L610 212L632 200Z" fill="var(--ko)"/><path class="w led2" d="M634 188V212"/><path class="w led2" d="M634 200H700"/>
+            <text class="pinl" x="620" y="230" text-anchor="middle">LED rouge</text></g>
+          <!-- buzzer -->
+          <g class="grp" tabindex="0" data-w="bz">
+            <path class="w bz" d="M470 280H590"/><circle cx="612" cy="280" r="20" fill="var(--surface)" stroke="var(--dew)" stroke-width="3"/><text class="pinl" x="612" y="284" text-anchor="middle">BZ</text>
+            <path class="w bz" d="M632 280H700"/><text class="pinl" x="612" y="318" text-anchor="middle">buzzer</text></g>
+          <text class="ts" x="708" y="215">masse</text><text class="ts" x="708" y="229">commune</text>
+        </svg>
+      </div>
+      <div class="card wireinfo" id="infoBorne" aria-live="polite"></div>
+    </div>
+    <div class="controls" id="legBorne" style="margin-top:10px"></div>
+    <p class="muted" style="font-size:.85rem;margin-top:8px">Schéma de principe : l'ordre des broches sur la vraie carte ESP32 est différent. Toujours vérifier avec le brochage de la carte achetée.</p>
+
+    <div class="sub">
+      <h3>Ce que fait la borne, étape par étape</h3>
+      <div class="borne">
+        <div class="bx" aria-label="Maquette de la borne">
+          <div class="leds"><span class="led g" id="ledG"></span><span class="led r" id="ledR"></span></div>
+          <div class="pad" id="pad"><span class="wave"></span>poser le badge<br>puis le PC</div>
+          <div class="bz" id="bz">&nbsp;</div>
+        </div>
+        <div class="stack">
+          <div class="controls">
+            <button class="btn" type="button" data-sc="ok">PC à jour</button>
+            <button class="btn ghost" type="button" data-sc="old">PC pas à jour</button>
+            <button class="btn ghost" type="button" data-sc="down">Serveur arrêté</button>
+          </div>
+          <div class="log" id="blog" aria-live="polite">Choisissez une situation pour voir la borne réagir.</div>
+        </div>
+      </div>
+      <p class="muted" style="font-size:.92rem">Le jeton de la borne est rangé une fois dans la mémoire de l'ESP32 (bibliothèque <code>Preferences</code>), jamais dans le code. Le certificat du serveur est vérifié : jamais <code>setInsecure()</code>. L'heure vient du serveur NTP, sinon le certificat ne peut pas être validé.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 3 BANC -->
+<section id="banc">
+  <div class="wrap">
+    <div class="sec-head"><span class="num">3 · Le banc de mesure</span><h2>Trois capteurs, deux bus, une mesure toutes les 10 secondes</h2></div>
+    <div class="grid2" style="grid-template-columns:1.5fr 1fr">
+      <div class="svgbox">
+        <svg class="wiring" id="wBanc" viewBox="0 0 780 380" width="100%" style="min-width:600px" role="group" aria-label="Câblage du banc de mesure">
+          <rect class="mod" x="20" y="90" width="150" height="200" rx="8"/>
+          <text class="tt" x="34" y="118">SHT40</text><text class="ts" x="34" y="134">air : T et humidité</text>
+          <rect class="board" x="300" y="40" width="170" height="300" rx="10"/>
+          <text class="tt" x="385" y="200" text-anchor="middle">ESP32</text>
+          <g class="grp" tabindex="0" data-w="pwr2"><path class="w pwr" d="M170 170H300"/><path class="w pwr" d="M470 80H560"/><path class="w pwr" d="M560 80H720V140"/><path class="w pwr" d="M720 140V300"/></g>
+          <g class="grp" tabindex="0" data-w="gnd2"><path class="w gnd" d="M170 200H300"/><path class="w gnd" d="M470 310H700"/></g>
+          <g class="grp" tabindex="0" data-w="i2c"><path class="w i2c" d="M170 230H300"/><path class="w i2c" d="M170 260H300"/></g>
+          <g class="grp" tabindex="0" data-w="ow"><path class="w ow" d="M470 160H620"/><path class="w ow" d="M620 160V250"/><path class="w ow" d="M620 160H690"/><path class="w ow" d="M690 160V250"/>
+            <rect class="res" x="552" y="96" width="16" height="44" rx="3"/><path class="w ow" d="M560 140V160"/><path class="w ow" d="M560 96V80"/>
+            <text class="pinl" x="520" y="122" text-anchor="end">4,7 kΩ</text></g>
+          <g class="grp" tabindex="0" data-w="ds">
+            <path d="M600 250h40v26a20 20 0 0 1-40 0z" fill="var(--ink)"/><path d="M670 250h40v26a20 20 0 0 1-40 0z" fill="var(--ink)"/>
+            <path class="w gnd" d="M606 296V310"/><path class="w gnd" d="M676 296V310"/>
+            <path class="w pwr" d="M634 296V300H720"/><path class="w pwr" d="M704 296V300"/>
+            <text class="pinl" x="655" y="236" text-anchor="middle">2 × DS18B20</text>
+            <text class="ts" x="620" y="350" text-anchor="middle">n°1 coque</text><text class="ts" x="690" y="350" text-anchor="middle">n°2 intérieur</text></g>
+          <g class="pinl">
+            <text x="162" y="174" text-anchor="end">VIN</text><text x="162" y="204" text-anchor="end">GND</text><text x="162" y="234" text-anchor="end">SCL</text><text x="162" y="264" text-anchor="end">SDA</text>
+            <text x="308" y="174">3V3</text><text x="308" y="204">GND</text><text x="308" y="234">GPIO 22</text><text x="308" y="264">GPIO 21</text>
+            <text x="462" y="84" text-anchor="end">3V3</text><text x="462" y="164" text-anchor="end">GPIO 4</text><text x="462" y="314" text-anchor="end">GND</text>
+          </g>
+        </svg>
+      </div>
+      <div class="card wireinfo" id="infoBanc" aria-live="polite"></div>
+    </div>
+    <div class="controls" id="legBanc" style="margin-top:10px"></div>
+    <div class="grid3" style="margin-top:22px">
+      <div class="card"><h3>SHT40, dans l'air de la pièce</h3><p>Mesure la température et l'humidité de l'air. Ce sont les deux valeurs nécessaires pour calculer le <b>point de rosée</b>.</p></div>
+      <div class="card"><h3>DS18B20 n° 1, sur la coque</h3><p>Collée sur la surface du PC (ou du bloc d'aluminium). C'est là que la buée apparaît en premier.</p></div>
+      <div class="card"><h3>DS18B20 n° 2, à l'intérieur</h3><p>Glissée dans une grille d'aération. L'intérieur se réchauffe <b>plus lentement</b> que la coque : c'est lui qui fixe le temps d'attente.</p></div>
+    </div>
+    <p class="muted" style="margin-top:14px;font-size:.92rem">Enregistrement : l'ESP32 envoie chaque mesure par la liaison série vers un fichier CSV horodaté (heure, T air, HR, T surface, T intérieur). Les fichiers bruts sont gardés tels quels.</p>
+  </div>
+</section>
+
+<!-- 4 CONDENSATION -->
+<section id="condensation">
+  <div class="wrap">
+    <div class="sec-head"><span class="num">4 · L'expérience de condensation</span><h2>Combien de minutes avant d'allumer un PC qui sort du froid ?</h2>
+      <p class="prose">L'hiver, un PC passe la nuit dans un véhicule à 0 °C, puis entre dans un local à 20 °C. L'air chaud de la pièce contient de la vapeur d'eau. Au contact d'une surface froide, cette vapeur se transforme en gouttelettes : c'est la buée. Allumer un PC humide, c'est risquer un court-circuit ou de la corrosion. Les fabricants conseillent d'attendre que le PC revienne à température ambiante <span class="muted">(conseil général, source à citer dans le dossier)</span>. Mais combien de temps ? Personne ne donne de chiffre pour <b>ce</b> PC.</p></div>
+
+    <div class="sub">
+      <h3>Étape 1 · Le point de rosée : quand la buée apparaît-elle ?</h3>
+      <div class="grid2">
+        <div class="stack">
+          <p>Chaque air a une température en dessous de laquelle sa vapeur d'eau se condense : c'est le <b>point de rosée</b> T<sub>d</sub>. Si la surface du PC est plus froide que T<sub>d</sub>, la buée se forme.</p>
+          <div class="formula">γ = ln(HR/100) + a·T<sub>a</sub> / (b + T<sub>a</sub>)<br>T<sub>d</sub> = b·γ / (a − γ)<small>Formule de Magnus, avec a = 17,62 et b = 243,12 °C. HR : humidité relative de la pièce (%). T<sub>a</sub> : température de la pièce (°C).</small></div>
+          <p class="muted" style="font-size:.92rem">Exemple vérifié : à 20 °C et 50 % d'humidité, T<sub>d</sub> ≈ 9,3 °C. Une surface à moins de 9,3 °C se couvre de buée.</p>
+        </div>
+        <div class="card stack">
+          <h3>Vérifier la formule par l'expérience</h3>
+          <p>Une plaque de métal poli est refroidie lentement, avec une sonde collée dessous. Aziza note la température au moment exact où la plaque se ternit. Elle compare cette valeur <b>mesurée</b> à T<sub>d</sub> <b>calculée</b> avec les mesures du SHT40.</p>
+          <svg viewBox="0 0 320 120" width="100%" role="img" aria-label="Plaque témoin">
+            <rect x="20" y="30" width="180" height="60" rx="6" fill="var(--line)"/>
+            <rect id="fog" x="20" y="30" width="180" height="60" rx="6" fill="var(--dew)" opacity="0"/>
+            <text x="110" y="66" text-anchor="middle" font-size="13" fill="var(--ink)">plaque témoin</text>
+            <text id="plateT" x="260" y="58" text-anchor="middle" font-size="22" font-weight="700" fill="var(--cold)" font-family="IBM Plex Mono,monospace">14,0 °C</text>
+            <text id="plateS" x="260" y="80" text-anchor="middle" font-size="12" fill="var(--muted)">sèche</text>
+          </svg>
+          <p class="muted" style="font-size:.88rem">Animation : la plaque refroidit, la buée apparaît en passant sous T<sub>d</sub>.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="sub">
+      <h3>Étape 2 · Le modèle : comment le PC se réchauffe</h3>
+      <div class="grid2">
+        <div class="stack">
+          <p>Plus l'écart de température avec la pièce est grand, plus le PC se réchauffe vite. Puis il ralentit en s'approchant de la température de la pièce. C'est la <b>loi de refroidissement de Newton</b> :</p>
+          <div class="formula">T(t) = T<sub>a</sub> + (T<sub>0</sub> − T<sub>a</sub>) · e<sup>−t/τ</sup><small>T<sub>0</sub> : température de départ. τ (tau) : constante de temps, en minutes. Au bout d'un temps τ, il reste 37 % de l'écart ; au bout de 3τ, il en reste 5 %.</small></div>
+          <div class="formula">τ = m · c / (h · S)<small>m : masse ; c : capacité thermique du matériau ; h : échange avec l'air ; S : surface. Un PC lourd ou rangé dans sa sacoche (h plus petit) se réchauffe plus lentement.</small></div>
+          <p>On cherche le moment où la surface dépasse le point de rosée. En résolvant T(t) = T<sub>d</sub> :</p>
+          <div class="formula">t<sub>attente</sub> = τ · ln[ (T<sub>0</sub> − T<sub>a</sub>) / (T<sub>d</sub> − T<sub>a</sub>) ]<small>Exemple vérifié : 0 °C → 20 °C, 50 % : t ≈ 0,62 τ.</small></div>
+        </div>
+        <div class="card stack">
+          <h3>Simulateur</h3>
+          <div class="sliders">
+            <div class="sl"><label for="sT0">Dehors (T<sub>0</sub>) <output id="oT0"></output></label><input type="range" id="sT0" min="-15" max="10" step="1" value="0"></div>
+            <div class="sl"><label for="sTa">Pièce (T<sub>a</sub>) <output id="oTa"></output></label><input type="range" id="sTa" min="15" max="26" step="0.5" value="20"></div>
+            <div class="sl"><label for="sHR">Humidité (HR) <output id="oHR"></output></label><input type="range" id="sHR" min="20" max="85" step="1" value="50"></div>
+            <div class="sl"><label for="sTau">Constante τ <output id="oTau"></output></label><input type="range" id="sTau" min="5" max="45" step="1" value="22"></div>
+          </div>
+          <div class="result">
+            <div class="res dew"><b id="rTd">–</b><span>point de rosée</span></div>
+            <div class="res t"><b id="rT">–</b><span>attente minimale</span></div>
+            <div class="res"><b id="r3">–</b><span>PC à ±1 °C de la pièce (≈ 3τ)</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="svgbox" style="margin-top:14px"><svg class="chart" id="cMain" viewBox="0 0 900 340" width="100%" style="min-width:560px" role="img" aria-label="Courbe de réchauffement et point de rosée"></svg></div>
+      <p class="muted" style="font-size:.88rem">Zone violette : la surface est sous le point de rosée, la buée peut se former. Les sliders recalculent tout en direct.</p>
+    </div>
+
+    <div class="sub">
+      <h3>Étape 3 · Trouver τ à partir des mesures</h3>
+      <div class="grid2">
+        <div class="stack">
+          <p>τ dépend du PC : on ne peut pas le deviner, on le <b>mesure</b>. Une astuce transforme la courbe en droite. En prenant le logarithme :</p>
+          <div class="formula">ln(T<sub>a</sub> − T) = ln(T<sub>a</sub> − T<sub>0</sub>) − t / τ<small>Si le modèle est bon, les points forment une droite. Sa pente vaut −1/τ.</small></div>
+          <ol class="steps">
+            <li><span>Refroidir le bloc d'aluminium (puis un vrai portable) au réfrigérateur ou dans une glacière.</span></li>
+            <li><span>Le poser dans la pièce et enregistrer toutes les 10 s pendant environ 1 h 30.</span></li>
+            <li><span>Tracer ln(T<sub>a</sub> − T) en fonction de t, puis tracer la droite qui passe au mieux (tableur ou Python).</span></li>
+            <li><span>Lire la pente, en déduire τ, et regarder si les points s'écartent de la droite.</span></li>
+          </ol>
+          <p class="muted" style="font-size:.92rem">On s'arrête quand T<sub>a</sub> − T devient inférieur à 1 °C : à ce moment, le bruit du capteur fausse le logarithme.</p>
+        </div>
+        <div class="card stack">
+          <div class="controls"><button class="btn" id="fitBtn" type="button">Tracer la droite</button><span class="pill ex">données simulées</span></div>
+          <svg class="chart" id="cFit" viewBox="0 0 460 300" width="100%" role="img" aria-label="Linéarisation et pente"></svg>
+          <p id="fitTxt" style="font-size:.95rem"></p>
+        </div>
+      </div>
+    </div>
+
+    <div class="sub">
+      <h3>Étape 4 · Étalonner les capteurs</h3>
+      <div class="grid2">
+        <div class="stack">
+          <p>Un capteur peut se tromper de quelques dixièmes de degré. On le compare donc à deux températures que l'on connaît bien :</p>
+          <ul style="margin:0;padding-left:20px;display:grid;gap:6px">
+            <li><b>eau + glace pilée</b> : 0 °C, une référence physique facile à obtenir ;</li>
+            <li><b>eau tiède</b>, mesurée avec le thermomètre de référence du laboratoire.</li>
+          </ul>
+          <p>On en tire un <b>décalage</b> pour chaque sonde, qu'on retire ensuite de toutes ses mesures.</p>
+          <p class="muted" style="font-size:.92rem">Pourquoi c'est important : une erreur de 0,5 °C sur la coque ou sur T<sub>d</sub> change le temps d'attente de plusieurs minutes (voir l'étape 5).</p>
+        </div>
+        <div class="tablebox">
+          <table>
+            <thead><tr><th>Sonde</th><th>Dans eau + glace (0 °C)</th><th>Dans eau tiède (réf. 35,2 °C)</th><th>Correction</th></tr></thead>
+            <tbody>
+              <tr><td>DS18B20 n° 1</td><td class="n">+0,3 °C</td><td class="n">35,5 °C</td><td class="n">−0,3 °C</td></tr>
+              <tr><td>DS18B20 n° 2</td><td class="n">−0,2 °C</td><td class="n">35,0 °C</td><td class="n">+0,2 °C</td></tr>
+              <tr><td>SHT40</td><td class="n">+0,1 °C</td><td class="n">35,3 °C</td><td class="n">−0,1 °C</td></tr>
+            </tbody>
+          </table>
+          <p class="muted" style="font-size:.82rem;padding:8px 12px">Valeurs d'<b>exemple</b>. Chaque point = moyenne de 30 mesures.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="sub">
+      <h3>Étape 5 · Incertitudes : de combien peut-on se tromper ?</h3>
+      <div class="grid2">
+        <div class="stack">
+          <p>Chaque mesure a une incertitude. Pour rester simple, on <b>encadre</b> le résultat : on refait le calcul avec les valeurs les plus défavorables, puis les plus favorables.</p>
+          <div class="formula">Incertitude de répétition : u = s / √n<small>s : écart-type de n mesures répétées. Fiche technique : précision ±a → u = a / √3. Précisions à vérifier dans les fiches techniques (DS18B20 ±0,5 °C et SHT40 ±0,2 °C / ±2 %HR, de mémoire).</small></div>
+          <div class="sliders">
+            <div class="sl"><label for="uHR">Incertitude sur HR <output id="ouHR"></output></label><input type="range" id="uHR" min="0" max="5" step="0.5" value="2"></div>
+            <div class="sl"><label for="uTau">Incertitude sur τ <output id="ouTau"></output></label><input type="range" id="uTau" min="0" max="5" step="0.5" value="1.5"></div>
+          </div>
+        </div>
+        <div class="card stack">
+          <h3>Résultat encadré</h3>
+          <div class="result" style="grid-template-columns:1fr 1fr">
+            <div class="res dew"><b id="uTdTxt">–</b><span>point de rosée</span></div>
+            <div class="res t"><b id="uTTxt">–</b><span>temps d'attente</span></div>
+          </div>
+          <p id="uMsg" style="font-size:.95rem"></p>
+          <p class="muted" style="font-size:.88rem">Calcul fait avec les réglages du simulateur de l'étape 2.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="sub">
+      <h3>Étape 6 · Confronter le modèle aux mesures</h3>
+      <div class="grid2">
+        <div class="stack">
+          <p>Le modèle est une simplification. Aziza vérifie trois choses :</p>
+          <ol class="steps">
+            <li><span><b>Les points sont-ils alignés</b> sur la droite de l'étape 3 ? Si oui, le modèle de Newton convient.</span></li>
+            <li><span><b>La buée apparaît-elle à la température prévue</b> sur la plaque témoin ? Cela valide la formule de Magnus.</span></li>
+            <li><span><b>Le vrai portable se comporte-t-il comme le bloc ?</b> Non : l'intérieur est en retard sur la coque. Le τ de l'intérieur est plus grand, c'est lui qu'on retient.</span></li>
+          </ol>
+        </div>
+        <div class="card stack">
+          <div class="controls"><span class="pill ex">données simulées</span></div>
+          <svg class="chart" id="cCmp" viewBox="0 0 460 280" width="100%" role="img" aria-label="Comparaison coque et intérieur"></svg>
+          <p class="muted" style="font-size:.9rem">Exemple : coque τ ≈ 14 min, intérieur τ ≈ 26 min. Le modèle simple suit bien la coque. Pour l'intérieur, on garde le τ mesuré, plus prudent.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="sub">
+      <h3>Étape 7 · Le résultat, utile sur le terrain</h3>
+      <div class="grid2">
+        <div class="stack">
+          <p>Le résultat n'est pas une courbe dans un rapport : c'est une <b>étiquette collée sur chaque PC</b> et une ligne dans le mode opératoire. Elle est calculée pour une pièce à 20 °C et 50 % d'humidité, avec le τ de l'intérieur et une marge de sécurité de 50 %.</p>
+          <p class="muted" style="font-size:.92rem">Le tableau suit les réglages du simulateur (τ) : changez τ à l'étape 2 et l'étiquette se met à jour.</p>
+          <p>Si le boîtier de sacoche est réalisé (extension), il fait ce calcul en direct avec la vraie température du PC.</p>
+        </div>
+        <div class="sticker" id="sticker"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 5 RFID -->
+<section id="rfid">
+  <div class="wrap">
+    <div class="sec-head"><span class="num">5 · Le test RFID</span><h2>Quelle étiquette coller sur un PC en métal ?</h2>
+      <p class="prose">Le RC522 crée un champ magnétique à 13,56 MHz. Il alimente l'étiquette et lit son numéro. Une coque en métal perturbe ce champ : des courants se créent dans le métal et s'opposent au champ. Une étiquette normale collée sur du métal se lit mal ou plus du tout. Une étiquette <b>anti-métal</b> a une couche de ferrite qui guide le champ et la protège.</p></div>
+    <div class="grid2">
+      <div class="stack">
+        <h3>Protocole</h3>
+        <ol class="steps">
+          <li><span>Fixer le lecteur, puis approcher l'étiquette sur une règle, 1 cm par 1 cm.</span></li>
+          <li><span>Noter la distance maximale de lecture. Recommencer 10 fois pour chaque cas.</span></li>
+          <li><span>Cas testés : étiquette normale à l'air, étiquette normale sur le PC, étiquette anti-métal sur le PC. Puis 3 orientations : 0°, 45°, 90°.</span></li>
+          <li><span>Calculer la moyenne et l'incertitude (s/√10), puis choisir l'étiquette et dessiner la zone « poser le PC ici » sur la borne.</span></li>
+        </ol>
+        <p class="muted" style="font-size:.92rem">Pas de formule compliquée : c'est une campagne de mesures, utile pour construire la borne. Plan B : si la condensation n'est pas confirmée, ce test devient l'expérience principale, avec plus de cas et une étude des incertitudes plus poussée.</p>
+      </div>
+      <div class="card stack">
+        <div class="controls"><span class="pill ex">valeurs d'exemple</span></div>
+        <svg class="chart" id="cRfid" viewBox="0 0 460 280" width="100%" role="img" aria-label="Distance de lecture selon l'étiquette"></svg>
+        <p style="font-size:.95rem"><b>Conclusion attendue :</b> étiquette anti-métal, collée face au lecteur. La borne aura un repère de pose à moins de 2 cm.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 6 JURY -->
+<section id="jury">
+  <div class="wrap">
+    <div class="sec-head"><span class="num">6 · Arguments pour le jury</span><h2>Les questions qui vont tomber, et quoi répondre</h2></div>
+    <div class="grid2">
+      <div>
+        <p class="qcat">Utilité</p>
+        <details><summary>À quoi sert cette expérience dans un projet informatique ?</summary><div><p>Elle protège le matériel que le projet met à jour. Un PC à jour mais grillé par la buée ne sert à rien. Le résultat est utilisé sur le terrain : une étiquette sur chaque PC et une ligne dans le mode opératoire.</p></div></details>
+        <details><summary>Pourquoi ne pas dire simplement « attendez une heure » ?</summary><div><p>Une heure, c'est parfois trop (un agent qui doit repartir) et parfois pas assez (PC très froid, pièce humide, PC rangé dans sa sacoche). Le modèle donne un temps adapté, avec une marge chiffrée et justifiée.</p></div></details>
+        <details><summary>Le problème existe-t-il vraiment ?</summary><div><p>Le tuteur a confirmé lors de la visite que les PC passent du véhicule au local. <span class="muted">(À confirmer en décembre. Sinon, le test RFID devient l'expérience principale.)</span></p></div></details>
+        <p class="qcat">Méthode</p>
+        <details><summary>Pourquoi un modèle plutôt que des mesures seules ?</summary><div><p>On ne peut pas tout mesurer : chaque température extérieure, chaque humidité. Le modèle, une fois validé par les mesures, permet de calculer le temps d'attente pour n'importe quelle situation.</p></div></details>
+        <details><summary>Comment savez-vous que le modèle est bon ?</summary><div><p>Trois preuves : les points de ln(T<sub>a</sub> − T) sont alignés ; la buée apparaît sur la plaque témoin à la température prévue par Magnus ; le modèle prédit la courbe d'un deuxième essai, qui n'a pas servi à calculer τ.</p></div></details>
+        <details><summary>Pourquoi deux sondes sur le PC ?</summary><div><p>La coque se réchauffe vite, l'intérieur plus lentement. La buée sur les circuits dépend de l'intérieur. On mesure les deux et on garde le τ le plus grand, c'est-à-dire le plus prudent.</p></div></details>
+        <details><summary>Pourquoi une mesure toutes les 10 secondes ?</summary><div><p>τ vaut plusieurs minutes. Avec une mesure toutes les 10 s, on a des dizaines de points par constante de temps : assez pour tracer la droite, sans saturer la mémoire.</p></div></details>
+      </div>
+      <div>
+        <p class="qcat">Mesure et incertitudes</p>
+        <details><summary>Pourquoi étalonner des capteurs neufs ?</summary><div><p>La fiche technique donne une précision maximale, pas l'erreur réelle de notre sonde. L'eau avec de la glace donne 0 °C sans matériel spécial. On mesure le décalage, puis on le corrige.</p></div></details>
+        <details><summary>Quelle est l'incertitude sur le temps d'attente ?</summary><div><p>On l'encadre : on refait le calcul avec les valeurs les plus défavorables de HR et de τ. On retient la borne haute, puis on ajoute une marge. L'incertitude qui pèse le plus est celle sur l'humidité.</p></div></details>
+        <details><summary>Quelles sont les limites du modèle ?</summary><div><p>Il suppose une pièce à température et humidité constantes, et un PC uniforme. Un PC n'est pas uniforme : d'où les deux sondes et la marge. Il ne tient pas compte d'un PC allumé qui chauffe tout seul : on parle ici d'un PC éteint.</p></div></details>
+        <p class="qcat">Électronique</p>
+        <details><summary>Pourquoi le RC522 en 3,3 V et pas en 5 V ?</summary><div><p>Le RC522 et les broches de l'ESP32 fonctionnent en 3,3 V. En 5 V, on risque de les abîmer.</p></div></details>
+        <details><summary>Pourquoi une résistance de 220 Ω devant chaque LED ?</summary><div><p>Pour limiter le courant. Pour une LED rouge (environ 2 V) : I = (3,3 − 2,0) / 220 ≈ 6 mA. C'est assez pour bien voir, et loin de la limite d'une broche de l'ESP32. Tension de la LED et limite de la broche : à vérifier dans les fiches techniques.</p></div></details>
+        <details><summary>À quoi sert la résistance de 4,7 kΩ du bus 1-Wire ?</summary><div><p>Les sondes ne font que tirer la ligne vers 0 V. La résistance la ramène à 3,3 V le reste du temps. Sans elle, la ligne flotte et les mesures sont fausses ou absentes.</p></div></details>
+        <details><summary>Pourquoi une étiquette anti-métal ?</summary><div><p>Le métal de la coque perturbe le champ magnétique du lecteur. La couche de ferrite de l'étiquette guide le champ. Le test RFID le montre : distance de lecture mesurée avec et sans ferrite.</p></div></details>
+        <details><summary>Le badge peut-il être copié ?</summary><div><p>Oui, un badge simple se copie. La borne s'en sert pour enregistrer une sortie, pas pour ouvrir une porte. C'est une limite écrite dans le dossier.</p></div></details>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 7 -->
+<section id="boitier">
+  <div class="wrap">
+    <div class="sec-head"><span class="num">7 · Extension : le boîtier de sacoche</span><h2>Le modèle, emporté sur le terrain</h2></div>
+    <div class="grid2">
+      <p class="prose">S'il reste du temps après la V2, Aziza réalise un petit boîtier sur batterie qui voyage avec le PC. Il mesure la température dans la sacoche et l'humidité de la pièce, applique le modèle de l'étape 2 et affiche sur un écran e-ink : « Attendre encore 12 min ». L'écran e-ink garde son affichage sans consommer d'énergie.</p>
+      <div class="card" style="display:grid;place-items:center">
+        <svg viewBox="0 0 300 150" width="100%" style="max-width:320px" role="img" aria-label="Écran e-ink du boîtier">
+          <rect x="10" y="10" width="280" height="130" rx="12" fill="var(--ink)"/>
+          <rect x="26" y="24" width="248" height="102" rx="4" fill="#e9e7df"/>
+          <text x="150" y="58" text-anchor="middle" font-size="15" fill="#222" font-family="IBM Plex Mono,monospace">PC-04 · kit v13</text>
+          <text x="150" y="92" text-anchor="middle" font-size="22" font-weight="700" fill="#222" font-family="Barlow Condensed,Arial Narrow,sans-serif" id="einkTxt">Attendre encore 12 min</text>
+          <text x="150" y="114" text-anchor="middle" font-size="11" fill="#555" font-family="IBM Plex Mono,monospace">intérieur 4,1 °C · rosée 9,3 °C</text>
+        </svg>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 8 -->
+<section id="materiel">
+  <div class="wrap">
+    <div class="sec-head"><span class="num">8 · Matériel et budget V1</span><h2>Environ 40 à 70 €</h2></div>
+    <div class="tablebox">
+      <table>
+        <thead><tr><th>Élément</th><th>Montage</th><th>Prix (ordre de grandeur, à confirmer)</th></tr></thead>
+        <tbody>
+          <tr><td>ESP32-WROOM-32 × 2</td><td>borne, banc</td><td class="n">12–20 €</td></tr>
+          <tr><td>Lecteur RFID RC522</td><td>borne</td><td class="n">3–8 €</td></tr>
+          <tr><td>Badges et étiquettes (normales et anti-métal)</td><td>borne, test RFID</td><td class="n">0,5–3 € pièce</td></tr>
+          <tr><td>LED, résistances, buzzer, boîtier</td><td>borne</td><td class="n">5–10 €</td></tr>
+          <tr><td>Capteur SHT40</td><td>banc</td><td class="n">5–15 €</td></tr>
+          <tr><td>Sondes DS18B20 × 2 + résistance 4,7 kΩ</td><td>banc</td><td class="n">2–5 €</td></tr>
+          <tr><td>Bloc d'aluminium, plaque témoin, glacière</td><td>banc</td><td>lycée</td></tr>
+          <tr><td>Thermomètre de référence</td><td>étalonnage</td><td>laboratoire de physique</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="next"><div><b>Le projet en entier</b><br><span class="muted">Problème, solutions existantes, architecture, sécurité, réseau, recette, planning.</span></div><a class="btn" href="https://claude.ai/artifact/Dv15hHawi8Uup8GoMmdSiF" id="backLink" style="text-decoration:none">← Vue d'ensemble</a></div>
+    <p>Projet E6 · BTS CIEL option A · apprentie 4 · session 2027. Besoin issu de l'entreprise, réalisation au lycée (à valider par l'académie). Contexte anonymisé, données d'exemple.</p>
+  </div>
+</footer>
+
+<script>
+(function(){
+  const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const $=s=>document.querySelector(s), NS='http://www.w3.org/2000/svg';
+  const fr=(x,d=1)=>x.toFixed(d).replace('.',',');
+
+  /* sommaire actif */
+  const links=[...document.querySelectorAll('nav.toc a')];
+  const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting)links.forEach(l=>l.classList.toggle('on',l.getAttribute('href')==='#'+e.target.id));}),{rootMargin:'-45% 0px -50% 0px'});
+  links.forEach(a=>{const s=document.querySelector(a.getAttribute('href'));if(s)io.observe(s);});
+
+  /* ---------- schémas de câblage ---------- */
+  function wiring(svgSel,infoSel,legSel,data,first){
+    const svg=$(svgSel),info=$(infoSel),leg=$(legSel);
+    const grps=[...svg.querySelectorAll('.grp')];
+    const btns={};
+    Object.keys(data).forEach(k=>{const b=document.createElement('button');b.type='button';b.className='btn ghost';b.textContent=data[k].short;b.addEventListener('click',()=>sel(k));leg.appendChild(b);btns[k]=b;});
+    function sel(k){const d=data[k];svg.classList.add('has-sel');grps.forEach(g=>g.classList.toggle('sel',g.dataset.w===k));
+      Object.keys(btns).forEach(j=>btns[j].classList.toggle('on',j===k));
+      info.innerHTML='<p class="eyebrow">'+d.pins+'</p><h3>'+d.t+'</h3><p style="margin-top:8px">'+d.b+'</p>'+(d.f?'<div class="formula">'+d.f+'</div>':'');}
+    grps.forEach(g=>{g.addEventListener('click',()=>sel(g.dataset.w));g.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();sel(g.dataset.w);}});});
+    sel(first);
+  }
+  wiring('#wBorne','#infoBorne','#legBorne',{
+    pwr:{short:'Alimentation',pins:'3.3V → 3V3',t:'Alimentation en 3,3 V, jamais en 5 V',b:"Le RC522 fonctionne en 3,3 V, comme les broches de l'ESP32. Le brancher sur la broche 5 V de la carte peut l'abîmer. C'est l'erreur de câblage la plus fréquente."},
+    gnd:{short:'Masse',pins:'GND → GND',t:'Une masse commune',b:"Tous les composants partagent la même masse (0 V). Sans masse commune, les signaux n'ont pas de référence et la lecture devient aléatoire."},
+    spi:{short:'Bus SPI',pins:'SDA·SCK·MOSI·MISO → GPIO 5·18·23·19',t:'Le bus SPI : 4 fils pour dialoguer',b:"SCK donne le rythme (horloge). MOSI porte les ordres de l'ESP32 vers le lecteur, MISO les réponses du lecteur. SDA (ou SS) choisit le composant à qui l'on parle. Les broches 18, 19 et 23 sont celles du bus SPI matériel de l'ESP32 (VSPI)."},
+    rst:{short:'Reset',pins:'RST → GPIO 22',t:'Redémarrer le lecteur',b:"Le programme peut remettre le lecteur à zéro s'il ne répond plus, sans débrancher la borne."},
+    led1:{short:'LED verte',pins:'GPIO 25 → 220 Ω → LED → GND',t:'LED verte : PC à jour',b:"La résistance limite le courant pour protéger la LED et la broche. La tension d'une LED verte dépend du modèle (environ 2 à 3 V) : à lire dans sa fiche technique, et adapter la résistance si la LED éclaire trop peu.",f:'I = (U<sub>broche</sub> − U<sub>LED</sub>) / R'},
+    led2:{short:'LED rouge',pins:'GPIO 26 → 220 Ω → LED → GND',t:'LED rouge : mettre à jour avant de partir',b:"Avec une LED rouge d'environ 2 V, le courant vaut environ 6 mA : assez pour bien voir, et loin de la limite d'une broche de l'ESP32 (à vérifier dans sa fiche technique).",f:'I = (3,3 − 2,0) / 220 ≈ 0,0059 A ≈ 6 mA'},
+    bz:{short:'Buzzer',pins:'GPIO 27 → buzzer → GND',t:'Buzzer : un signal sonore',b:"Un bip court quand tout va bien, trois bips si le PC n'est pas à jour. Prendre un module buzzer qui contient déjà un transistor : la broche de l'ESP32 n'a alors presque rien à fournir."}
+  },'spi');
+  wiring('#wBanc','#infoBanc','#legBanc',{
+    pwr2:{short:'Alimentation',pins:'3V3',t:'Tout en 3,3 V',b:"Le SHT40 et les deux DS18B20 sont alimentés par la broche 3V3 de l'ESP32. L'ESP32 lui-même est alimenté par USB."},
+    gnd2:{short:'Masse',pins:'GND',t:'Masse commune',b:"Même règle que pour la borne : une seule masse pour tous les capteurs."},
+    i2c:{short:'Bus I²C',pins:'SCL·SDA → GPIO 22·21',t:'Le bus I²C : 2 fils pour le SHT40',b:"SCL donne le rythme, SDA transporte les données dans les deux sens. Chaque capteur I²C a une adresse : 0x44 pour le SHT40. GPIO 21 et 22 sont les broches I²C par défaut de l'ESP32."},
+    ow:{short:'Bus 1-Wire',pins:'DATA → GPIO 4 + 4,7 kΩ vers 3V3',t:'Le bus 1-Wire : un seul fil pour deux sondes',b:"Les deux DS18B20 partagent le même fil de données. Chaque sonde a un numéro unique gravé en usine : le programme les distingue ainsi. La résistance de 4,7 kΩ ramène la ligne à 3,3 V au repos (résistance de rappel). Sans elle, rien ne marche."},
+    ds:{short:'Sondes DS18B20',pins:'GND · DATA · VDD',t:'Deux sondes, deux rôles',b:"N° 1 collée sur la coque avec un peu de pâte thermique et du ruban adhésif. N° 2 glissée dans une grille d'aération, pour l'intérieur. Version étanche conseillée pour l'essai dans l'eau glacée."}
+  },'ow');
+
+  /* ---------- borne : scénarios ---------- */
+  const G=$('#ledG'),R=$('#ledR'),bz=$('#bz'),pad=$('#pad'),blog=$('#blog');let bt=[],blinkIv=null;
+  function clr(){bt.forEach(clearTimeout);bt=[];clearInterval(blinkIv);G.classList.remove('on');R.classList.remove('on');bz.innerHTML='&nbsp;';}
+  function at(ms,f){bt.push(setTimeout(f,reduce?0:ms));}
+  function read(){pad.classList.remove('read');void pad.offsetWidth;pad.classList.add('read');}
+  const SC={
+    ok:[['Badge lu : agent A-12',0,1],['Étiquette lue : PC-04',700,1],['GET /pc/PC-04/etat (HTTPS, jeton) …',1300],['→ dernier rapport : il y a 8 min · version 13 = version publiée',2100],['POST /sorties → 201 enregistrée',2500],['VERT · un bip',2700,0,'g']],
+    old:[['Badge lu : agent A-12',0,1],['Étiquette lue : PC-09',700,1],['GET /pc/PC-09/etat (HTTPS, jeton) …',1300],['→ dernier rapport : hier 17 h 40 · version 12 < 13',2100],['ROUGE · trois bips · mettre à jour avant de partir',2500,0,'r']],
+    down:[['Badge lu : agent A-12',0,1],['Étiquette lue : PC-04',700,1],['GET /pc/PC-04/etat …',1300],['→ aucune réponse après 5 s',2800],['Sortie gardée en mémoire, envoyée plus tard',3000],['VERT/ROUGE en alternance · « vérification impossible », jamais « à jour »',3200,0,'b']]
+  };
+  document.querySelectorAll('[data-sc]').forEach(b=>b.addEventListener('click',()=>{
+    document.querySelectorAll('[data-sc]').forEach(x=>x.classList.toggle('ghost',x!==b));
+    clr();blog.textContent='';
+    SC[b.dataset.sc].forEach(([txt,ms,isRead,lamp])=>at(ms,()=>{blog.textContent+=txt+'\n';if(isRead)read();
+      if(lamp==='g'){G.classList.add('on');bz.textContent='♪ bip';}
+      if(lamp==='r'){R.classList.add('on');bz.textContent='♪ bip bip bip';}
+      if(lamp==='b'){let on=false;blinkIv=setInterval(()=>{on=!on;G.classList.toggle('on',on);R.classList.toggle('on',!on);},400);bz.textContent='♪ bip long';}
+    }));
+  }));
+  // état au repos : PC à jour
+  G.classList.add('on'); blog.textContent='Badge lu : agent A-12\nÉtiquette lue : PC-04\nGET /pc/PC-04/etat (HTTPS, jeton) …\n→ dernier rapport : il y a 8 min · version 13 = version publiée\nPOST /sorties → 201 enregistrée\nVERT · un bip';
+
+  /* ---------- outils graphiques ---------- */
+  function el(tag,attrs,parent,txt){const e=document.createElementNS(NS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);if(txt!==undefined)e.textContent=txt;if(parent)parent.appendChild(e);return e;}
+  function frame(svg,o){
+    svg.innerHTML='';const vb=svg.getAttribute('viewBox').split(/[ ,]+/).map(Number),W=vb[2],H=vb[3];
+    const m={l:o.ml||52,r:o.mr||20,t:o.mt||16,b:o.mb||42};
+    const X=v=>m.l+(v-o.x0)/(o.x1-o.x0)*(W-m.l-m.r), Y=v=>H-m.b-(v-o.y0)/(o.y1-o.y0)*(H-m.t-m.b);
+    o.xt.forEach(v=>{el('line',{x1:X(v),x2:X(v),y1:m.t,y2:H-m.b,class:'gr'},svg);el('text',{x:X(v),y:H-m.b+18,'text-anchor':'middle'},svg,o.xf?o.xf(v):v);});
+    o.yt.forEach(v=>{el('line',{x1:m.l,x2:W-m.r,y1:Y(v),y2:Y(v),class:'gr'},svg);el('text',{x:m.l-8,y:Y(v)+4,'text-anchor':'end'},svg,o.yf?o.yf(v):String(v).replace('.',','));});
+    el('line',{x1:m.l,x2:W-m.r,y1:H-m.b,y2:H-m.b,class:'ax'},svg);el('line',{x1:m.l,x2:m.l,y1:m.t,y2:H-m.b,class:'ax'},svg);
+    if(o.xl)el('text',{x:W-m.r,y:H-6,'text-anchor':'end'},svg,o.xl);
+    if(o.yl)el('text',{x:m.l+6,y:m.t+12},svg,o.yl);
+    return {X,Y,W,H,m};
+  }
+  const path=(pts,X,Y)=>pts.map((p,i)=>(i?'L':'M')+X(p[0]).toFixed(1)+' '+Y(p[1]).toFixed(1)).join('');
+
+  /* ---------- physique ---------- */
+  const a=17.62,b=243.12;
+  const dew=(T,HR)=>{const g=Math.log(HR/100)+a*T/(b+T);return b*g/(a-g);};
+  const tAtt=(T0,Ta,Td,tau)=>T0>=Td?0:tau*Math.log((T0-Ta)/(Td-Ta));
+  const S={T0:$('#sT0'),Ta:$('#sTa'),HR:$('#sHR'),tau:$('#sTau'),uHR:$('#uHR'),uTau:$('#uTau')};
+  const V=()=>({T0:+S.T0.value,Ta:+S.Ta.value,HR:+S.HR.value,tau:+S.tau.value,uHR:+S.uHR.value,uTau:+S.uTau.value});
+
+  function drawMain(v,Td,t){
+    const svg=$('#cMain'),tmax=Math.max(60,Math.ceil(3.2*v.tau/10)*10);
+    const f=frame(svg,{x0:0,x1:tmax,y0:-15,y1:28,xt:Array.from({length:tmax/10+1},(_,i)=>i*10),yt:[-15,-10,-5,0,5,10,15,20,25],xl:'temps (min)',yl:'température (°C)',ml:46});
+    const {X,Y}=f;
+    if(t>0){el('rect',{x:X(0),y:Y(28),width:X(Math.min(t,tmax))-X(0),height:Y(-15)-Y(28),fill:'var(--dew-soft)'},svg);}
+    el('line',{x1:X(0),x2:X(tmax),y1:Y(v.Ta),y2:Y(v.Ta),stroke:'var(--warm)','stroke-width':1.5,'stroke-dasharray':'6 5'},svg);
+    el('text',{x:X(tmax)-4,y:Y(v.Ta)-6,'text-anchor':'end',fill:'var(--warm)',style:'fill:var(--warm)'},svg,'pièce '+fr(v.Ta)+' °C');
+    el('line',{x1:X(0),x2:X(tmax),y1:Y(Td),y2:Y(Td),stroke:'var(--dew)','stroke-width':2},svg);
+    el('text',{x:X(tmax)-4,y:Y(Td)+16,'text-anchor':'end',style:'fill:var(--dew);font-weight:700'},svg,'point de rosée '+fr(Td)+' °C');
+    const pts=[];for(let s=0;s<=tmax;s+=tmax/180)pts.push([s,v.Ta+(v.T0-v.Ta)*Math.exp(-s/v.tau)]);
+    const p=el('path',{d:path(pts,X,Y),fill:'none',stroke:'var(--cold)','stroke-width':3.5,'stroke-linecap':'round'},svg);
+    if(!reduce){const L=p.getTotalLength();p.style.strokeDasharray=L;p.style.strokeDashoffset=L;p.getBoundingClientRect();p.style.transition='stroke-dashoffset .9s ease-out';p.style.strokeDashoffset=0;}
+    el('circle',{cx:X(0),cy:Y(v.T0),r:5,fill:'var(--cold)'},svg);
+    el('text',{x:X(0)+8,y:Y(v.T0)+16,style:'fill:var(--cold);font-weight:700'},svg,'départ '+fr(v.T0,0)+' °C');
+    if(t>0&&t<=tmax){el('line',{x1:X(t),x2:X(t),y1:Y(Td),y2:Y(-15),stroke:'var(--ok)','stroke-width':2,'stroke-dasharray':'4 4'},svg);
+      el('circle',{cx:X(t),cy:Y(Td),r:6,fill:'var(--ok)'},svg);
+      el('text',{x:X(t)+8,y:Y(-15)-8,style:'fill:var(--ok);font-weight:700'},svg,'allumage possible : '+fr(t)+' min');
+      el('text',{x:X(Math.min(t,tmax)/2),y:Y(24),'text-anchor':'middle',style:'fill:var(--dew)'},svg,'risque de buée');}
+  }
+  function sticker(v){
+    const Ta=20,HR=50,Td=dew(Ta,HR),rows=[-10,-5,0,5];
+    $('#sticker').innerHTML='<h4><span class="pill v1">PC-04</span> Avant d\'allumer un PC froid</h4><table><thead><tr><th>PC sorti à</th><th>Attendre au moins</th></tr></thead><tbody>'+
+      rows.map(T=>{const t=tAtt(T,Ta,Td,v.tau)*1.5;return '<tr><td class="n">'+(T>0?'+':'')+T+' °C</td><td class="n"><b>'+(t<=0?'0':Math.ceil(t/5)*5)+' min</b></td></tr>';}).join('')+
+      '</tbody></table><p class="muted" style="font-size:.8rem;margin-top:8px">Pièce 20 °C / 50 %. τ intérieur = '+v.tau+' min, marge +50 %. Arrondi aux 5 min supérieures. <span class="pill ex">exemple</span></p>';
+  }
+  function upd(){
+    const v=V(),Td=dew(v.Ta,v.HR),t=tAtt(v.T0,v.Ta,Td,v.tau);
+    $('#oT0').textContent=fr(v.T0,0)+' °C';$('#oTa').textContent=fr(v.Ta)+' °C';$('#oHR').textContent=v.HR+' %';$('#oTau').textContent=v.tau+' min';
+    $('#rTd').textContent=fr(Td)+' °C';$('#rT').textContent=t<=0?'0 min':fr(t)+' min';$('#r3').textContent=Math.round(3*v.tau)+' min';
+    drawMain(v,Td,t);
+    // incertitudes
+    $('#ouHR').textContent='± '+fr(v.uHR)+' %';$('#ouTau').textContent='± '+fr(v.uTau)+' min';
+    const TdHi=dew(v.Ta,Math.min(99,v.HR+v.uHR)),TdLo=dew(v.Ta,Math.max(1,v.HR-v.uHR));
+    const tHi=tAtt(v.T0,v.Ta,TdHi,v.tau+v.uTau),tLo=Math.max(0,tAtt(v.T0,v.Ta,TdLo,Math.max(1,v.tau-v.uTau)));
+    $('#uTdTxt').textContent=fr(TdLo)+' à '+fr(TdHi)+' °C';
+    $('#uTTxt').textContent=fr(tLo)+' à '+fr(tHi)+' min';
+    $('#uMsg').innerHTML='Valeur centrale : <b>'+fr(Math.max(0,t))+' min</b>. Pour la sécurité, on retient la borne haute (<b>'+fr(tHi)+' min</b>), puis on ajoute une marge.';
+    sticker(v);
+    const ein=$('#einkTxt');if(ein)ein.textContent='Attendre encore '+Math.max(0,Math.ceil(t))+' min';
+  }
+  Object.values(S).forEach(s=>s.addEventListener('input',upd));
+  upd();
+
+  /* plaque témoin */
+  (function(){const fog=$('#fog'),tt=$('#plateT'),st=$('#plateS');let T=14;
+    function frameP(){const Td=dew(+S.Ta.value,+S.HR.value);T-=0.08;if(T<4)T=14;
+      tt.textContent=fr(T)+' °C';const wet=T<Td;fog.setAttribute('opacity',wet?Math.min(.75,(Td-T)/2.5):0);st.textContent=wet?'buée : sous '+fr(Td)+' °C':'sèche';
+      st.style.fill=wet?'var(--dew)':'var(--muted)';}
+    if(reduce){T=8;frameP();}else setInterval(frameP,120);
+  })();
+
+  /* données simulées (bruit pseudo-aléatoire fixe) */
+  let seed=7;const rnd=()=>{seed=(seed*16807)%2147483647;return seed/2147483647-.5;};
+  const Ta0=20.5,T00=2,tauS=22,data=[];
+  for(let t=0;t<=90;t+=3)data.push([t,Ta0+(T00-Ta0)*Math.exp(-t/tauS)+rnd()*0.3]);
+  function drawFit(show){
+    const svg=$('#cFit'),pts=data.filter(p=>Ta0-p[1]>1).map(p=>[p[0],Math.log(Ta0-p[1])]);
+    const f=frame(svg,{x0:0,x1:60,y0:0,y1:3.2,xt:[0,10,20,30,40,50,60],yt:[0,1,2,3],xl:'t (min)',yl:'ln(Ta − T)',ml:40});
+    pts.forEach((p,i)=>{const c=el('circle',{cx:f.X(p[0]),cy:f.Y(p[1]),r:4,fill:'var(--accent)'},svg);if(!reduce){c.style.opacity=0;c.style.transition='opacity .2s '+(i*0.03)+'s';requestAnimationFrame(()=>c.style.opacity=1);}});
+    const n=pts.length,mx=pts.reduce((s,p)=>s+p[0],0)/n,my=pts.reduce((s,p)=>s+p[1],0)/n;
+    const sl=pts.reduce((s,p)=>s+(p[0]-mx)*(p[1]-my),0)/pts.reduce((s,p)=>s+(p[0]-mx)**2,0),ic=my-sl*mx;
+    const ssr=pts.reduce((s,p)=>s+(p[1]-(ic+sl*p[0]))**2,0),sst=pts.reduce((s,p)=>s+(p[1]-my)**2,0),r2=1-ssr/sst;
+    if(show){const xe=Math.min(60,(0-ic)/sl);const ln=el('line',{x1:f.X(0),y1:f.Y(ic),x2:f.X(xe),y2:f.Y(ic+sl*xe),stroke:'var(--ko)','stroke-width':2.5},svg);
+      if(!reduce){const L=Math.hypot(f.X(xe)-f.X(0),f.Y(ic+sl*xe)-f.Y(ic));ln.style.strokeDasharray=L;ln.style.strokeDashoffset=L;ln.getBoundingClientRect();ln.style.transition='stroke-dashoffset .8s';ln.style.strokeDashoffset=0;}
+      el('text',{x:f.X(30),y:f.Y(2.6),style:'fill:var(--ko);font-weight:700'},svg,'pente = '+fr(sl,4)+' min⁻¹');
+      $('#fitTxt').innerHTML='Pente = '+fr(sl,4)+' min⁻¹ → <b>τ = −1/pente ≈ '+fr(-1/sl)+' min</b>. Coefficient R² = '+fr(r2,3)+' : les points sont bien alignés, le modèle convient. Ce τ est envoyé au simulateur.';
+      S.tau.value=Math.round(-1/sl);upd();
+    } else $('#fitTxt').textContent='Chaque point est une mesure (une toutes les 3 min ici, pour la lisibilité). Cliquez pour tracer la droite.';
+  }
+  drawFit(true);
+  $('#fitBtn').addEventListener('click',()=>drawFit(true));
+
+  /* comparaison coque / intérieur */
+  (function(){const svg=$('#cCmp');const f=frame(svg,{x0:0,x1:80,y0:0,y1:22,xt:[0,20,40,60,80],yt:[0,5,10,15,20],xl:'t (min)',yl:'°C',ml:36});
+    const Td=dew(20.5,50);
+    el('line',{x1:f.X(0),x2:f.X(80),y1:f.Y(Td),y2:f.Y(Td),stroke:'var(--dew)','stroke-width':1.5,'stroke-dasharray':'5 4'},svg);
+    el('text',{x:f.X(79),y:f.Y(Td)-5,'text-anchor':'end',style:'fill:var(--dew)'},svg,'rosée');
+    seed=11;
+    [[14,'var(--cold)','coque'],[26,'var(--warm)','intérieur']].forEach(([tau,col,lab])=>{
+      const model=[];for(let t=0;t<=80;t+=1)model.push([t,20.5+(2-20.5)*Math.exp(-t/tau)]);
+      el('path',{d:path(model,f.X,f.Y),fill:'none',stroke:col,'stroke-width':2},svg);
+      for(let t=0;t<=80;t+=4)el('circle',{cx:f.X(t),cy:f.Y(20.5+(2-20.5)*Math.exp(-t/tau)+rnd()*0.5),r:3,fill:col},svg);
+      const tt=tau*Math.log((2-20.5)/(Td-20.5));el('text',{x:f.X(tt)+6,y:f.Y(Td)+(lab==='coque'?-14:22),style:'fill:'+col+';font-weight:700'},svg,lab+' : '+fr(tt,0)+' min');
+    });
+  })();
+
+  /* RFID */
+  (function(){const svg=$('#cRfid');const f=frame(svg,{x0:0,x1:3,y0:0,y1:6,xt:[],yt:[0,1,2,3,4,5,6],yl:'distance max (cm)',ml:36,mb:58});
+    const D=[['normale','à l\'air',4.6,.3,'var(--accent)'],['normale','sur le PC',0.6,.4,'var(--ko)'],['anti-métal','sur le PC',3.4,.3,'var(--ok)']];
+    D.forEach((d,i)=>{const x=f.X(i+.5),w=70,y=f.Y(d[2]);
+      const r=el('rect',{x:x-w/2,y:f.Y(0),width:w,height:0,fill:d[4],rx:4},svg);
+      const set=()=>{r.setAttribute('y',y);r.setAttribute('height',f.Y(0)-y);};
+      if(reduce)set();else{r.style.transition='all .8s';setTimeout(set,100+i*150);}
+      el('line',{x1:x,x2:x,y1:f.Y(d[2]+d[3]),y2:f.Y(d[2]-d[3]),stroke:'var(--ink)','stroke-width':1.5},svg);
+      el('line',{x1:x-8,x2:x+8,y1:f.Y(d[2]+d[3]),y2:f.Y(d[2]+d[3]),stroke:'var(--ink)','stroke-width':1.5},svg);
+      el('line',{x1:x-8,x2:x+8,y1:f.Y(d[2]-d[3]),y2:f.Y(d[2]-d[3]),stroke:'var(--ink)','stroke-width':1.5},svg);
+      el('text',{x:x,y:y-10,'text-anchor':'middle',class:'lab'},svg,fr(d[2])+' cm');
+      el('text',{x:x,y:f.H-38,'text-anchor':'middle',class:'lab'},svg,d[0]);
+      el('text',{x:x,y:f.H-22,'text-anchor':'middle'},svg,d[1]);
+    });
+  })();
+})();
+</script>

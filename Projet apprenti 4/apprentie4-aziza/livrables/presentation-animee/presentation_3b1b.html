@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Projet E6 – Des PC de maintenance à jour</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=STIX+Two+Text:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#121417;--fg:#ECECEC;--dim:#8E959D;--blue:#58C4DD;--teal:#5CD0B3;--green:#83C167;--yellow:#FFE36E;--gold:#F0AC5F;--red:#FC6255;--purple:#B189C6;--grid:#2A2F35}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--fg);overflow:hidden;font-family:'STIX Two Text',Georgia,serif}
+#stage{position:absolute;left:50%;top:50%;width:1920px;height:1080px;transform-origin:center center}
+.slide{position:absolute;inset:0;padding:110px 140px;opacity:0;pointer-events:none;transition:opacity .5s}
+.slide.active{opacity:1;pointer-events:auto}
+h1{font-size:96px;font-weight:600;margin:0;line-height:1.05}
+h2{font-size:64px;font-weight:400;margin:0 0 40px;color:var(--fg)}
+h2 .k{color:var(--yellow)}
+p,li{font-size:38px;line-height:1.35;margin:0}
+.mono{font-family:'JetBrains Mono',monospace}
+.dim{color:var(--dim)} .blue{color:var(--blue)} .yellow{color:var(--yellow)} .green{color:var(--green)} .red{color:var(--red)} .teal{color:var(--teal)} .gold{color:var(--gold)}
+[data-s]{opacity:0;transition:opacity .7s ease, transform .7s ease}
+[data-s].on{opacity:1}
+.rise{transform:translateY(24px)} .rise.on{transform:none}
+.write{clip-path:inset(0 100% 0 0);transition:clip-path 1.3s ease,opacity .2s}
+.write.on{clip-path:inset(0 0 0 0)}
+.draw{stroke-dasharray:var(--len);stroke-dashoffset:var(--len);transition:stroke-dashoffset 1.6s ease}
+.on .draw,.draw.on{stroke-dashoffset:0}
+svg text{font-family:'STIX Two Text',Georgia,serif;fill:var(--fg)}
+.box{fill:none;stroke-width:3}
+.badge{display:inline-block;border:2px solid var(--yellow);color:var(--yellow);padding:10px 26px;border-radius:40px;font-size:30px}
+.card{border:2px solid var(--grid);border-radius:18px;padding:30px 36px}
+#hud{position:fixed;left:0;right:0;bottom:0;height:5px;background:#1d2126}
+#bar{height:100%;width:0;background:var(--blue);transition:width .4s}
+#num{position:fixed;right:18px;bottom:14px;font:14px 'JetBrains Mono',monospace;color:var(--dim)}
+#help{position:fixed;left:18px;bottom:14px;font:13px 'JetBrains Mono',monospace;color:#5a6169}
+#fs{position:fixed;right:16px;top:14px;background:none;border:1px solid #3a4048;color:var(--dim);font:13px 'JetBrains Mono',monospace;padding:6px 10px;border-radius:6px;cursor:pointer}
+#notes{position:fixed;left:50%;bottom:30px;transform:translateX(-50%);width:min(900px,92vw);background:#1b1f24ee;border:1px solid #3a4048;border-radius:10px;padding:16px 20px;font:17px/1.5 Georgia,serif;color:#d8d8d8;display:none}
+input[type=range]{width:420px;accent-color:var(--yellow)}
+.ctl{font-size:30px;display:flex;align-items:center;gap:24px;margin:10px 0}
+.ctl span.v{font-family:'JetBrains Mono',monospace;color:var(--yellow);width:150px}
+#hashIn{font:34px 'JetBrains Mono',monospace;background:#1b1f24;color:var(--fg);border:2px solid var(--grid);border-radius:10px;padding:10px 18px;width:760px}
+.hex{font:30px 'JetBrains Mono',monospace;letter-spacing:1px;word-break:break-all;line-height:1.4}
+.hex b{color:var(--red);font-weight:600}
+.pulse{animation:pulse 1.6s ease-in-out infinite}
+@keyframes pulse{50%{opacity:.35}}
+.seq rect{transition:fill .3s}
+</style>
+</head>
+<body>
+<div id="stage">
+
+<!-- 0 TITRE -->
+<section class="slide" id="s-titre" data-notes="Je présente mon projet E6. Le besoin vient de mon entreprise, la réalisation se fait au lycée sur une maquette, avec des données fictives.">
+  <p class="dim" style="font-size:30px">BTS CIEL option A · Épreuve E6 « Valorisation de la donnée et cybersécurité » · Session 2027</p>
+  <div style="height:120px"></div>
+  <h1 class="write" data-s="0">Des PC de maintenance à jour,</h1>
+  <h1 class="write" data-s="0" style="color:var(--blue)">des documents archivés,</h1>
+  <h1 class="write" data-s="0" style="color:var(--yellow)">un parc tracé.</h1>
+  <div style="height:60px"></div>
+  <p data-s="0" class="rise">Aziza · service de maintenance des équipements de télécommande</p>
+  <div style="height:40px"></div>
+  <span class="badge" data-s="0">Besoin issu de l'entreprise · réalisation au lycée</span>
+  <svg width="560" height="240" viewBox="0 0 700 300" style="position:absolute;right:110px;bottom:100px" aria-label="Dix PC qui se valident un par un">
+    <g id="titlePCs"></g>
+  </svg>
+</section>
+
+<!-- 1 QUESTION -->
+<section class="slide" id="s-question" data-notes="Tout le projet part d'une seule question. Puis le contexte : dix PC portables, Internet seulement par le téléphone, des fichiers centralisés sur SharePoint. Et les deux besoins du tuteur.">
+  <p class="dim" style="font-size:32px">La question</p>
+  <div style="height:30px"></div>
+  <h1 class="write" data-s="0" style="font-size:72px;font-weight:400">Comment être sûr qu'un PC qui part en intervention<br>a <span class="yellow">la bonne version</span> de ses fichiers ?</h1>
+  <div style="height:90px"></div>
+  <div style="display:flex;gap:40px">
+    <div class="card rise" data-s="1" style="flex:1"><p class="blue" style="font-size:52px">≈ 10</p><p>PC portables Windows 11, emportés en intervention</p></div>
+    <div class="card rise" data-s="1" style="flex:1"><p class="gold" style="font-size:52px">4G</p><p>Internet seulement par le partage de connexion du téléphone</p></div>
+    <div class="card rise" data-s="1" style="flex:1"><p class="teal" style="font-size:52px">SharePoint</p><p>paramètres, procédures et programmes centralisés</p></div>
+  </div>
+  <div style="height:50px"></div>
+  <p data-s="2" class="rise"><span class="yellow">Besoin 1</span> : tenir ces PC à jour. &nbsp; <span class="blue">Besoin 2</span> : archiver les documents de modification.</p>
+</section>
+
+<!-- 2 PROBLEME -->
+<section class="slide" id="s-probleme" data-notes="Imaginons : la version 3 est publiée à 8 heures. Certains PC la reçoivent, d'autres non, d'autres sont éteints. Tous ont des fichiers, mais lesquels peuvent partir ?">
+  <h2>Le problème, <span class="k">en image</span></h2>
+  <svg width="1640" height="760" viewBox="0 0 1640 760" aria-label="Une version publiée qui n'arrive pas sur tous les PC">
+    <g data-s="0">
+      <rect class="box draw" x="40" y="300" width="300" height="150" rx="16" stroke="var(--teal)"/>
+      <text x="190" y="365" text-anchor="middle" font-size="36">Dépôt</text>
+      <text x="190" y="412" text-anchor="middle" font-size="30" fill="var(--dim)">SharePoint</text>
+    </g>
+    <g data-s="1"><text x="190" y="225" text-anchor="middle" font-size="34" fill="var(--yellow)">v3 publiée à 8 h</text>
+      <circle cx="190" cy="375" r="110" fill="none" stroke="var(--yellow)" stroke-width="3" class="pulse"/></g>
+    <g id="probPCs"></g>
+    <g data-s="3"><text x="820" y="730" text-anchor="middle" font-size="42" fill="var(--yellow)">Tous ont des fichiers. Lesquels peuvent partir ?</text></g>
+  </svg>
+</section>
+
+<!-- 3 EMPREINTE -->
+<section class="slide" id="s-hash" data-notes="Premier principe : avoir un fichier ne prouve pas qu'il est le bon. On calcule son empreinte SHA-256. Modifiez un seul caractère : l'empreinte change entièrement. Le calcul est fait en direct dans la page.">
+  <p class="dim" style="font-size:30px">Principe 1</p>
+  <h2>Avoir un fichier <span class="k">ne prouve pas</span> qu'il est le bon</h2>
+  <div class="rise" data-s="0" style="display:flex;align-items:center;gap:40px">
+    <input id="hashIn" value="seuil_alarme = 42" spellcheck="false" aria-label="Contenu du fichier">
+    <svg width="260" height="90" viewBox="0 0 260 90" aria-hidden="true"><path class="draw" d="M10 45 H220 M200 25 L225 45 L200 65" stroke="var(--dim)" stroke-width="3" fill="none"/></svg>
+    <div class="card" style="padding:18px 30px;border-color:var(--blue)"><span class="blue" style="font-size:40px">SHA-256</span></div>
+  </div>
+  <div style="height:40px"></div>
+  <div data-s="1" class="rise"><p class="dim" style="font-size:28px">Empreinte du fichier officiel</p><div class="hex" id="hashRef"></div></div>
+  <div style="height:36px"></div>
+  <div data-s="2" class="rise"><p class="dim" style="font-size:28px">Empreinte du fichier présent sur le PC <span class="yellow">(modifiez le texte ci-dessus)</span></p><div class="hex" id="hashCur"></div></div>
+  <div style="height:40px"></div>
+  <p data-s="3" class="rise">Un seul caractère change → <span class="red">l'empreinte change entièrement</span>. On compare donc chaque fichier au <span class="yellow">catalogue</span>.</p>
+</section>
+
+<!-- 4 SIGNATURE -->
+<section class="slide" id="s-sign" data-notes="Deuxième principe : le réseau n'est pas de confiance, surtout en 4G sur Internet. Si quelqu'un remplace un fichier en route, la vérification échoue. La confiance vient de la signature du catalogue, pas du chemin.">
+  <p class="dim" style="font-size:30px">Principe 2</p>
+  <h2>Le réseau <span class="k">n'est pas de confiance</span></h2>
+  <svg width="1640" height="620" viewBox="0 0 1640 620" aria-label="Le catalogue signé traverse un réseau non fiable ; un fichier remplacé est refusé">
+    <g data-s="0">
+      <rect class="box draw" x="20" y="200" width="300" height="170" rx="16" stroke="var(--yellow)"/>
+      <text x="170" y="270" text-anchor="middle" font-size="36">Référent</text>
+      <text x="170" y="320" text-anchor="middle" font-size="28" fill="var(--yellow)">signe le catalogue</text>
+      <ellipse cx="820" cy="285" rx="300" ry="150" fill="none" stroke="var(--dim)" stroke-width="3" stroke-dasharray="10 10"/>
+      <text x="820" y="275" text-anchor="middle" font-size="40" fill="var(--dim)">4G · Internet</text>
+      <text x="820" y="325" text-anchor="middle" font-size="28" fill="var(--dim)">chemin inconnu</text>
+      <rect class="box draw" x="1320" y="200" width="300" height="170" rx="16" stroke="var(--blue)"/>
+      <text x="1470" y="270" text-anchor="middle" font-size="36">PC</text>
+      <text x="1470" y="320" text-anchor="middle" font-size="28" fill="var(--blue)">vérifie</text>
+      <path id="pSign" d="M320 285 H1320" stroke="var(--grid)" stroke-width="3" fill="none"/>
+    </g>
+    <g data-s="1"><rect width="46" height="34" rx="6" fill="var(--green)"><animateMotion dur="3s" repeatCount="indefinite"><mpath href="#pSign"/></animateMotion></rect>
+      <text x="1470" y="430" text-anchor="middle" font-size="34" fill="var(--green)">✓ signature valide</text></g>
+    <g data-s="2"><rect width="46" height="34" rx="6" fill="var(--red)"><animateMotion dur="3s" begin="1.5s" repeatCount="indefinite"><mpath href="#pSign"/></animateMotion></rect>
+      <text x="820" y="490" text-anchor="middle" font-size="32" fill="var(--red)">un fichier remplacé en route…</text>
+      <text x="1470" y="480" text-anchor="middle" font-size="34" fill="var(--red)">✗ refusé</text></g>
+  </svg>
+  <p data-s="3" class="write" style="font-size:46px">confiance = <span class="yellow">signature du catalogue</span>, pas le chemin suivi</p>
+</section>
+
+<!-- 5 PC ETEINT -->
+<section class="slide" id="s-borne" data-notes="Troisième principe : un PC éteint ne peut rien affirmer. La borne ne lit pas le PC : elle lit le dernier rapport envoyé au serveur. Et si le serveur ne répond pas, on n'affiche jamais vert.">
+  <p class="dim" style="font-size:30px">Principe 3</p>
+  <h2>Un PC éteint <span class="k">ne peut rien affirmer</span></h2>
+  <p class="rise" data-s="0">La borne de sortie lit le <span class="yellow">dernier rapport</span> enregistré sur le serveur, jamais le PC lui-même.</p>
+  <div style="height:60px"></div>
+  <div style="display:flex;flex-direction:column;gap:34px">
+    <div class="rise" data-s="1" style="display:flex;align-items:center;gap:40px"><svg width="90" height="90" aria-hidden="true"><circle cx="45" cy="45" r="38" fill="var(--green)"/></svg><p style="width:820px">rapport récent <span class="dim">et</span> version publiée</p><p class="green">sortie enregistrée</p></div>
+    <div class="rise" data-s="2" style="display:flex;align-items:center;gap:40px"><svg width="90" height="90" aria-hidden="true"><circle cx="45" cy="45" r="38" fill="var(--red)"/></svg><p style="width:820px">rapport ancien <span class="dim">ou</span> version dépassée</p><p class="red">mettre à jour d'abord</p></div>
+    <div class="rise" data-s="3" style="display:flex;align-items:center;gap:40px"><svg width="90" height="90" aria-hidden="true"><circle cx="45" cy="45" r="38" fill="var(--green)"><animate attributeName="fill" values="#83C167;#FC6255;#83C167" dur="1.2s" repeatCount="indefinite"/></circle></svg><p style="width:820px">serveur muet</p><p class="yellow">vérification impossible</p></div>
+  </div>
+  <div style="height:60px"></div>
+  <p data-s="4" class="write" style="font-size:46px">Par défaut : <span class="red">jamais « à jour »</span>.</p>
+</section>
+
+<!-- 6 TELECHARGER PEU -->
+<section class="slide" id="s-diff" data-notes="Quatrième principe : sur le terrain, le réseau manque. On ne télécharge que les fichiers modifiés, la reprise après coupure est automatique, et rien n'est activé avant vérification complète.">
+  <p class="dim" style="font-size:30px">Principe 4</p>
+  <h2>Sur le terrain, <span class="k">le réseau manque</span></h2>
+  <svg width="1640" height="640" viewBox="0 0 1640 640" aria-label="Seuls les fichiers modifiés sont téléchargés, avec reprise après coupure">
+    <g id="files" data-s="0"></g>
+    <g data-s="1"><text x="0" y="330" font-size="34" fill="var(--yellow)">3 fichiers modifiés sur 24 : on ne télécharge qu'eux</text></g>
+    <g data-s="2">
+      <text x="0" y="420" font-size="30" fill="var(--dim)">copie complète</text>
+      <rect x="320" y="395" width="1200" height="34" rx="6" fill="var(--grid)"/>
+      <text x="0" y="490" font-size="30" fill="var(--dim)">fichiers modifiés</text>
+      <rect x="320" y="465" width="150" height="34" rx="6" fill="var(--yellow)"/>
+    </g>
+    <g data-s="3">
+      <text x="0" y="580" font-size="30" fill="var(--dim)">coupure 4G</text>
+      <rect x="320" y="555" width="1200" height="34" rx="6" fill="none" stroke="var(--grid)" stroke-width="2"/>
+      <rect id="dlbar" x="320" y="555" width="0" height="34" rx="6" fill="var(--blue)"/>
+      <text id="dltxt" x="1540" y="582" font-size="28" fill="var(--blue)" text-anchor="end"></text>
+    </g>
+  </svg>
+</section>
+
+<!-- 7 VERSIONS -->
+<section class="slide" id="s-versions" data-notes="Cinquième principe : chaque version a une valeur. On n'écrase jamais. La version en vigueur part sur les PC ; l'historique complet forme l'archive, le deuxième besoin du tuteur. Une proposition d'un technicien passe par le chef avant de devenir une version signée.">
+  <p class="dim" style="font-size:30px">Principe 5</p>
+  <h2>Chaque version <span class="k">a une valeur</span></h2>
+  <svg width="1640" height="700" viewBox="0 0 1640 700" aria-label="Pile de versions : la plus récente part sur les PC, les autres forment l'archive">
+    <g data-s="0">
+      <rect class="box draw" x="80" y="460" width="380" height="80" rx="10" stroke="var(--dim)"/><text x="270" y="512" text-anchor="middle" font-size="34" fill="var(--dim)">v1</text>
+      <rect class="box draw" x="80" y="360" width="380" height="80" rx="10" stroke="var(--dim)"/><text x="270" y="412" text-anchor="middle" font-size="34" fill="var(--dim)">v2</text>
+      <rect class="box draw" x="80" y="260" width="380" height="80" rx="10" stroke="var(--dim)"/><text x="270" y="312" text-anchor="middle" font-size="34" fill="var(--dim)">v3</text>
+    </g>
+    <g data-s="1"><rect class="box draw" x="80" y="160" width="380" height="80" rx="10" stroke="var(--yellow)"/><text x="270" y="212" text-anchor="middle" font-size="34" fill="var(--yellow)">v4 · en vigueur</text>
+      <path class="draw" d="M470 200 H760" stroke="var(--yellow)" stroke-width="3" fill="none"/><text x="800" y="212" font-size="36" fill="var(--yellow)">→ part sur les PC</text></g>
+    <g data-s="2"><path class="draw" d="M500 270 Q560 400 500 530" stroke="var(--blue)" stroke-width="3" fill="none"/><text x="560" y="420" font-size="36" fill="var(--blue)">→ forment l'archive (qui, quand, pourquoi, quel équipement)</text></g>
+    <g data-s="3">
+      <text x="80" y="640" font-size="32" fill="var(--teal)">V2 : proposition d'un technicien → zone séparée → le chef valide → nouvelle version signée</text>
+    </g>
+  </svg>
+</section>
+
+<!-- 8 ARCHITECTURE -->
+<section class="slide" id="s-archi" data-notes="L'architecture se construit à partir des principes. Le serveur Ubuntu du lycée joue le rôle du SharePoint. Le référent publie le kit signé. Les PC se mettent à jour par un lien 4G simulé. La borne et le tableau de bord lisent l'état sur le serveur.">
+  <h2>L'architecture <span class="k">découle des principes</span></h2>
+  <svg width="1640" height="800" viewBox="0 0 1640 800" aria-label="Architecture : référent, serveur Ubuntu, lien 4G, PC, borne, tableau de bord">
+    <defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#8E959D"/></marker></defs>
+    <g data-s="0"><rect class="box draw" x="620" y="40" width="400" height="160" rx="16" stroke="var(--blue)"/>
+      <text x="820" y="105" text-anchor="middle" font-size="38">Serveur Ubuntu</text><text x="820" y="155" text-anchor="middle" font-size="27" fill="var(--blue)">rôle du SharePoint · archive</text></g>
+    <g data-s="1"><rect class="box draw" x="40" y="40" width="380" height="160" rx="16" stroke="var(--yellow)"/>
+      <text x="230" y="105" text-anchor="middle" font-size="36">Référent</text><text x="230" y="155" text-anchor="middle" font-size="27" fill="var(--yellow)">prépare et signe le kit</text>
+      <path class="draw" d="M420 120 H612" stroke="#8E959D" stroke-width="3" fill="none" marker-end="url(#ar)"/><text x="516" y="100" text-anchor="middle" font-size="24" fill="var(--dim)">publie</text></g>
+    <g data-s="2"><rect class="box draw" x="620" y="330" width="400" height="130" rx="16" stroke="var(--gold)"/>
+      <text x="820" y="385" text-anchor="middle" font-size="34">Partage de connexion 4G</text><text x="820" y="430" text-anchor="middle" font-size="26" fill="var(--gold)">simulé : PC Ubuntu + tc netem</text>
+      <path id="pDown1" class="draw" d="M820 200 V322" stroke="#8E959D" stroke-width="3" fill="none" marker-end="url(#ar)" marker-start="url(#ar)"/>
+      <rect class="box draw" x="620" y="590" width="400" height="160" rx="16" stroke="var(--fg)"/>
+      <text x="820" y="655" text-anchor="middle" font-size="36">PC de maintenance</text><text x="820" y="705" text-anchor="middle" font-size="27" fill="var(--dim)">agent PowerShell : vérifie, bascule</text>
+      <path id="pDown2" class="draw" d="M820 460 V582" stroke="#8E959D" stroke-width="3" fill="none" marker-end="url(#ar)" marker-start="url(#ar)"/>
+      <circle r="10" fill="var(--yellow)"><animateMotion dur="1.2s" repeatCount="indefinite" path="M820 205 V325"/></circle><circle r="10" fill="var(--yellow)"><animateMotion dur="1.2s" begin="0.6s" repeatCount="indefinite" path="M820 465 V585"/></circle></g>
+    <g data-s="3"><rect class="box draw" x="40" y="330" width="380" height="160" rx="16" stroke="var(--green)"/>
+      <text x="230" y="395" text-anchor="middle" font-size="36">Borne de sortie</text><text x="230" y="445" text-anchor="middle" font-size="27" fill="var(--green)">ESP32 + RFID, au bureau</text>
+      <path class="draw" d="M420 410 H520 V170 H612" stroke="#8E959D" stroke-width="3" fill="none" marker-end="url(#ar)"/><text x="536" y="300" font-size="24" fill="var(--dim)">Wi-Fi</text></g>
+    <g data-s="4"><rect class="box draw" x="1220" y="40" width="380" height="160" rx="16" stroke="var(--teal)"/>
+      <text x="1410" y="105" text-anchor="middle" font-size="36">Tableau de bord</text><text x="1410" y="155" text-anchor="middle" font-size="27" fill="var(--teal)">état du parc, export Excel</text>
+      <path class="draw" d="M1020 120 H1212" stroke="#8E959D" stroke-width="3" fill="none" marker-end="url(#ar)"/>
+      <rect class="box" x="1220" y="330" width="380" height="130" rx="16" stroke="var(--dim)" stroke-dasharray="10 8"/>
+      <text x="1410" y="385" text-anchor="middle" font-size="32" fill="var(--dim)">SharePoint réel</text><text x="1410" y="428" text-anchor="middle" font-size="26" fill="var(--dim)">extension</text>
+      <path d="M1220 395 H1028" stroke="#8E959D" stroke-width="3" fill="none" stroke-dasharray="10 8" marker-end="url(#ar)"/></g>
+  </svg>
+</section>
+
+<!-- 9 AGENT -->
+<section class="slide" id="s-agent" data-notes="L'agent PowerShell suit huit étapes. La règle d'or : il ne remplace le kit actif que si tout le nouveau kit est vérifié, et il garde la version précédente. Trois paliers de sécurité vont de la simulation à l'automatique.">
+  <h2>L'agent PowerShell : <span class="k">vérifier avant d'installer</span></h2>
+  <svg width="1640" height="420" viewBox="0 0 1640 420" aria-label="Huit étapes de l'agent qui s'allument l'une après l'autre">
+    <g id="agentSteps" data-s="0"></g>
+  </svg>
+  <p data-s="1" class="write" style="font-size:44px">Le kit actif n'est remplacé <span class="yellow">que si tout est vérifié</span> ; la version précédente reste prête.</p>
+  <div style="height:60px"></div>
+  <div style="display:flex;gap:40px">
+    <div class="card rise" data-s="2" style="flex:1;border-color:var(--blue)"><p class="blue">Simulation</p><p class="dim" style="font-size:30px">affiche ce qu'il ferait</p></div>
+    <div class="card rise" data-s="2" style="flex:1;border-color:var(--gold)"><p class="gold">Confirmation</p><p class="dim" style="font-size:30px">l'agent accepte (paramètres, programmes)</p></div>
+    <div class="card rise" data-s="2" style="flex:1;border-color:var(--green)"><p class="green">Automatique</p><p class="dim" style="font-size:30px">documents seulement</p></div>
+  </div>
+</section>
+
+<!-- 10 SCENARIO -->
+<section class="slide" id="s-karim" data-notes="Un cas concret. La borne affiche rouge parce que le dernier rapport est ancien. Karim active le partage de connexion, l'agent met à jour, envoie son rapport, et la borne passe au vert.">
+  <h2>Un matin, <span class="k">Karim part en intervention</span></h2>
+  <svg width="1640" height="760" viewBox="0 0 1640 760" aria-label="Chronologie de 8 h 00 à 8 h 08">
+    <path class="draw" data-s="0" d="M60 200 H1600" stroke="var(--dim)" stroke-width="3" fill="none"/>
+    <g id="karim"></g>
+  </svg>
+</section>
+
+<!-- 11 PHYSIQUE -->
+<section class="slide" id="s-phys" data-notes="Expérience principale de physique. La surface du PC suit un modèle du premier ordre. Le point de rosée de l'air vient de la formule de Magnus. Le croisement donne le temps d'attente avant d'allumer. Les curseurs montrent l'effet de τ, de la température de départ et de l'humidité ; τ sera mesuré sur le banc.">
+  <h2>Physique : <span class="k">quand peut-on allumer un PC froid ?</span></h2>
+  <div style="display:flex;gap:60px">
+    <svg id="plot" width="1000" height="640" viewBox="0 0 1000 640" aria-label="Courbe de réchauffement du PC et point de rosée">
+      <g data-s="0" id="axes"></g>
+      <path id="curve" class="draw" data-s="1" stroke="var(--yellow)" stroke-width="5" fill="none"/>
+      <g data-s="2"><line id="dew" stroke="var(--teal)" stroke-width="4" stroke-dasharray="14 10"/><text id="dewTxt" font-size="28" fill="var(--teal)"></text></g>
+      <g data-s="3"><line id="tline" stroke="var(--red)" stroke-width="3" stroke-dasharray="6 8"/><circle id="tdot" r="11" fill="var(--red)"/><text id="tTxt" font-size="30" fill="var(--red)"></text></g>
+    </svg>
+    <div style="flex:1">
+      <p class="write" data-s="1" style="font-size:34px"><i>T</i>(<i>t</i>) = <i>T</i><sub>a</sub> + (<i>T</i><sub>0</sub> − <i>T</i><sub>a</sub>) e<sup>−<i>t</i>/τ</sup></p>
+      <div style="height:26px"></div>
+      <p class="write" data-s="2" style="font-size:34px"><span class="teal"><i>T</i><sub>d</sub></span> : point de rosée (Magnus)</p>
+      <div style="height:26px"></div>
+      <p class="write" data-s="3" style="font-size:34px"><i>t</i><sub>att</sub> = τ · ln[(<i>T</i><sub>0</sub> − <i>T</i><sub>a</sub>) / (<i>T</i><sub>d</sub> − <i>T</i><sub>a</sub>)]</p>
+      <div style="height:40px"></div>
+      <div data-s="4" class="rise">
+        <div class="ctl">τ <input type="range" id="rTau" min="10" max="60" value="30" aria-label="tau"><span class="v" id="vTau"></span></div>
+        <div class="ctl">T₀ <input type="range" id="rT0" min="-10" max="8" value="0" aria-label="température de départ"><span class="v" id="vT0"></span></div>
+        <div class="ctl">HR <input type="range" id="rHR" min="30" max="80" value="50" aria-label="humidité"><span class="v" id="vHR"></span></div>
+        <p class="dim" style="font-size:24px;margin-top:10px">Pièce à 20 °C. τ est une valeur d'exemple : il sera mesuré sur le banc.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 12 RFID -->
+<section class="slide" id="s-rfid" data-notes="Deuxième expérience, plus courte : le lecteur et l'étiquette sont deux circuits accordés à 13,56 MHz. Le métal du PC les désaccorde, la réponse baisse et la portée chute. On mesure la portée selon l'orientation et le support pour choisir l'étiquette. Les courbes montrent l'allure, pas des mesures.">
+  <h2>Physique : <span class="k">où coller l'étiquette RFID ?</span></h2>
+  <div style="display:flex;gap:80px">
+    <svg width="780" height="560" viewBox="0 0 780 560" aria-label="Allure de la courbe de résonance avec et sans métal">
+      <line x1="60" y1="480" x2="740" y2="480" stroke="var(--dim)" stroke-width="2"/><line x1="60" y1="480" x2="60" y2="40" stroke="var(--dim)" stroke-width="2"/>
+      <text x="740" y="525" text-anchor="end" font-size="26" fill="var(--dim)">fréquence</text><text x="70" y="50" font-size="26" fill="var(--dim)">réponse</text>
+      <line x1="400" y1="480" x2="400" y2="60" stroke="var(--grid)" stroke-width="2" stroke-dasharray="6 6"/><text x="400" y="525" text-anchor="middle" font-size="26" fill="var(--yellow)">13,56 MHz</text>
+      <path class="draw" data-s="0" id="res1" stroke="var(--blue)" stroke-width="5" fill="none"/>
+      <path class="draw" data-s="1" id="res2" stroke="var(--red)" stroke-width="5" fill="none"/>
+      <text data-s="0" x="420" y="90" font-size="28" fill="var(--blue)">étiquette seule</text>
+      <text data-s="1" x="553" y="222" text-anchor="middle" font-size="28" fill="var(--red)">sur le métal</text>
+    </svg>
+    <div style="flex:1">
+      <p class="write" data-s="0" style="font-size:44px"><i>f</i> = 1 / (2π √(<i>LC</i>))</p>
+      <div style="height:40px"></div>
+      <p class="rise" data-s="1">Le métal proche <span class="red">désaccorde</span> le circuit : la réponse à 13,56 MHz baisse, la portée chute.</p>
+      <div style="height:40px"></div>
+      <p class="rise" data-s="2"><span class="yellow">Mesures</span> : distance de lecture et son incertitude, selon l'orientation, l'étiquette (normale ou anti-métal) et le support.</p>
+      <div style="height:30px"></div>
+      <p class="dim rise" data-s="2" style="font-size:26px">Courbes : allure qualitative, pas des mesures.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 13 GESTION -->
+<section class="slide" id="s-gestion" data-notes="Environ 150 heures. La V1 est obligatoire et tient en environ 116 heures en comptant la relecture du code généré par IA. La V2, l'archivage avec les propositions, est visée. Le boîtier de sacoche passe en extension. Les revues de projet servent de jalons.">
+  <h2>150 heures : <span class="k">une V1 solide, une V2 utile</span></h2>
+  <svg width="1640" height="560" viewBox="0 0 1640 560" aria-label="Barres des heures : V1 116 h, V2 26 h, marge 8 h">
+    <g data-s="0"><text x="0" y="110" font-size="36" fill="var(--green)">V1 · obligatoire</text><rect class="grow" id="b1" x="360" y="70" height="60" rx="8" fill="var(--green)"/><text id="t1" y="112" font-size="34" fill="var(--green)"></text>
+      <text x="360" y="170" font-size="26" fill="var(--dim)">serveur et catalogue signé, agent PowerShell, borne, tableau de bord, réseau, physique, recette</text></g>
+    <g data-s="1"><text x="0" y="290" font-size="36" fill="var(--yellow)">V2 · visée</text><rect id="b2" x="360" y="250" height="60" rx="8" fill="var(--yellow)"/><text id="t2" y="292" font-size="34" fill="var(--yellow)"></text>
+      <text x="360" y="350" font-size="26" fill="var(--dim)">archivage, propositions des techniciens validées par le chef</text></g>
+    <g data-s="2"><text x="0" y="470" font-size="36" fill="var(--dim)">Extensions</text>
+      <text x="360" y="470" font-size="30" fill="var(--dim)">boîtier de sacoche e-ink · lien SharePoint réel · installation de programmes</text></g>
+  </svg>
+  <p data-s="3" class="rise">Jalons : la V2 ne démarre que si la V1 est validée à la <span class="yellow">revue 2</span>.</p>
+</section>
+
+<!-- 14 E6 -->
+<section class="slide" id="s-e6" data-notes="Je relie le projet aux compétences évaluées en E6 : C01, C03, C08, C10, la physique, et le volet donnée et cybersécurité. Chaque compétence a ses preuves.">
+  <h2>Ce que le projet démontre <span class="k">pour l'E6</span></h2>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:34px">
+    <div class="card rise" data-s="0"><p class="blue">C01 · Communiquer</p><p class="dim" style="font-size:30px">recueil du besoin, mode opératoire, dossier, soutenance</p></div>
+    <div class="card rise" data-s="0"><p class="yellow">C03 · Gérer un projet</p><p class="dim" style="font-size:30px">V1 / V2 / extensions, revues, risques, journal d'usage de l'IA</p></div>
+    <div class="card rise" data-s="1"><p class="green">C08 · Coder</p><p class="dim" style="font-size:30px">PowerShell, API Python, programme ESP32, tests T01 à T13</p></div>
+    <div class="card rise" data-s="1"><p class="gold">C10 · Exploiter un réseau</p><p class="dim" style="font-size:30px">DHCP, DNS, NTP, HTTPS, captures, lien 4G simulé</p></div>
+    <div class="card rise" data-s="2"><p class="teal">Physique</p><p class="dim" style="font-size:30px">étalonnage, modèle du 1er ordre, point de rosée, incertitudes</p></div>
+    <div class="card rise" data-s="2"><p class="red">Donnée et cybersécurité</p><p class="dim" style="font-size:30px">empreintes, signature, traçabilité, archive</p></div>
+  </div>
+</section>
+
+<!-- 15 FIN -->
+<section class="slide" id="s-fin" data-notes="Je conclus sur le message principal, puis je lance la démonstration : PC obsolète mis à jour, fichier altéré refusé, borne rouge puis verte.">
+  <div style="height:200px"></div>
+  <h1 class="write" data-s="0" style="font-size:80px;font-weight:400">Un PC ne part plus sans <span class="yellow">le bon kit</span>,</h1>
+  <h1 class="write" data-s="0" style="font-size:80px;font-weight:400">et chaque version reste <span class="blue">retrouvable</span>.</h1>
+  <div style="height:120px"></div>
+  <p class="rise" data-s="1" style="font-size:46px">Place à la démonstration et à vos questions.</p>
+</section>
+
+</div>
+<div id="hud"><div id="bar"></div></div>
+<div id="num"></div>
+<div id="help">→ / espace : avancer · ← : reculer · N : notes</div>
+<button id="fs" type="button">plein écran</button>
+<div id="notes"></div>
+
+<script>
+// ---------- SHA-256 (compact, synchrone)
+function sha256(ascii){function r(v,a){return(v>>>a)|(v<<(32-a))}var mp=Math.pow,mw=mp(2,32),res='',words=[],bl=ascii.length*8,h=sha256.h=sha256.h||[],k=sha256.k=sha256.k||[],pl=k.length,isC={};for(var c=2;pl<64;c++){if(!isC[c]){for(var i=0;i<313;i+=c)isC[i]=c;h[pl]=(mp(c,.5)*mw)|0;k[pl++]=(mp(c,1/3)*mw)|0}}h=h.slice(0,8);ascii+='\x80';while(ascii.length%64-56)ascii+='\x00';for(i=0;i<ascii.length;i++){var j=ascii.charCodeAt(i);words[i>>2]|=j<<((3-i)%4)*8}words[words.length]=((bl/mw)|0);words[words.length]=(bl);for(j=0;j<words.length;){var w=words.slice(j,j+=16),oh=h;h=h.slice(0,8);for(i=0;i<64;i++){var w15=w[i-15],w2=w[i-2],a=h[0],e=h[4],t1=h[7]+(r(e,6)^r(e,11)^r(e,25))+((e&h[5])^((~e)&h[6]))+k[i]+(w[i]=(i<16)?w[i]:(w[i-16]+(r(w15,7)^r(w15,18)^(w15>>>3))+w[i-7]+(r(w2,17)^r(w2,19)^(w2>>>10)))|0),t2=(r(a,2)^r(a,13)^r(a,22))+((a&h[1])^(a&h[2])^(h[1]&h[2]));h=[(t1+t2)|0].concat(h);h[4]=(h[4]+t1)|0}for(i=0;i<8;i++)h[i]=(h[i]+oh[i])|0}for(i=0;i<8;i++){for(j=3;j+1;j--){var b=(h[i]>>(j*8))&255;res+=((b<16)?0:'')+b.toString(16)}}return res}
+function utf8(s){return unescape(encodeURIComponent(s))}
+const NS='http://www.w3.org/2000/svg';
+function el(tag,attrs,parent,text){const e=document.createElementNS(NS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);if(text!=null)e.textContent=text;if(parent)parent.appendChild(e);return e}
+
+// ---------- contenus générés
+(function(){const g=document.getElementById('titlePCs');for(let i=0;i<10;i++){const x=(i%5)*135+20,y=Math.floor(i/5)*140+30;const grp=el('g',{'data-s':'0'},g);grp.style.transitionDelay=(1.2+i*0.15)+'s';el('rect',{x,y,width:100,height:64,rx:6,fill:'none',stroke:'#58C4DD','stroke-width':3},grp);el('path',{d:`M${x-10} ${y+74} H${x+110}`,stroke:'#58C4DD','stroke-width':3},grp);el('text',{x:x+50,y:y+45,'text-anchor':'middle','font-size':34,fill:'#83C167'},grp,'✓')}})();
+(function(){const g=document.getElementById('probPCs');const st=['ok','ok','v2','ok','off','ok','ok','v2','ok','off'];for(let i=0;i<10;i++){const c=i%5,r=Math.floor(i/5);const x=640+c*190,y=170+r*250;const s=st[i];
+  const col=s==='ok'?'#58C4DD':s==='v2'?'#F0AC5F':'#5a6169';
+  const base=el('g',{'data-s':'0'},g);el('rect',{x,y,width:130,height:84,rx:8,fill:'none',stroke:'#8E959D','stroke-width':3},base);el('path',{d:`M${x-12} ${y+96} H${x+142}`,stroke:'#8E959D','stroke-width':3},base);
+  const lab=el('g',{'data-s':'2'},g);lab.style.transitionDelay=(i*0.12)+'s';el('rect',{x,y,width:130,height:84,rx:8,fill:col,'fill-opacity':0.25,stroke:col,'stroke-width':3},lab);el('text',{x:x+65,y:y+56,'text-anchor':'middle','font-size':32,fill:col},lab,s==='ok'?'v3':s==='v2'?'v2':'?');
+  const ln=el('path',{class:'draw',d:`M340 375 L${x} ${y+42}`,stroke:'#FFE36E','stroke-width':1.5,fill:'none','stroke-opacity':0.5},el('g',{'data-s':'1'},g))}})();
+(function(){const g=document.getElementById('files');const mod=[4,13,19];for(let i=0;i<24;i++){const x=i*66,y=60;const m=mod.includes(i);el('rect',{x,y,width:50,height:66,rx:6,fill:'none',stroke:'#8E959D','stroke-width':2.5},g);if(m){const h=el('g',{'data-s':'1'},g);el('rect',{x,y,width:50,height:66,rx:6,fill:'#FFE36E','fill-opacity':0.85},h)}}el('text',{x:0,y:200,'font-size':30,fill:'#8E959D'},g,'le kit : 24 fichiers')})();
+(function(){const g=document.getElementById('agentSteps');const t=['Déclencher','Lire le catalogue','Vérifier la signature','Comparer les empreintes','Télécharger le modifié','Vérifier le dossier','Basculer, garder N-1','Envoyer le rapport'];
+  t.forEach((s,i)=>{const c=i%4,r=Math.floor(i/4);const x=c*410,y=r*190+20;const grp=el('g',{},g);const rc=el('rect',{x,y,width:370,height:140,rx:14,fill:'none',stroke:'#2A2F35','stroke-width':3},grp);
+    el('animate',{attributeName:'stroke',values:'#2A2F35;#FFE36E;#2A2F35',dur:'8s',begin:(i)+'s',repeatCount:'indefinite'},rc);
+    el('text',{x:x+30,y:y+60,'font-size':34,fill:'#FFE36E'},grp,String(i+1));el('text',{x:x+80,y:y+60,'font-size':30},grp,s.split(' ').slice(0,2).join(' '));el('text',{x:x+80,y:y+100,'font-size':30},grp,s.split(' ').slice(2).join(' '))})})();
+(function(){const g=document.getElementById('karim');const ev=[['8 h 00','v3 publiée','PC resté éteint','#8E959D'],['8 h 01','badge à la borne','voyant rouge','#FC6255'],['8 h 03','partage 4G activé','catalogue vérifié','#F0AC5F'],['8 h 04','fichiers modifiés','téléchargés, vérifiés','#58C4DD'],['8 h 07','rapport envoyé','au serveur','#5CD0B3'],['8 h 08','retour à la borne','voyant vert','#83C167']];
+  ev.forEach((e,i)=>{const x=120+i*280;const grp=el('g',{'data-s':String(i+1)},g);el('circle',{cx:x,cy:200,r:22,fill:e[3]},grp);el('text',{x,y:130,'text-anchor':'middle','font-size':38,fill:'#FFE36E'},grp,e[0]);el('text',{x,y:290,'text-anchor':'middle','font-size':30},grp,e[1]);el('text',{x,y:335,'text-anchor':'middle','font-size':28,fill:e[3]},grp,e[2])});
+  const w=el('g',{'data-s':'7'},g);el('text',{x:820,y:560,'text-anchor':'middle','font-size':40,fill:'#FC6255'},w,'Serveur muet → « vérification impossible », jamais « à jour ».')})();
+// courbes RFID (allure)
+(function(){function lor(f0,a,w){let d='';for(let x=60;x<=740;x+=4){const f=(x-400)/340;const y=480-a/(1+((f-f0)/w)**2);d+=(x===60?'M':'L')+x+' '+y.toFixed(1)+' '}return d}document.getElementById('res1').setAttribute('d',lor(0,400,0.12));document.getElementById('res2').setAttribute('d',lor(0.45,230,0.2))})();
+
+// ---------- physique
+const P={W:1000,H:640,x0:90,x1:960,y0:560,y1:40,tmax:120,Tmin:-10,Tmax:25};
+const X=t=>P.x0+(P.x1-P.x0)*t/P.tmax, Y=T=>P.y0-(P.y0-P.y1)*(T-P.Tmin)/(P.Tmax-P.Tmin);
+(function(){const g=document.getElementById('axes');el('line',{x1:P.x0,y1:P.y0,x2:P.x1,y2:P.y0,stroke:'#8E959D','stroke-width':2},g);el('line',{x1:P.x0,y1:P.y0,x2:P.x0,y2:P.y1,stroke:'#8E959D','stroke-width':2},g);
+  for(let t=0;t<=120;t+=20){el('text',{x:X(t),y:P.y0+36,'text-anchor':'middle','font-size':24,fill:'#8E959D'},g,t)}for(let T=-10;T<=25;T+=5){el('text',{x:P.x0-14,y:Y(T)+8,'text-anchor':'end','font-size':24,fill:'#8E959D'},g,T);el('line',{x1:P.x0,y1:Y(T),x2:P.x1,y2:Y(T),stroke:'#2A2F35','stroke-width':1},g)}
+  el('text',{x:P.x1,y:P.y0+70,'text-anchor':'end','font-size':26,fill:'#8E959D'},g,'temps (min)');el('text',{x:P.x0+10,y:P.y1-6,'font-size':26,fill:'#8E959D'},g,'température (°C)')})();
+function phys(){const tau=+rTau.value,T0=+rT0.value,HR=+rHR.value,Ta=20,a=17.62,b=243.12;const g=Math.log(HR/100)+a*Ta/(b+Ta),Td=b*g/(a-g);
+  let d='';for(let t=0;t<=P.tmax;t+=1){const T=Ta+(T0-Ta)*Math.exp(-t/tau);d+=(t?'L':'M')+X(t).toFixed(1)+' '+Y(T).toFixed(1)+' '}curve.setAttribute('d',d);
+  dew.setAttribute('x1',P.x0);dew.setAttribute('x2',P.x1);dew.setAttribute('y1',Y(Td));dew.setAttribute('y2',Y(Td));dewTxt.setAttribute('x',P.x1-10);dewTxt.setAttribute('y',Y(Td)+40);dewTxt.setAttribute('text-anchor','end');dewTxt.textContent='Td ≈ '+Td.toFixed(1).replace('.',',')+' °C';
+  const tw=T0>=Td?0:tau*Math.log((T0-Ta)/(Td-Ta));tline.setAttribute('x1',X(tw));tline.setAttribute('x2',X(tw));tline.setAttribute('y1',P.y0);tline.setAttribute('y2',Y(Td));tdot.setAttribute('cx',X(tw));tdot.setAttribute('cy',Y(Td));
+  tTxt.setAttribute('x',X(tw)+18);tTxt.setAttribute('y',Y(Td)-22);tTxt.textContent=T0>=Td?'pas d\'attente':'t_att ≈ '+Math.round(tw)+' min';
+  vTau.textContent=tau+' min';vT0.textContent=T0+' °C';vHR.textContent=HR+' %';
+  const len=curve.getTotalLength();curve.style.setProperty('--len',len)}
+['rTau','rT0','rHR'].forEach(id=>document.getElementById(id).addEventListener('input',()=>{curve.style.transition='none';phys()}));
+
+// ---------- empreinte
+const REF='seuil_alarme = 42';
+function hashes(){const ref=sha256(utf8(REF)),cur=sha256(utf8(hashIn.value));hashRef.textContent=ref;let h='';for(let i=0;i<64;i++)h+=cur[i]===ref[i]?cur[i]:'<b>'+cur[i]+'</b>';hashCur.innerHTML=h}
+hashIn.addEventListener('input',hashes);hashIn.addEventListener('keydown',e=>e.stopPropagation());hashes();
+
+// ---------- moteur
+const slides=[...document.querySelectorAll('.slide')];let cur=0,step=0;
+function initDraw(root){root.querySelectorAll('.draw').forEach(p=>{if(p.id==='curve')return;try{const L=p.getTotalLength();p.style.setProperty('--len',Math.ceil(L)+1)}catch(e){}})}
+function maxStep(s){let m=0;s.querySelectorAll('[data-s]').forEach(e=>m=Math.max(m,+e.dataset.s));return m}
+const hooks={
+  's-hash':st=>{if(st<2){hashIn.value=REF;hashes()}else if(st===2&&hashIn.value===REF){hashIn.value='seuil_alarme = 43';hashes()}},
+  's-diff':st=>{const bar=document.getElementById('dlbar'),tx=document.getElementById('dltxt');clearInterval(window._dl);bar.setAttribute('width',0);tx.textContent='';
+    if(st>=3){let p=0,cut=false;window._dl=setInterval(()=>{if(p>=60&&!cut){cut=true;tx.textContent='coupure… reprise';tx.setAttribute('fill','#FC6255');setTimeout(()=>{tx.setAttribute('fill','#58C4DD')},1200);clearInterval(window._dl);setTimeout(()=>{window._dl=setInterval(()=>{p+=1;bar.setAttribute('width',12*p);if(p>=100){clearInterval(window._dl);tx.textContent='✓ vérifié, puis activé';tx.setAttribute('fill','#83C167')}},30)},1400);return}p+=1;bar.setAttribute('width',12*p);tx.textContent=p+' %'},30)}},
+  's-gestion':st=>{const k=1200/150;const b1=document.getElementById('b1'),b2=document.getElementById('b2');[[b1,'t1',116,st>=0],[b2,'t2',26,st>=1]].forEach(([b,t,v,on])=>{b.style.transition='width 1.4s ease';b.setAttribute('width',on?v*k:0);const tt=document.getElementById(t);tt.setAttribute('x',360+(on?v*k:0)+20);tt.textContent=on?'≈ '+v+' h':''})},
+  's-phys':()=>{}
+};
+function render(){slides.forEach((s,i)=>s.classList.toggle('active',i===cur));const s=slides[cur];
+  s.querySelectorAll('[data-s]').forEach(e=>e.classList.toggle('on',+e.dataset.s<=step));
+  if(hooks[s.id])hooks[s.id](step,s);
+  document.getElementById('bar').style.width=((cur+1)/slides.length*100)+'%';
+  document.getElementById('num').textContent=(cur+1)+' / '+slides.length;
+  const n=document.getElementById('notes');n.textContent=s.dataset.notes||'';
+  try{history.replaceState(null,'','#'+s.id)}catch(e){}}
+function go(i,st){const s=slides[i];s.querySelectorAll('[data-s]').forEach(e=>e.classList.remove('on'));if(s.id==='s-phys'){curve.style.transition='';phys()}
+  if(s.id==='s-gestion'){['b1','b2'].forEach(id=>{const b=document.getElementById(id);b.style.transition='none';b.setAttribute('width',0)})}
+  cur=i;step=st;slides.forEach((x,j)=>x.classList.toggle('active',j===cur));requestAnimationFrame(()=>requestAnimationFrame(render))}
+function next(){if(step<maxStep(slides[cur])){step++;render()}else if(cur<slides.length-1)go(cur+1,0)}
+function prev(){if(step>0){step--;render()}else if(cur>0)go(cur-1,maxStep(slides[cur-1]))}
+document.addEventListener('keydown',e=>{if(['ArrowRight','PageDown',' ','Enter'].includes(e.key)){e.preventDefault();next()}else if(['ArrowLeft','PageUp','Backspace'].includes(e.key)){e.preventDefault();prev()}else if(e.key==='n'||e.key==='N'){const n=document.getElementById('notes');n.style.display=n.style.display==='block'?'none':'block'}});
+document.getElementById('stage').addEventListener('click',e=>{if(e.target.closest('input'))return;next()});
+document.getElementById('fs').addEventListener('click',()=>{try{const p=document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen();if(p&&p.catch)p.catch(()=>{})}catch(e){}});
+function fit(){const sc=Math.min(innerWidth/1920,innerHeight/1080);document.getElementById('stage').style.transform=`translate(-50%,-50%) scale(${sc})`}
+addEventListener('resize',fit);fit();
+slides.forEach(initDraw);phys();
+const start=slides.findIndex(s=>'#'+s.id===location.hash);go(start>0?start:0,0);
+</script>
+</body>
+</html>

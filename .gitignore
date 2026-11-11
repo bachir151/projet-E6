@@ -1,0 +1,8 @@
+# Traces de téléchargement Windows
+*:Zone.Identifier
+*Zone.Identifier
+# Dépendances et fichiers temporaires
+node_modules/
+deck_brut.pptx
+*.tmp
+__pycache__/
