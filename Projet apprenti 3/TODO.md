@@ -27,7 +27,7 @@
 - Mettre de côté : E1–E3 (wattmètre, bilan énergétique), sauf E1 court si la sobriété revient.
 
 ## À faire
-- [ ] Présentation 3Blue1Brown (PowerPoint ou Beamer) : dernier des 3 documents
+- [x] Présentation 3Blue1Brown : `livrables/powerpoint-3b1b/Projet_E6_Lorenzo_3b1b.pptx` (30 diapositives, animations au clic, notes) ; à relire dans PowerPoint
 - [x] Dossier V2 (PDF) : **pas de mise à jour** (décision du 11/11 : seuls la page HTML, le formulaire et la présentation sont demandés)
 - [x] Propositions ci-dessus validées (11/11)
 - [x] Formulaire académique rempli (version corrigée et enrichie) : `fiche-academique/Fiche_presentation_E6_Lorenzo.docx` et `.pdf` (13 p.). À compléter à la main : adresse, site, téléphone, mail de l'entreprise ; nom et fonction du tuteur

@@ -12,7 +12,7 @@
 |---|---|---|---|
 | 1 Wassim | à faire | à faire | à faire |
 | 2 Yaksan | à faire (après les réponses du tuteur) | fait, à mettre à jour (recentrage, journal chaîné) | à faire |
-| 3 Lorenzo | fait (`livrables/page-html/poste-attentif.html`) | fait (`fiche-academique/`) | à faire |
+| 3 Lorenzo | fait (`livrables/page-html/poste-attentif.html`) | fait (`fiche-academique/`) | fait (`livrables/powerpoint-3b1b/`) |
 | 4 Aziza | fait (`livrables/pages-html/vue-ensemble.html`) | fait (`livrables/fiche-academique/`) | fait (`livrables/powerpoint-3b1b/`) |
 
 ## Choix communs

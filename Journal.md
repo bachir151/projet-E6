@@ -1,5 +1,11 @@
 # Journal de travail – Projets E6
 
+## Session du 11 novembre 2026 (suite) : présentation 3Blue1Brown de Lorenzo
+
+### Fait
+- `Projet apprenti 3/livrables/powerpoint-3b1b/Projet_E6_Lorenzo_3b1b.pptx` : 30 diapositives, 328 animations au clic, notes de l'orateur sur chaque diapositive. Plan : question d'ouverture → problème (« inactif ne veut pas dire absent ») → existant (deux tests, outils de l'administration) → solution (radar, machine à états) → journée de Martine → architecture → faux boîtier et vie privée → physique → valoriser la donnée (tableau de bord, essai R6) → parcours → conclusion. Reconstruire : `build.sh` (pptxgenjs + `apply_theme.js` + `animate.py`).
+- **Lorenzo a ses trois documents.** Le rendu a été contrôlé avec LibreOffice (aperçu statique) : à ouvrir dans PowerPoint pour vérifier les animations.
+
 ## Session du 11 novembre 2026 (suite) : les trois livrables par apprenti
 
 ### Décidé
