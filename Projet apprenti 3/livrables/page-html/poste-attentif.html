@@ -1,0 +1,949 @@
+<title>Poste attentif</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Mise en page : une longue page de présentation, sections numérotées dans l'ordre de l'oral ; scènes dessinées en SVG au centre de chaque section. */
+:root{
+  --bg:#f2f5f7; --surface:#ffffff; --surface-2:#e8eef2; --ink:#13202b; --muted:#566573; --line:#d3dde4;
+  --radar:#0b7a83; --radar-ink:#075a61; --radar-soft:#d4eeef;
+  --ok:#1e9a54; --warn:#e38b00; --bad:#d4443f; --off:#9aa6b0;
+  --screen:#fbfdff; --screen-line:#c9d6df; --screen-off:#1b2733; --desk:#b89d78; --desk-dark:#93795a;
+  --skin:#e9b48f; --agent:#2f5d8a; --usager:#8a5a9e; --chair:#5c6b78;
+  --f-display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --f-body:"Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --f-mono:"JetBrains Mono", ui-monospace, "Cascadia Mono", monospace;
+  --r:14px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0e161d; --surface:#15212b; --surface-2:#1c2a36; --ink:#e6eef3; --muted:#9db0bd; --line:#2a3b48;
+  --radar:#3cc3cc; --radar-ink:#7ee0e6; --radar-soft:#123a3e;
+  --ok:#3cc477; --warn:#f2a531; --bad:#f06a63; --off:#5f6e79;
+  --screen:#e9f1f6; --screen-line:#b5c6d1; --screen-off:#05090d; --desk:#8c7556; --desk-dark:#6e5a40;
+  --skin:#d9a17c; --agent:#5b8fc2; --usager:#b183c4; --chair:#7d8e9b; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0e161d; --surface:#15212b; --surface-2:#1c2a36; --ink:#e6eef3; --muted:#9db0bd; --line:#2a3b48;
+  --radar:#3cc3cc; --radar-ink:#7ee0e6; --radar-soft:#123a3e;
+  --ok:#3cc477; --warn:#f2a531; --bad:#f06a63; --off:#5f6e79;
+  --screen:#e9f1f6; --screen-line:#b5c6d1; --screen-off:#05090d; --desk:#8c7556; --desk-dark:#6e5a40;
+  --skin:#d9a17c; --agent:#5b8fc2; --usager:#b183c4; --chair:#7d8e9b; color-scheme:dark}
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:17px;line-height:1.6;
+  padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px))}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top, 0px);z-index:10;background:var(--bg)}
+.wrap{max-width:1080px;margin:0 auto}
+h1,h2,h3{font-family:var(--f-display);line-height:1.1;text-wrap:balance;margin:0}
+h2{font-size:clamp(1.7rem,3.6vw,2.5rem);font-weight:800;letter-spacing:-.01em}
+h3{font-size:1.15rem;font-weight:700}
+p{margin:0}
+.lead{font-size:1.12rem;color:var(--muted);max-width:62ch}
+.mono{font-family:var(--f-mono)}
+button{font:inherit;cursor:pointer}
+:focus-visible{outline:3px solid var(--radar);outline-offset:3px;border-radius:6px}
+
+/* navigation */
+.nav{position:sticky;top:env(safe-area-inset-top, 0px);z-index:9;background:color-mix(in srgb, var(--bg) 88%, transparent);
+  backdrop-filter:blur(8px);border-bottom:1px solid var(--line);margin:0 calc(-1 * max(16px, env(safe-area-inset-left, 0px)))}
+.nav .wrap{display:flex;gap:6px;overflow-x:auto;padding:10px max(16px, env(safe-area-inset-left, 0px));scrollbar-width:none}
+.nav a{flex:none;text-decoration:none;color:var(--muted);font-size:.86rem;padding:6px 11px;border-radius:999px;white-space:nowrap}
+.nav a b{font-family:var(--f-mono);font-weight:600;margin-right:5px;color:var(--radar)}
+.nav a.on{background:var(--radar-soft);color:var(--ink)}
+
+/* hero */
+.hero{display:grid;grid-template-columns:1.1fr .9fr;gap:32px;align-items:center;padding-block:48px 28px}
+.hero h1{font-size:clamp(2.6rem,7vw,5rem);font-weight:800;letter-spacing:-.025em}
+.hero h1 span{color:var(--radar)}
+.hero .kicker{font-family:var(--f-mono);font-size:.8rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:14px}
+.hero .thesis{font-size:clamp(1.2rem,2.4vw,1.5rem);margin-top:18px;max-width:30ch;font-weight:700}
+.hero .sub{margin-top:12px;color:var(--muted);max-width:52ch}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:20px}
+.chip{font-size:.82rem;padding:5px 11px;border-radius:999px;background:var(--surface);border:1px solid var(--line);color:var(--muted)}
+.hero-art{background:var(--surface);border:1px solid var(--line);border-radius:22px;padding:14px;min-width:0}
+
+/* sections */
+section.s{padding-block:64px 24px;scroll-margin-top:60px}
+.s-head{display:grid;grid-template-columns:auto 1fr;gap:6px 18px;align-items:baseline;margin-bottom:26px}
+.num{font-family:var(--f-mono);font-weight:600;font-size:.95rem;color:var(--radar);border:1.5px solid var(--radar);border-radius:8px;padding:2px 8px}
+.s-head .lead{grid-column:2}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:22px;min-width:0}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.btn{border:0;border-radius:10px;padding:10px 16px;background:var(--radar);color:var(--surface);font-weight:700}
+.btn.ghost{background:transparent;color:var(--ink);border:1.5px solid var(--line)}
+.btn:hover{filter:brightness(1.08)}
+.big-quote{font-family:var(--f-display);font-weight:800;font-size:clamp(1.6rem,4vw,2.6rem);line-height:1.15;margin-top:28px;max-width:22ch}
+.big-quote em{font-style:normal;color:var(--radar)}
+
+/* scène */
+.scene{width:100%;height:auto;display:block;max-width:760px;margin:0 auto}
+.scene .fade{transition:opacity .5s, transform .6s}
+.scene[data-agent="absent"] .agent{opacity:0;transform:translateX(-70px)}
+.scene[data-agent="present"] .paper, .scene[data-agent="absent"] .paper{opacity:0}
+.scene .agent .body{transform-box:fill-box;transform-origin:50% 100%;animation:breathe 3.6s ease-in-out infinite}
+@keyframes breathe{50%{transform:scaleY(1.035)}}
+.scene .scr{opacity:0;transition:opacity .4s}
+.scene[data-screen="open"] .scr-open, .scene[data-screen="locked"] .scr-locked, .scene[data-screen="install"] .scr-install{opacity:1}
+.scene .usager{opacity:0;transition:opacity .5s}
+.scene[data-usager="present"] .usager, .scene[data-usager="lean"] .usager{opacity:1}
+.scene .usager .lean{transform-box:view-box;transform-origin:560px 300px;transition:transform .6s}
+.scene[data-usager="lean"] .usager .lean{transform:rotate(-9deg)}
+.scene .sight{opacity:0;transition:opacity .4s}
+.scene[data-usager="lean"][data-screen="open"] .sight{opacity:1}
+.scene .radarbox{transition:opacity .4s}
+.scene[data-box="off"] .radarbox{opacity:0}
+.scene .led{fill:var(--off);transition:fill .3s}
+.scene[data-led="green"] .led{fill:var(--ok)} .scene[data-led="orange"] .led{fill:var(--warn);animation:blink .5s steps(2) infinite}
+.scene[data-led="red"] .led{fill:var(--bad)}
+@keyframes blink{50%{opacity:.25}}
+.scene .wave{fill:none;stroke:var(--radar);stroke-width:2;opacity:0}
+.scene:not([data-box="off"]) .wave{animation:wave 2.4s ease-out infinite}
+.scene .wave:nth-of-type(2){animation-delay:.8s} .scene .wave:nth-of-type(3){animation-delay:1.6s}
+@keyframes wave{0%{opacity:.85;transform:scale(.4)}100%{opacity:0;transform:scale(1.25)}}
+.scene .waves{transform-box:view-box;transform-origin:300px 223px}
+.scene .wave{transform-box:view-box;transform-origin:300px 223px}
+.scene .fake{opacity:0;transition:opacity .4s}
+.scene[data-fake="on"] .fake{opacity:1}
+.scene .bar{animation:prog 2.6s linear infinite;transform-box:fill-box;transform-origin:0 50%}
+@keyframes prog{0%{transform:scaleX(.05)}100%{transform:scaleX(1)}}
+
+/* 1 problème */
+.timer-row{display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:space-between;margin-bottom:10px}
+.timer{font-family:var(--f-mono);font-size:clamp(2rem,6vw,3rem);font-weight:600;font-variant-numeric:tabular-nums;color:var(--bad)}
+.timer small{display:block;font-family:var(--f-body);font-size:.85rem;color:var(--muted);font-weight:400}
+.cause{margin-top:22px;display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.conseq{border-left:4px solid var(--bad);padding:4px 0 4px 16px}
+.conseq.second{border-left-color:var(--warn)}
+.conseq .tag{font-family:var(--f-mono);font-size:.75rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+
+/* 2 cartes */
+.cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+@media (max-width:820px){.cards{grid-template-columns:1fr}}
+.flip{perspective:900px;border:0;background:none;padding:0;text-align:left;min-height:250px;color:inherit}
+.flip .in{position:relative;width:100%;height:100%;min-height:250px;transition:transform .6s;transform-style:preserve-3d}
+.flip .who{font-family:var(--f-mono);font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:var(--radar-ink)}
+.flip .back .plus,.flip .back .minus{font-size:.9rem;padding-left:22px;position:relative}
+.flip .back .plus::before{content:"✓";position:absolute;left:0;color:var(--ok);font-weight:700}
+.flip .back .minus::before{content:"✗";position:absolute;left:0;color:var(--bad);font-weight:700}
+.flip .back .lbl{font-family:var(--f-mono);font-size:.7rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.tabs button{border:1.5px solid var(--line);background:var(--surface);color:var(--muted);border-radius:12px;padding:10px 16px;font-weight:700}
+.tabs button span{font-family:var(--f-mono);font-size:.78rem;margin-left:6px;padding:1px 7px;border-radius:999px;background:var(--surface-2)}
+.tabs button[aria-selected="true"]{border-color:var(--radar);color:var(--ink);background:var(--radar-soft)}
+.fam-intro{color:var(--muted);margin-bottom:14px;max-width:70ch}
+.test td.c.p{color:var(--warn)}
+.bridge{margin-top:22px}
+.bridge svg{width:100%;height:auto;display:block;margin-top:10px}
+.flip.turned .in{transform:rotateY(180deg)}
+.flip .face{position:absolute;inset:0;backface-visibility:hidden;border-radius:var(--r);padding:16px;display:flex;flex-direction:column;gap:8px;border:1px solid var(--line)}
+.flip .front{background:var(--surface)}
+.flip .back{background:var(--surface-2);transform:rotateY(180deg)}
+.flip .hint{margin-top:auto;font-size:.78rem;color:var(--muted);font-family:var(--f-mono)}
+.flip .back .tag{font-family:var(--f-mono);font-size:.74rem;text-transform:uppercase;letter-spacing:.06em;color:var(--bad)}
+.flip h3{font-size:1.05rem}
+.flip p{font-size:.94rem}
+@media (prefers-reduced-motion: reduce){.flip .in{transition:none}}
+.test{margin-top:26px}
+.test table{width:100%;border-collapse:collapse;font-size:.95rem;min-width:560px}
+.test th,.test td{padding:10px 8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+.test th{font-size:.82rem;color:var(--muted);font-weight:700}
+.test td.c{text-align:center;font-weight:700;transition:background .3s,color .3s}
+.test td.c span{display:block;font-weight:400;font-size:.78rem;color:var(--muted)}
+.test td.c.y{color:var(--ok)} .test td.c.n{color:var(--bad)} .test td.c.wait{color:var(--off)}
+.test tr.radar td{background:var(--radar-soft)}
+.scroll-x{overflow-x:auto}
+
+/* 3 solution */
+.box-art .hot{cursor:pointer}
+.box-art .hot rect,.box-art .hot circle{transition:stroke-width .2s}
+.box-art .hot:hover rect,.box-art .hot:focus rect{stroke-width:3}
+.bubble{min-height:84px;margin-top:10px;padding:12px 14px;border-radius:12px;background:var(--radar-soft);font-size:.96rem}
+.bubble b{font-family:var(--f-display)}
+.actions{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:18px}
+.act{padding:16px;border-radius:var(--r);background:var(--surface);border:1px solid var(--line);display:flex;flex-direction:column;gap:6px}
+.act .lvl{font-family:var(--f-mono);font-size:.74rem;text-transform:uppercase;letter-spacing:.06em;color:var(--radar-ink)}
+.act.opt{border-style:dashed}
+.act.opt .lvl{color:var(--muted)}
+.rule{margin-top:18px;padding:16px 18px;border-radius:var(--r);border:2px solid var(--radar);font-weight:700}
+
+/* 4 scénario */
+.player{display:grid;grid-template-columns:1.2fr .8fr;gap:20px;align-items:start}
+.mode{display:inline-flex;border:1.5px solid var(--line);border-radius:999px;padding:3px;gap:3px;background:var(--surface)}
+.mode button{border:0;background:none;padding:6px 14px;border-radius:999px;color:var(--muted);font-weight:700;font-size:.9rem}
+.mode button[aria-pressed="true"]{background:var(--radar);color:var(--surface)}
+.mode button.sans[aria-pressed="true"]{background:var(--bad)}
+.clock{font-family:var(--f-mono);font-size:1.7rem;font-weight:600;font-variant-numeric:tabular-nums}
+.story h3{font-size:1.35rem;margin:4px 0 8px}
+.story .verdict{margin-top:12px;font-size:.9rem;font-weight:700;padding:6px 10px;border-radius:8px;display:inline-block}
+.verdict.good{background:color-mix(in srgb,var(--ok) 16%,transparent);color:var(--ok)}
+.verdict.badv{background:color-mix(in srgb,var(--bad) 16%,transparent);color:var(--bad)}
+.ctrl{display:flex;gap:10px;align-items:center;margin-top:14px;flex-wrap:wrap}
+.steps{display:flex;gap:6px;margin-top:14px;flex-wrap:wrap}
+.steps button{border:1.5px solid var(--line);background:var(--surface);color:var(--muted);border-radius:8px;padding:4px 9px;font-family:var(--f-mono);font-size:.8rem}
+.steps button.on{border-color:var(--radar);color:var(--ink);background:var(--radar-soft)}
+input[type=range]{width:100%;accent-color:var(--radar)}
+
+/* 5 architecture */
+.arch{width:100%;height:auto;display:block;min-width:720px}
+.arch .node rect{fill:var(--surface);stroke:var(--line);stroke-width:1.5;transition:stroke .2s}
+.arch .node.lor rect{stroke:var(--radar);stroke-width:2.2}
+.arch .node.lyc rect{stroke-dasharray:6 4}
+.arch .node{cursor:pointer}
+.arch .node:hover rect,.arch .node.sel rect{stroke:var(--radar-ink);stroke-width:3.2}
+.arch text{fill:var(--ink);font-family:var(--f-body)}
+.arch .t{font-family:var(--f-display);font-weight:700;font-size:16px}
+.arch .s{font-size:12.5px;fill:var(--muted)}
+.arch .link{fill:none;stroke:var(--muted);stroke-width:1.6}
+.arch .lbl{font-size:12px;fill:var(--muted)}
+.arch .pk{fill:var(--radar)}
+.arch .pk.alt{fill:var(--warn)}
+@media (prefers-reduced-motion: reduce){.arch .pk{display:none}}
+.legend{display:flex;gap:18px;flex-wrap:wrap;font-size:.88rem;color:var(--muted);margin-top:10px}
+.legend i{display:inline-block;width:22px;height:12px;border-radius:4px;margin-right:6px;vertical-align:-1px;border:2px solid var(--radar)}
+.legend i.lyc{border:2px dashed var(--muted)}
+.info{margin-top:14px}
+.info dl{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;margin:10px 0 0}
+.info dt{font-weight:700;color:var(--muted);font-size:.9rem}
+.info dd{margin:0}
+
+/* 6 sécurité */
+.switch{display:inline-flex;align-items:center;gap:10px;font-weight:700;cursor:pointer;user-select:none}
+.switch input{appearance:none;width:46px;height:26px;border-radius:999px;background:var(--off);position:relative;transition:background .2s;cursor:pointer;margin:0}
+.switch input::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:var(--surface);transition:left .2s}
+.switch input:checked{background:var(--ok)}
+.switch input:checked::after{left:23px}
+.log{font-family:var(--f-mono);font-size:.86rem;background:var(--surface-2);border-radius:10px;padding:12px 14px;min-height:150px;margin-top:12px;white-space:pre-wrap}
+.log .ok{color:var(--ok)} .log .bad{color:var(--bad)} .log .dim{color:var(--muted)}
+.prot{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin-top:18px}
+.prot div{padding:14px;border-radius:12px;border:1px solid var(--line);background:var(--surface);font-size:.94rem}
+.prot b{display:block;font-family:var(--f-display);margin-bottom:4px}
+
+/* 7 physique */
+.phys svg{width:100%;height:auto;display:block}
+.readout{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px}
+.readout div{background:var(--surface-2);border-radius:10px;padding:10px 12px}
+.readout small{display:block;color:var(--muted);font-size:.78rem}
+.readout b{font-family:var(--f-mono);font-size:1.05rem;font-variant-numeric:tabular-nums}
+.verdict-phys{margin-top:10px;font-weight:700}
+.formulas{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px;margin-top:18px}
+.formula{padding:14px;border-radius:12px;background:var(--surface);border:1px solid var(--line)}
+.formula .eq{font-family:var(--f-mono);font-size:1.05rem;color:var(--radar-ink);margin:4px 0}
+.formula p{font-size:.92rem;color:var(--muted)}
+.gauge{height:16px;border-radius:999px;background:var(--surface-2);overflow:hidden;margin:8px 0 4px;border:1px solid var(--line)}
+.gauge span{display:block;height:100%;width:.3%;min-width:4px;background:var(--ok)}
+.essais{margin-top:18px;display:grid;gap:8px}
+.essai{display:grid;grid-template-columns:56px 1fr;gap:12px;align-items:baseline;padding:10px 0;border-bottom:1px solid var(--line)}
+.essai b{font-family:var(--f-mono);color:var(--radar)}
+
+/* 8 vie privée */
+.priv{display:grid;grid-template-columns:1fr auto 1fr;gap:16px;align-items:stretch}
+.priv ul{margin:10px 0 0;padding-left:18px}
+.priv li{margin:4px 0}
+.priv .arrow{align-self:center;font-family:var(--f-mono);color:var(--muted);text-align:center;font-size:.85rem}
+.priv .keep{border-top:4px solid var(--radar)}
+.priv .send{border-top:4px solid var(--muted)}
+
+/* 9 parcours */
+.road{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.stage{padding:18px;border-radius:var(--r);background:var(--surface);border:1px solid var(--line)}
+.stage.v1{border-top:5px solid var(--radar)}
+.stage.v2{border-top:5px solid var(--agent)}
+.stage.ext{border-top:5px dashed var(--muted)}
+.stage .h{font-family:var(--f-mono);font-size:.8rem;color:var(--muted)}
+.stage ul{margin:8px 0 0;padding-left:18px;font-size:.95rem}
+.revues{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:16px}
+.revue{padding:12px 14px;border-radius:12px;background:var(--surface-2);font-size:.93rem}
+.revue b{font-family:var(--f-display);display:block}
+.hours{display:flex;height:22px;border-radius:999px;overflow:hidden;margin-top:18px;border:1px solid var(--line)}
+.hours span{display:flex;align-items:center;justify-content:center;font-size:.75rem;font-family:var(--f-mono);color:var(--surface);white-space:nowrap;overflow:hidden}
+
+/* 10 conclusion */
+.final{padding:34px;border-radius:22px;background:var(--surface);border:1px solid var(--line)}
+.final .phrase{font-family:var(--f-display);font-weight:800;font-size:clamp(1.5rem,3.6vw,2.3rem);line-height:1.15;max-width:26ch}
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:26px}
+.kpi b{display:block;font-family:var(--f-display);font-size:clamp(1.8rem,4.5vw,2.8rem);color:var(--radar);line-height:1}
+.kpi span{color:var(--muted);font-size:.95rem}
+footer{padding-block:40px 60px;color:var(--muted);font-size:.85rem}
+
+@media (max-width:820px){
+  .hero,.grid2,.player,.cause,.priv{grid-template-columns:1fr}
+  .grid3,.actions,.road,.revues,.kpis,.readout{grid-template-columns:1fr}
+  .priv .arrow{transform:rotate(90deg)}
+}
+@media (prefers-reduced-motion: reduce){
+  html{scroll-behavior:auto}
+  .scene *{animation:none!important;transition:none!important}
+}
+</style>
+
+<nav class="nav" aria-label="Sections">
+  <div class="wrap" id="navlinks">
+    <a href="#probleme"><b>1</b>Problème</a>
+    <a href="#existant"><b>2</b>Solutions existantes</a>
+    <a href="#solution"><b>3</b>Solution</a>
+    <a href="#martine"><b>4</b>Martine</a>
+    <a href="#architecture"><b>5</b>Architecture</a>
+    <a href="#securite"><b>6</b>Faux boîtier</a>
+    <a href="#physique"><b>7</b>Physique</a>
+    <a href="#vie-privee"><b>8</b>Vie privée</a>
+    <a href="#parcours"><b>9</b>Parcours</a>
+    <a href="#bilan"><b>10</b>En bref</a>
+  </div>
+</nav>
+
+<main class="wrap">
+
+<header class="hero">
+  <div>
+    <p class="kicker">BTS CIEL IR · Épreuve E6 · Apprenti 3 (Lorenzo)</p>
+    <h1>Poste <span>attentif</span></h1>
+    <p class="thesis">L'ordinateur sait enfin si quelqu'un est devant lui.</p>
+    <p class="sub">Un petit radar sous le bureau sent si l'agent est assis, même immobile. Quand il part, l'écran se bloque. Quand il n'est pas là, les installations se font sans le déranger.</p>
+    <div class="chips"><span class="chip">Radar 24 GHz</span><span class="chip">ESP32 + lumière</span><span class="chip">PowerShell</span><span class="chip">Serveur Python</span><span class="chip">Aucune caméra</span></div>
+  </div>
+  <div class="hero-art" id="heroScene" aria-label="Dessin : un agent assis, le radar sous le bureau envoie des ondes vers lui"></div>
+</header>
+
+<!-- 1 -->
+<section class="s" id="probleme">
+  <div class="s-head"><span class="num">1</span><h2>Le problème de départ</h2>
+    <p class="lead">Une administration avec un accueil du public. Sur les écrans, des dossiers confidentiels. Quand l'agent quitte son poste, l'ordinateur ne le sait pas.</p></div>
+  <div class="panel">
+    <div class="timer-row">
+      <div class="timer" id="timer">06:40<small>depuis que Martine a quitté son poste, écran toujours ouvert</small></div>
+      <button class="btn" id="replay1">Rejouer la scène</button>
+    </div>
+    <div id="scene1" aria-label="Dessin : l'agent est parti, l'écran est resté ouvert, un usager se penche pour lire"></div>
+    <p style="margin-top:10px;color:var(--muted);font-size:.95rem">Aujourd'hui, l'écran se bloque tout seul seulement après 10 minutes sans clavier ni souris. Pendant ce temps, l'usager au guichet peut lire.</p>
+  </div>
+  <div class="cause">
+    <div class="conseq"><p class="tag">Problème principal</p><h3>L'écran reste ouvert</h3><p>Des dossiers confidentiels restent visibles par le public, parfois pendant 10 minutes.</p></div>
+    <div class="conseq second"><p class="tag">Problème secondaire</p><h3>Les installations tombent mal</h3><p>Elles démarrent pendant que l'agent travaille, parfois devant un usager.</p></div>
+  </div>
+  <p class="big-quote">L'ordinateur voit si on touche le clavier. Il ne voit pas si on est là. <em>Inactif ne veut pas dire absent.</em></p>
+</section>
+
+<!-- 2 -->
+<section class="s" id="existant">
+  <div class="s-head"><span class="num">2</span><h2>Les solutions qui existent déjà</h2>
+    <p class="lead">L'administration est déjà bien équipée : une image toute prête pour chaque poste neuf, des règles imposées par l'annuaire, des serveurs qui distribuent logiciels et mises à jour. Ces outils font bien leur travail. Aucun ne sait si l'agent est devant son écran.</p></div>
+
+  <div class="tabs" role="tablist" aria-label="Familles de solutions">
+    <button role="tab" id="tabEcran" aria-selected="true" aria-controls="famEcran">Protéger l'écran <span>9</span></button>
+    <button role="tab" id="tabInstall" aria-selected="false" aria-controls="famInstall">Installer les logiciels <span>9</span></button>
+  </div>
+
+  <div id="famEcran" role="tabpanel" aria-labelledby="tabEcran">
+    <p class="fam-intro">Pour éviter qu'un écran reste ouvert quand l'agent part. Cliquez sur une carte : ce que la solution fait bien, et ce qui lui manque au guichet.</p>
+    <div class="cards" id="cardsEcran"></div>
+    <div class="panel test">
+      <div class="timer-row" style="margin-bottom:6px">
+        <div><h3>Le test des trois situations</h3><p style="color:var(--muted);font-size:.95rem">Une bonne solution doit réussir les trois.</p></div>
+        <button class="btn" data-run="testEcran">Relancer le test</button>
+      </div>
+      <div class="scroll-x"><table id="testEcran"></table></div>
+    </div>
+  </div>
+
+  <div id="famInstall" role="tabpanel" aria-labelledby="tabInstall" hidden>
+    <p class="fam-intro">Les outils du service informatique, du poste neuf à la mise à jour de tous les jours. Ils savent <strong>quoi</strong> installer et <strong>sur quels postes</strong>. Il leur manque <strong>quand</strong> : au bon moment pour l'agent.</p>
+    <div class="cards" id="cardsInstall"></div>
+    <div class="panel test">
+      <div class="timer-row" style="margin-bottom:6px">
+        <div><h3>Le test de la journée de Martine</h3><p style="color:var(--muted);font-size:.95rem">Une installation doit tomber quand Martine n'est pas là, sans la retenir le soir.</p></div>
+        <button class="btn" data-run="testInstall">Relancer le test</button>
+      </div>
+      <div class="scroll-x"><table id="testInstall"></table></div>
+    </div>
+  </div>
+
+  <div class="panel bridge">
+    <h3>Le boîtier ne remplace aucun de ces outils</h3>
+    <p style="color:var(--muted);margin-top:4px">Il leur apporte la seule information qui leur manque. Les outils de l'administration gardent la liste des logiciels et des postes ; le boîtier dit si l'agent est là.</p>
+    <div id="bridgeArt"></div>
+  </div>
+</section>
+
+<!-- 3 -->
+<section class="s" id="solution">
+  <div class="s-head"><span class="num">3</span><h2>La solution de Lorenzo</h2>
+    <p class="lead">Un boîtier sous le bureau, branché au PC par un câble USB. Il dit une seule chose, chaque seconde : « quelqu'un est là » ou « personne ». Le PC décide quoi faire.</p></div>
+  <div class="grid2">
+    <div class="panel box-art">
+      <h3>Le boîtier, pièce par pièce</h3>
+      <p style="color:var(--muted);font-size:.92rem">Touchez ou survolez une pièce.</p>
+      <div id="boxArt"></div>
+      <div class="bubble" id="bubble"><b>Le radar.</b> Il envoie une onde invisible et écoute l'écho. Il voit les tout petits mouvements de la respiration : il sait qu'une personne est assise, même si elle ne bouge pas.</div>
+    </div>
+    <div class="panel">
+      <h3>Comment le radar voit quelqu'un d'immobile</h3>
+      <div id="waveArt"></div>
+      <p style="font-size:.95rem;color:var(--muted);margin-top:8px">Quand on respire, la poitrine bouge de quelques millimètres. L'onde du radar fait 12,5 mm de long : ce petit mouvement suffit à changer l'écho. Le radar ne fait pas d'image, il mesure seulement ces changements.</p>
+    </div>
+  </div>
+  <div class="actions">
+    <div class="act"><span class="lvl">Version 1 · obligatoire</span><h3>Bloquer l'écran</h3><p>L'agent part : lumière orange 3 secondes, puis l'écran se bloque.</p></div>
+    <div class="act"><span class="lvl">Version 2 · visée</span><h3>Installer au bon moment</h3><p>L'agent est absent depuis 20 minutes : les logiciels prévus s'installent sans le déranger.</p></div>
+    <div class="act opt"><span class="lvl">En option</span><h3>Économiser l'énergie</h3><p>Le soir, un poste oublié allumé passe en veille, sans perdre le travail.</p></div>
+  </div>
+  <p class="rule">Règle d'or : si le boîtier tombe en panne ou est débranché, le blocage habituel de Windows après 10 minutes continue de protéger. Et rien ne ferme jamais le travail de l'agent.</p>
+</section>
+
+<!-- 4 -->
+<section class="s" id="martine">
+  <div class="s-head"><span class="num">4</span><h2>Une journée avec Martine</h2>
+    <p class="lead">Martine travaille à l'accueil. Suivez sa journée, avec puis sans le projet de Lorenzo.</p></div>
+  <div class="panel">
+    <div class="timer-row">
+      <div class="mode" role="group" aria-label="Avec ou sans le projet">
+        <button id="mAvec" aria-pressed="true">Avec le projet</button>
+        <button id="mSans" class="sans" aria-pressed="false">Sans le projet</button>
+      </div>
+      <div class="clock" id="clock">9 h 00</div>
+    </div>
+    <div class="player">
+      <div id="scene4" aria-live="off"></div>
+      <div class="story" aria-live="polite">
+        <p class="mono" id="stepNo" style="color:var(--muted);font-size:.85rem">Étape 1 sur 6</p>
+        <h3 id="stepTitle">Martine lit un dossier papier</h3>
+        <p id="stepText">Elle ne touche pas au clavier depuis 10 minutes. Le radar voit sa respiration : elle est là. Rien ne se passe.</p>
+        <span class="verdict good" id="stepVerdict">Écran ouvert, Martine travaille</span>
+      </div>
+    </div>
+    <div class="ctrl">
+      <button class="btn" id="play">Lecture</button>
+      <button class="btn ghost" id="prev" aria-label="Étape précédente">←</button>
+      <button class="btn ghost" id="next" aria-label="Étape suivante">→</button>
+      <div class="steps" id="steps"></div>
+    </div>
+  </div>
+</section>
+
+<!-- 5 -->
+<section class="s" id="architecture">
+  <div class="s-head"><span class="num">5</span><h2>Le schéma du projet</h2>
+    <p class="lead">Qui parle à qui. Les points qui bougent sont les messages. Cliquez sur une machine pour savoir ce qu'elle fait.</p></div>
+  <div class="panel">
+    <div class="scroll-x" id="archWrap"></div>
+    <div class="legend"><span><i></i>Réalisé par Lorenzo</span><span><i class="lyc"></i>Fourni par le lycée (déjà en place)</span></div>
+    <div class="info panel" id="info" style="background:var(--surface-2);border:0"></div>
+  </div>
+</section>
+
+<!-- 6 -->
+<section class="s" id="securite">
+  <div class="s-head"><span class="num">6</span><h2>La tricherie : le faux boîtier</h2>
+    <p class="lead">Quelqu'un fabrique un boîtier qui dit toujours « Martine est là ». L'écran ne se bloquerait plus jamais. Essayez, avec et sans protection.</p></div>
+  <div class="grid2">
+    <div class="panel">
+      <div class="timer-row">
+        <label class="switch"><input type="checkbox" id="protect" checked> Protection par code secret</label>
+        <button class="btn" id="plugFake">Brancher le faux boîtier</button>
+      </div>
+      <div id="scene6"></div>
+    </div>
+    <div class="panel">
+      <h3>Ce qui se passe dans l'ordinateur</h3>
+      <div class="log" id="log"><span class="dim">Cliquez sur « Brancher le faux boîtier ».</span></div>
+      <p style="font-size:.92rem;color:var(--muted);margin-top:10px">Le vrai boîtier connaît un code secret, créé au moment de son installation. À chaque message, il ajoute une preuve calculée avec ce code. Le faux boîtier ne connaît pas le code : ses messages sont refusés.</p>
+    </div>
+  </div>
+  <div class="prot">
+    <div><b>Journal protégé</b>Un agent ne peut pas écrire un faux « absence longue » pour lancer une installation.</div>
+    <div><b>Programmes signés</b>Un programme modifié refuse de démarrer.</div>
+    <div><b>Agents non administrateurs</b>Ils ne peuvent ni arrêter le service ni lire le code secret.</div>
+    <div><b>Filet de sécurité</b>Radar masqué ou débranché : le blocage après 10 minutes reste actif.</div>
+  </div>
+</section>
+
+<!-- 7 -->
+<section class="s" id="physique">
+  <div class="s-head"><span class="num">7</span><h2>La physique : régler le radar avec des mesures</h2>
+    <p class="lead">Le radar découpe l'espace en tranches de 0,75 m. Lorenzo mesure où s'arrête l'agent et où commence l'usager, pour ne compter que l'agent. Déplacez la personne.</p></div>
+  <div class="panel phys">
+    <div id="physArt"></div>
+    <label for="dist" style="font-weight:700;display:block;margin-top:8px">Distance entre le radar et la personne : <span class="mono" id="distVal">0,60 m</span></label>
+    <input type="range" id="dist" min="0.1" max="2.9" step="0.05" value="0.6">
+    <div class="readout">
+      <div><small>Tranche du radar (porte)</small><b id="gate">porte 0</b></div>
+      <div><small>Aller-retour de l'onde</small><b id="tof">4,0 ns</b></div>
+      <div><small>Décision</small><b id="decision">agent</b></div>
+    </div>
+    <p class="verdict-phys" id="physVerdict"></p>
+    <p style="font-size:.85rem;color:var(--muted);margin-top:6px">Zone retenue d'exemple : 1,0 m. La vraie valeur sortira des essais R2 et R3, avec son incertitude.</p>
+  </div>
+  <div class="formulas">
+    <div class="formula"><h3>Longueur d'onde</h3><p class="eq">λ = c / f = 12,5 mm</p><p>Avec c = 3·10⁸ m/s et f = 24 GHz.</p></div>
+    <div class="formula"><h3>Finesse en distance</h3><p class="eq">ΔR = c / (2B) = 0,6 m</p><p>B = 250 MHz de balayage. Le module travaille par tranches de 0,75 m.</p></div>
+    <div class="formula"><h3>La respiration se voit</h3><p class="eq">Δφ = 4π·Δd / λ ≈ 1 rad</p><p>Pour un mouvement de 1 mm, l'écho change nettement.</p></div>
+    <div class="formula"><h3>Les ondes sont-elles dangereuses ?</h3><p class="eq">S = PIRE / (4πr²) ≈ 0,03 W/m²</p><div class="gauge" aria-label="0,3 % de la limite"><span></span></div><p>Au pire, environ 0,3 % de la limite pour le public (10 W/m²). Calcul majorant, à confirmer avec la fiche du module.</p></div>
+  </div>
+  <div class="essais">
+    <div class="essai"><b>R1</b><span><strong>Seuils.</strong> Chaise vide, agent immobile, agent qui lit : l'énergie captée dans chaque tranche, pour fixer le seuil « présent ».</span></div>
+    <div class="essai"><b>R2–R3</b><span><strong>Zone.</strong> Agent à 0,4 / 0,6 / 0,8 / 1,0 m, puis usager côté public : où mettre la limite pour ne compter que l'agent.</span></div>
+    <div class="essai"><b>R4</b><span><strong>Temps de réaction.</strong> 20 départs chronométrés à l'oscilloscope : combien de secondes avant le blocage, avec l'incertitude. C'est l'indicateur clé.</span></div>
+    <div class="essai"><b>R5</b><span><strong>Fausses alertes.</strong> Ventilateur, rideau, collègue qui passe : le radar se trompe-t-il ?</span></div>
+  </div>
+</section>
+
+<!-- 8 -->
+<section class="s" id="vie-privee">
+  <div class="s-head"><span class="num">8</span><h2>Vie privée : ce qui ne sort jamais du poste</h2>
+    <p class="lead">Savoir si quelqu'un est à son poste, c'est une donnée personnelle. Le projet la garde sur place.</p></div>
+  <div class="priv">
+    <div class="panel keep"><h3>Reste sur le poste</h3><ul><li>Présent ou absent, chaque seconde</li><li>L'heure des départs et des retours</li><li>La couleur de la lumière</li></ul></div>
+    <div class="arrow">rien de tout ça<br>ne part →</div>
+    <div class="panel send"><h3>Part au serveur</h3><ul><li>« Logiciel installé », avec le jour, sans l'heure</li><li>Les reports et leurs raisons (« logiciel ouvert »…)</li><li>Le bilan d'installation d'un poste neuf</li><li>Les pannes du boîtier</li></ul></div>
+  </div>
+  <p class="big-quote">On sait si le bureau est occupé. <em>Jamais qui, ni combien de temps.</em></p>
+</section>
+
+<!-- 9 -->
+<section class="s" id="parcours">
+  <div class="s-head"><span class="num">9</span><h2>Le parcours de Lorenzo</h2>
+    <p class="lead">Environ 150 heures, de janvier à mai. D'abord ce qui est obligatoire, ensuite ce qui est visé, le reste seulement s'il reste du temps.</p></div>
+  <div class="road">
+    <div class="stage v1"><p class="h">≈ 108 h</p><h3>Version 1 · obligatoire</h3><ul><li>Le boîtier : radar, lumière, ESP32</li><li>Le blocage de l'écran avec avertissement</li><li>Le code secret sur chaque message</li><li>Le filet de sécurité de Windows</li><li>Les mesures R1 à R4</li><li>Les échanges réseau vérifiés et capturés</li></ul></div>
+    <div class="stage v2"><p class="h">≈ 40 h</p><h3>Version 2 · visée</h3><ul><li>Les installations pendant les absences</li><li>Le retour de l'agent au milieu : rien n'est touché</li><li>Un petit serveur : liste des installations, résultats</li><li><strong>Tableau de bord du parc</strong> : réussites du premier coup, reports et leurs raisons, postes en retard, sans aucune donnée sur les agents</li><li><strong>Mesure de l'apport</strong> : sur une journée jouée, combien d'installations seraient tombées devant l'agent, avec et sans le boîtier (essai R6)</li><li>L'installation d'un poste neuf, d'abord en simulation</li></ul></div>
+    <div class="stage ext"><p class="h">s'il reste du temps</p><h3>Extensions</h3><ul><li>Un assistant de réglage : l'agent s'assoit, se lève, le poste propose les seuils</li><li>Détecter un radar masqué</li><li>La veille du soir et le bilan d'énergie</li><li>La fiche de contrôle d'un poste neuf</li><li>Un radar qui sépare l'agent et l'usager</li></ul></div>
+  </div>
+  <div class="hours" aria-label="Répartition des heures">
+    <span style="width:72%;background:var(--radar)">V1 · 108 h</span>
+    <span style="width:26.5%;background:var(--agent)">V2 · 40 h</span>
+    <span style="width:1.5%;background:var(--off)" title="marge ≈ 2 h"></span>
+  </div>
+  <div class="revues">
+    <div class="revue"><b>Revue 1 · fin janvier</b>Besoin chiffré validé par le tuteur, maquette prête, le radar détecte.</div>
+    <div class="revue"><b>Revue 2 · mi-mars</b>Version 1 complète : on se lève, l'écran se bloque ; le faux boîtier est refusé.</div>
+    <div class="revue"><b>Revue 3 · mi-mai</b>Version 2 : installation pendant la pause, tableau de bord du parc, chiffre de l'apport, démonstration complète.</div>
+  </div>
+</section>
+
+<!-- 10 -->
+<section class="s" id="bilan">
+  <div class="s-head"><span class="num">10</span><h2>En bref</h2></div>
+  <div class="final">
+    <p class="phrase">Le poste se protège quand l'agent part, et travaille quand l'agent n'est pas là.</p>
+    <div class="kpis">
+      <div class="kpi"><b>~10 s</b><span>avant le blocage, au lieu de 10 minutes (à mesurer, essai R4)</span></div>
+      <div class="kpi"><b>0</b><span>installation lancée devant l'agent, contre N avec l'outil classique (à mesurer, essai R6)</span></div>
+      <div class="kpi"><b>0</b><span>image filmée : un radar, pas une caméra</span></div>
+    </div>
+  </div>
+</section>
+
+<footer>Maquette réalisée au lycée, contexte anonymisé, noms et valeurs fictifs. Besoin issu de l'entreprise, réalisation au lycée à faire valider par l'académie. Valeurs du module radar relevées dans sa documentation publique, à confirmer sur le modèle acheté.</footer>
+</main>
+
+<script>
+(function(){
+const reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+const $ = s => document.querySelector(s);
+
+/* ---------- scène du guichet ---------- */
+function sceneSVG(){
+  return `<svg class="scene" viewBox="0 0 640 330" role="img" data-agent="present" data-screen="open" data-led="green" data-usager="none" data-box="on" data-fake="off">
+  <line x1="10" y1="300" x2="630" y2="300" stroke="var(--line)" stroke-width="2"/>
+  <!-- chaise -->
+  <g stroke="var(--chair)" stroke-width="6" stroke-linecap="round" fill="none">
+    <line x1="92" y1="150" x2="92" y2="222"/><line x1="90" y1="222" x2="160" y2="222"/>
+    <line x1="125" y1="224" x2="125" y2="282"/><line x1="100" y1="290" x2="150" y2="290"/>
+  </g>
+  <!-- agent -->
+  <g class="agent fade">
+    <g class="body"><rect x="104" y="140" width="46" height="80" rx="18" fill="var(--agent)"/></g>
+    <circle cx="128" cy="118" r="19" fill="var(--skin)"/>
+    <path d="M140 160 Q175 175 205 192" stroke="var(--agent)" stroke-width="12" stroke-linecap="round" fill="none"/>
+    <rect x="150" y="214" width="58" height="14" rx="7" fill="var(--agent)" opacity=".85"/>
+    <g class="paper fade"><rect x="186" y="150" width="34" height="44" rx="3" fill="var(--screen)" stroke="var(--screen-line)" transform="rotate(-12 203 172)"/>
+      <line x1="192" y1="162" x2="212" y2="158" stroke="var(--screen-line)" stroke-width="2"/><line x1="193" y1="170" x2="213" y2="166" stroke="var(--screen-line)" stroke-width="2"/></g>
+  </g>
+  <!-- bureau -->
+  <rect x="190" y="200" width="250" height="12" rx="3" fill="var(--desk)"/>
+  <rect x="200" y="212" width="8" height="88" fill="var(--desk-dark)"/><rect x="422" y="212" width="8" height="88" fill="var(--desk-dark)"/>
+  <!-- écran -->
+  <rect x="300" y="178" width="12" height="22" fill="var(--chair)"/><rect x="282" y="196" width="48" height="6" rx="3" fill="var(--chair)"/>
+  <rect x="236" y="86" width="142" height="94" rx="7" fill="var(--chair)"/>
+  <g class="scr scr-open"><rect x="242" y="92" width="130" height="82" rx="4" fill="var(--screen)"/>
+    <text x="250" y="108" font-size="10" font-weight="700" fill="var(--bad)" font-family="var(--f-body)">CONFIDENTIEL</text>
+    <rect x="250" y="116" width="100" height="5" rx="2" fill="var(--screen-line)"/><rect x="250" y="127" width="112" height="5" rx="2" fill="var(--screen-line)"/>
+    <rect x="250" y="138" width="86" height="5" rx="2" fill="var(--screen-line)"/><rect x="250" y="149" width="104" height="5" rx="2" fill="var(--screen-line)"/></g>
+  <g class="scr scr-locked"><rect x="242" y="92" width="130" height="82" rx="4" fill="var(--screen-off)"/>
+    <rect x="296" y="124" width="22" height="18" rx="3" fill="var(--screen-line)"/><path d="M300 124 v-6 a7 7 0 0 1 14 0 v6" stroke="var(--screen-line)" stroke-width="3" fill="none"/>
+    <text x="307" y="160" font-size="10" fill="var(--screen-line)" text-anchor="middle" font-family="var(--f-body)">Verrouillé</text></g>
+  <g class="scr scr-install"><rect x="242" y="92" width="130" height="82" rx="4" fill="var(--screen-off)"/>
+    <text x="307" y="124" font-size="10" fill="var(--screen-line)" text-anchor="middle" font-family="var(--f-body)">Installation…</text>
+    <rect x="262" y="134" width="90" height="8" rx="4" fill="var(--chair)"/><rect class="bar" x="262" y="134" width="90" height="8" rx="4" fill="var(--radar)"/></g>
+  <!-- boîtier radar -->
+  <g class="radarbox">
+    <g class="waves"><path class="wave" d="M286 214 q-30 -20 -60 -10"/><path class="wave" d="M286 214 q-30 -20 -60 -10"/><path class="wave" d="M286 214 q-30 -20 -60 -10"/></g>
+    <rect x="282" y="214" width="46" height="18" rx="4" fill="var(--surface-2)" stroke="var(--radar)" stroke-width="1.5"/>
+    <circle class="led" cx="318" cy="223" r="4.5"/>
+  </g>
+  <!-- faux boîtier -->
+  <g class="fake"><rect x="350" y="250" width="42" height="18" rx="4" fill="var(--surface-2)" stroke="var(--bad)" stroke-width="2"/>
+    <text x="371" y="263" font-size="10" text-anchor="middle" fill="var(--bad)" font-weight="700" font-family="var(--f-body)">faux</text>
+    <path d="M371 250 Q370 228 330 226" stroke="var(--bad)" stroke-width="1.5" fill="none" stroke-dasharray="4 3"/></g>
+  <!-- comptoir -->
+  <rect x="452" y="168" width="18" height="132" fill="var(--desk-dark)"/><rect x="440" y="160" width="96" height="10" rx="3" fill="var(--desk)"/>
+  <!-- usager -->
+  <g class="usager"><g class="lean">
+    <rect x="540" y="130" width="42" height="96" rx="16" fill="var(--usager)"/>
+    <circle cx="561" cy="110" r="18" fill="var(--skin)"/>
+    <rect x="545" y="222" width="12" height="76" rx="5" fill="var(--usager)" opacity=".8"/><rect x="565" y="222" width="12" height="76" rx="5" fill="var(--usager)" opacity=".8"/>
+  </g></g>
+  <line class="sight" x1="540" y1="104" x2="380" y2="130" stroke="var(--bad)" stroke-width="2" stroke-dasharray="5 5"/>
+  </svg>`;
+}
+function setScene(host, st){
+  const s = host.querySelector('svg');
+  for (const k of ['agent','screen','led','usager','box','fake']) if (st[k] !== undefined) s.dataset[k] = st[k];
+}
+function mount(id, st){ const h = document.getElementById(id); h.innerHTML = sceneSVG(); setScene(h, st); return h; }
+
+/* héros */
+const hero = mount('heroScene', {agent:'present', screen:'open', led:'green', usager:'none', box:'on'});
+
+/* ---------- 1 : compteur ---------- */
+const s1 = mount('scene1', {agent:'absent', screen:'open', led:'off', usager:'lean', box:'off'});
+const timer = $('#timer');
+let t1 = null;
+function fmt(sec){ const m = Math.floor(sec/60), s = sec%60; return String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0'); }
+function setTimer(sec, msg){ timer.innerHTML = fmt(sec) + '<small>' + msg + '</small>'; }
+function play1(){
+  clearInterval(t1);
+  setScene(s1, {agent:'present', screen:'open', usager:'present'});
+  setTimer(0, 'Martine travaille');
+  let sec = 0;
+  setTimeout(() => {
+    setScene(s1, {agent:'absent'});
+    t1 = setInterval(() => {
+      sec += 10;
+      if (sec >= 90) setScene(s1, {usager:'lean'});
+      if (sec >= 600){ clearInterval(t1); setScene(s1, {screen:'locked', usager:'present'}); setTimer(600, 'enfin bloqué : 10 minutes d\'écran ouvert'); return; }
+      setTimer(sec, 'depuis que Martine a quitté son poste, écran toujours ouvert');
+    }, reduce ? 20 : 110);
+  }, reduce ? 0 : 1200);
+}
+$('#replay1').addEventListener('click', play1);
+let played1 = false;
+if ('IntersectionObserver' in window){
+  new IntersectionObserver((e, o) => { if (e[0].isIntersecting && !played1){ played1 = true; play1(); o.disconnect(); } }, {threshold:.5}).observe(s1);
+}
+
+/* ---------- 2 : cartes ---------- */
+/* [titre, qui l'utilise, ce que c'est, ce qu'il fait bien, ce qui manque ici] */
+const cardsEcran = [
+  ['Windows + L', 'geste de l\'agent', 'Le raccourci clavier qui bloque l\'écran.', 'Immédiat et gratuit.', 'Il faut y penser à chaque fois. Un jour chargé, avec un usager pressé, on oublie.'],
+  ['Blocage après inactivité', 'règle de l\'annuaire (GPO)', 'L\'écran se bloque après 10 minutes sans clavier ni souris.', 'Automatique, déjà en place sur tous les postes.', '10 minutes d\'écran ouvert. Plus court, il bloque l\'agent qui lit un dossier. Lorenzo le garde comme filet de sécurité.'],
+  ['Verrouillage par téléphone', 'fonction de Windows', 'Windows bloque quand le téléphone Bluetooth s\'éloigne.', 'Bloque sans y penser.', 'Il faut le téléphone personnel de l\'agent. Environ 30 secondes de délai. Téléphone oublié sur le bureau : poste ouvert.'],
+  ['Retirer sa carte à puce', 'carte d\'agent', 'Le poste se bloque quand on retire la carte du lecteur.', 'Lié à l\'identité de l\'agent.', 'Ça dépend encore d\'un geste. Les cartes restent souvent dans le lecteur.'],
+  ['Caméra qui reconnaît le visage', 'webcam', 'Une webcam regarde qui est devant l\'écran.', 'Voit vraiment si quelqu\'un est là.', 'Filmer un agent à son poste est interdit sauf cas particuliers (CNIL). Un visage est une donnée très sensible.'],
+  ['Capteur de Windows 11', 'PC récents', 'Certains PC récents détectent la présence et se bloquent seuls.', 'Intégré et reconnu par Windows.', 'Seulement sur des PC compatibles. Le parc actuel n\'en a pas : il faudrait tout racheter.'],
+  ['Badge dans la poche', 'objet porté', 'Le PC détecte un badge porté par l\'agent.', 'Fonctionne sans geste.', 'Un objet de plus à porter et à recharger. Souvent vécu comme une « laisse électronique ».'],
+  ['Détecteur de mouvement', 'capteur infrarouge', 'Le capteur qui allume la lumière dans un couloir.', 'Bon marché et simple.', 'Il ne voit pas une personne immobile. Il bloquerait Martine en pleine lecture.'],
+  ['Tapis capteur sur la chaise', 'capteur de poids', 'Un capteur sous l\'assise.', 'Sent vraiment qu\'on est assis.', 'Un sac posé sur la chaise compte comme « présent ». Le câble se débranche avec le pied.'],
+];
+const cardsInstall = [
+  ['Image « master »', 'poste neuf', 'Un Windows tout prêt, avec tous les logiciels du service, copié sur chaque poste neuf.', 'Tous les postes identiques dès le premier jour.', 'C\'est une photo à un instant : dès le lendemain, il faut mettre à jour.'],
+  ['GPO (stratégies de groupe)', 'annuaire', 'L\'annuaire impose les réglages à tous les postes.', 'Règles appliquées partout, automatiquement.', 'Elle règle, elle n\'installe pas au bon moment. Son blocage après inactivité reste le filet de Lorenzo.'],
+  ['WSUS', 'serveur interne', 'Le serveur qui reçoit les correctifs Microsoft, les fait tester puis les distribue.', 'Correctifs vérifiés avant d\'arriver sur les postes.', 'Seulement Microsoft. Il installe à l\'heure prévue, que l\'agent soit là ou non.'],
+  ['SCCM (MECM)', 'tour de contrôle', 'Logiciels, mises à jour, images et inventaire pour des milliers de postes.', 'Très puissant, tout au même endroit.', 'Fenêtres de maintenance à heures fixes. Il ne sait pas si l\'agent est devant l\'écran.'],
+  ['WAPT', 'outil français', 'Paquets et mises à jour, à l\'ouverture ou à la fermeture de session.', 'Ne dérange pas pendant la journée.', 'Installer à la fermeture retient l\'agent le soir. Les pauses de la journée ne servent à rien.'],
+  ['Intune', 'gestion par le cloud', 'La version en ligne de Microsoft, qui suit aussi les PC hors du bureau.', 'Fonctionne même loin du réseau interne.', 'Service hébergé hors de l\'administration : questions de souveraineté. Mêmes heures fixes.'],
+  ['La nuit, avec réveil à distance', 'Wake-on-LAN', 'Le serveur réveille les PC à 2 h du matin pour installer.', 'Personne n\'est dérangé.', 'Le PC doit rester branché au réseau. Un portable fermé ne se réveille pas. Consomme de l\'énergie.'],
+  ['« Si l\'ordinateur est inactif »', 'Planificateur de Windows', 'Windows lance une tâche quand personne ne touche au clavier.', 'Déjà dans Windows, gratuit.', 'Il confond inactif et absent : il installe pendant que Martine lit un dossier.'],
+  ['Report puis redémarrage forcé', 'règle courante', 'L\'agent peut reporter quelques fois, puis le redémarrage est imposé.', 'Le parc finit toujours à jour.', 'Le redémarrage imposé tombe parfois au mauvais moment, devant un usager.'],
+];
+function drawCards(id, list){
+  $(id).innerHTML = list.map(([t, w, f, plus, minus]) => `<button class="flip" aria-pressed="false">
+    <div class="in"><div class="face front"><span class="who">${w}</span><h3>${t}</h3><p>${f}</p><span class="hint">Et au guichet ? →</span></div>
+    <div class="face back"><span class="lbl">Ce qu'il fait bien</span><p class="plus">${plus}</p><span class="lbl">Ce qui manque ici</span><p class="minus">${minus}</p><span class="hint">← retourner</span></div></div></button>`).join('');
+  $(id).querySelectorAll('.flip').forEach(c => c.addEventListener('click', () => { c.classList.toggle('turned'); c.setAttribute('aria-pressed', c.classList.contains('turned')); }));
+}
+drawCards('#cardsEcran', cardsEcran);
+drawCards('#cardsInstall', cardsInstall);
+
+/* tests : y = oui, n = non, p = parfois */
+const tests = {
+  testEcran: {
+    head: ['Solution', 'Martine lit sans bouger.<br>L\'écran reste ouvert ?', 'Elle part en laissant ses affaires.<br>L\'écran se bloque vite ?', 'Autorisé, rien à porter ?'],
+    rows: [
+      ['Blocage après inactivité (court)', ['n','bloque pendant la lecture'], ['p','après quelques minutes'], ['y','']],
+      ['Détecteur de mouvement', ['n','ne voit pas l\'immobile'], ['y',''], ['y','']],
+      ['Téléphone Bluetooth', ['y',''], ['n','téléphone oublié'], ['n','téléphone perso']],
+      ['Carte à puce', ['y',''], ['n','carte oubliée'], ['y','']],
+      ['Tapis sur la chaise', ['y',''], ['n','sac sur la chaise'], ['y','']],
+      ['Caméra', ['y',''], ['y',''], ['n','interdit de filmer']],
+      ['Radar de Lorenzo', ['y','voit la respiration'], ['y','en quelques secondes'], ['y','aucune image, rien à porter']],
+    ]},
+  testInstall: {
+    head: ['Moment choisi', 'Martine lit sans bouger.<br>Rien ne s\'installe ?', 'Elle est partie déjeuner.<br>Ça s\'installe ?', 'Le soir, elle éteint.<br>Elle part sans attendre ?'],
+    rows: [
+      ['Heure fixe (12 h 30)', ['n','installe même si elle est là'], ['p','si sa pause tombe à 12 h 30'], ['y','']],
+      ['La nuit + réveil à distance', ['y',''], ['n','n\'en profite pas'], ['p','si le PC reste branché']],
+      ['Inactivité du clavier', ['n','croit qu\'elle est partie'], ['y',''], ['y','']],
+      ['À la fermeture de session', ['y',''], ['n','n\'en profite pas'], ['n','elle attend la fin']],
+      ['Outil de l\'administration + boîtier', ['y','le radar la voit'], ['y','absente depuis 20 min'], ['y','']],
+    ]},
+};
+const ICON = {y:'✓ oui', n:'✗ non', p:'≈ parfois'};
+function buildTest(id){
+  const T = tests[id], tb = $('#' + id);
+  tb.innerHTML = `<thead><tr>${T.head.map(h => `<th>${h}</th>`).join('')}</tr></thead><tbody>` +
+    T.rows.map((r, i) => `<tr class="${i === T.rows.length - 1 ? 'radar' : ''}"><td><strong>${r[0]}</strong></td>` +
+    r.slice(1).map(c => `<td class="c" data-v="${c[0]}" data-n="${c[1]}">?</td>`).join('') + '</tr>').join('') + '</tbody>';
+  tb.querySelectorAll('td.c').forEach(reveal);
+}
+function reveal(td){ const v = td.dataset.v; td.className = 'c ' + v; td.innerHTML = ICON[v] + (td.dataset.n ? `<span>${td.dataset.n}</span>` : ''); }
+function runTest(id){
+  const tds = [...$('#' + id).querySelectorAll('td.c')];
+  tds.forEach(td => { td.className = 'c wait'; td.innerHTML = '?'; });
+  tds.forEach((td, i) => setTimeout(() => reveal(td), reduce ? 0 : 140 * i));
+}
+buildTest('testEcran'); buildTest('testInstall');
+document.querySelectorAll('[data-run]').forEach(b => b.addEventListener('click', () => runTest(b.dataset.run)));
+
+/* onglets */
+const tabs = [['#tabEcran', '#famEcran', 'testEcran'], ['#tabInstall', '#famInstall', 'testInstall']];
+tabs.forEach(([t, p, test]) => $(t).addEventListener('click', () => {
+  tabs.forEach(([t2, p2]) => { $(t2).setAttribute('aria-selected', t2 === t); $(p2).hidden = p2 !== p; });
+  runTest(test);
+}));
+
+/* pont : les outils + le boîtier */
+$('#bridgeArt').innerHTML = `<svg viewBox="0 0 900 230" role="img" aria-label="Les outils de l'administration disent quoi et où, le boîtier dit quand : ensemble, installation au bon moment">
+  <rect x="20" y="20" width="300" height="86" rx="12" fill="var(--surface)" stroke="var(--line)" stroke-width="1.5" stroke-dasharray="6 4"/>
+  <text x="170" y="52" text-anchor="middle" font-family="var(--f-display)" font-weight="700" font-size="16" fill="var(--ink)">Outils de l'administration</text>
+  <text x="170" y="76" text-anchor="middle" font-size="13" fill="var(--muted)" font-family="var(--f-body)">image, GPO, WSUS, SCCM, WAPT…</text>
+  <text x="170" y="94" text-anchor="middle" font-size="13" fill="var(--radar-ink)" font-family="var(--f-body)" font-weight="700">QUOI installer, sur QUELS postes</text>
+  <rect x="20" y="124" width="300" height="86" rx="12" fill="var(--surface)" stroke="var(--radar)" stroke-width="2.2"/>
+  <text x="170" y="156" text-anchor="middle" font-family="var(--f-display)" font-weight="700" font-size="16" fill="var(--ink)">Boîtier de Lorenzo</text>
+  <text x="170" y="180" text-anchor="middle" font-size="13" fill="var(--muted)" font-family="var(--f-body)">radar sous le bureau</text>
+  <text x="170" y="198" text-anchor="middle" font-size="13" fill="var(--radar-ink)" font-family="var(--f-body)" font-weight="700">QUAND : l'agent est-il là ?</text>
+  <path id="br1" d="M320 63 C420 63 440 115 560 115" fill="none" stroke="var(--muted)" stroke-width="1.6"/>
+  <path id="br2" d="M320 167 C420 167 440 115 560 115" fill="none" stroke="var(--muted)" stroke-width="1.6"/>
+  <rect x="560" y="70" width="320" height="90" rx="14" fill="var(--radar-soft)" stroke="var(--radar)" stroke-width="2"/>
+  <text x="720" y="106" text-anchor="middle" font-family="var(--f-display)" font-weight="800" font-size="18" fill="var(--ink)">Installation au bon moment</text>
+  <text x="720" y="132" text-anchor="middle" font-size="13" fill="var(--muted)" font-family="var(--f-body)">pendant les absences, jamais devant l'agent</text>
+  ${reduce ? '' : `<circle r="5" class="pkb" fill="var(--muted)"><animateMotion dur="2.4s" repeatCount="indefinite"><mpath href="#br1"/></animateMotion></circle>
+  <circle r="5" fill="var(--radar)"><animateMotion dur="2.4s" begin="1.2s" repeatCount="indefinite"><mpath href="#br2"/></animateMotion></circle>`}
+</svg>`;
+
+/* ---------- 3 : boîtier ---------- */
+const parts = {
+  radar:'<b>Le radar.</b> Il envoie une onde invisible et écoute l\'écho. Il voit les tout petits mouvements de la respiration : il sait qu\'une personne est assise, même si elle ne bouge pas.',
+  esp:'<b>La carte ESP32.</b> Un petit ordinateur. Il lit le radar, envoie « présent » ou « personne » au PC chaque seconde, et prouve qu\'il est le vrai boîtier grâce à un code secret.',
+  led:'<b>La lumière.</b> Verte : tout va bien. Orange : « je crois que vous partez », 3 secondes pour revenir. Rouge : écran bloqué.',
+  usb:'<b>Le câble USB.</b> Il alimente le boîtier (5 volts, aucun risque) et transporte les messages. Pas de Wi-Fi, pas de Bluetooth.'
+};
+$('#boxArt').innerHTML = `<svg viewBox="0 0 460 220" width="100%" role="img" aria-label="Le boîtier ouvert : radar, carte ESP32, lumière, câble USB" style="display:block">
+  <rect x="20" y="30" width="330" height="160" rx="16" fill="var(--surface-2)" stroke="var(--line)" stroke-width="2"/>
+  <g class="hot" tabindex="0" data-p="radar"><rect x="44" y="58" width="110" height="104" rx="8" fill="var(--surface)" stroke="var(--radar)" stroke-width="1.5"/>
+    <rect x="62" y="76" width="30" height="30" rx="3" fill="var(--radar-soft)"/><rect x="104" y="76" width="30" height="30" rx="3" fill="var(--radar-soft)"/>
+    <text x="99" y="142" text-anchor="middle" font-size="13" fill="var(--ink)" font-family="var(--f-body)" font-weight="700">Radar 24 GHz</text></g>
+  <g class="hot" tabindex="0" data-p="esp"><rect x="176" y="70" width="110" height="80" rx="8" fill="var(--surface)" stroke="var(--radar)" stroke-width="1.5"/>
+    <rect x="206" y="88" width="50" height="30" rx="3" fill="var(--chair)"/>
+    <text x="231" y="138" text-anchor="middle" font-size="13" fill="var(--ink)" font-family="var(--f-body)" font-weight="700">ESP32</text></g>
+  <path d="M154 110 H176" stroke="var(--muted)" stroke-width="3"/>
+  <g class="hot" tabindex="0" data-p="led"><rect x="296" y="88" width="44" height="44" rx="8" fill="var(--surface)" stroke="var(--radar)" stroke-width="1.5"/>
+    <circle cx="318" cy="110" r="10" fill="var(--ok)"><animate attributeName="fill" values="var(--ok);var(--warn);var(--bad);var(--ok)" dur="6s" repeatCount="indefinite"/></circle></g>
+  <path d="M286 110 H296" stroke="var(--muted)" stroke-width="3"/>
+  <g class="hot" tabindex="0" data-p="usb"><rect x="350" y="98" width="30" height="24" rx="4" fill="var(--surface)" stroke="var(--radar)" stroke-width="1.5"/>
+    <path d="M380 110 C410 110 410 60 446 60" stroke="var(--muted)" stroke-width="5" fill="none" stroke-linecap="round"/>
+    <text x="400" y="150" font-size="13" fill="var(--ink)" font-family="var(--f-body)" font-weight="700">vers le PC</text></g>
+</svg>`;
+document.querySelectorAll('#boxArt .hot').forEach(g => {
+  const show = () => { $('#bubble').innerHTML = parts[g.dataset.p]; };
+  g.addEventListener('mouseenter', show); g.addEventListener('focus', show); g.addEventListener('click', show);
+});
+$('#waveArt').innerHTML = `<svg viewBox="0 0 460 200" width="100%" role="img" aria-label="Onde radar qui va jusqu'à la poitrine et revient" style="display:block">
+  <rect x="16" y="86" width="40" height="28" rx="5" fill="var(--surface-2)" stroke="var(--radar)" stroke-width="1.5"/>
+  <path id="wv" d="M56 100 C80 70 104 130 128 100 S176 70 200 100 S248 130 272 100 S320 70 344 100" fill="none" stroke="var(--radar)" stroke-width="2.5" stroke-dasharray="6 6">
+    ${reduce ? '' : '<animate attributeName="stroke-dashoffset" from="24" to="0" dur=".6s" repeatCount="indefinite"/>'}</path>
+  <g><rect x="360" y="50" width="56" height="110" rx="22" fill="var(--agent)">${reduce ? '' : '<animate attributeName="width" values="56;60;56" dur="3.6s" repeatCount="indefinite"/>'}</rect>
+  <circle cx="388" cy="34" r="18" fill="var(--skin)"/></g>
+  <text x="200" y="160" text-anchor="middle" font-size="13" fill="var(--muted)" font-family="var(--f-body)">l'onde part, touche la poitrine, revient</text>
+  <text x="388" y="186" text-anchor="middle" font-size="13" fill="var(--muted)" font-family="var(--f-body)">respiration : ~1 mm</text>
+</svg>`;
+
+/* ---------- 4 : Martine ---------- */
+const S = {
+  avec: [
+    ['9 h 00', 'Martine lit un dossier papier', 'Elle ne touche pas au clavier depuis 10 minutes. Le radar voit sa respiration : elle est là. Rien ne se passe.', ['good','Écran ouvert, Martine travaille'], {agent:'reading', screen:'open', led:'green', usager:'none', box:'on', fake:'off'}],
+    ['10 h 00', 'Elle se lève', 'Le radar ne la voit plus. La lumière passe à l\'orange pendant 3 secondes : si elle était juste penchée, tout s\'annule.', ['good','Avertissement'], {agent:'absent', screen:'open', led:'orange', usager:'present', fake:'off'}],
+    ['10 h 00 + 8 s', 'L\'écran se bloque', 'Elle n\'est pas revenue : l\'écran se bloque tout seul. L\'usager au guichet ne peut rien lire.', ['good','Dossier protégé en quelques secondes'], {agent:'absent', screen:'locked', led:'red', usager:'lean', fake:'off'}],
+    ['10 h 05', 'Martine revient', 'Elle tape son mot de passe, comme d\'habitude. La lumière redevient verte.', ['good','Rien de changé pour elle'], {agent:'present', screen:'open', led:'green', usager:'none', fake:'off'}],
+    ['12 h 20', 'La pause déjeuner', 'Absente depuis 20 minutes : le logiciel prévu par le technicien s\'installe. Si elle revient au milieu, son travail n\'est pas touché.', ['good','Installation sans déranger'], {agent:'absent', screen:'install', led:'red', usager:'none', fake:'off'}],
+    ['15 h 00', 'Tentative de triche', 'Quelqu\'un branche un faux boîtier qui dit toujours « Martine est là ». Il ne connaît pas le code secret : l\'ordinateur bloque quand même et donne l\'alerte.', ['good','Faux boîtier démasqué'], {agent:'absent', screen:'locked', led:'red', usager:'none', fake:'on'}],
+  ],
+  sans: [
+    ['9 h 10', 'Martine lit un dossier papier', 'Au bout de 10 minutes sans clavier, Windows croit qu\'elle est partie : l\'écran se bloque en pleine lecture. Elle doit retaper son mot de passe.', ['badv','Bloquée alors qu\'elle est là'], {agent:'reading', screen:'locked', led:'off', usager:'none', box:'off', fake:'off'}],
+    ['10 h 00', 'Elle se lève', 'Elle est pressée et oublie Windows + L. L\'ordinateur ne sait pas qu\'elle est partie.', ['badv','Écran ouvert'], {agent:'absent', screen:'open', usager:'present', fake:'off'}],
+    ['10 h 00 + 8 s', 'L\'usager se penche', 'L\'usager peut lire le dossier confidentiel. L\'écran restera ouvert jusqu\'à 10 h 10.', ['badv','Dossier visible par le public'], {agent:'absent', screen:'open', usager:'lean', fake:'off'}],
+    ['10 h 05', 'Martine revient', 'Personne n\'a rien bloqué. Pendant 5 minutes, le dossier était visible.', ['badv','5 minutes d\'exposition'], {agent:'present', screen:'open', usager:'none', fake:'off'}],
+    ['12 h 20', 'La pause déjeuner', 'Le poste est libre, mais rien ne s\'installe : l\'outil ne sait pas qu\'elle est partie.', ['badv','Occasion perdue'], {agent:'absent', screen:'open', usager:'none', fake:'off'}],
+    ['15 h 00', 'L\'installation démarre', 'L\'installation se lance à heure fixe, pendant qu\'elle reçoit un usager. Le poste rame devant lui.', ['badv','Agent dérangé'], {agent:'present', screen:'install', usager:'present', fake:'off'}],
+  ]
+};
+const s4 = mount('scene4', S.avec[0][4]);
+let mode = 'avec', idx = 0, timerPlay = null;
+const stepsEl = $('#steps');
+stepsEl.innerHTML = S.avec.map((_, i) => `<button data-i="${i}" aria-label="Étape ${i+1}">${i+1}</button>`).join('');
+function render(){
+  const [h, t, x, v, st] = S[mode][idx];
+  setScene(s4, Object.assign({box: mode === 'avec' ? 'on' : 'off'}, st));
+  $('#clock').textContent = h; $('#stepNo').textContent = `Étape ${idx+1} sur ${S[mode].length}`;
+  $('#stepTitle').textContent = t; $('#stepText').textContent = x;
+  const vd = $('#stepVerdict'); vd.className = 'verdict ' + v[0]; vd.textContent = v[1];
+  stepsEl.querySelectorAll('button').forEach((b, i) => b.classList.toggle('on', i === idx));
+}
+function go(i){ idx = (i + S[mode].length) % S[mode].length; render(); }
+function stop(){ clearInterval(timerPlay); timerPlay = null; $('#play').textContent = 'Lecture'; }
+$('#play').addEventListener('click', () => {
+  if (timerPlay){ stop(); return; }
+  $('#play').textContent = 'Pause';
+  timerPlay = setInterval(() => { if (idx === S[mode].length - 1){ stop(); return; } go(idx + 1); }, 3800);
+});
+$('#prev').addEventListener('click', () => { stop(); go(idx - 1); });
+$('#next').addEventListener('click', () => { stop(); go(idx + 1); });
+stepsEl.addEventListener('click', e => { const b = e.target.closest('button'); if (b){ stop(); go(+b.dataset.i); } });
+function setMode(m){ mode = m; $('#mAvec').setAttribute('aria-pressed', m === 'avec'); $('#mSans').setAttribute('aria-pressed', m === 'sans'); render(); }
+$('#mAvec').addEventListener('click', () => setMode('avec'));
+$('#mSans').addEventListener('click', () => setMode('sans'));
+render();
+
+/* ---------- 5 : architecture ---------- */
+const nodes = {
+  boitier:{x:30,y:170,w:180,h:110,t:'Boîtier de présence',s:['radar 24 GHz + ESP32','lumière tricolore'],c:'lor',
+    role:'Dit chaque seconde « présent » ou « personne », avec une preuve calculée grâce au code secret.',
+    lor:'Il monte le boîtier et écrit son programme en C++ : lecture du radar, lumière, code secret.', four:'Les composants (environ 25 à 60 €, à confirmer).'},
+  poste:{x:300,y:160,w:210,h:130,t:'Poste Windows 11',s:['service de présence','tâches : bloquer, installer','journal « PostePresence »'],c:'lor',
+    role:'Décide : avertir, bloquer l\'écran, lancer une installation pendant une absence.',
+    lor:'Il écrit le service en PowerShell, la règle « quand installer » et le script d\'installation du poste.', four:'Le PC de test du lycée.'},
+  serveur:{x:610,y:30,w:250,h:110,t:'Serveur Ubuntu',s:['API Python, base SQLite','page web du technicien'],c:'lor',
+    role:'Garde la liste des logiciels à installer et les résultats, datés au jour, sans heure.',
+    lor:'Il écrit l\'API, la base et la page web (version 2).', four:'Une machine Ubuntu du lycée.'},
+  tech:{x:660,y:200,w:200,h:80,t:'PC du technicien',s:['navigateur, Wireshark'],c:'lyc',
+    role:'Programme les installations et suit le parc. Sert aussi aux captures réseau.',
+    lor:'Il analyse les captures (C10).', four:'Un PC du lycée.'},
+  dc:{x:300,y:350,w:210,h:90,t:'Contrôleur de domaine',s:['comptes, DNS, heure','commun à la maquette'],c:'lyc',
+    role:'Gère les comptes et la règle de blocage après 10 minutes (le filet de sécurité).',
+    lor:'Il vérifie que les règles s\'appliquent et capture les échanges (Kerberos, DNS). Il ne le configure pas.', four:'Préparé une fois par l\'enseignant pour tous les apprentis.'},
+  routeur:{x:620,y:360,w:220,h:76,t:'Routeur Cisco ISR 4331',s:['passerelle, source d\'heure'],c:'lyc',
+    role:'Donne l\'heure exacte au réseau. Une heure fausse de plus de 5 minutes empêche de se connecter.',
+    lor:'Il montre ce cas en direct (horloge décalée, puis corrigée).', four:'Équipement du lycée, déjà en place.'},
+};
+const links = [
+  ['p1','M210 225 L300 225','USB',255,214,false],
+  ['p2','M510 190 C565 190 560 85 610 85','HTTPS · installations, résultats',548,112,true],
+  ['p3','M405 290 L405 350','Kerberos, DNS, LDAP',412,325,false],
+  ['p4','M510 398 L620 398','NTP · l\'heure',565,388,false],
+  ['p5','M760 200 L760 140','HTTPS · pages de suivi',768,175,false],
+];
+let svg = `<svg class="arch" viewBox="0 0 900 460" role="img" aria-label="Schéma : boîtier, poste Windows, serveur, contrôleur de domaine, routeur, PC du technicien">`;
+links.forEach(([id, d, lbl, lx, ly]) => { svg += `<path id="${id}" class="link" d="${d}"/><text class="lbl" x="${lx}" y="${ly}" text-anchor="${id === 'p1' || id === 'p4' ? 'middle' : (id === 'p2' ? 'end' : 'start')}">${lbl}</text>`; });
+for (const [k, n] of Object.entries(nodes)){
+  svg += `<g class="node ${n.c}" data-k="${k}" tabindex="0" role="button" aria-label="${n.t}"><rect x="${n.x}" y="${n.y}" width="${n.w}" height="${n.h}" rx="12"/>
+    <text class="t" x="${n.x + n.w/2}" y="${n.y + 30}" text-anchor="middle">${n.t}</text>` +
+    n.s.map((l, i) => `<text class="s" x="${n.x + n.w/2}" y="${n.y + 54 + i*18}" text-anchor="middle">${l}</text>`).join('') + '</g>';
+}
+links.forEach(([id], i) => {
+  const dur = (2.2 + i*.4).toFixed(1);
+  svg += `<circle r="5" class="pk"><animateMotion dur="${dur}s" repeatCount="indefinite"><mpath href="#${id}"/></animateMotion></circle>`;
+  if (i < 2) svg += `<circle r="4" class="pk alt"><animateMotion dur="${dur}s" begin="${(dur/2).toFixed(1)}s" repeatCount="indefinite" keyPoints="1;0" keyTimes="0;1" calcMode="linear"><mpath href="#${id}"/></animateMotion></circle>`;
+});
+svg += '</svg>';
+$('#archWrap').innerHTML = svg;
+function showNode(k){
+  const n = nodes[k];
+  document.querySelectorAll('.arch .node').forEach(g => g.classList.toggle('sel', g.dataset.k === k));
+  $('#info').innerHTML = `<h3>${n.t}</h3><dl><dt>Son rôle</dt><dd>${n.role}</dd><dt>Ce que fait Lorenzo</dt><dd>${n.lor}</dd><dt>Fourni par</dt><dd>${n.four}</dd></dl>`;
+}
+document.querySelectorAll('.arch .node').forEach(g => {
+  g.addEventListener('click', () => showNode(g.dataset.k));
+  g.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); showNode(g.dataset.k); } });
+});
+showNode('poste');
+
+/* ---------- 6 : faux boîtier ---------- */
+const s6 = mount('scene6', {agent:'absent', screen:'locked', led:'red', usager:'none', box:'on', fake:'off'});
+const log = $('#log');
+let tl = [];
+function hex(n){ let s = ''; for (let i = 0; i < n; i++) s += '0123456789abcdef'[Math.floor(Math.random()*16)]; return s; }
+$('#plugFake').addEventListener('click', () => {
+  tl.forEach(clearTimeout); tl = [];
+  const on = $('#protect').checked;
+  setScene(s6, {fake:'on', screen:'open', led:'green', usager:'present'});
+  const lines = on ? [
+    ['dim','15:00:00  nouveau boîtier branché'],
+    ['', `15:00:00  PC → boîtier : question secrète ${hex(8)}…`],
+    ['bad','15:00:01  boîtier → PC : réponse fausse'],
+    ['', '15:00:01  message « présent » reçu…'],
+    ['bad','15:00:01  preuve absente : message refusé'],
+    ['bad','15:00:01  ALERTE : boîtier non reconnu (événement 210)'],
+    ['ok', '15:00:02  personne n\'est assis → écran bloqué'],
+  ] : [
+    ['dim','15:00:00  nouveau boîtier branché'],
+    ['', '15:00:01  boîtier → PC : « présent »'],
+    ['', '15:00:02  boîtier → PC : « présent »'],
+    ['', '15:00:03  boîtier → PC : « présent »'],
+    ['bad','15:00:04  aucune vérification : le PC le croit'],
+    ['bad','15:10:00  écran ouvert depuis 10 minutes, personne devant'],
+  ];
+  log.innerHTML = '';
+  lines.forEach(([c, l], i) => tl.push(setTimeout(() => {
+    log.innerHTML += `<span class="${c}">${l}</span>\n`;
+    if (i === lines.length - 1) setScene(s6, on ? {screen:'locked', led:'red', usager:'none'} : {screen:'open', led:'green', usager:'lean'});
+  }, reduce ? 0 : 650 * i)));
+});
+$('#protect').addEventListener('change', () => { tl.forEach(clearTimeout); setScene(s6, {fake:'off', screen:'locked', led:'red', usager:'none'}); log.innerHTML = '<span class="dim">Cliquez sur « Brancher le faux boîtier ».</span>'; });
+
+/* ---------- 7 : physique ---------- */
+const X0 = 40, PX = 200; // 200 px par mètre
+let ph = `<svg viewBox="0 0 660 210" role="img" aria-label="Vue de dessus : le radar, ses tranches de 0,75 m, la zone retenue et la personne">`;
+for (let g = 0; g < 4; g++){
+  const x = X0 + g*0.75*PX;
+  ph += `<rect x="${x}" y="30" width="${0.75*PX}" height="140" fill="${g % 2 ? 'var(--surface)' : 'var(--surface-2)'}" stroke="var(--line)"/>
+    <text x="${x + 0.375*PX}" y="22" text-anchor="middle" font-size="12" fill="var(--muted)" font-family="var(--f-mono)">porte ${g}</text>`;
+}
+ph += `<rect x="${X0}" y="30" width="${1.0*PX}" height="140" fill="var(--radar-soft)" opacity=".85"/>
+  <rect x="${X0}" y="30" width="${0.3*PX}" height="140" fill="var(--off)" opacity=".35"/>
+  <text x="${X0 + 6}" y="186" font-size="11" fill="var(--muted)" font-family="var(--f-body)">aveugle</text>
+  <line x1="${X0 + PX}" y1="30" x2="${X0 + PX}" y2="170" stroke="var(--radar)" stroke-width="2" stroke-dasharray="5 4"/>
+  <text x="${X0 + PX + 4}" y="186" font-size="12" fill="var(--radar-ink)" font-family="var(--f-body)" font-weight="700">limite 1,0 m</text>
+  <rect x="${X0 - 26}" y="88" width="22" height="24" rx="4" fill="var(--surface-2)" stroke="var(--radar)" stroke-width="2"/>
+  <text x="${X0 + 1.3*PX}" y="70" text-anchor="middle" font-size="12" fill="var(--usager)" font-family="var(--f-body)" font-weight="700">usager</text>
+  <circle cx="${X0 + 1.3*PX}" cy="100" r="14" fill="var(--usager)" opacity=".55"/>
+  <g id="pers"><circle id="persC" cx="${X0 + 0.6*PX}" cy="132" r="15" fill="var(--agent)"/><text id="persT" x="${X0 + 0.6*PX}" y="162" text-anchor="middle" font-size="12" font-family="var(--f-body)" font-weight="700" fill="var(--ink)">vous</text></g>
+  <g font-family="var(--f-mono)" font-size="11" fill="var(--muted)">`;
+for (let m = 0; m <= 3; m += 0.5) ph += `<text x="${X0 + m*PX}" y="204" text-anchor="middle">${String(m).replace('.', ',')} m</text>`;
+ph += '</g></svg>';
+$('#physArt').innerHTML = ph;
+const dist = $('#dist');
+function upd(){
+  const d = +dist.value, x = X0 + d*PX;
+  $('#persC').setAttribute('cx', x); $('#persT').setAttribute('x', x);
+  $('#distVal').textContent = d.toFixed(2).replace('.', ',') + ' m';
+  $('#gate').textContent = 'porte ' + Math.min(3, Math.floor(d/0.75));
+  $('#tof').textContent = (2*d/3e8*1e9).toFixed(1).replace('.', ',') + ' ns';
+  let dec, txt, col;
+  if (d < 0.3){ dec = 'mal vu'; col = 'var(--warn)'; txt = 'Trop près : zone aveugle du radar (environ 30 cm). Il faut placer le radar un peu plus loin.'; }
+  else if (d <= 1.0){ dec = 'agent'; col = 'var(--ok)'; txt = 'Dans la zone retenue : compté comme l\'agent assis. L\'écran reste ouvert.'; }
+  else { dec = 'ignoré'; col = 'var(--muted)'; txt = 'Hors zone : ignoré, comme un usager au guichet. S\'il n\'y a personne plus près, l\'écran se bloque.'; }
+  $('#decision').textContent = dec; $('#decision').style.color = col; $('#physVerdict').textContent = txt;
+}
+dist.addEventListener('input', upd); upd();
+
+/* ---------- navigation active ---------- */
+const links2 = [...document.querySelectorAll('#navlinks a')];
+if ('IntersectionObserver' in window){
+  const obs = new IntersectionObserver(es => es.forEach(e => {
+    if (e.isIntersecting){ links2.forEach(a => a.classList.toggle('on', a.getAttribute('href') === '#' + e.target.id)); }
+  }), {rootMargin:'-45% 0px -50% 0px'});
+  document.querySelectorAll('section.s').forEach(s => obs.observe(s));
+}
+})();
+</script>
