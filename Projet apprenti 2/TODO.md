@@ -20,6 +20,8 @@ Rien ne bouge sur le projet tant que ces réponses ne sont pas arrivées. Les do
 - [ ] Harmoniser la case « Projet développé : Entreprise » avec le texte « maquette au lycée »
 
 ## Autres points
+- [ ] Page HTML interactive et présentation 3Blue1Brown (3 documents par apprenti, décision du 11/11)
+
 - [ ] Confirmer que Yaksan = apprenti 2
 - [ ] Compléter à la main dans le formulaire : adresse, site, téléphone, mail de l'entreprise ; nom et fonction du tuteur
 - [ ] Validation de la réalisation au lycée par l'académie

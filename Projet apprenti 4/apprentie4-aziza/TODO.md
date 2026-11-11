@@ -14,7 +14,7 @@
 - [ ] Demander la validation de la réalisation au lycée à l'académie (commission de validation des sujets)
 - [ ] Faire valider le volet physique par le collègue de physique avant janvier
 - [x] Modèles disponibles : `Projet apprenti 1/` (dossier V3) et `Projet apprenti 2/` (synthèse)
-- [ ] Reporter les corrections du 11/11 dans la fiche technique (doc Claude) et le PowerPoint
+- [ ] Reporter les corrections du 11/11 dans le PowerPoint 3Blue1Brown (la fiche technique n'est plus un livrable)
 - [x] Formulaire académique « Dossier de présentation et de validation du projet » rempli (`livrables/fiche-academique/`, DOCX + PDF, 14 p.) : à compléter à la main (adresse, contact, site, téléphone, mail de l'entreprise ; nom du tuteur)
 - [ ] ~~Étape 3 : dossier complet~~ : pas nécessaire (décision de l'enseignant, 11/11)
 - [ ] Après la visite : mettre à jour les hypothèses chiffrées (diapo 5 du PowerPoint, fiche technique, dossier)

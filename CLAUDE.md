@@ -25,18 +25,23 @@ Ce dépôt sert à concevoir et documenter les projets individuels E6 de 4 appre
 
 ## Organisation du dépôt
 - `docs/` : cadre E6, état des 4 projets, charte IA, sources vérifiées.
-- `Projet apprenti 1/` : dossier V3 de Wassim (PDF, 24 p.) = **modèle du dossier complet**.
-- `Projet apprenti 2/` : synthèse de 3 pages (PDF) = **modèle de la synthèse**.
-- `Projet apprenti 3/` : dossier V2 de Lorenzo (PDF, 33 p.).
+- `Projet apprenti 1/` : dossier V3 de Wassim (PDF, 24 p.), source du projet.
+- `Projet apprenti 2/` : synthèse de 3 pages (PDF), source du projet ; `fiche-academique/` ; `TODO.md`.
+- `Projet apprenti 3/` : dossier V2 de Lorenzo (PDF, 33 p.), source du projet ; `fiche-academique/` ; `livrables/page-html/` ; `TODO.md`.
 - `Projet apprenti 4/` : fiche technique d'Aziza (PDF) et `apprentie4-aziza/` (spécification `projet.md`, décisions, questions de visite, TODO).
 - `Projet apprenti 4/apprentie4-aziza/livrables/` : fichiers déjà produits (fiche signable, PowerPoint, présentation animée, scripts de génération).
 - `.claude/commands/` : commandes réutilisables (revue critique d'un projet, contrôle d'un dossier).
 
-## Livrables : formats habituels
-- **Fiche de présentation** : 1 page A4, à faire signer et cacheter par l'entreprise, avec la mention « besoin issu de l'entreprise, réalisation au lycée ».
-- **Dossier complet** : PDF A4 portrait, même mise en page et même structure que le dossier V3 de l'apprenti 1 (couverture ; le projet en une minute ; pourquoi ce projet ; besoin chiffré ; architecture ; scénarios ; qui fait quoi ; briques expliquées ; étapes avec preuves ; logique logicielle ; montage physique et sécurité ; expériences de physique avec formules ; exploitation du réseau ; cybersécurité ; recette T01… ; planning 150 h ; budget ; risques et décisions ouvertes ; plan de déploiement ; annexes ; checklist de l'apprenti ; références).
-- **Synthèse** : 3 pages, sur le modèle de celle de l'apprenti 2.
-- Modèles : `Projet apprenti 1/projet_E6_apprenti_1_guide_complet_V3_WASSIM.pdf` (dossier) et `Projet apprenti 2/projet_E6_apprenti_2_boite_noire_synthese_3p.pdf` (synthèse).
+## Livrables : les trois documents par apprenti (décision du 11/11/2026)
+Pour **chaque** apprenti, il faut ces trois documents, et seulement eux :
+1. **Page HTML interactive** (pour l'enseignant) : comprendre le projet dans son ensemble et dans ses détails. Structure : problème de départ ; solutions existantes (ce qu'elles font bien, ce qui leur manque) ; solution de l'apprenti ; scénario concret avec un personnage ; schéma d'architecture ; puis sécurité, physique, vie privée, parcours V1/V2, en bref. Illustrations SVG, animations, mots simples. Modèle : `Projet apprenti 3/livrables/page-html/poste-attentif.html`.
+2. **Formulaire académique rempli** (« Dossier de présentation et de validation du projet », `Fiche presentation projet E6-projet-IR v2.docx` dans le dossier de l'apprenti) : parties 1 à 6, partie 7 laissée à la commission ; DOCX + PDF ; schémas SysML et Gantt du 1er janvier au 15 mai. Modèle : `Projet apprenti 3/fiche-academique/` (`schemas.py`, `rendu.js`, `remplir_fiche.py`).
+3. **Présentation style 3Blue1Brown** (PowerPoint, ou Beamer) : fond sombre, animations au clic, notes de l'orateur. Modèle : `Projet apprenti 4/apprentie4-aziza/livrables/powerpoint-3b1b/`.
+
+**Plus de dossier complet ni de synthèse de 3 pages** : ils ne sont plus demandés. Les anciens dossiers (V3 de Wassim, V2 de Lorenzo, synthèse de l'apprenti 2) restent des sources, pas des livrables à mettre à jour.
+La fiche d'une page à faire signer par l'entreprise reste utile quand le tuteur doit valider le besoin (cas d'Aziza).
+
+État au 11/11 : voir le tableau « Livrables » dans `docs/apprentis.md`.
 
 ## Outils de génération
 - PDF : HTML + CSS puis `weasyprint` (voir `Projet apprenti 4/apprentie4-aziza/livrables/fiche/fiche.html`). Toujours vérifier le nombre de pages (`pdfinfo`) et le rendu (`pdftoppm`) avant de livrer.

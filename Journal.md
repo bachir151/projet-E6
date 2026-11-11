@@ -1,5 +1,10 @@
 # Journal de travail – Projets E6
 
+## Session du 11 novembre 2026 (suite) : les trois livrables par apprenti
+
+### Décidé
+- Pour chaque apprenti, **trois documents seulement** : page HTML interactive (pour l'enseignant), formulaire académique rempli, présentation style 3Blue1Brown (PowerPoint ou Beamer). Plus de dossier complet ni de synthèse ; le dossier V2 de Lorenzo n'est pas mis à jour. Écrit dans `CLAUDE.md` et `docs/apprentis.md` (tableau d'avancement).
+
 ## Session du 11 novembre 2026 (suite) : Lorenzo, recentrage validé
 
 ### Décidé
