@@ -15,7 +15,8 @@
 - [ ] Faire valider le volet physique par le collègue de physique avant janvier
 - [x] Modèles disponibles : `Projet apprenti 1/` (dossier V3) et `Projet apprenti 2/` (synthèse)
 - [ ] Reporter les corrections du 11/11 dans la fiche technique (doc Claude) et le PowerPoint
-- [ ] **Étape 3** : dossier complet PDF A4 (même mise en page que le dossier de l'apprenti 1), puis synthèse de 3 pages
+- [x] Formulaire académique « Dossier de présentation et de validation du projet » rempli (`livrables/fiche-academique/`, DOCX + PDF, 14 p.) : à compléter à la main (adresse, contact, site, téléphone, mail de l'entreprise ; nom du tuteur)
+- [ ] ~~Étape 3 : dossier complet~~ : pas nécessaire (décision de l'enseignant, 11/11)
 - [ ] Après la visite : mettre à jour les hypothèses chiffrées (diapo 5 du PowerPoint, fiche technique, dossier)
 - [ ] Commander le matériel en décembre
 - [ ] Vérifier les licences Windows 11 du lycée (ou VM avec TPM virtuel)

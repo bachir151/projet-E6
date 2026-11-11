@@ -1,5 +1,18 @@
 # Journal de travail – Projets E6
 
+## Session du 11 novembre 2026 (suite) : formulaire académique d'Aziza
+
+### Fait
+- **Formulaire officiel rempli** (`Fiche presentation projet E6-projet-IR v2.docx`, modèle laissé intact) → `Projet apprenti 4/apprentie4-aziza/livrables/fiche-academique/Fiche_presentation_E6_Aziza.docx` et `.pdf` (14 pages). Parties 1 à 6 remplies ; partie 7 laissée à la commission.
+- Choix de l'enseignant : nom réel (SNCF) dans les cases entreprise ; case « Projet développé : Entreprise » ; R1 fin janvier (29/01), R2 mi-mars (19/03), R3 mi-mai (14/05), remise avec la R3, soutenance en juin (date académique).
+- Schémas produits (`schemas/`) : synoptique, diagrammes SysML d'exigences, de contexte, de cas d'utilisation et de séquence, Gantt du 1er janvier au 15 mai 2027. Pour tout reconstruire : `python3 schemas.py && node rendu.js && python3 remplir_fiche.py`, puis `soffice --headless --convert-to pdf`.
+- Dossier complet : abandonné (pas nécessaire).
+
+### À vérifier
+- Compléter à la main : adresse, site, téléphone et mail de l'entreprise ; nom et fonction du tuteur.
+- La case « Entreprise » est cochée alors que le texte parle d'une maquette au lycée : à harmoniser si la commission le demande.
+- Ouvrir le DOCX dans Word : mettre à jour la table des matières (numéros de page) et vérifier les cases ☐/☒ (police Segoe UI Symbol).
+
 ## Session du 11 novembre 2026 (projet d'Aziza)
 
 ### Fait
