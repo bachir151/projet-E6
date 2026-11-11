@@ -1,5 +1,12 @@
 # Journal de travail – Projets E6
 
+## Session du 11 novembre 2026 (suite) : revue de Lorenzo et répartition de la sécurité
+
+### Fait
+- Revue critique du projet de Lorenzo : dossier solide, mais trop gros (≈ 178 h avec IA), une faille (messages du boîtier non signés entre deux défis) et des doublons. Propositions dans `Projet apprenti 3/TODO.md`.
+- **Décidé par l'enseignant** : une question de sécurité par apprenti. Lorenzo = « le boîtier est-il le vrai ? » (HMAC) ; Yaksan = « le récit a-t-il été effacé ? » (journal chaîné) ; Aziza = « le fichier est-il le bon ? », sans changement. Écrit dans `docs/apprentis.md`.
+- La physique n'est pas touchée par cette répartition. Réductions de physique proposées pour Lorenzo et Yaksan : à valider avec le collègue de physique.
+
 ## Session du 11 novembre 2026 (suite) : revue du projet de Yaksan (apprenti 2)
 
 ### Fait

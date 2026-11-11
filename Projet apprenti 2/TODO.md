@@ -24,6 +24,14 @@ Rien ne bouge sur le projet tant que ces réponses ne sont pas arrivées. Les do
 - [ ] Compléter à la main dans le formulaire : adresse, site, téléphone, mail de l'entreprise ; nom et fonction du tuteur
 - [ ] Validation de la réalisation au lycée par l'académie
 
+## Décidé (11/11)
+- [x] Répartition de la sécurité entre apprentis (voir `docs/apprentis.md`) : Yaksan **abandonne** le défi-réponse HMAC et la démonstration du faux boîtier (gardés par Lorenzo). Sa question de sécurité = **« quelqu'un a-t-il effacé ce qui s'est passé ? »** : journal chaîné, dernier haché envoyé au serveur, démonstration « ligne effacée détectée ».
+- [ ] Reporter ce changement dans le formulaire académique (exigence E7, synoptique, séquence : étapes 4–5 « défi HMAC » à remplacer)
+
+## Physique (à valider avec le collègue de physique)
+- Garder : P3 énergie de secours et P4 carte vivante (principaux), P1 voyants et P6 horloges (courts).
+- Abandonner : P2 échantillonnage et P5 signal de la carte (ATR).
+
 ## Décisions déjà proposées (revue du 11/11, à valider par l'enseignant)
 - Extension « lien outil de tickets » supprimée (doublon apprenti 1)
 - PKI de labo préparée par l'enseignant, comme le contrôleur de domaine (Yaksan l'exploite)
