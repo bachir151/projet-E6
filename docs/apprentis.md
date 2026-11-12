@@ -1,5 +1,9 @@
 # Les 4 projets E6 : état au 11 novembre 2026
 
+> **Mise à jour du 12/11/2026 (dite par l'enseignant)** : les formulaires académiques de **Yaksan (2)**, **Aziza (4)** et **Wassim (1)** sont **envoyés**. Il ne reste que **Lorenzo (3)**.
+> - Lorenzo, contrôle du 12/11 : formulaire prêt à envoyer (13 p., parties 1 à 6 remplies, schémas SysML et Gantt lisibles, mêmes choix que les formulaires déjà envoyés). Restent à écrire à la main : adresse, site, téléphone, mail de l'entreprise ; nom et fonction du tuteur.
+> - Présentation 3Blue1Brown de Lorenzo : rendu vérifié avec LibreOffice (30 diapositives, aucun débordement visible). Les animations au clic restent à voir dans PowerPoint.
+
 | Apprenti | Entreprise (à anonymiser) | Missions | Projet retenu | État |
 |---|---|---|---|---|
 | 1 (tuteur M. Goussard) | Hôpital | technicien support, déploiement | « Assistance automatisée » : courriel → ticket GLPI → diagnostic PowerShell à distance ; banc de mesure de batterie de portable (ESP32 + INA226). V4 recentrée sur l'autonomie des portables de chariot. | Dossier V3 fait ; V4 + synthèse 3 p. à finir. Volet Wi-Fi non tranché (doublon possible avec l'apprentie 4). |
