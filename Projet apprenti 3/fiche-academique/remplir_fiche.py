@@ -235,13 +235,19 @@ for c in (2, 3, 4):
 cocher(cases(t.cell(1, 3).paragraphs[0])[0])          # projet développé : entreprise
 c = t.cell(2, 1).paragraphs
 cocher(cases(c[0])[0])
-ajouter_dans_run(c[1], "Nom", "DGFiP (Direction générale des Finances publiques)")
-ajouter_dans_run(c[3], "Contact", "tuteur de l’apprenti (nom et fonction à compléter)")
+ajouter_dans_run(c[1], "Nom", "DGFiP de Bobigny")
+ajouter_dans_run(c[2], "Adresse", "8 rue Michel de l’Hospital, 93000 Bobigny")
+ajouter_dans_run(c[3], "Contact", "Mathurin TOURET, CID 93 (tuteur)")
 cocher(cases(c[5])[1])
 for k in (6, 7):
     for case in cases(c[k]):
         cocher(case)
-ajouter_dans_run(t.cell(3, 1).paragraphs[0], "Nom de l", "DGFiP")
+ajouter_dans_run(t.cell(3, 1).paragraphs[0], "Nom de l", "DGFiP de Bobigny")
+ajouter_dans_run(t.cell(3, 1).paragraphs[1], "Adresse", "8 rue Michel de l’Hospital, 93000 Bobigny")
+for r in t.cell(3, 1).paragraphs[2].runs:
+    r.text = r.text.replace("http://", "")
+ajouter_dans_run(t.cell(3, 1).paragraphs[3], "Tel", "01.88.50.92.20")
+ajouter_dans_run(t.cell(3, 1).paragraphs[3], "\tMail", "mathurin.touret@dgfip.finances.gouv.fr")
 
 # ================================================================== 1.2 PRÉSENTATION
 R = Redac(P[38])
