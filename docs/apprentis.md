@@ -39,3 +39,11 @@ Chaque apprenti garde **une seule** question de sécurité, pour que la commissi
 | 4 Aziza | « Ce fichier est-il le bon ? » | Catalogue signé, empreintes, numéro de version | Rien ne change |
 
 La physique de chaque projet n'est pas touchée par cette répartition.
+
+## Préparation de l'oral : questions difficiles du jury (12/11)
+Un PDF par apprenti : questions probables (à l'enseignant puis à l'apprenti), piège, réponse en mots simples, relance, preuve à montrer ; points à corriger avant l'oral ; lectures.
+- Wassim : `Projet apprenti 1/questions-jury/Questions_jury_Wassim.pdf` (source : dossier V3 ; à recaler sur la V4)
+- Yaksan : `Projet apprenti 2/questions-jury/Questions_jury_Yaksan.pdf` (à revoir après les réponses du tuteur)
+- Lorenzo : `Projet apprenti 3/livrables/questions-jury/Questions_jury_Lorenzo.pdf`
+- Aziza : `Projet apprenti 4/apprentie4-aziza/livrables/questions-jury/Questions_jury_Aziza.pdf`
+Contenu modifiable dans chaque `contenu.py` ; régénérer avec `python3 docs/questions-jury/generer.py` (nécessite `weasyprint`).
