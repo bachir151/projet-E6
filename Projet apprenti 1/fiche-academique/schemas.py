@@ -124,7 +124,7 @@ def exigences():
     px, py, pw, ph = 330, 48, 460, 92
     b.append(f'<rect x="{px}" y="{py}" width="{pw}" height="{ph}" fill="{BLUE_BG}" stroke="{BLUE}" stroke-width="2"/>')
     b.append(text(px + pw / 2, py + 17, "«requirement»", 11, fill=GREY, italic=True))
-    b.append(text(px + pw / 2, py + 37, "E0 – Témoin du chariot de soins", 15, "bold"))
+    b.append(text(px + pw / 2, py + 37, "E0 – Supervision instrumentée des chariots de soins", 15, "bold"))
     b.append(text(px + pw / 2, py + 60, "Voir la panne au moment où elle arrive", 13))
     b.append(text(px + pw / 2, py + 78, "et ouvrir le ticket avec la preuve", 13))
     reqs = [
@@ -162,7 +162,7 @@ def contexte():
     sx, sy, sw, sh = 390, 220, 340, 150
     b.append(f'<rect x="{sx}" y="{sy}" width="{sw}" height="{sh}" fill="{BLUE_BG}" stroke="{BLUE}" stroke-width="2"/>')
     b.append(text(sx + sw / 2, sy + 22, "«system»", 11, fill=GREY, italic=True))
-    b.append(text(sx + sw / 2, sy + 46, "Témoin du chariot", 16, "bold"))
+    b.append(text(sx + sw / 2, sy + 46, "Supervision instrumentée des chariots", 14.5, "bold"))
     for i, t in enumerate(["boîtier posé sur le chariot", "+ service de corrélation (serveur)", "+ diagnostic à distance et tickets"]):
         b.append(text(sx + sw / 2, sy + 78 + i * 20, t, 13))
     b.append(actor(120, 60, "Soignant", "pousse le chariot, saisit"))
@@ -193,7 +193,7 @@ def cas():
     b = [text(30, 30, "Diagramme des cas d’utilisation (uc)", 16, "bold", anchor="start")]
     bx, by, bw, bh = 230, 50, 640, 590
     b.append(f'<rect x="{bx}" y="{by}" width="{bw}" height="{bh}" fill="#fff" stroke="#4b5563" stroke-width="1.4"/>')
-    b.append(text(bx + bw / 2, by + 22, "Système « Témoin du chariot »", 14, "bold"))
+    b.append(text(bx + bw / 2, by + 22, "Système « Supervision instrumentée des chariots de soins »", 14, "bold"))
 
     def uc(cx, cy, t1, t2, rx):
         o = f'<ellipse cx="{cx}" cy="{cy}" rx="{rx}" ry="27" fill="#fff" stroke="{BLUE}" stroke-width="1.5"/>'

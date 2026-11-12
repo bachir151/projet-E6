@@ -215,7 +215,7 @@ harmoniser_cases(d)
 
 # ================================================================== EN-TÊTE
 remplacer_marque(T[0].cell(3, 0).paragraphs[0], " à attribuer par la commission")
-remplacer_marque(T[0].cell(3, 1).paragraphs[0], "Témoin du chariot de soins", gras=True)
+remplacer_marque(T[0].cell(3, 1).paragraphs[0], "Supervision instrumentée des chariots de soins : de la coupure au ticket", gras=True)
 
 t = T[1]
 cocher(cases(t.cell(0, 1).paragraphs[0])[0])          # projet nouveau : oui
