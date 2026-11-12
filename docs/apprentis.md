@@ -4,6 +4,7 @@
 > - Lorenzo : relire la présentation dans PowerPoint ; compléter à la main les coordonnées entreprise/tuteur dans le formulaire ; validation académie.
 > - Wassim : trancher le volet Wi-Fi, finir la V4, puis les 3 documents (page HTML, formulaire académique, présentation 3Blue1Brown).
 > - Wassim : projet **réalisé au lycée, avec le matériel du lycée** (GLPI de laboratoire, PC Windows de test, ESP32 + INA226). Aucun accès à l'hôpital.
+> - Wassim, décision du 12/11 : le banc de mesure de batterie est jugé **artificiel** (l'hôpital a déjà des moyens : rapport Windows, outils de parc, remplacement programmé). **Option C retenue** : chercher le volet physique ailleurs, du côté du **Wi-Fi des chariots** (puissance du signal, zones mortes). Un **doublon avec Aziza est accepté** (décision de l'enseignant). Reste à confirmer avec le tuteur : cause réelle des pannes de chariot, outils existants.
 > - Les TODO de Yaksan et d'Aziza ne sont plus prioritaires (le tableau ci-dessous n'est pas encore remis à jour).
 
 | Apprenti | Entreprise (à anonymiser) | Missions | Projet retenu | État |
