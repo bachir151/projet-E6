@@ -27,6 +27,9 @@
 - Mettre de côté : E1–E3 (wattmètre, bilan énergétique), sauf E1 court si la sobriété revient.
 
 ## À faire
+- [x] Récit refait pour des **postes de bureau** (12/11) : formulaire, présentation, page HTML (https://claude.ai/artifact/3Bhga5UmEr3r67mo6Wus3j)
+- [x] Poste Windows 11 (12/11) : **Windows 11 Entreprise en évaluation (90 j) en VM VirtualBox** sur le PC Ubuntu (le PC du commerce de l'enseignant est en édition Famille, qui ne rejoint pas un domaine). Installation ≈ 11/01, **réinstallation 5–9 avril** (dans le Gantt), après export des journaux et mesures ; couvre la soutenance de juin.
+- [ ] Choisir le titre définitif (propositions du 12/11) et le reporter partout
 - [x] Présentation 3Blue1Brown : `livrables/powerpoint-3b1b/Projet_E6_Lorenzo_3b1b.pptx` (30 diapositives, animations au clic, notes) ; à relire dans PowerPoint
 - [x] Dossier V2 (PDF) : **pas de mise à jour** (décision du 11/11 : seuls la page HTML, le formulaire et la présentation sont demandés)
 - [x] Propositions ci-dessus validées (11/11)
@@ -39,4 +42,4 @@
 2. Les agents sont-ils administrateurs de leur poste ?
 3. Délai actuel du verrouillage sur inactivité ?
 4. Comment les installations sont-elles lancées aujourd'hui (outil, horaires) ?
-5. Distance entre l'agent et l'usager au guichet ?
+5. Disposition des bureaux : bureaux partagés ou plateau ouvert, distance au bureau voisin ? (et, à l'accueil, distance à l'usager)

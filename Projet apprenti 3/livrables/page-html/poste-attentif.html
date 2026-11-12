@@ -309,18 +309,18 @@ footer{padding-block:40px 60px;color:var(--muted);font-size:.85rem}
 <!-- 1 -->
 <section class="s" id="probleme">
   <div class="s-head"><span class="num">1</span><h2>Le problème de départ</h2>
-    <p class="lead">Une administration avec un accueil du public. Sur les écrans, des dossiers confidentiels. Quand l'agent quitte son poste, l'ordinateur ne le sait pas.</p></div>
+    <p class="lead">Une administration, surtout des employés de bureau, souvent en bureau partagé, et quelques postes d'accueil. Sur les écrans, des dossiers confidentiels. Quand l'agent quitte son poste, l'ordinateur ne le sait pas.</p></div>
   <div class="panel">
     <div class="timer-row">
       <div class="timer" id="timer">06:40<small>depuis que Martine a quitté son poste, écran toujours ouvert</small></div>
       <button class="btn" id="replay1">Rejouer la scène</button>
     </div>
-    <div id="scene1" aria-label="Dessin : l'agent est parti, l'écran est resté ouvert, un usager se penche pour lire"></div>
-    <p style="margin-top:10px;color:var(--muted);font-size:.95rem">Aujourd'hui, l'écran se bloque tout seul seulement après 10 minutes sans clavier ni souris. Pendant ce temps, l'usager au guichet peut lire.</p>
+    <div id="scene1" aria-label="Dessin : l'agent est parti, l'écran est resté ouvert, un collègue de passage se penche pour lire"></div>
+    <p style="margin-top:10px;color:var(--muted);font-size:.95rem">Aujourd'hui, l'écran se bloque tout seul seulement après 10 minutes sans clavier ni souris. Pendant ce temps, un collègue non habilité, un visiteur ou un prestataire peut lire le dossier, ou agir au nom de l'agent. À l'accueil, c'est le public.</p>
   </div>
   <div class="cause">
-    <div class="conseq"><p class="tag">Problème principal</p><h3>L'écran reste ouvert</h3><p>Des dossiers confidentiels restent visibles par le public, parfois pendant 10 minutes.</p></div>
-    <div class="conseq second"><p class="tag">Problème secondaire</p><h3>Les installations tombent mal</h3><p>Elles démarrent pendant que l'agent travaille, parfois devant un usager.</p></div>
+    <div class="conseq"><p class="tag">Première conséquence</p><h3>La session reste ouverte</h3><p>Pendant 10 minutes, n'importe qui passant près du bureau peut lire un dossier couvert par le secret, ou agir au nom de l'agent.</p></div>
+    <div class="conseq second"><p class="tag">Deuxième conséquence</p><h3>Les installations tombent mal</h3><p>Elles démarrent pendant que l'agent travaille, alors que ses vraies absences (réunion, déjeuner) ne servent pas.</p></div>
   </div>
   <p class="big-quote">L'ordinateur voit si on touche le clavier. Il ne voit pas si on est là. <em>Inactif ne veut pas dire absent.</em></p>
 </section>
@@ -336,7 +336,7 @@ footer{padding-block:40px 60px;color:var(--muted);font-size:.85rem}
   </div>
 
   <div id="famEcran" role="tabpanel" aria-labelledby="tabEcran">
-    <p class="fam-intro">Pour éviter qu'un écran reste ouvert quand l'agent part. Cliquez sur une carte : ce que la solution fait bien, et ce qui lui manque au guichet.</p>
+    <p class="fam-intro">Pour éviter qu'un écran reste ouvert quand l'agent part. Cliquez sur une carte : ce que la solution fait bien, et ce qui lui manque dans nos bureaux.</p>
     <div class="cards" id="cardsEcran"></div>
     <div class="panel test">
       <div class="timer-row" style="margin-bottom:6px">
@@ -394,7 +394,7 @@ footer{padding-block:40px 60px;color:var(--muted);font-size:.85rem}
 <!-- 4 -->
 <section class="s" id="martine">
   <div class="s-head"><span class="num">4</span><h2>Une journée avec Martine</h2>
-    <p class="lead">Martine travaille à l'accueil. Suivez sa journée, avec puis sans le projet de Lorenzo.</p></div>
+    <p class="lead">Martine est gestionnaire. Elle partage son bureau avec deux collègues ; des visiteurs et des prestataires passent dans la journée. Suivez sa journée, avec puis sans le projet de Lorenzo.</p></div>
   <div class="panel">
     <div class="timer-row">
       <div class="mode" role="group" aria-label="Avec ou sans le projet">
@@ -461,7 +461,7 @@ footer{padding-block:40px 60px;color:var(--muted);font-size:.85rem}
 <!-- 7 -->
 <section class="s" id="physique">
   <div class="s-head"><span class="num">7</span><h2>La physique : régler le radar avec des mesures</h2>
-    <p class="lead">Le radar découpe l'espace en tranches de 0,75 m. Lorenzo mesure où s'arrête l'agent et où commence l'usager, pour ne compter que l'agent. Déplacez la personne.</p></div>
+    <p class="lead">Le radar découpe l'espace en tranches de 0,75 m. Lorenzo mesure où s'arrête l'agent et où commence le collègue du bureau voisin (ou la personne qui passe dans l'allée), pour ne compter que l'agent. Déplacez la personne.</p></div>
   <div class="panel phys">
     <div id="physArt"></div>
     <label for="dist" style="font-weight:700;display:block;margin-top:8px">Distance entre le radar et la personne : <span class="mono" id="distVal">0,60 m</span></label>
@@ -482,7 +482,7 @@ footer{padding-block:40px 60px;color:var(--muted);font-size:.85rem}
   </div>
   <div class="essais">
     <div class="essai"><b>R1</b><span><strong>Seuils.</strong> Chaise vide, agent immobile, agent qui lit : l'énergie captée dans chaque tranche, pour fixer le seuil « présent ».</span></div>
-    <div class="essai"><b>R2–R3</b><span><strong>Zone.</strong> Agent à 0,4 / 0,6 / 0,8 / 1,0 m, puis usager côté public : où mettre la limite pour ne compter que l'agent.</span></div>
+    <div class="essai"><b>R2–R3</b><span><strong>Zone.</strong> Agent à 0,4 / 0,6 / 0,8 / 1,0 m, puis collègue au bureau voisin ou dans l'allée : où mettre la limite pour ne compter que l'agent.</span></div>
     <div class="essai"><b>R4</b><span><strong>Temps de réaction.</strong> 20 départs chronométrés à l'oscilloscope : combien de secondes avant le blocage, avec l'incertitude. C'est l'indicateur clé.</span></div>
     <div class="essai"><b>R5</b><span><strong>Fausses alertes.</strong> Ventilateur, rideau, collègue qui passe : le radar se trompe-t-il ?</span></div>
   </div>
@@ -542,7 +542,7 @@ footer{padding-block:40px 60px;color:var(--muted);font-size:.85rem}
 const reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
 const $ = s => document.querySelector(s);
 
-/* ---------- scène du guichet ---------- */
+/* ---------- scène du bureau ---------- */
 function sceneSVG(){
   return `<svg class="scene" viewBox="0 0 640 330" role="img" data-agent="present" data-screen="open" data-led="green" data-usager="none" data-box="on" data-fake="off">
   <line x1="10" y1="300" x2="630" y2="300" stroke="var(--line)" stroke-width="2"/>
@@ -586,9 +586,7 @@ function sceneSVG(){
   <g class="fake"><rect x="350" y="250" width="42" height="18" rx="4" fill="var(--surface-2)" stroke="var(--bad)" stroke-width="2"/>
     <text x="371" y="263" font-size="10" text-anchor="middle" fill="var(--bad)" font-weight="700" font-family="var(--f-body)">faux</text>
     <path d="M371 250 Q370 228 330 226" stroke="var(--bad)" stroke-width="1.5" fill="none" stroke-dasharray="4 3"/></g>
-  <!-- comptoir -->
-  <rect x="452" y="168" width="18" height="132" fill="var(--desk-dark)"/><rect x="440" y="160" width="96" height="10" rx="3" fill="var(--desk)"/>
-  <!-- usager -->
+  <!-- collègue de passage -->
   <g class="usager"><g class="lean">
     <rect x="540" y="130" width="42" height="96" rx="16" fill="var(--usager)"/>
     <circle cx="561" cy="110" r="18" fill="var(--skin)"/>
@@ -636,7 +634,7 @@ if ('IntersectionObserver' in window){
 /* ---------- 2 : cartes ---------- */
 /* [titre, qui l'utilise, ce que c'est, ce qu'il fait bien, ce qui manque ici] */
 const cardsEcran = [
-  ['Windows + L', 'geste de l\'agent', 'Le raccourci clavier qui bloque l\'écran.', 'Immédiat et gratuit.', 'Il faut y penser à chaque fois. Un jour chargé, avec un usager pressé, on oublie.'],
+  ['Windows + L', 'geste de l\'agent', 'Le raccourci clavier qui bloque l\'écran.', 'Immédiat et gratuit.', 'Il faut y penser à chaque fois. Un jour chargé, pressé par une réunion, on oublie.'],
   ['Blocage après inactivité', 'règle de l\'annuaire (GPO)', 'L\'écran se bloque après 10 minutes sans clavier ni souris.', 'Automatique, déjà en place sur tous les postes.', '10 minutes d\'écran ouvert. Plus court, il bloque l\'agent qui lit un dossier. Lorenzo le garde comme filet de sécurité.'],
   ['Verrouillage par téléphone', 'fonction de Windows', 'Windows bloque quand le téléphone Bluetooth s\'éloigne.', 'Bloque sans y penser.', 'Il faut le téléphone personnel de l\'agent. Environ 30 secondes de délai. Téléphone oublié sur le bureau : poste ouvert.'],
   ['Retirer sa carte à puce', 'carte d\'agent', 'Le poste se bloque quand on retire la carte du lecteur.', 'Lié à l\'identité de l\'agent.', 'Ça dépend encore d\'un geste. Les cartes restent souvent dans le lecteur.'],
@@ -655,11 +653,11 @@ const cardsInstall = [
   ['Intune', 'gestion par le cloud', 'La version en ligne de Microsoft, qui suit aussi les PC hors du bureau.', 'Fonctionne même loin du réseau interne.', 'Service hébergé hors de l\'administration : questions de souveraineté. Mêmes heures fixes.'],
   ['La nuit, avec réveil à distance', 'Wake-on-LAN', 'Le serveur réveille les PC à 2 h du matin pour installer.', 'Personne n\'est dérangé.', 'Le PC doit rester branché au réseau. Un portable fermé ne se réveille pas. Consomme de l\'énergie.'],
   ['« Si l\'ordinateur est inactif »', 'Planificateur de Windows', 'Windows lance une tâche quand personne ne touche au clavier.', 'Déjà dans Windows, gratuit.', 'Il confond inactif et absent : il installe pendant que Martine lit un dossier.'],
-  ['Report puis redémarrage forcé', 'règle courante', 'L\'agent peut reporter quelques fois, puis le redémarrage est imposé.', 'Le parc finit toujours à jour.', 'Le redémarrage imposé tombe parfois au mauvais moment, devant un usager.'],
+  ['Report puis redémarrage forcé', 'règle courante', 'L\'agent peut reporter quelques fois, puis le redémarrage est imposé.', 'Le parc finit toujours à jour.', 'Le redémarrage imposé tombe parfois au mauvais moment, en plein travail ou en pleine réunion en visio.'],
 ];
 function drawCards(id, list){
   $(id).innerHTML = list.map(([t, w, f, plus, minus]) => `<button class="flip" aria-pressed="false">
-    <div class="in"><div class="face front"><span class="who">${w}</span><h3>${t}</h3><p>${f}</p><span class="hint">Et au guichet ? →</span></div>
+    <div class="in"><div class="face front"><span class="who">${w}</span><h3>${t}</h3><p>${f}</p><span class="hint">Et chez nous ? →</span></div>
     <div class="face back"><span class="lbl">Ce qu'il fait bien</span><p class="plus">${plus}</p><span class="lbl">Ce qui manque ici</span><p class="minus">${minus}</p><span class="hint">← retourner</span></div></div></button>`).join('');
   $(id).querySelectorAll('.flip').forEach(c => c.addEventListener('click', () => { c.classList.toggle('turned'); c.setAttribute('aria-pressed', c.classList.contains('turned')); }));
 }
@@ -773,19 +771,19 @@ $('#waveArt').innerHTML = `<svg viewBox="0 0 460 200" width="100%" role="img" ar
 const S = {
   avec: [
     ['9 h 00', 'Martine lit un dossier papier', 'Elle ne touche pas au clavier depuis 10 minutes. Le radar voit sa respiration : elle est là. Rien ne se passe.', ['good','Écran ouvert, Martine travaille'], {agent:'reading', screen:'open', led:'green', usager:'none', box:'on', fake:'off'}],
-    ['10 h 00', 'Elle se lève', 'Le radar ne la voit plus. La lumière passe à l\'orange pendant 3 secondes : si elle était juste penchée, tout s\'annule.', ['good','Avertissement'], {agent:'absent', screen:'open', led:'orange', usager:'present', fake:'off'}],
-    ['10 h 00 + 8 s', 'L\'écran se bloque', 'Elle n\'est pas revenue : l\'écran se bloque tout seul. L\'usager au guichet ne peut rien lire.', ['good','Dossier protégé en quelques secondes'], {agent:'absent', screen:'locked', led:'red', usager:'lean', fake:'off'}],
+    ['10 h 00', 'Elle part en réunion', 'Le radar ne la voit plus. La lumière passe à l\'orange pendant 3 secondes : si elle était juste penchée, tout s\'annule.', ['good','Avertissement'], {agent:'absent', screen:'open', led:'orange', usager:'present', fake:'off'}],
+    ['10 h 00 + 8 s', 'L\'écran se bloque', 'Elle n\'est pas revenue : l\'écran se bloque tout seul. Le collègue qui passe ne peut rien lire, ni rien faire en son nom.', ['good','Dossier protégé en quelques secondes'], {agent:'absent', screen:'locked', led:'red', usager:'lean', fake:'off'}],
     ['10 h 05', 'Martine revient', 'Elle tape son mot de passe, comme d\'habitude. La lumière redevient verte.', ['good','Rien de changé pour elle'], {agent:'present', screen:'open', led:'green', usager:'none', fake:'off'}],
     ['12 h 20', 'La pause déjeuner', 'Absente depuis 20 minutes : le logiciel prévu par le technicien s\'installe. Si elle revient au milieu, son travail n\'est pas touché.', ['good','Installation sans déranger'], {agent:'absent', screen:'install', led:'red', usager:'none', fake:'off'}],
     ['15 h 00', 'Tentative de triche', 'Quelqu\'un branche un faux boîtier qui dit toujours « Martine est là ». Il ne connaît pas le code secret : l\'ordinateur bloque quand même et donne l\'alerte.', ['good','Faux boîtier démasqué'], {agent:'absent', screen:'locked', led:'red', usager:'none', fake:'on'}],
   ],
   sans: [
     ['9 h 10', 'Martine lit un dossier papier', 'Au bout de 10 minutes sans clavier, Windows croit qu\'elle est partie : l\'écran se bloque en pleine lecture. Elle doit retaper son mot de passe.', ['badv','Bloquée alors qu\'elle est là'], {agent:'reading', screen:'locked', led:'off', usager:'none', box:'off', fake:'off'}],
-    ['10 h 00', 'Elle se lève', 'Elle est pressée et oublie Windows + L. L\'ordinateur ne sait pas qu\'elle est partie.', ['badv','Écran ouvert'], {agent:'absent', screen:'open', usager:'present', fake:'off'}],
-    ['10 h 00 + 8 s', 'L\'usager se penche', 'L\'usager peut lire le dossier confidentiel. L\'écran restera ouvert jusqu\'à 10 h 10.', ['badv','Dossier visible par le public'], {agent:'absent', screen:'open', usager:'lean', fake:'off'}],
+    ['10 h 00', 'Elle part en réunion', 'Elle est pressée et oublie Windows + L. L\'ordinateur ne sait pas qu\'elle est partie.', ['badv','Écran ouvert'], {agent:'absent', screen:'open', usager:'present', fake:'off'}],
+    ['10 h 00 + 8 s', 'Un collègue passe', 'Un collègue d\'un autre service, non habilité, peut lire le dossier confidentiel, ou envoyer un message au nom de Martine. L\'écran restera ouvert jusqu\'à 10 h 10.', ['badv','Dossier visible, session utilisable'], {agent:'absent', screen:'open', usager:'lean', fake:'off'}],
     ['10 h 05', 'Martine revient', 'Personne n\'a rien bloqué. Pendant 5 minutes, le dossier était visible.', ['badv','5 minutes d\'exposition'], {agent:'present', screen:'open', usager:'none', fake:'off'}],
     ['12 h 20', 'La pause déjeuner', 'Le poste est libre, mais rien ne s\'installe : l\'outil ne sait pas qu\'elle est partie.', ['badv','Occasion perdue'], {agent:'absent', screen:'open', usager:'none', fake:'off'}],
-    ['15 h 00', 'L\'installation démarre', 'L\'installation se lance à heure fixe, pendant qu\'elle reçoit un usager. Le poste rame devant lui.', ['badv','Agent dérangé'], {agent:'present', screen:'install', usager:'present', fake:'off'}],
+    ['15 h 00', 'L\'installation démarre', 'L\'installation se lance à heure fixe, en plein milieu d\'une réunion en visio. Le poste rame, le son coupe.', ['badv','Agent dérangé'], {agent:'present', screen:'install', usager:'present', fake:'off'}],
   ]
 };
 const s4 = mount('scene4', S.avec[0][4]);
@@ -915,7 +913,7 @@ ph += `<rect x="${X0}" y="30" width="${1.0*PX}" height="140" fill="var(--radar-s
   <line x1="${X0 + PX}" y1="30" x2="${X0 + PX}" y2="170" stroke="var(--radar)" stroke-width="2" stroke-dasharray="5 4"/>
   <text x="${X0 + PX + 4}" y="186" font-size="12" fill="var(--radar-ink)" font-family="var(--f-body)" font-weight="700">limite 1,0 m</text>
   <rect x="${X0 - 26}" y="88" width="22" height="24" rx="4" fill="var(--surface-2)" stroke="var(--radar)" stroke-width="2"/>
-  <text x="${X0 + 1.3*PX}" y="70" text-anchor="middle" font-size="12" fill="var(--usager)" font-family="var(--f-body)" font-weight="700">usager</text>
+  <text x="${X0 + 1.3*PX}" y="70" text-anchor="middle" font-size="12" fill="var(--usager)" font-family="var(--f-body)" font-weight="700">collègue</text>
   <circle cx="${X0 + 1.3*PX}" cy="100" r="14" fill="var(--usager)" opacity=".55"/>
   <g id="pers"><circle id="persC" cx="${X0 + 0.6*PX}" cy="132" r="15" fill="var(--agent)"/><text id="persT" x="${X0 + 0.6*PX}" y="162" text-anchor="middle" font-size="12" font-family="var(--f-body)" font-weight="700" fill="var(--ink)">vous</text></g>
   <g font-family="var(--f-mono)" font-size="11" fill="var(--muted)">`;
@@ -932,7 +930,7 @@ function upd(){
   let dec, txt, col;
   if (d < 0.3){ dec = 'mal vu'; col = 'var(--warn)'; txt = 'Trop près : zone aveugle du radar (environ 30 cm). Il faut placer le radar un peu plus loin.'; }
   else if (d <= 1.0){ dec = 'agent'; col = 'var(--ok)'; txt = 'Dans la zone retenue : compté comme l\'agent assis. L\'écran reste ouvert.'; }
-  else { dec = 'ignoré'; col = 'var(--muted)'; txt = 'Hors zone : ignoré, comme un usager au guichet. S\'il n\'y a personne plus près, l\'écran se bloque.'; }
+  else { dec = 'ignoré'; col = 'var(--muted)'; txt = 'Hors zone : ignoré, comme le collègue du bureau voisin. S\'il n\'y a personne plus près, l\'écran se bloque.'; }
   $('#decision').textContent = dec; $('#decision').style.color = col; $('#physVerdict').textContent = txt;
 }
 dist.addEventListener('input', upd); upd();
