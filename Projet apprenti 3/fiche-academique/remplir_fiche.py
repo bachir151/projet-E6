@@ -350,12 +350,13 @@ R.image(IMG("4_sequence"), 16.5, "Figure 4 – Diagramme de séquence : départ,
 R = Redac(P[55])
 R.puce("Matériel à acheter : ", ("environ 25 € (minimal) à 60 € (confort)", "g"), ", prix à confirmer : 2 radars "
        "LD2410 (dont un de secours), LED RVB, résistances, boîtier plastique ; wattmètre et INA219 en option.")
-R.puce("PC, serveur, réseau, oscilloscope et licences Windows : fournis par le lycée. Logiciels libres. Si le poste "
-       "Windows 11 est en édition Famille : mise à niveau Pro (≈ 150 €, à confirmer) ou licence Éducation du lycée.")
+R.puce("PC, serveur, réseau et oscilloscope : fournis par le lycée. Logiciels libres ; Windows Server et Windows 11 "
+       "en versions d’évaluation gratuites (aucune licence à acheter).")
 
 R = Redac(P[60])
-R.puce(("Poste : ", "g"), "Windows 11 Pro ou Éducation sur un PC physique (une édition Famille ne peut pas rejoindre "
-       "le domaine) ; service PowerShell au compte "
+R.puce(("Poste : ", "g"), "Windows 11 Entreprise en évaluation (90 jours), en machine virtuelle VirtualBox sur un PC "
+       "Ubuntu, membre du domaine ; radar transmis par USB à la machine virtuelle ; réinstallation prévue "
+       "début avril (fin des 90 jours), après export des journaux et des mesures ; service PowerShell au compte "
        "SYSTÈME, journal dédié, tâches planifiées « sur événement », stratégie AllSigned.")
 R.puce(("Serveur : ", "g"), "Ubuntu Server, API Python FastAPI, base SQLite, partage Samba des paquets MSI de test.")
 R.puce(("Boîtier : ", "g"), "ESP32 programmé en C++ (Arduino) ; radar LD2410 en liaison série à 256 000 bauds ; "
@@ -385,13 +386,13 @@ R.puce(("Vie privée : ", "g"), "présence gardée sur le poste ; résultats dat
 
 # ================================================================== 2.3 RESSOURCES
 R = Redac(P[73])
-R.puce(("Matériel du lycée : ", "g"), "PC Ubuntu (machines virtuelles du serveur et du contrôleur de domaine), "
-       "poste Windows 11 physique (Pro ou Éducation), switchs HP ProCurve, routeur Cisco ISR 4331, ESP32 (dont un « faux boîtier »), "
+R.puce(("Matériel du lycée : ", "g"), "PC Ubuntu avec VirtualBox (machines virtuelles du serveur, du contrôleur de domaine et du "
+       "poste Windows 11, 16 Go de mémoire conseillés), switchs HP ProCurve, routeur Cisco ISR 4331, ESP32 (dont un « faux boîtier »), "
        "oscilloscope, multimètre.")
 R.puce(("Matériel à commander (décembre 2026) : ", "g"), "radars LD2410, LED RVB, boîtier plastique, petite "
        "plaque métallique pour les essais.")
 R.puce(("Logiciels : ", "g"), "PowerShell, Visual Studio Code, Python et FastAPI, SQLite, Samba, Arduino IDE, "
-       "Wireshark, Git ; Windows Server en évaluation (180 jours) ; Windows 11 Pro ou Éducation ; paquets MSI de logiciels libres.")
+       "Wireshark, Git ; VirtualBox ; Windows Server en évaluation (180 jours) ; Windows 11 Entreprise en évaluation (90 jours) ; paquets MSI de logiciels libres.")
 R.puce(("Documents : ", "g"), "fiche de présentation validée par le tuteur, documentation du module LD2410, "
        "Microsoft Learn (Planificateur de tâches, msiexec, audit, LAPS), recommandations de la CNIL, charte IA du lycée.")
 
@@ -484,7 +485,7 @@ for i in range(102, 122):
 cocher(cases(P[125])[0])
 R2 = nouveau_par_apres(P[125], "No Spacing")
 rr = R2.add_run("Matériel du lycée ; radars et petits composants à commander en décembre 2026 ; Windows Server "
-                "en évaluation ; poste en Windows 11 Pro ou Éducation.")
+                "en évaluation (180 jours) ; poste Windows 11 en évaluation (90 jours), réinstallé début avril.")
 rr.italic = True
 rr.font.size = Pt(9.5)
 

@@ -85,7 +85,7 @@ def save(name, content):
 def synoptique():
     b = [text(30, 34, "Synoptique de la maquette au lycée (réseau de laboratoire isolé, aucune donnée réelle)", 16, "bold", anchor="start")]
     b.append(box(30, 60, 300, 160, "Boîtier de présence", ["radar 24 GHz (LD2410)", "ESP32 + lumière tricolore", "chaque message signé (HMAC)", "sous le bureau, face au siège"], hl=True))
-    b.append(box(420, 60, 330, 200, "Poste Windows 11", ["service de présence (SYSTÈME)", "journal « PostePresence »", "tâche « Verrou » (session agent)", "tâche « Maintenance » (V2)", "script d’installation à paliers"]))
+    b.append(box(420, 60, 330, 200, "Poste Windows 11 (VM)", ["service de présence (SYSTÈME)", "journal « PostePresence »", "tâche « Verrou » (session agent)", "tâche « Maintenance » (V2)", "script d’installation à paliers"]))
     b.append(arrow(330, 140, 418, 140, "USB série", ly=132, both=True))
     b.append(box(840, 60, 290, 150, "Serveur Ubuntu", ["API Python (FastAPI), SQLite", "liste des installations", "tableau de bord du parc", "partage des paquets (SMB)"], hl=True))
     b.append(arrow(750, 130, 838, 130, "HTTPS + jeton", ly=122))
@@ -291,6 +291,7 @@ def gantt():
         ("Physique R4–R5 : délai, fausses alertes", (D(2027, 3, 1), D(2027, 3, 19)), "phy"),
         ("Captures réseau : DHCP, DNS, Kerberos, SMB, HTTPS", (D(2027, 2, 22), D(2027, 4, 2)), "c10"),
         ("Recette V1", (D(2027, 3, 8), D(2027, 3, 19)), "c10"),
+        ("Poste Windows 11 réinstallé (fin des 90 jours)", (D(2027, 4, 5), D(2027, 4, 9)), "c10"),
         ("V2 – installer au bon moment", None),
         ("Installation pendant les absences", (D(2027, 3, 22), D(2027, 4, 23)), "c8"),
         ("Serveur + tableau de bord du parc", (D(2027, 3, 29), D(2027, 4, 30)), "c8"),
