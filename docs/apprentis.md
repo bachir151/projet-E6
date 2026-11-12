@@ -3,6 +3,7 @@
 > **Mise à jour du 12/11/2026 (dite par l'enseignant)** : les fiches (formulaires académiques) de **Yaksan (2)** et d'**Aziza (4)** sont **déjà envoyées**. Il ne reste à traiter que **Lorenzo (3)** et **Wassim (1)**.
 > - Lorenzo : relire la présentation dans PowerPoint ; compléter à la main les coordonnées entreprise/tuteur dans le formulaire ; validation académie.
 > - Wassim : trancher le volet Wi-Fi, finir la V4, puis les 3 documents (page HTML, formulaire académique, présentation 3Blue1Brown).
+> - Wassim : projet **réalisé au lycée, avec le matériel du lycée** (GLPI de laboratoire, PC Windows de test, ESP32 + INA226). Aucun accès à l'hôpital.
 > - Les TODO de Yaksan et d'Aziza ne sont plus prioritaires (le tableau ci-dessous n'est pas encore remis à jour).
 
 | Apprenti | Entreprise (à anonymiser) | Missions | Projet retenu | État |
