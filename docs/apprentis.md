@@ -4,6 +4,8 @@
 > - Lorenzo, contrôle du 12/11 : formulaire prêt à envoyer (13 p., parties 1 à 6 remplies, schémas SysML et Gantt lisibles, mêmes choix que les formulaires déjà envoyés). Restent à écrire à la main : adresse, site, téléphone, mail de l'entreprise ; nom et fonction du tuteur.
 > - Lorenzo, 12/11 : **récit refait pour des postes de bureau** (précision de l'enseignant : Lorenzo intervient surtout sur des PC d'employés de bureau ; l'accueil n'est qu'un cas particulier). Risque principal : session ouverte, vue ou utilisée par un collègue non habilité, un visiteur ou un prestataire. Martine devient gestionnaire en bureau partagé ; l'« usager au guichet » devient « collègue de passage » (essais R2–R3 : bureau voisin, allée). Formulaire, présentation et page HTML mis à jour. Nouveau lien de la page : https://claude.ai/artifact/3Bhga5UmEr3r67mo6Wus3j (l'ancien lien n'est plus accessible). Titre : à choisir (« Poste attentif » gardé en attendant).
 > - Présentation 3Blue1Brown de Lorenzo : rendu vérifié avec LibreOffice (30 diapositives, aucun débordement visible). Les animations au clic restent à voir dans PowerPoint.
+> - Wassim : projet **réalisé au lycée, avec le matériel du lycée** (GLPI de laboratoire, PC Windows de test, ESP32). Aucun accès à l'hôpital.
+> - Wassim, historique du 12/11 : le matin, le banc de mesure de batterie est jugé **artificiel** et l'option C (volet physique du côté du Wi-Fi des chariots, doublon avec Aziza accepté) est retenue. L'après-midi, elle est **remplacée** par « Supervision instrumentée des chariots de soins » (voir le tableau ci-dessous).
 
 | Apprenti | Entreprise (à anonymiser) | Missions | Projet retenu | État |
 |---|---|---|---|---|
