@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Témoin du chariot de soins</title>
+<style>
+@page {
+  size: A4;
+  margin: 14mm 15mm 15mm 15mm;
+  @bottom-left { content: "BTS CIEL option IR — Épreuve E6 — Dossier de présentation du projet"; font: 7.5pt Inter; color: #666; }
+  @bottom-right { content: counter(page) " / " counter(pages); font: 7.5pt Inter; color: #666; }
+}
+:root { --bleu: #1f5f8b; --orange: #c8641e; --vert: #3a7d44; --gris: #f1f3f5; --trait: #c9d1d9; }
+* { box-sizing: border-box; }
+body { font-family: "Bitstream Charter", "DejaVu Serif", serif; font-size: 9.3pt; line-height: 1.32; color: #1b1b1b; margin: 0; }
+p { margin: 0 0 4pt 0; text-align: justify; hyphens: auto; }
+.lab { font-family: Inter, sans-serif; font-weight: 600; font-size: 8.2pt; color: var(--bleu); }
+.bandeau { font-family: Inter, sans-serif; font-size: 7.5pt; letter-spacing: .6pt; color: #555; text-transform: uppercase; }
+h1 { font-family: Inter, sans-serif; font-size: 20pt; margin: 4pt 0 2pt 0; color: #10324a; }
+.sous { font-family: Inter, sans-serif; font-size: 10pt; color: #333; margin-bottom: 2pt; }
+.sous2 { font-family: Inter, sans-serif; font-size: 8.5pt; color: #666; margin-bottom: 8pt; padding-bottom: 6pt; border-bottom: 1.5pt solid var(--bleu); }
+h2 { font-family: Inter, sans-serif; font-size: 11.5pt; color: #10324a; margin: 9pt 0 4pt 0; display: flex; align-items: center; break-after: avoid; }
+h2 .n { display: inline-block; background: var(--orange); color: #fff; width: 15pt; height: 15pt; text-align: center; line-height: 15pt; font-size: 9pt; margin-right: 6pt; }
+h3 { font-family: Inter, sans-serif; font-size: 9pt; color: var(--bleu); margin: 6pt 0 2pt 0; break-after: avoid; }
+table { width: 100%; border-collapse: collapse; margin: 3pt 0 6pt 0; font-size: 8.4pt; break-inside: avoid; }
+th { font-family: Inter, sans-serif; font-weight: 500; font-size: 7.6pt; color: #555; text-align: left; border-bottom: 1pt solid #888; padding: 2pt 4pt; }
+td { border-bottom: .5pt solid var(--trait); padding: 2.2pt 4pt; vertical-align: top; }
+td.k { font-family: Inter, sans-serif; font-weight: 600; font-size: 7.8pt; }
+td.h { text-align: right; font-family: Inter, sans-serif; }
+tr.tot td { font-weight: 700; border-top: 1pt solid #888; border-bottom: none; }
+.encart { background: var(--gris); border-left: 3pt solid var(--bleu); padding: 4pt 7pt; margin: 4pt 0 6pt 0; break-inside: avoid; }
+.encart.or { border-left-color: var(--orange); }
+.encart p:last-child { margin-bottom: 0; }
+ul, ol { margin: 1pt 0 4pt 0; padding-left: 14pt; }
+li { margin-bottom: 1pt; }
+svg { display: block; margin: 3pt auto 4pt auto; }
+.deux { display: flex; gap: 10pt; }
+.deux > div { flex: 1; }
+code { font-family: "JetBrains Mono", monospace; font-size: 7.8pt; }
+.saut { break-before: page; }
+.petit { font-size: 8pt; color: #444; }
+</style>
+</head>
+<body>
+
+<div class="bandeau">BTS CIEL · Option Informatique et réseaux · Épreuve E6 · Session 2027</div>
+<h1>Témoin du chariot de soins</h1>
+<div class="sous">Tester un boîtier qui voit les arrêts des PC de chariot, relié au diagnostic à distance et aux tickets GLPI</div>
+<div class="sous2">Projet individuel d’un apprenti technicien support en centre hospitalier — 150 heures — réalisation sur maquette au lycée</div>
+
+<h2><span class="n">1</span>Contexte</h2>
+<p>L’apprenti est technicien support au service informatique d’un centre hospitalier. Il traite les incidents de premier et de deuxième niveau dans un outil de tickets, sur un parc de plusieurs milliers de postes : postes de bureau, postes de soins, chariots de soins mobiles équipés d’un PC portable.</p>
+<p>À l’hôpital, un poste arrêté n’est pas un simple désagrément : la prescription, la traçabilité des soins et la consultation des résultats passent par le dossier patient informatisé. Quand le PC du chariot s’éteint, le soignant revient au papier ou attend.</p>
+<p>Le projet s’inscrit dans l’épreuve E6 « Valorisation de la donnée et cybersécurité ». Il mobilise C01 (communiquer), C03 (gérer un projet), C08 (coder) et C10 (exploiter un réseau informatique). Le réseau est utilisé tel qu’il existe : sa conception relève d’une autre épreuve.</p>
+<div class="encart or"><p><span class="lab">Point réglementaire.</span> L’arrêté du 25 janvier 2023 indique que les projets des apprentis doivent être développés dans l’entreprise. Ici, le besoin vient de l’hôpital, mais la réalisation se fait <b>au lycée, sur maquette</b>, sans accès à la production ni donnée réelle. Cette organisation doit être <b>validée par l’académie</b>.</p></div>
+
+<h2><span class="n">2</span>Le problème à résoudre</h2>
+<p><span class="lab">Raisonnement de départ.</span> Une panne a toujours une cause, physique ou logicielle, et cette cause laisse une trace à l’instant où elle agit. Diagnostiquer, c’est disposer de la bonne mesure au bon moment.</p>
+<p><span class="lab">Le cas de la panne intermittente.</span> Elle ne se produit jamais devant le technicien. Il n’observe rien, ne mesure rien, et procède par élimination : il change une pièce, attend le prochain appel, recommence.</p>
+<p><span class="lab">Fait rapporté par le service</span> (à confirmer par le tuteur). En cardiologie, le PC d’un chariot s’éteignait seul deux à trois fois par jour, en pleine saisie. Deux déplacements n’ont rien révélé : à chaque passage, le poste fonctionnait. Le journal Windows signalait des arrêts brutaux, sans en donner la cause.</p>
+<p><span class="lab">Ce que cela coûte.</span> Des déplacements répétés, des pièces changées sans certitude, des saisies perdues et un ticket ouvert pendant des semaines.</p>
+<div class="encart"><p><span class="lab">Question posée par le projet.</span> Un petit boîtier posé en permanence sur chaque chariot, qui voit la panne au moment où elle arrive et ouvre lui-même le ticket : <b>est-ce que cela vaut le coup de l’adopter ?</b> L’apprenti construit le système, le teste sur maquette et répond avec des chiffres.</p></div>
+
+<h2><span class="n">3</span>Les solutions existantes et leurs limites</h2>
+<table>
+<tr><th style="width:27%">Solution</th><th style="width:34%">Ce qu’elle apporte</th><th>Pourquoi elle ne suffit pas</th></tr>
+<tr><td class="k">Journal d’événements Windows</td><td>Date des arrêts brutaux, erreurs disque et matériel</td><td>Écrit seulement au redémarrage : décrit l’effet, jamais ce qui s’est passé autour du PC</td></tr>
+<tr><td class="k">Diagnostic à distance (PowerShell)</td><td>État du PC : batterie, disque, erreurs</td><td>Ne voit le PC qu’une fois rallumé ; rien sur l’instant de la panne</td></tr>
+<tr><td class="k">Outil de tickets (GLPI)</td><td>Suivi et historique des interventions</td><td>Le ticket dépend de l’appel du soignant ; il ne contient aucune mesure</td></tr>
+<tr><td class="k">Supervision, sondes internes</td><td>Température du processeur, santé du disque</td><td>L’agent s’arrête avec la machine ; aucune mesure de choc</td></tr>
+<tr><td class="k">Enregistreurs du commerce (chocs, température)</td><td>Mesures physiques horodatées</td><td>Données isolées, dépouillées à la main, sans lien avec Windows ni les tickets</td></tr>
+<tr><td class="k">Remplacement par élimination</td><td>Finit parfois par aboutir</td><td>Lent, coûteux, sans preuve de la cause</td></tr>
+</table>
+<p><span class="lab">Constat.</span> Chaque outil voit une partie du problème. Aucun ne place sur une même ligne de temps ce que le chariot a subi, ce que Windows a noté et le ticket du support. C’est pourtant l’<b>ordre des événements</b> qui désigne la cause.</p>
+
+<h2 class="saut"><span class="n">4</span>La solution proposée par l’apprenti</h2>
+<p>Un système en trois parties, que l’apprenti relie entre elles :</p>
+<ol>
+<li><b>Le boîtier</b>, posé en permanence sur le chariot, comme la boîte d’un enregistreur de vol. Il continue d’enregistrer sur sa petite batterie quand le PC s’éteint.</li>
+<li><b>Le diagnostic à distance</b> : dès que le PC redémarre, le serveur lance un script PowerShell qui relève l’état du PC (journal, batterie, disque).</li>
+<li><b>GLPI</b> : le serveur ouvre le ticket et y écrit tout ce qui a été vu. Le technicien lit, décide et ferme le ticket lui-même.</li>
+</ol>
+
+<table>
+<tr><th style="width:24%">Source</th><th style="width:22%">Matériel</th><th>Question à laquelle elle répond</th></tr>
+<tr><td class="k">Secousses (3 axes)</td><td>MPU6050</td><td>Le chariot a-t-il pris un choc juste avant la panne ? (cœur du projet)</td></tr>
+<tr><td class="k">Tension 5 V de l’USB</td><td>INA219</td><td>À quelle seconde exacte le PC s’est-il éteint ? (le 5 V tombe avec lui)</td></tr>
+<tr><td class="k">Température, humidité</td><td>SHT31</td><td>Le PC a-t-il chauffé avant de s’arrêter ?</td></tr>
+<tr><td class="k">État de Windows</td><td>Script PowerShell</td><td>Batterie vide ou usée ? Écran bleu ? Disque malade ?</td></tr>
+</table>
+
+<h3>Comment le système trouve la cause : il regarde l’ordre</h3>
+<table>
+<tr><th style="width:46%">Ce qui est vu, dans l’ordre</th><th style="width:20%">Cause probable</th><th>Message écrit dans le ticket</th></tr>
+<tr><td>Secousse, puis coupure 2 s après, batterie encore chargée</td><td>Faux contact</td><td>« Coupure après une secousse : vérifier les connecteurs »</td></tr>
+<tr><td>Pas de secousse, coupure, batterie qui descendait vers 0 %</td><td>Batterie vide ou usée</td><td>« Coupure à 2 % : batterie à contrôler »</td></tr>
+<tr><td>Température en hausse, puis coupure</td><td>Surchauffe</td><td>« Coupure à 41 °C : vérifier la ventilation »</td></tr>
+<tr><td>Rien d’anormal autour, erreur grave notée par Windows</td><td>Panne logicielle</td><td>« Aucune cause physique : erreur Windows »</td></tr>
+<tr><td>Rien de clair</td><td>Non conclu</td><td>« Cause non trouvée : poursuivre l’observation »</td></tr>
+</table>
+<p class="petit">Ces règles supposent des PC portables avec batterie : un portable sain ne s’éteint pas quand on débranche son chargeur. Si les chariots portent des petits PC sans batterie, deux règles seront adaptées (question au tuteur).</p>
+
+<p><span class="lab">Scénario visé</span> (rejoué sur la maquette, pas réalisé à l’hôpital). Le chariot passe le seuil de l’ascenseur ; le système produit la frise suivante et ouvre un ticket.</p>
+<svg width="680" height="92" viewBox="0 0 680 92" font-family="Inter" font-size="9">
+  <line x1="10" y1="62" x2="655" y2="62" stroke="#555" stroke-width="1.2"/>
+  <polygon points="655,58 665,62 655,66" fill="#555"/>
+  <text x="640" y="78" fill="#555" font-size="8">temps</text>
+  <g>
+    <rect x="12" y="8" width="138" height="36" rx="3" fill="#fdebd9" stroke="#c8641e"/>
+    <text x="81" y="22" text-anchor="middle" font-weight="600">Boîtier : secousse 2,1 g</text>
+    <text x="81" y="36" text-anchor="middle">seuil de l’ascenseur</text>
+    <line x1="81" y1="44" x2="81" y2="62" stroke="#c8641e"/><circle cx="81" cy="62" r="3" fill="#c8641e"/>
+    <text x="81" y="76" text-anchor="middle" fill="#555">10:42:07</text>
+  </g>
+  <g>
+    <rect x="170" y="8" width="138" height="36" rx="3" fill="#fdebd9" stroke="#c8641e"/>
+    <text x="239" y="22" text-anchor="middle" font-weight="600">Boîtier : 5 V USB → 0 V</text>
+    <text x="239" y="36" text-anchor="middle">le PC s’éteint</text>
+    <line x1="239" y1="44" x2="239" y2="62" stroke="#c8641e"/><circle cx="239" cy="62" r="3" fill="#c8641e"/>
+    <text x="239" y="76" text-anchor="middle" fill="#555">10:42:09</text>
+  </g>
+  <g>
+    <rect x="328" y="8" width="138" height="36" rx="3" fill="#e4eef6" stroke="#1f5f8b"/>
+    <text x="397" y="22" text-anchor="middle" font-weight="600">GLPI : ticket ouvert</text>
+    <text x="397" y="36" text-anchor="middle">« faux contact probable »</text>
+    <line x1="397" y1="44" x2="397" y2="62" stroke="#1f5f8b"/><circle cx="397" cy="62" r="3" fill="#1f5f8b"/>
+    <text x="397" y="76" text-anchor="middle" fill="#555">10:42:40</text>
+  </g>
+  <g>
+    <rect x="486" y="8" width="160" height="36" rx="3" fill="#e5f1e6" stroke="#3a7d44"/>
+    <text x="566" y="22" text-anchor="middle" font-weight="600">PC rallumé : diagnostic</text>
+    <text x="566" y="36" text-anchor="middle">Kernel-Power 41, batterie 65 %</text>
+    <line x1="566" y1="44" x2="566" y2="62" stroke="#3a7d44"/><circle cx="566" cy="62" r="3" fill="#3a7d44"/>
+    <text x="566" y="76" text-anchor="middle" fill="#555">10:43:20</text>
+  </g>
+  <text x="10" y="90" fill="#777" font-size="7.5">Orange : boîtier · Bleu : GLPI · Vert : diagnostic à distance (PowerShell). Les pannes suivantes du même jour s’ajoutent au même ticket.</text>
+</svg>
+<p>Le technicien lit le ticket : trois fois dans la semaine, la coupure suit une secousse alors que la batterie est chargée. Il contrôle le connecteur de la batterie, le refixe et ferme le ticket avec la frise en pièce jointe.</p>
+
+<h3>Trois paliers avant d’ouvrir des tickets tout seul</h3>
+<table>
+<tr><th style="width:22%">Palier</th><th style="width:44%">Ce que fait le système</th><th>Quand on passe au suivant</th></tr>
+<tr><td class="k">1. Simulation</td><td>Il note « j’aurais ouvert un ticket », sans rien ouvrir</td><td>Aucune fausse alerte pendant la campagne d’essai</td></tr>
+<tr><td class="k">2. Confirmation</td><td>Il propose le ticket ; le technicien valide d’un clic</td><td>Propositions jugées justes par le technicien</td></tr>
+<tr><td class="k">3. Automatique</td><td>Il ouvre le ticket seul ; un seul ticket par chariot et par jour</td><td>Seulement si les indicateurs de la partie 6 sont atteints</td></tr>
+</table>
+<p><span class="lab">Limites volontaires.</span> Le système ne lit aucune donnée patient, ne répare rien et ne ferme jamais un ticket. Le diagnostic à distance lit l’état du PC mais ne le modifie pas. Il fournit une preuve ; la décision reste au technicien.</p>
+
+<h2 class="saut"><span class="n">5</span>Architecture du projet</h2>
+<svg width="680" height="178" viewBox="0 0 680 178" font-family="Inter" font-size="8.6">
+  <rect x="2" y="2" width="676" height="16" fill="#eef1f4" stroke="#c9d1d9"/>
+  <text x="340" y="13.5" text-anchor="middle" fill="#444">Réseau de la maquette du lycée (Wi-Fi, DHCP, DNS, NTP) : exploité, non reconfiguré — aucune connexion à l’hôpital</text>
+  <!-- boitier -->
+  <rect x="6" y="34" width="170" height="104" rx="4" fill="#fdf3ea" stroke="#c8641e" stroke-width="1.3"/>
+  <text x="14" y="49" font-weight="700">Boîtier — ESP32 (C++)</text>
+  <text x="14" y="63">MPU6050 : secousses</text>
+  <text x="14" y="75">INA219 : 5 V de l’USB du PC</text>
+  <text x="14" y="87">SHT31 : température, humidité</text>
+  <text x="14" y="99">Heure NTP, numéro de séquence</text>
+  <text x="14" y="111">Mémoire flash si Wi-Fi coupé</text>
+  <text x="14" y="123">Batterie Li-Po de secours</text>
+  <!-- serveur -->
+  <rect x="246" y="34" width="190" height="104" rx="4" fill="#eef4fa" stroke="#1f5f8b" stroke-width="1.3"/>
+  <text x="254" y="49" font-weight="700">Serveur — PC Ubuntu</text>
+  <text x="254" y="63">Mosquitto (MQTT sur TLS)</text>
+  <text x="254" y="75">Service Python : réception, règles,</text>
+  <text x="254" y="87">   pilotage du diagnostic et de GLPI</text>
+  <text x="254" y="99">PostgreSQL : mesures et événements</text>
+  <text x="254" y="111">Rapport (Python) ; frise Grafana (V2)</text>
+  <text x="254" y="123">GLPI dans Docker, données fictives</text>
+  <!-- PC -->
+  <rect x="506" y="34" width="168" height="104" rx="4" fill="#eef6ef" stroke="#3a7d44" stroke-width="1.3"/>
+  <text x="514" y="49" font-weight="700">PC du chariot — Windows</text>
+  <text x="514" y="63">Portable de récupération</text>
+  <text x="514" y="75">Point d’accès WinRM restreint (JEA)</text>
+  <text x="514" y="87">Script PowerShell de diagnostic :</text>
+  <text x="514" y="99">  Get-WinEvent, BatteryStatus,</text>
+  <text x="514" y="111">  powercfg, Get-PhysicalDisk</text>
+  <text x="514" y="123">Lecture seule, aucune correction</text>
+  <!-- liens -->
+  <line x1="176" y1="70" x2="244" y2="70" stroke="#c8641e" stroke-width="1.4"/><polygon points="240,66 246,70 240,74" fill="#c8641e"/>
+  <text x="211" y="62" text-anchor="middle" font-size="7.8">MQTT / TLS</text>
+  <text x="211" y="82" text-anchor="middle" font-size="7.8">Wi-Fi, 8883</text>
+  <line x1="438" y1="70" x2="504" y2="70" stroke="#3a7d44" stroke-width="1.4"/><polygon points="500,66 506,70 500,74" fill="#3a7d44"/>
+  <text x="471" y="62" text-anchor="middle" font-size="7.8">WinRM HTTPS</text>
+  <text x="471" y="82" text-anchor="middle" font-size="7.8">5986</text>
+  <!-- USB -->
+  <path d="M90 138 L90 158 L590 158 L590 138" fill="none" stroke="#c8641e" stroke-dasharray="4 3"/>
+  <text x="340" y="172" text-anchor="middle" fill="#c8641e" font-size="7.8">Câble USB : le boîtier est alimenté par le PC et mesure ce 5 V (aucune donnée échangée)</text>
+  <text x="341" y="152" text-anchor="middle" fill="#1f5f8b" font-size="7.8">GLPI : API REST en HTTPS, compte de service à droits limités</text>
+</svg>
+
+<div class="deux">
+<div>
+<p><span class="lab">Boîtier.</span> L’ESP32 lit l’accéléromètre à 100 Hz et publie un événement dès qu’un seuil est franchi ; le MPU6050 signale lui-même les chocs par une broche d’interruption. Les autres grandeurs sont résumées chaque seconde (min, max, moyenne). Si le Wi-Fi manque, les mesures sont gardées en mémoire flash puis renvoyées.</p>
+<p><span class="lab">Corrélation.</span> Windows écrit ses événements d’arrêt brutal (41, 6008) <b>au redémarrage</b>, pas au moment de la panne. Le point de départ est donc la <b>coupure du 5 V vue par le boîtier</b> : le serveur cherche la secousse et la température juste avant, puis le redémarrage et le diagnostic juste après.</p>
+</div>
+<div>
+<p><span class="lab">Diagnostic à distance.</span> Le service Python lance le script PowerShell sur le PC par WinRM (bibliothèque <code>pywinrm</code>). Le point d’accès JEA n’autorise que les commandes de diagnostic prévues.</p>
+<p><span class="lab">GLPI.</span> Installé sur la maquette avec Docker. Le service ouvre un ticket, ajoute des suivis et joint le rapport par l’API REST. Version fixée au départ (les API des versions 10 et 11 diffèrent).</p>
+<p><span class="lab">Base de données.</span> Tables <code>chariot</code>, <code>mesure</code>, <code>evenement_physique</code>, <code>evenement_windows</code>, <code>ticket</code>.</p>
+</div>
+</div>
+
+<div class="deux">
+<div>
+<h3>Sécurité : « le diagnostic à distance peut-il faire plus que ce qu’on lui permet ? »</h3>
+<ul>
+<li>Point d’accès JEA : liste fermée de commandes, compte sans droit d’administrateur. <b>Démonstration</b> : une commande hors liste est refusée et tracée.</li>
+<li>MQTT et WinRM chiffrés (TLS), un identifiant par boîtier.</li>
+<li>Compte GLPI de service : il ajoute des tickets et des suivis, mais ne supprime et ne ferme rien.</li>
+<li>Clés d’accès hors du code ; aucune donnée nominative.</li>
+</ul>
+</div>
+<div>
+<h3>Réseau en place (C10)</h3>
+<ul>
+<li>Réservation DHCP et nom DNS pour le serveur et le boîtier.</li>
+<li>Écart d’horloge NTP mesuré entre boîtier, serveur et PC (il conditionne la corrélation).</li>
+<li>Captures Wireshark des trois flux : MQTT 8883, WinRM 5986, HTTPS vers GLPI.</li>
+<li>Comportement observé quand le Wi-Fi coupe (mise en mémoire puis renvoi).</li>
+</ul>
+</div>
+</div>
+
+<h3>Physique : « à quelle condition le boîtier voit-il une secousse ? »</h3>
+<table>
+<tr><th style="width:22%">Étape</th><th style="width:45%">Mesure</th><th>Modèle, exploitation</th></tr>
+<tr><td class="k">Étalonnage</td><td>Capteur posé dans 6 positions (chaque axe vers le haut puis vers le bas)</td><td>Doit lire ± 1 g ; on en tire décalage et gain de chaque axe</td></tr>
+<tr><td class="k">Chutes contrôlées</td><td>Boîtier lâché de hauteurs connues sur un support, 10 essais par hauteur</td><td>Vitesse à l’impact <i>v</i> = √(2<i>gh</i>) ; choc modélisé en demi-sinus de durée τ ; moyenne, écart-type, incertitude <i>s</i>/√<i>N</i></td></tr>
+<tr><td class="k">Échantillonnage</td><td>Même choc vu à 100 Hz et à 1 kHz</td><td>Un choc de quelques ms peut tomber entre deux mesures : choix de la fréquence et du seuil</td></tr>
+<tr><td class="k">Autonomie (court)</td><td>Durée de fonctionnement du boîtier sur sa batterie</td><td><i>t</i> ≈ <i>Q</i>/<i>I</i>, confronté à la mesure</td></tr>
+</table>
+
+<h2><span class="n">6</span>Faisabilité</h2>
+<p><span class="lab">Matériel.</span> Le lycée fournit l’ESP32, le PC Ubuntu (serveur et GLPI) et un PC portable Windows de récupération, avec sa batterie et sans données. Restent à commander : MPU6050, INA219, SHT31, batterie Li-Po avec module de charge, boîtier et connectique, soit <b>30 à 40 € environ</b> (à confirmer sur devis). Un chariot ou une desserte du lycée sert de chariot de soins. Tous les logiciels sont libres ou déjà présents sous Windows.</p>
+
+<table>
+<tr><th style="width:14%">Version</th><th>Contenu</th></tr>
+<tr><td class="k">V1 obligatoire</td><td>Boîtier (secousses, coupure), diagnostic à distance, corrélation, ticket GLPI au palier 1 puis 2, rapport simple joint au ticket</td></tr>
+<tr><td class="k">V2 visée</td><td>Frise Grafana, température et humidité, batterie dans les règles, palier 3, bilan chiffré « adopter ou non »</td></tr>
+<tr><td class="k">Extensions</td><td>Plusieurs boîtiers en parallèle ; tableau de bord du parc de chariots ; corrections à distance avec confirmation humaine</td></tr>
+</table>
+
+<table>
+<tr><th style="width:5%">N°</th><th>Tâche</th><th style="width:8%" class="h">Heures</th><th style="width:22%">Compétence · jalon</th></tr>
+<tr><td>1</td><td>Analyse du besoin, cahier des charges, planification</td><td class="h">12</td><td>C03, C01 · revue 1</td></tr>
+<tr><td>2</td><td>Boîtier : câblage, programme, détection de secousse, MQTT, mémoire tampon</td><td class="h">35</td><td>C08, C10</td></tr>
+<tr><td>3</td><td>Physique : étalonnage, chutes, échantillonnage, incertitudes</td><td class="h">10</td><td>physique</td></tr>
+<tr><td>4</td><td>Serveur : réception des mesures, base de données, règles</td><td class="h">20</td><td>C08 · revue 2</td></tr>
+<tr><td>5</td><td>Diagnostic à distance : script PowerShell, WinRM, JEA</td><td class="h">18</td><td>C08, C10</td></tr>
+<tr><td>6</td><td>GLPI : installation, API, ouverture de tickets, paliers</td><td class="h">15</td><td>C08</td></tr>
+<tr><td>7</td><td>Corrélation SQL, rapport, frise Grafana</td><td class="h">12</td><td>C08</td></tr>
+<tr><td>8</td><td>Exploitation du réseau : DHCP, DNS, NTP, captures</td><td class="h">8</td><td>C10</td></tr>
+<tr><td>9</td><td>Campagne d’essai, indicateurs, bilan « adopter ou non »</td><td class="h">10</td><td>C03 · revue 3</td></tr>
+<tr><td>10</td><td>Dossier technique et préparation de la soutenance</td><td class="h">10</td><td>C01</td></tr>
+<tr class="tot"><td></td><td>Total</td><td class="h">150</td><td></td></tr>
+</table>
+
+<h3>Indicateurs : le boîtier vaut-il le coup ?</h3>
+<table>
+<tr><th style="width:24%">Critère</th><th style="width:46%">Mesure sur la maquette</th><th>Objectif (à valider par le tuteur)</th></tr>
+<tr><td class="k">Il voit les pannes</td><td>20 pannes provoquées : secousse avec coupure, coupure seule, chauffage de l’air</td><td>Au moins 19 sur 20 détectées et bien classées</td></tr>
+<tr><td class="k">Il ne crie pas au loup</td><td>Chariot roulé 1 h sans panne, seuils et chocs ordinaires compris</td><td>0 ticket proposé</td></tr>
+<tr><td class="k">Il est rapide</td><td>Temps entre la coupure et le ticket</td><td>Moins d’1 minute</td></tr>
+<tr><td class="k">Il tient</td><td>Enregistrement continu ; autonomie sans le PC</td><td>72 h sans perte ; autonomie mesurée</td></tr>
+<tr><td class="k">Il coûte</td><td>Prix d’un boîtier × nombre de chariots, comparé au coût des déplacements évités</td><td>Bilan écrit, chiffres du tuteur</td></tr>
+</table>
+<p>À la fin, l’apprenti conclut « je recommande » ou « je ne recommande pas » l’adoption, chiffres à l’appui, et propose si besoin un <b>essai réel sur 2 ou 3 chariots</b>, que l’hôpital décidera.</p>
+
+<h3>Risques et parades</h3>
+<table>
+<tr><th style="width:42%">Risque</th><th>Parade</th></tr>
+<tr><td>Horloges du boîtier et du PC décalées : corrélation faussée</td><td>Même serveur NTP pour tous ; écart mesuré et affiché dans le rapport</td></tr>
+<tr><td>Le boîtier s’éteint avec le PC</td><td>Batterie de secours ; test de coupure dès la tâche 2</td></tr>
+<tr><td>Fausses alertes et tickets en trop</td><td>Étalonnage, seuil réglable, paliers, un ticket par chariot et par jour</td></tr>
+<tr><td>WinRM avec JEA difficile à piloter depuis Linux</td><td>Test dès les premières semaines ; repli : script local planifié qui envoie en HTTPS</td></tr>
+<tr><td>Retard sur l’affichage</td><td>Grafana en V2 ; la V1 se contente du rapport joint au ticket</td></tr>
+</table>
+
+<div class="encart"><p><span class="lab">Questions au tuteur.</span> (1) Les PC des chariots sont-ils des portables avec batterie ou de petits PC sans batterie ? (2) Combien de chariots, et combien de déplacements pour panne intermittente par mois ? (3) Quels objectifs chiffrés retenir pour les indicateurs ? (4) Un boîtier avec batterie Li-Po serait-il accepté sur un chariot de soins ?</p></div>
+
+</body>
+</html>
