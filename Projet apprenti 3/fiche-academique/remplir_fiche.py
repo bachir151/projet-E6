@@ -247,14 +247,17 @@ ajouter_dans_run(t.cell(3, 1).paragraphs[0], "Nom de l", "DGFiP")
 R = Redac(P[38])
 R.titre("Contexte")
 R.texte("Lorenzo est apprenti dans une administration qui traite des données couvertes par le secret "
-        "professionnel et reçoit du public. Il installe les logiciels des nouveaux agents et s’occupe des "
-        "postes, des comptes et des stratégies de groupe. Le service est déjà bien équipé : image toute prête "
+        "professionnel. Il intervient surtout sur les postes des ", ("employés de bureau", "g"), " (bureaux "
+        "partagés, plateaux ouverts), et aussi sur quelques postes d’accueil qui reçoivent du public. Il installe "
+        "les logiciels des nouveaux agents et s’occupe des postes, des comptes et des stratégies de groupe. Le service est déjà bien équipé : image toute prête "
         "pour chaque poste neuf, règles imposées par l’annuaire, outils qui distribuent logiciels et mises à jour.")
 R.titre("Le problème")
 R.texte(("Quand l’agent quitte son poste, l’ordinateur ne le sait pas.", "g"), " Il voit seulement si l’on touche "
-        "le clavier. Conséquence principale : ", ("l’écran reste ouvert", "g"), " devant le public jusqu’au "
-        "blocage automatique, après environ 10 minutes. Conséquence secondaire : ", ("les installations tombent "
-        "mal", "g"), ", pendant que l’agent travaille, parfois devant un usager. Inactif ne veut pas dire absent.")
+        "le clavier. Première conséquence : ", ("la session reste ouverte", "g"), " jusqu’au blocage automatique, "
+        "après environ 10 minutes. Pendant ce temps, un collègue non habilité, un visiteur ou un prestataire peut "
+        "lire un dossier, ou agir au nom de l’agent. Aux postes d’accueil, c’est le public qui voit l’écran. "
+        "Deuxième conséquence : ", ("les installations tombent mal", "g"), ", pendant que l’agent travaille, alors "
+        "que ses vraies absences (réunion, déjeuner) restent inutilisées. Inactif ne veut pas dire absent.")
 R.titre("Principe de la solution")
 R.texte("Un ", ("boîtier de présence", "g"), " (radar 24 GHz, ESP32, lumière tricolore), fixé sous le bureau et "
         "branché en USB, dit chaque seconde si quelqu’un est assis, même immobile : le radar voit la respiration, "
@@ -278,7 +281,7 @@ R.puce("Aucune caméra. La présence ne quitte jamais le poste : le serveur ne r
 R.puce("La maintenance ne ferme aucun logiciel et ne redémarre jamais une session ouverte.")
 R.titre("Attentes du client")
 R.puce("Un écran protégé en quelques secondes quand l’agent s’éloigne, sans le gêner quand il lit.")
-R.puce("Des installations qui ne dérangent plus les agents ni les usagers.")
+R.puce("Des installations faites pendant les absences, qui ne dérangent plus les agents dans leur travail.")
 R.puce("Une vue claire de l’état du parc, sans surveiller les personnes.")
 
 # ================================================================== 1.3 DOMAINE
@@ -308,10 +311,12 @@ for p in cell.paragraphs:
 # ================================================================== 1.4 CAHIER DES CHARGES
 R = Redac(P[47])
 R.titre("Besoins exprimés par le tuteur")
-R.puce(("Besoin 1 – ", "g"), "ne plus laisser d’écran ouvert devant le public quand l’agent s’éloigne.")
+R.puce(("Besoin 1 – ", "g"), "ne plus laisser de session ouverte quand l’agent quitte son bureau (collègues, visiteurs, "
+       "prestataires ; public aux postes d’accueil).")
 R.puce(("Besoin 2 – ", "g"), "installer les logiciels et maintenances sans déranger les agents.")
 R.titre("Hypothèses chiffrées (fictives, à valider par le tuteur)")
-R.puce("40 postes dont 8 d’accueil ; 6 à 10 départs du poste par agent et par jour.")
+R.puce("40 postes : 32 postes de bureau, souvent en bureau partagé, et 8 postes d’accueil ; 6 à 10 départs du "
+       "poste par agent et par jour, dont 1 à 2 absences de plus de 20 minutes (réunion, déjeuner).")
 R.puce("Blocage actuel après 10 minutes d’inactivité ; 4 installations par poste et par mois ; 15 % de postes en "
        "retard faute d’être disponibles.")
 R.puce("Agents non administrateurs de leur poste ; périphérique USB de type port série autorisé (à confirmer).")
@@ -321,7 +326,7 @@ R.tableau(
     [
         ["E1 – Bloquer vite", "Écran bloqué quelques secondes après le départ, au lieu de 10 minutes (avec incertitude)", "R4, T01", "V1"],
         ["E2 – Ne pas gêner", "Aucun blocage pendant 30 min de travail assis, dont 10 min de lecture sans clavier ; retour pendant l’orange = annulation", "T02, T03", "V1"],
-        ["E3 – Agent seul", "L’usager au guichet n’est pas compté : agent parti, écran bloqué", "R2, R3, T04", "V1"],
+        ["E3 – Agent seul", "Le collègue du bureau voisin ou une personne qui passe n’est pas compté : agent parti, écran bloqué", "R2, R3, T04", "V1"],
         ["E4 – Vrai boîtier", "Chaque message signé ; faux boîtier démasqué ; enrôlement seulement avec appui physique", "T06, T19, T20", "V1"],
         ["E5 – Filet de sécurité", "Boîtier débranché ou radar masqué : alerte, blocage GPO toujours actif", "T05", "V1"],
         ["E6 – Installer au bon moment", "Aucune installation devant l’agent ; retour au milieu sans perte ; nombre d’installations évitées devant l’agent, mesuré", "T07–T11, R6", "V2"],
@@ -485,7 +490,8 @@ R = Redac(P[129])
 R.texte("Lors d’une démonstration sur la maquette, devant le tuteur et le jury :")
 R.puce("L’agent lit sans toucher au clavier : ", ("rien ne se passe", "g"), ".")
 R.puce("L’agent se lève : lumière orange, puis ", ("écran bloqué en quelques secondes", "g"),
-       " (délai mesuré, comparé aux 10 minutes actuelles) ; un usager au guichet ne change rien.")
+       " (délai mesuré, comparé aux 10 minutes actuelles) ; un collègue au bureau voisin ou qui passe "
+       "derrière ne change rien.")
 R.puce("Un faux boîtier qui dit toujours « présent » est ", ("démasqué", "g"), " ; boîtier débranché : le filet GPO reste actif.")
 R.puce("Pendant une absence, un logiciel ", ("s’installe sans déranger", "g"), " ; si l’agent revient, son travail n’est pas touché.")
 R.puce("Sur une journée jouée, ", ("aucune installation devant l’agent", "g"), ", contre N avec l’outil classique (essai R6).")

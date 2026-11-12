@@ -124,23 +124,22 @@ T(s, "?", { x: 7.3, y: 2.95, w: 1.2, h: 1.2, fontSize: 72, color: YEL, align: "c
 s.addNotes("Ouvrir par la question. Votre ordinateur sait si vous tapez au clavier. Mais sait-il si vous êtes là ? Je fais disparaître l'agent : pour l'ordinateur, rien n'a changé. Tout le projet part de cette question.");
 
 // ======================= 1. PROBLÈME =======================
-s = section(1, "Le problème", "Un guichet d'accueil, des dossiers confidentiels, un agent qui se lève.", "1 · Le problème");
+s = section(1, "Le problème", "Des bureaux partagés, des dossiers confidentiels, un agent qui se lève.", "1 · Le problème");
 s.addNotes("Première partie : le problème, tel que le tuteur l'a décrit.");
 
 s = content("L'agent part. L'écran reste ouvert.", "1 · Le problème");
 desk(s, 1.0, 3.6, 4.2);
 monitor(s, 2.2, 1.95, 1.9, "open");
 person(s, 0.9, 2.35, 1.3, "2F5D8A", "anim_1_m~-1.2:0~t900+x~t500~d700_ag");
-R(s, 5.6, 2.6, 0.18, 2.2, { fill: "5C4A35", round: false });
-R(s, 5.45, 2.5, 1.0, 0.12, { fill: DESK, round: false });
 person(s, 6.4, 2.0, 1.7, PUR, "anim_2_f_us");
+T(s, "un collègue, un visiteur…", { x: 5.6, y: 3.8, w: 2.4, h: 0.3, fontSize: 12, color: PUR, align: "center", objectName: "anim_2_f_ust" });
 L(s, 6.4, 2.25, 4.15, 2.45, { c: RED, dash: true, arrow: false, n: "anim_2_f~d400_vue" });
 T(s, "0:00", { x: 7.0, y: 1.05, w: 2.4, h: 0.6, fontSize: 32, color: RED, fontFace: MONO, align: "right", objectName: "anim_1_f~d900_c0" });
 T(s, "3:00", { x: 7.0, y: 1.05, w: 2.4, h: 0.6, fontSize: 32, color: RED, fontFace: MONO, align: "right", fill: { color: BG }, objectName: "anim_2_f~d600_c3" });
 T(s, "10:00", { x: 7.0, y: 1.05, w: 2.4, h: 0.6, fontSize: 32, color: RED, fontFace: MONO, align: "right", fill: { color: BG }, objectName: "anim_3_f_c10" });
 screenState(s, 2.2, 1.95, 1.9, "locked", "anim_3_f~d500_lk");
 T(s, "Aujourd'hui : blocage automatique après 10 minutes sans clavier.", { x: 0.5, y: 4.85, w: 9, h: 0.3, fontSize: 14, color: GREY, objectName: "anim_3_f~d800_ex" });
-s.addNotes("Clic 1 : l'agent se lève, le compteur démarre. Clic 2 : un usager au guichet peut lire l'écran. Clic 3 : au bout de 10 minutes seulement, l'écran se bloque. Dix minutes pendant lesquelles un dossier confidentiel est visible par le public.");
+s.addNotes("Clic 1 : l'agent se lève, le compteur démarre. Clic 2 : dans un bureau partagé, un collègue, un visiteur ou un prestataire passe. Il peut lire l'écran, ou même agir au nom de l'agent. Clic 3 : au bout de 10 minutes seulement, l'écran se bloque. Dix minutes pendant lesquelles un dossier couvert par le secret est accessible à une personne non habilitée. Aux postes d'accueil, c'est le public qui voit l'écran.");
 
 s = content("Inactif ne veut pas dire absent", "1 · Le problème");
 T(s, "Ce que voit Windows : le clavier et la souris.", { x: 0.5, y: 1.05, w: 9, h: 0.35, fontSize: 16, color: GREY });
@@ -158,14 +157,14 @@ s.addNotes("Deux situations. Martine lit un dossier papier : elle ne touche plus
 
 s = content("Deux conséquences", "1 · Le problème");
 R(s, 0.5, 1.2, 4.3, 3.6, { fill: PANEL, line: RED, lw: 2 });
-T(s, "PRINCIPALE", { x: 0.8, y: 1.4, w: 3.8, h: 0.3, fontSize: 12, color: RED, bold: true });
-T(s, "L'écran reste ouvert", { x: 0.8, y: 1.75, w: 3.8, h: 0.5, fontSize: 22 });
-T(s, "Des dossiers couverts par le secret professionnel restent visibles par le public, jusqu'à 10 minutes.", { x: 0.8, y: 2.4, w: 3.7, h: 1.4, fontSize: 15, color: GREY });
+T(s, "PREMIÈRE", { x: 0.8, y: 1.4, w: 3.8, h: 0.3, fontSize: 12, color: RED, bold: true });
+T(s, "La session reste ouverte", { x: 0.8, y: 1.75, w: 3.8, h: 0.5, fontSize: 22 });
+T(s, "Pendant 10 minutes, un collègue non habilité, un visiteur ou un prestataire peut lire un dossier couvert par le secret, ou agir au nom de l'agent. À l'accueil, c'est le public.", { x: 0.8, y: 2.4, w: 3.7, h: 2.2, fontSize: 15, color: GREY });
 R(s, 5.2, 1.2, 4.3, 3.6, { fill: PANEL, line: YEL, lw: 2, n: "anim_1_f_c2" });
-T(s, "SECONDAIRE", { x: 5.5, y: 1.4, w: 3.8, h: 0.3, fontSize: 12, color: YEL, bold: true, objectName: "anim_1_f_c2a" });
+T(s, "DEUXIÈME", { x: 5.5, y: 1.4, w: 3.8, h: 0.3, fontSize: 12, color: YEL, bold: true, objectName: "anim_1_f_c2a" });
 T(s, "Les installations tombent mal", { x: 5.5, y: 1.75, w: 3.8, h: 0.5, fontSize: 22, objectName: "anim_1_f_c2b" });
-T(s, "Lancées en journée, elles dérangent l'agent, parfois devant un usager. Reportées le soir, elles trouvent des postes éteints.", { x: 5.5, y: 2.4, w: 3.7, h: 1.6, fontSize: 15, color: GREY, objectName: "anim_1_f_c2c" });
-s.addNotes("Le problème principal est la sécurité : l'écran ouvert. Le problème secondaire touche le métier de l'apprenti : il installe des logiciels, et il ne sait jamais quand le faire sans déranger.");
+T(s, "Lancées en journée, elles dérangent l'agent en plein travail. Ses vraies absences (réunion, déjeuner) ne servent pas. Reportées le soir, elles trouvent des postes éteints.", { x: 5.5, y: 2.4, w: 3.7, h: 2.2, fontSize: 15, color: GREY, objectName: "anim_1_f_c2c" });
+s.addNotes("Première conséquence, la sécurité : la session ouverte. Lorenzo intervient surtout sur des postes d'employés de bureau, souvent en bureau partagé ; l'accueil n'est qu'un cas particulier, le plus exposé. Deuxième conséquence, qui touche le métier de l'apprenti : un employé de bureau travaille toute la journée sur son poste. Lorenzo installe des logiciels, et il ne sait jamais quand le faire sans déranger, alors que les réunions et le déjeuner seraient de bons moments.");
 
 // ======================= 2. EXISTANT =======================
 s = section(2, "Ce qui existe déjà", "Des outils qui font bien leur travail. Aucun ne sait si l'agent est là.", "2 · Existant");
@@ -262,26 +261,25 @@ T(s, "Chaque changement écrit un événement numéroté dans un journal Windows
 s.addNotes("Le radar hésite parfois. Le service transforme cette mesure qui hésite en décisions sûres. Présent. Personne pendant 5 secondes : doute. Puis départ : lumière orange 3 secondes. Puis absent : l'écran se bloque. Après 20 minutes : absence longue, une installation peut commencer. Si l'agent revient, tout s'annule. Chaque étape est écrite dans le journal de Windows, ce qui rend tout visible et facile à diagnostiquer.");
 
 // ======================= 4. MARTINE =======================
-s = section(4, "Une journée avec Martine", "Le même guichet, du matin au soir.", "4 · Martine");
-s.addNotes("Quatrième partie : un scénario concret. Martine est fictive.");
+s = section(4, "Une journée avec Martine", "Une gestionnaire dans un bureau partagé, du matin au soir.", "4 · Martine");
+s.addNotes("Quatrième partie : un scénario concret. Martine est fictive. Elle est gestionnaire et partage son bureau avec deux collègues ; des visiteurs et des prestataires passent dans la journée.");
 
-function guichet(sl, state, led, agent, usager, nameP) {
+function bureau(sl, state, led, agent, nameP) {
   desk(sl, 0.8, 3.65, 3.8);
   monitor(sl, 2.0, 2.0, 1.8, state, nameP);
   box(sl, 2.6, 3.8, led, nameP ? nameP + "bx" : undefined);
   if (agent) person(sl, 0.75, 2.4, 1.3, "2F5D8A");
-  if (usager) { R(sl, 5.0, 2.7, 0.16, 2.1, { fill: "5C4A35", round: false }); person(sl, 5.6, 2.0, 1.7, PUR); }
 }
 s = content("9 h 00 · Martine lit un dossier", "4 · Martine");
 clock(s, "9 h 00");
-guichet(s, "open", GRN, true, false);
+bureau(s, "open", GRN, true);
 R(s, 1.6, 2.75, 0.4, 0.5, { fill: "DDE6EC", line: "A9B8C3" });
 T(s, "Elle ne touche plus au clavier depuis 10 minutes.", { x: 5.6, y: 1.4, w: 3.9, h: 0.8, fontSize: 17, objectName: "anim_1_f_t1" });
 T(s, "Sans le projet : écran bloqué en pleine lecture.", { x: 5.6, y: 2.35, w: 3.9, h: 0.8, fontSize: 15, color: RED, objectName: "anim_2_f_t2" });
 T(s, "Avec le projet : le radar voit sa respiration. Rien ne se passe.", { x: 5.6, y: 3.25, w: 3.9, h: 0.8, fontSize: 15, color: GRN, objectName: "anim_3_f_t3" });
 s.addNotes("9 heures. Martine lit un dossier papier, sans toucher au clavier. Aujourd'hui, au bout de 10 minutes, Windows la bloquerait. Avec le boîtier, la lumière reste verte : elle est là.");
 
-s = content("10 h 00 · Elle se lève", "4 · Martine");
+s = content("10 h 00 · Elle part en réunion", "4 · Martine");
 clock(s, "10 h 00");
 desk(s, 0.8, 3.65, 3.8); monitor(s, 2.0, 2.0, 1.8, "open"); box(s, 2.6, 3.8, GRN);
 person(s, 0.75, 2.4, 1.3, "2F5D8A", "anim_1_m~-0.9:0~t700+x~t400~d600_ag");
@@ -290,10 +288,9 @@ T(s, "orange 3 s : « je crois que vous partez »", { x: 5.4, y: 1.4, w: 4.1, h:
 screenState(s, 2.0, 2.0, 1.8, "locked", "anim_3_f_lk");
 O(s, 2.98, 3.86, 0.12, RED, "anim_3_f_led2");
 T(s, "≈ 8 s après le départ : écran bloqué", { x: 5.4, y: 2.2, w: 4.1, h: 0.6, fontSize: 15, color: GRN, objectName: "anim_3_f_t3" });
-R(s, 5.0, 3.0, 0.16, 1.8, { fill: "5C4A35", round: false, n: "anim_4_f_cp" });
 person(s, 5.6, 2.9, 1.5, PUR, "anim_4_f_us");
-T(s, "L'usager au guichet ne voit rien.", { x: 7.0, y: 3.4, w: 2.6, h: 0.8, fontSize: 15, objectName: "anim_4_f_t4" });
-s.addNotes("10 heures. Martine se lève. Le radar ne la voit plus. Après 5 secondes de confirmation, la lumière passe à l'orange pendant 3 secondes : si elle était seulement penchée, tout s'annule. Elle ne revient pas : l'écran se bloque, environ 8 secondes après son départ. La valeur exacte sera mesurée par l'essai R4. L'usager ne voit qu'un écran verrouillé.");
+T(s, "Un collègue passe : il ne voit qu'un écran verrouillé.", { x: 7.0, y: 3.4, w: 2.6, h: 0.8, fontSize: 15, objectName: "anim_4_f_t4" });
+s.addNotes("10 heures. Martine se lève pour aller en réunion. Le radar ne la voit plus. Après 5 secondes de confirmation, la lumière passe à l'orange pendant 3 secondes : si elle était seulement penchée, tout s'annule. Elle ne revient pas : l'écran se bloque, environ 8 secondes après son départ. La valeur exacte sera mesurée par l'essai R4. Le collègue qui passe derrière son bureau ne voit qu'un écran verrouillé, et ne peut rien faire en son nom.");
 
 s = content("12 h 20 · La pause déjeuner", "4 · Martine");
 clock(s, "12 h 20");
@@ -369,7 +366,7 @@ s.addNotes("Les autres protections sont classiques et démontrées par des tests
 s = section(7, "La physique", "Chaque réglage vient d'une mesure.", "7 · Physique");
 s.addNotes("Septième partie : le volet physique, qui fixe les réglages.");
 
-s = content("Où s'arrête l'agent, où commence l'usager ?", "7 · Physique");
+s = content("L'agent, ou le collègue d'à côté ?", "7 · Physique");
 const X0 = 0.9, PXm = 2.4;
 R(s, X0 - 0.5, 2.05, 0.4, 0.5, { fill: PANEL2, line: BLUE, lw: 2 });
 for (let g = 0; g < 3; g++) { R(s, X0 + g * 0.75 * PXm, 1.4, 0.75 * PXm, 1.8, { fill: g % 2 ? PANEL : PANEL2, line: LINE, round: false }); T(s, "porte " + g, { x: X0 + g * 0.75 * PXm, y: 1.1, w: 0.75 * PXm, h: 0.3, fontSize: 12, color: GREY, align: "center", fontFace: MONO }); }
@@ -378,12 +375,12 @@ T(s, "zone retenue ≈ 1,0 m (essais R2–R3)", { x: X0, y: 3.25, w: 2.6, h: 0.3
 O(s, X0 + 0.6 * PXm - 0.2, 2.1, 0.4, "2F5D8A", "anim_1_f_ag");
 T(s, "agent 0,6 m", { x: X0 + 0.6 * PXm - 0.6, y: 2.55, w: 1.2, h: 0.3, fontSize: 11, color: WHITE, align: "center", objectName: "anim_1_f_agt" });
 O(s, X0 + 1.4 * PXm - 0.2, 2.1, 0.4, PUR, "anim_3_f_us");
-T(s, "usager 1,4 m : ignoré", { x: X0 + 1.4 * PXm - 0.8, y: 2.55, w: 1.6, h: 0.3, fontSize: 11, color: PUR, align: "center", objectName: "anim_3_f_ust" });
+T(s, "collègue 1,4 m : ignoré", { x: X0 + 1.4 * PXm - 1.0, y: 2.55, w: 2.0, h: 0.3, fontSize: 11, color: PUR, align: "center", objectName: "anim_3_f_ust" });
 T(s, [{ text: "ΔR = c / (2B) = 3·10⁸ / (2 × 250·10⁶) = 0,6 m", options: { fontFace: MONO, color: YEL, breakLine: true } }, { text: "le module découpe l'espace en tranches de 0,75 m", options: { fontSize: 13, color: GREY } }], { x: 0.5, y: 3.75, w: 9, h: 0.8, fontSize: 16, objectName: "anim_4_f_f" });
-s.addNotes("Le radar ne donne pas une distance au centimètre : il découpe l'espace en tranches de 0,75 mètre, les portes. La finesse théorique vaut c sur 2B, soit 0,6 mètre pour un balayage de 250 mégahertz. Les essais R2 et R3 placent l'agent puis un usager à différentes distances pour fixer la limite, environ 1 mètre ici : l'usager au guichet n'est pas compté.");
+s.addNotes("Le radar ne donne pas une distance au centimètre : il découpe l'espace en tranches de 0,75 mètre, les portes. La finesse théorique vaut c sur 2B, soit 0,6 mètre pour un balayage de 250 mégahertz. Les essais R2 et R3 placent l'agent puis un collègue à différentes distances pour fixer la limite, environ 1 mètre ici : le collègue du bureau voisin, ou celui qui passe dans l'allée, n'est pas compté. À l'accueil, c'est la même chose pour l'usager de l'autre côté du comptoir.");
 
 s = content("Les mesures, avec leurs incertitudes", "7 · Physique");
-const es = [["R1", "Seuils", "chaise vide, agent immobile, agent qui lit : énergie par porte"], ["R2–R3", "Zone", "agent de 0,4 à 1,0 m, puis usager côté public"], ["R4", "Délai", "20 départs chronométrés à l'oscilloscope : l'indicateur clé"], ["R5", "Fausses alertes", "ventilateur, rideau, collègue qui passe"]];
+const es = [["R1", "Seuils", "chaise vide, agent immobile, agent qui lit : énergie par porte"], ["R2–R3", "Zone", "agent de 0,4 à 1,0 m, puis collègue au bureau voisin ou dans l'allée"], ["R4", "Délai", "20 départs chronométrés à l'oscilloscope : l'indicateur clé"], ["R5", "Fausses alertes", "ventilateur, rideau, mobilier métallique"]];
 es.forEach(([c, t, d], i) => { T(s, c, { x: 0.5, y: 1.15 + i * 0.62, w: 0.9, h: 0.4, fontSize: 16, bold: true, color: BLUE, fontFace: MONO, objectName: `anim_${i + 1}_f_e${i}` }); T(s, [{ text: t + " · ", options: { bold: true } }, { text: d, options: { color: GREY } }], { x: 1.45, y: 1.15 + i * 0.62, w: 4.3, h: 0.55, fontSize: 13, objectName: `anim_${i + 1}_f_et${i}` }); });
 R(s, 6.0, 1.15, 3.5, 1.3, { fill: PANEL, line: YEL, n: "anim_5_f_u" });
 T(s, [{ text: "u = s / √N", options: { fontFace: MONO, color: YEL, fontSize: 20, breakLine: true } }, { text: "sur les 20 départs de R4 ; chaque réglage est donné avec son incertitude", options: { fontSize: 12, color: GREY } }], { x: 6.15, y: 1.25, w: 3.2, h: 1.1, objectName: "anim_5_f_ut" });
@@ -409,7 +406,7 @@ T(s, "outil seul\n(inactivité)", { x: 5.8, y: 4.35, w: 1.5, h: 0.5, fontSize: 1
 R(s, 7.8, 4.25, 1.1, 0.05, { fill: GRN, round: false, n: "anim_4_f_b2" });
 T(s, "0", { x: 7.8, y: 3.9, w: 1.1, h: 0.3, fontSize: 16, bold: true, color: GRN, align: "center", objectName: "anim_4_f_b2n" });
 T(s, "outil\n+ boîtier", { x: 7.6, y: 4.35, w: 1.5, h: 0.5, fontSize: 11, color: GREY, align: "center", objectName: "anim_4_f_b2t" });
-s.addNotes("Le technicien suit son parc : ce qui s'est installé du premier coup, ce qui a été reporté et pourquoi, les postes en retard. Aucune donnée sur les agents. Puis l'essai R6 : une séance de travail jouée, avec frappe, lecture, usager et vraies absences. On compte les installations qui seraient tombées devant l'agent avec l'inactivité de Windows : N, valeur à mesurer. Avec le boîtier : zéro.");
+s.addNotes("Le technicien suit son parc : ce qui s'est installé du premier coup, ce qui a été reporté et pourquoi, les postes en retard. Aucune donnée sur les agents. Puis l'essai R6 : une séance de travail jouée, avec frappe, lecture, collègue qui passe et vraies absences (réunion, déjeuner). On compte les installations qui seraient tombées devant l'agent avec l'inactivité de Windows : N, valeur à mesurer. Avec le boîtier : zéro.");
 
 // ======================= 9. PARCOURS =======================
 s = section(9, "Le parcours", "Environ 150 heures, de janvier à mai.", "9 · Parcours");

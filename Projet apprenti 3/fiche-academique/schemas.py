@@ -127,7 +127,7 @@ def exigences():
     reqs = [
         ("E1 – Bloquer vite", ["Écran bloqué quelques", "secondes après le départ", "(au lieu de 10 min)"], "R4, T01"),
         ("E2 – Ne pas gêner", ["Aucun blocage pendant", "30 min de travail assis,", "dont 10 min de lecture"], "T02, T03"),
-        ("E3 – Agent seul", ["L’usager au guichet n’est", "pas compté : agent parti,", "écran bloqué"], "R2, R3, T04"),
+        ("E3 – Agent seul", ["Le collègue voisin ou le", "passant n’est pas compté :", "agent parti, écran bloqué"], "R2, R3, T04"),
         ("E4 – Vrai boîtier", ["Chaque message signé ;", "un faux boîtier est", "démasqué"], "T06, T19, T20"),
         ("E5 – Filet", ["Boîtier débranché ou", "masqué : le blocage", "après 10 min reste actif"], "T05"),
         ("E6 – Bon moment", ["Aucune installation devant", "l’agent ; retour au milieu", "sans perte (V2)"], "T07–T11, R6"),
@@ -162,7 +162,7 @@ def contexte():
     b.append(text(sx + sw / 2, sy + 46, "Poste attentif", 16, "bold"))
     for i, t in enumerate(["boîtier radar + service de présence", "+ installations au bon moment", "+ serveur et tableau de bord"]):
         b.append(text(sx + sw / 2, sy + 78 + i * 20, t, 13))
-    b.append(actor(120, 60, "Agent d’accueil", "travaille, s’absente"))
+    b.append(actor(120, 60, "Agent (bureau, accueil)", "travaille, s’absente"))
     b.append(arrow(175, 120, sx - 2, sy + 30, "présence (respiration)", lx=300, ly=232))
     b.append(actor(120, 400, "Technicien", "programme, installe"))
     b.append(arrow(165, 450, sx - 2, sy + 120, "paquets, enrôlement", lx=290, ly=440, both=True))
@@ -174,7 +174,7 @@ def contexte():
     b.append(arrow(560, 126, 560, sy - 2, "verrouillage, installations", lx=570, ly=180, both=True, anchor="start"))
     b.append(ext(880, 60, 230, "Contrôleur de domaine", "commun : GPO, heure"))
     b.append(arrow(880, 110, sx + sw + 2, sy + 30, "filet GPO, Kerberos", lx=835, ly=205, both=True))
-    b.append(actor(1000, 300, "Usager au guichet", "à ne pas détecter"))
+    b.append(actor(1000, 300, "Collègue, visiteur", "de passage : à ne pas détecter"))
     b.append(arrow(950, 345, sx + sw + 2, 320, "ne doit pas compter", lx=840, ly=322))
     b.append(ext(880, 470, 230, "Outil de déploiement", "de l’entreprise (extension)", dashed=True))
     b.append(arrow(878, 500, sx + sw + 2, 355, None, dashed=True))
