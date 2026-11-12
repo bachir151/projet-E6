@@ -1,5 +1,10 @@
 # Les 4 projets E6 : état au 11 novembre 2026
 
+> **Mise à jour du 12/11/2026 (dite par l'enseignant)** : les fiches (formulaires académiques) de **Yaksan (2)** et d'**Aziza (4)** sont **déjà envoyées**. Il ne reste à traiter que **Lorenzo (3)** et **Wassim (1)**.
+> - Lorenzo : relire la présentation dans PowerPoint ; compléter à la main les coordonnées entreprise/tuteur dans le formulaire ; validation académie.
+> - Wassim : trancher le volet Wi-Fi, finir la V4, puis les 3 documents (page HTML, formulaire académique, présentation 3Blue1Brown).
+> - Les TODO de Yaksan et d'Aziza ne sont plus prioritaires (le tableau ci-dessous n'est pas encore remis à jour).
+
 | Apprenti | Entreprise (à anonymiser) | Missions | Projet retenu | État |
 |---|---|---|---|---|
 | 1 (tuteur M. Goussard) | Hôpital | technicien support, déploiement | « Assistance automatisée » : courriel → ticket GLPI → diagnostic PowerShell à distance ; banc de mesure de batterie de portable (ESP32 + INA226). V4 recentrée sur l'autonomie des portables de chariot. | Dossier V3 fait ; V4 + synthèse 3 p. à finir. Volet Wi-Fi non tranché (doublon possible avec l'apprentie 4). |
