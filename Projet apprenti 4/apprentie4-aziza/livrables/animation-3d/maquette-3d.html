@@ -153,11 +153,14 @@ import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
    Unité : 1 = 1 cm. Le dessus du bureau est à y = 0.
    ===================================================================== */
 const $ = s => document.querySelector(s);
+/* ?lite : mode léger pour les PC peu puissants (moins de pixels, ombres plus simples) */
+const LITE = new URLSearchParams(location.search).has('lite');
+const PR = LITE ? 1 : Math.min(devicePixelRatio, 2);
 let renderer;
 try {
-  renderer = new THREE.WebGLRenderer({ canvas: $('#scene'), antialias: true, powerPreference: 'high-performance' });
+  renderer = new THREE.WebGLRenderer({ canvas: $('#scene'), antialias: !LITE, powerPreference: 'high-performance' });
 } catch (e) { $('#err').style.display = 'grid'; throw e; }
-renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.setPixelRatio(PR);
 renderer.setSize(innerWidth, innerHeight);
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
@@ -188,7 +191,7 @@ const key = new THREE.DirectionalLight(0xfff0dc, 2.4);
 key.position.set(110, 280, 170);
 key.target.position.set(0, 0, -10);
 key.castShadow = true;
-key.shadow.mapSize.set(4096, 4096);
+key.shadow.mapSize.setScalar(LITE ? 1024 : 4096);
 Object.assign(key.shadow.camera, { left: -150, right: 150, top: 110, bottom: -110, near: 50, far: 700 });
 key.shadow.bias = -0.0004;
 key.shadow.normalBias = 0.04;
@@ -199,7 +202,7 @@ rim.position.set(-220, 140, -220);
 scene.add(rim);
 
 const composer = new EffectComposer(renderer);
-composer.setPixelRatio(Math.min(devicePixelRatio, 2));
+composer.setPixelRatio(PR);
 composer.addPass(new RenderPass(scene, camera));
 const bloom = new UnrealBloomPass(new THREE.Vector2(innerWidth, innerHeight), 0.7, 0.4, 0.95);
 composer.addPass(bloom);
