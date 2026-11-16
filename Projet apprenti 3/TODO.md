@@ -1,4 +1,12 @@
-# Lorenzo (apprenti 3) – suivi (au 11 novembre 2026)
+# Lorenzo (apprenti 3) – suivi (au 16 novembre 2026)
+
+## Entretien avec le tuteur (16/11) : voir `entretien-tuteur-2026-11-16.md`
+- Besoins **confirmés par des faits** : agents qui ne font pas Windows + L ; fenêtre « installer ? oui/non », refus répétés, mise à jour forcée après 2 ou 3 refus.
+- Parc de **portables** (veille prolongée, réveil le week-end pour les mises à jour, certains emportés à domicile). AD nationale hors site ; Lorenzo n'a pas de code admin.
+- Propositions à valider : P1 règle de report réelle (forcée à la prochaine absence), P2 mode « hors bureau », P3 réveil du week-end (extension), P4 « socle de maquette » (clé Rufus), P5 contexte corrigé, P6 compteur de reports par poste.
+- [ ] Valider P1 à P6 (enseignant)
+- [ ] **Formulaire non envoyé** : corriger le contexte et les hypothèses avant envoi, puis régénérer DOCX + PDF
+- [ ] Mettre à jour la page HTML et la présentation 3Blue1Brown
 
 ## Décidé (11/11)
 - [x] Répartition de la sécurité entre apprentis (voir `docs/apprentis.md`) : Lorenzo **garde** le défi-réponse HMAC et la démonstration du faux boîtier.
@@ -45,7 +53,7 @@
 - [x] Contrôle avant envoi (12/11) : formulaire prêt ; coordonnées entreprise et tuteur à écrire à la main
 - [ ] Validation de la réalisation au lycée par l'académie
 
-## Questions pour la visite du tuteur
+## Questions pour la visite du tuteur (réponses du 16/11 : Q2 non, quasi sûr ; Q4 répondue ; Q1, Q3, Q5 à reposer)
 1. Les périphériques USB de type port série sont-ils autorisés ?
 2. Les agents sont-ils administrateurs de leur poste ?
 3. Délai actuel du verrouillage sur inactivité ?
