@@ -1,5 +1,7 @@
 # Wassim – entretien avec l'apprenti (16/11/2026)
 
+> **Décision du 16/11/2026** : aucune des options A, B ou C telle quelle. L'enseignant retient « Le service informatique augmenté » (boîtier de l'imprimante + station RFID des PC neufs). Voir `projet-v4/` et `fiche-academique/`. Les options ci-dessous restent comme historique.
+
 Notes de l'enseignant, remises au propre à partir d'une transcription orale. Document interne : ne pas recopier tel quel dans un dossier (anonymiser).
 Passages incertains de la transcription, interprétés ici : « PC d'élan » = **PC lent** ; « vélan / bon Vélan » = **VLAN** ; « nuque » = **NUC** (mini-PC Intel) ; « les jeux viennent directement » = **les gens viennent directement** au service ; « il y a juste trop checker » = sens incertain, suivi de « il y a trop de tickets ».
 

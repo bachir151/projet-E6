@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Génère les schémas de la fiche académique de Wassim (apprenti 1), en SVG.
+"""Génère les schémas de la fiche académique de Wassim (apprenti 1) – projet « Le service informatique augmenté », en SVG.
 Usage : python3 schemas.py  puis  node rendu.js  (SVG -> PNG)."""
 import datetime as dt
 import os
@@ -82,27 +82,31 @@ def save(name, content):
 
 
 
+
 # ---------------------------------------------------------------- synoptique
 def synoptique():
     b = [text(30, 34, "Synoptique de la maquette au lycée (réseau exploité tel quel, aucune connexion à l’hôpital, aucune donnée réelle)", 16, "bold", anchor="start")]
-    b.append(box(30, 60, 300, 175, "Boîtier du chariot", ["ESP32 (C++), batterie Li-Po de secours", "MPU6050 : secousses (100 Hz)", "INA219 : 5 V de l’USB du PC", "SHT31 : température, humidité", "heure NTP, numéro de séquence", "mémoire flash si Wi-Fi coupé"], hl=True))
-    b.append(box(420, 60, 330, 175, "Serveur – PC Ubuntu", ["Mosquitto (MQTT sur TLS)", "service Python : règles, corrélation", "pilote le diagnostic et GLPI", "PostgreSQL : mesures et événements", "rapport ; frise Grafana (V2)"], hl=True))
-    b.append(arrow(330, 120, 418, 120, "MQTT / TLS", ly=112))
-    b.append(text(374, 140, "Wi-Fi, 8883", 12, fill=GREY))
-    b.append(box(840, 60, 290, 175, "PC du chariot – Windows", ["portable de récupération", "point d’accès WinRM restreint (JEA)", "script PowerShell de diagnostic :", "journal, batterie, disque", "lecture seule, aucune correction"]))
-    b.append(arrow(750, 140, 838, 140, "WinRM HTTPS", ly=132))
-    b.append(text(794, 160, "5986", 12, fill=GREY))
-    b.append(box(420, 320, 330, 100, "GLPI dans Docker", ["données fictives", "compte de service à droits limités"], hl=True))
-    b.append(arrow(585, 237, 585, 318, "API REST (HTTPS)", lx=595, ly=282, anchor="start"))
-    b.append(box(880, 320, 250, 80, "PC du technicien", ["navigateur : tickets GLPI"]))
-    b.append(arrow(878, 360, 752, 360, "HTTPS", lx=815, ly=352))
-    b.append(box(30, 320, 300, 100, "Réseau de la maquette", ["Wi-Fi, DHCP, DNS, NTP", "routeur Cisco ISR 4331", "exploité, non reconfiguré"]))
-    b.append(arrow(180, 318, 180, 237, "NTP, DHCP, DNS", lx=190, ly=285, anchor="start"))
-    b.append(line([(858, 237), (858, 470), (370, 470), (370, 200)]))
-    b.append(arrow(370, 200, 332, 200))
-    b.append(text(614, 462, "Câble USB : le PC alimente le boîtier, qui mesure ce 5 V (aucune donnée échangée)", 12.5, fill=GREY))
-    b.append(text(30, 510, "En bleu : réalisé par l’apprenti (boîtier, service et base du serveur, GLPI de test). Le script PowerShell et le point JEA sont aussi écrits par l’apprenti.", 13, fill=GREY, anchor="start"))
-    save("0_synoptique", svg(1160, 530, "".join(b)))
+    b.append(box(30, 60, 270, 160, "Boîtier de l’imprimante", ["ESP32 (C++), Wi-Fi", "accéléromètre : vibration", "infrarouge : feuilles qui sortent", "bouton, écran à encre", "lecteur RFID (V2)"], hl=True))
+    b.append(box(400, 60, 340, 190, "Serveur – PC Ubuntu", ["Mosquitto (MQTT sur TLS)", "CUPS : serveur d’impression", "service Python : compare les témoins", "PostgreSQL, tableau de bord", "interroge l’imprimante (SNMP),", "le PC (JEA) et l’AD (LDAP)"], hl=True))
+    b.append(arrow(300, 140, 398, 140, "MQTT / TLS", ly=132, both=True))
+    b.append(box(30, 260, 270, 100, "Imprimante réseau", ["du lycée ou de récupération", "SNMP (état, encre), IPP"]))
+    b.append(arrow(400, 230, 302, 290, "SNMP, IPP", lx=352, ly=250, anchor="end"))
+    b.append(box(30, 400, 270, 100, "Station des PC neufs (V2)", ["ESP32, lecteur RFID", "écran, LED, bouton"], dashed=True, hl=True))
+    b.append(arrow(302, 440, 430, 252, "MQTT / TLS", lx=324, ly=424, dashed=True, anchor="start", size=11))
+    b.append(box(400, 320, 160, 118, "PC secrétaire", ["VM Windows 11", "Entreprise", "point d’accès JEA"]))
+    b.append(arrow(480, 252, 480, 318, "WinRM HTTPS", lx=486, ly=290, anchor="start", size=11))
+    b.append(box(580, 320, 160, 118, "PC neuf (V2)", ["VM Windows 11", "Entreprise", "script PowerShell"], dashed=True))
+    b.append(arrow(660, 252, 660, 318, "commande", lx=666, ly=290, anchor="start", dashed=True, size=11))
+    b.append(box(840, 60, 290, 100, "GLPI dans Docker", ["données fictives", "compte de service limité"], hl=True))
+    b.append(arrow(742, 110, 838, 110, "API REST", ly=102, both=True, size=11))
+    b.append(box(840, 190, 290, 80, "PC du technicien", ["navigateur : GLPI, tableau de bord"]))
+    b.append(box(840, 300, 290, 100, "Annuaire AD – Samba (Ubuntu)", ["domaine de la maquette (commun)", "partage des applications"]))
+    b.append(arrow(742, 230, 838, 320, "LDAP", lx=794, ly=262, anchor="start", size=11))
+    b.append(arrow(742, 400, 838, 380, "jonction, partage", lx=790, ly=416, dashed=True, size=11))
+    b.append(box(840, 430, 290, 80, "Réseau de la maquette", ["Wi-Fi, DHCP, DNS, NTP, switchs, routeur"]))
+    b.append(text(30, 545, "En bleu : réalisé par l’apprenti. Pointillés : V2. Windows 11 Famille ne peut rejoindre aucun domaine : les PC Windows sont des machines", 13, fill=GREY, anchor="start"))
+    b.append(text(30, 563, "virtuelles Windows 11 Entreprise (version d’évaluation) ou des PC sous Windows 11 Pro. L’AD est simulé par Samba sur Ubuntu.", 13, fill=GREY, anchor="start"))
+    save("0_synoptique", svg(1160, 580, "".join(b)))
 
 
 def req(x, y, w, h, rid, txt_lines, verif):
@@ -124,18 +128,18 @@ def exigences():
     px, py, pw, ph = 330, 48, 460, 92
     b.append(f'<rect x="{px}" y="{py}" width="{pw}" height="{ph}" fill="{BLUE_BG}" stroke="{BLUE}" stroke-width="2"/>')
     b.append(text(px + pw / 2, py + 17, "«requirement»", 11, fill=GREY, italic=True))
-    b.append(text(px + pw / 2, py + 37, "E0 – Supervision instrumentée des chariots de soins", 15, "bold"))
-    b.append(text(px + pw / 2, py + 60, "Voir la panne au moment où elle arrive", 13))
-    b.append(text(px + pw / 2, py + 78, "et ouvrir le ticket avec la preuve", 13))
+    b.append(text(px + pw / 2, py + 37, "E0 – Le service informatique augmenté", 15, "bold"))
+    b.append(text(px + pw / 2, py + 60, "Voir la panne d’imprimante, trouver la cause, ouvrir", 13))
+    b.append(text(px + pw / 2, py + 78, "le ticket avec la preuve ; préparer les PC neufs (V2)", 13))
     reqs = [
-        ("E1 – Voir les pannes", ["Au moins 19 pannes", "provoquées sur 20 détectées", "et bien classées"], "campagne d’essai"),
-        ("E2 – Pas de fausse alerte", ["Chariot roulé 1 h, seuils", "et chocs ordinaires compris :", "0 ticket proposé"], "essai de roulage"),
-        ("E3 – Rapide", ["Moins d’1 minute entre", "la coupure du 5 V", "et le ticket"], "chronométrage"),
-        ("E4 – Tenir", ["72 h sans perte ; Wi-Fi", "coupé : mesures gardées", "puis renvoyées"], "essai 72 h, capture"),
+        ("E1 – Bonne cause", ["10 pannes provoquées :", "cause juste dans", "au moins 9 cas"], "campagne d’essai"),
+        ("E2 – Pas de fausse alerte", ["1 h d’impressions", "normales :", "aucun ticket"], "essai d’1 h"),
+        ("E3 – Rapide", ["Moins d’1 minute entre", "l’impression ratée", "et le ticket"], "chronométrage"),
+        ("E4 – Feuilles comptées", ["100 feuilles : au plus", "1 erreur ; 10 pages de", "test vues sur 10"], "comptage"),
         ("E5 – Diagnostic borné", ["JEA : commande hors liste", "refusée et tracée ;", "lecture seule du PC"], "démonstration"),
-        ("E6 – Ticket utile", ["Frise, cause probable et", "diagnostic dans le ticket ;", "paliers, 1 ticket par jour"], "avis du technicien"),
-        ("E7 – Horloges alignées", ["Écart NTP entre boîtier,", "serveur et PC mesuré", "et affiché dans le rapport"], "mesure, capture"),
-        ("E8 – Bilan chiffré", ["« Je recommande » ou non :", "coût des boîtiers contre", "déplacements évités (V2)"], "bilan écrit"),
+        ("E6 – Retour au terrain", ["Écran du boîtier à jour", "en moins d’1 minute ;", "témoins dans le ticket"], "chronométrage"),
+        ("E7 – Bon réseau", ["Imprimante hors du réseau", "attendu par l’AD :", "signalée 5 fois sur 5"], "essai, capture"),
+        ("E8 – PC neufs (V2)", ["5 PC préparés : bon service", "dans l’AD, applications,", "fiche GLPI à jour"], "essai de la station"),
     ]
     xs = [30, 300, 570, 840]
     ys = [205, 395]
@@ -152,7 +156,7 @@ def exigences():
         b.append(line([(x + W / 2, 180 if i < 4 else 370), (x + W / 2, y)]))
     b.append(line([(xs[0] + W / 2, 370), (xs[3] + W / 2, 370)]))
     b.append(line([(xs[3] + W / 2, 180), (xs[3] + W + 12, 180), (xs[3] + W + 12, 370), (xs[3] + W / 2, 370)]))
-    b.append(text(30, 562, "Le symbole ⊕ indique que E0 se décompose en E1 à E8. V1 : E1 à E7 (paliers 1 et 2). V2 : E8, palier 3, température et frise Grafana.", 12.5, fill=GREY, anchor="start"))
+    b.append(text(30, 562, "Le symbole ⊕ indique que E0 se décompose en E1 à E8. V1 : E1 à E7 (paliers 1 et 2). V2 : E8, carte de Wassim, preuve de réparation, encre, palier 3.", 12.5, fill=GREY, anchor="start"))
     save("1_exigences", svg(1125, 575, "".join(b)))
 
 
@@ -162,130 +166,149 @@ def contexte():
     sx, sy, sw, sh = 390, 220, 340, 150
     b.append(f'<rect x="{sx}" y="{sy}" width="{sw}" height="{sh}" fill="{BLUE_BG}" stroke="{BLUE}" stroke-width="2"/>')
     b.append(text(sx + sw / 2, sy + 22, "«system»", 11, fill=GREY, italic=True))
-    b.append(text(sx + sw / 2, sy + 46, "Supervision instrumentée des chariots", 14.5, "bold"))
-    for i, t in enumerate(["boîtier posé sur le chariot", "+ service de corrélation (serveur)", "+ diagnostic à distance et tickets"]):
+    b.append(text(sx + sw / 2, sy + 46, "Le service informatique augmenté", 14.5, "bold"))
+    for i, t in enumerate(["boîtier collé sur l’imprimante", "+ serveur (règles, tickets, tableau de bord)", "+ station des PC neufs (V2)"]):
         b.append(text(sx + sw / 2, sy + 78 + i * 20, t, 13))
-    b.append(actor(120, 60, "Soignant", "pousse le chariot, saisit"))
-    b.append(arrow(175, 120, sx - 2, sy + 30, "n’a plus à appeler", lx=290, ly=232, anchor="end"))
-    b.append(actor(120, 400, "Technicien support", "lit, décide, ferme"))
+    b.append(actor(120, 60, "Secrétaire", "imprime, appuie sur le bouton"))
+    b.append(arrow(175, 120, sx - 2, sy + 30, "bouton, écran", lx=290, ly=232, anchor="end", both=True))
+    b.append(actor(120, 400, "Technicien support", "lit, décide, pose sa carte"))
     b.append(arrow(165, 450, sx - 2, sy + 120, "ticket, validation", lx=290, ly=440, both=True))
-    b.append(text(290, 456, "(palier 2), réglages", 12, fill=GREY))
+    b.append(text(290, 456, "(palier 2), 3 cartes (V2)", 12, fill=GREY))
 
     def ext(x, y, w, title, sub, dashed=False):
         return box(x, y, w, 64, title, [sub], dashed=dashed, stereo="«external»", tsize=14, lsize=12)
-    b.append(ext(430, 60, 260, "Chariot de soins", "seuils, ascenseur, chocs"))
-    b.append(arrow(560, 126, 560, sy - 2, "secousses", lx=570, ly=180, anchor="start"))
-    b.append(ext(880, 60, 230, "PC du chariot (Windows)", "portable avec batterie"))
-    b.append(arrow(880, 110, sx + sw + 2, sy + 30, "5 V de l’USB, état du PC", lx=842, ly=212, both=True, anchor="start"))
-    b.append(text(842, 228, "(lecture seule)", 12, fill=GREY, anchor="start"))
-    b.append(ext(880, 270, 230, "GLPI", "outil de tickets"))
+    b.append(ext(430, 60, 260, "Imprimante réseau", "vibre, sort les feuilles"))
+    b.append(arrow(560, 126, 560, sy - 2, "vibration, feuilles, état", lx=570, ly=180, anchor="start", both=True))
+    b.append(text(570, 196, "(SNMP)", 12, fill=GREY, anchor="start"))
+    b.append(ext(880, 60, 230, "PC de la secrétaire", "Windows 11, file d’impression"))
+    b.append(arrow(880, 110, sx + sw + 2, sy + 30, "file d’impression", lx=842, ly=212, both=True, anchor="start"))
+    b.append(text(842, 228, "(lecture seule, JEA)", 12, fill=GREY, anchor="start"))
+    b.append(ext(880, 270, 230, "GLPI", "tickets, fiches des PC"))
     b.append(arrow(878, 300, sx + sw + 2, 300, "tickets, suivis", ly=292, both=True))
-    b.append(ext(880, 470, 230, "Environnement", "chaleur, humidité"))
-    b.append(arrow(878, 500, sx + sw + 2, 355, "température", lx=830, ly=418, anchor="start"))
+    b.append(ext(880, 470, 230, "Annuaire AD (Samba)", "service de chaque PC"))
+    b.append(arrow(878, 500, sx + sw + 2, 355, "service, réseau attendu", lx=822, ly=418, anchor="start"))
     b.append(ext(430, 470, 260, "Réseau de la maquette", "Wi-Fi, DHCP, DNS, NTP"))
     b.append(arrow(560, 468, 560, sy + sh + 2, "adresses, heure commune", lx=570, ly=430, both=True, anchor="start"))
-    b.append(text(30, 600, "Hors périmètre : dossier patient informatisé, réseau et postes réels de l’hôpital ; le système ne répare rien et ne ferme aucun ticket.", 12.5, fill=GREY, anchor="start"))
-    save("2_contexte", svg(1140, 615, "".join(b)))
+    b.append(ext(60, 560, 250, "PC neuf (V2)", "Windows 11 Entreprise", dashed=True))
+    b.append(arrow(312, 590, sx + 40, sy + sh + 2, "préparation (V2)", lx=330, ly=610, dashed=True, anchor="start"))
+    b.append(text(30, 670, "Hors périmètre : dossier patient informatisé, réseau, imprimantes et postes réels de l’hôpital. Aucune donnée patient : le système lit le nombre de documents, jamais leur nom.", 12.5, fill=GREY, anchor="start"))
+    save("2_contexte", svg(1140, 685, "".join(b)))
 
 
 # ---------------------------------------------------------------- cas d'utilisation
 def cas():
     b = [text(30, 30, "Diagramme des cas d’utilisation (uc)", 16, "bold", anchor="start")]
-    bx, by, bw, bh = 230, 50, 640, 590
+    bx, by, bw, bh = 230, 50, 640, 600
     b.append(f'<rect x="{bx}" y="{by}" width="{bw}" height="{bh}" fill="#fff" stroke="#4b5563" stroke-width="1.4"/>')
-    b.append(text(bx + bw / 2, by + 22, "Système « Supervision instrumentée des chariots de soins »", 14, "bold"))
+    b.append(text(bx + bw / 2, by + 22, "Système « Le service informatique augmenté »", 14, "bold"))
 
-    def uc(cx, cy, t1, t2, rx):
-        o = f'<ellipse cx="{cx}" cy="{cy}" rx="{rx}" ry="27" fill="#fff" stroke="{BLUE}" stroke-width="1.5"/>'
+    def uc(cx, cy, t1, t2, rx, dashed=False):
+        d = ' stroke-dasharray="6 4"' if dashed else ""
+        o = f'<ellipse cx="{cx}" cy="{cy}" rx="{rx}" ry="27" fill="#fff" stroke="{BLUE}" stroke-width="1.5"{d}/>'
         return o + text(cx, cy - 3, t1, 13) + text(cx, cy + 14, t2, 13)
-    U = [
-        (420, 105, "Enregistrer secousses,", "tension, température"),
-        (420, 185, "Détecter la coupure", "du PC (5 V → 0 V)"),
-        (700, 185, "Corréler les", "événements"),
-        (700, 265, "Diagnostiquer le PC", "à distance (JEA)"),
-        (700, 345, "Ouvrir ou compléter", "le ticket (paliers)"),
-        (420, 345, "Valider un ticket", "proposé (palier 2)"),
-        (420, 425, "Lire le ticket", "et la frise"),
-        (420, 505, "Régler les seuils", "et le palier"),
-        (420, 585, "Établir le bilan", "« adopter ou non » (V2)"),
+    G = [
+        (400, 105, "Surveiller l’impression", "(vibration, feuilles)", False),
+        (400, 185, "Signaler une panne", "(bouton)", False),
+        (400, 265, "Lire le ticket et", "le tableau de bord", False),
+        (400, 345, "Valider une action", "proposée (palier 2)", False),
+        (400, 425, "Pointer une intervention", "avec sa carte (V2)", True),
+        (400, 505, "Préparer un PC neuf", "avec 3 cartes (V2)", True),
+        (400, 585, "Régler les seuils", "et le palier", False),
     ]
-    for x, y, a, c in U:
-        b.append(uc(x, y, a, c, 125 if x == 700 else 145))
-    b.append(arrow(565, 185, 573, 185, None, dashed=True, open_head=True))
-    b.append(text(570, 172, "«include»", 11, fill=GREY, italic=True))
-    for y1 in (212, 292):
-        b.append(arrow(700, y1, 700, y1 + 24, None, dashed=True, open_head=True))
-        b.append(text(708, y1 + 16, "«include»", 11, fill=GREY, italic=True, anchor="start"))
-    b.append(actor(110, 100, "Chariot", "secousse, panne"))
-    b.append(actor(110, 420, "Technicien"))
-    b.append(actor(980, 220, "PC du chariot"))
-    b.append(actor(980, 370, "GLPI"))
-    L = lambda x1, y1, x2, y2: line([(x1, y1), (x2, y2)], color="#4b5563", width=1.2)
+    D = [
+        (720, 145, "Comparer les témoins,", "trouver la cause", False),
+        (720, 225, "Interroger", "l’imprimante (SNMP)", False),
+        (720, 305, "Lire la file", "du PC (JEA)", False),
+        (720, 385, "Ouvrir ou compléter", "le ticket (paliers)", False),
+        (720, 465, "Afficher l’état", "sur le boîtier", False),
+        (720, 545, "Ranger le PC dans le", "bon service (V2)", True),
+    ]
+    for x, y, a, c, dsh in G:
+        b.append(uc(x, y, a, c, 140, dsh))
+    for x, y, a, c, dsh in D:
+        b.append(uc(x, y, a, c, 125, dsh))
+
+    def inc(x1, y1, x2, y2, tx, ty, anchor="start"):
+        return arrow(x1, y1, x2, y2, None, dashed=True, open_head=True) + text(tx, ty, "«include»", 11, fill=GREY, italic=True, anchor=anchor)
+    b.append(inc(530, 115, 600, 135, 548, 112))
+    b.append(inc(720, 172, 720, 196, 728, 190))
+    b.append(inc(720, 252, 720, 276, 728, 270))
+    b.append(inc(530, 515, 600, 535, 548, 512))
+    b.append(actor(110, 90, "Secrétaire"))
+    b.append(actor(110, 380, "Technicien"))
+    b.append(actor(990, 160, "Imprimante"))
+    b.append(actor(990, 290, "PC secrétaire"))
+    b.append(actor(990, 420, "GLPI"))
+    b.append(actor(990, 540, "AD (Samba)"))
+    Lk = lambda x1, y1, x2, y2: line([(x1, y1), (x2, y2)], color="#4b5563", width=1.2)
     for y in (105, 185):
-        b.append(L(130, 125, 275, y))
-    for y in (345, 425, 505, 585):
-        b.append(L(130, 445, 275, y))
-    b.append(L(960, 245, 825, 265))
-    b.append(L(960, 395, 825, 345))
-    save("3_cas_utilisation", svg(1080, 660, "".join(b)))
+        b.append(Lk(130, 115, 260, y))
+    for y in (265, 345, 425, 505, 585):
+        b.append(Lk(130, 405, 260, y))
+    b.append(Lk(970, 185, 845, 225))
+    b.append(Lk(970, 315, 845, 305))
+    b.append(Lk(970, 445, 845, 385))
+    b.append(Lk(970, 565, 845, 545))
+    b.append(text(30, 680, "Pointillés : V2. Le système ne supprime aucun ticket ; il ne le ferme qu’avec une preuve (page de test vue, ou feuilles qui ressortent).", 12.5, fill=GREY, anchor="start"))
+    save("3_cas_utilisation", svg(1090, 695, "".join(b)))
 
 
 # ---------------------------------------------------------------- séquence
 def sequence():
-    b = [text(30, 30, "Diagramme de séquence (sd) – le chariot passe le seuil de l’ascenseur, le PC s’éteint, le ticket s’ouvre", 16, "bold", anchor="start")]
-    L = {"brt": 130, "srv": 390, "pst": 660, "glpi": 890, "tech": 1070}
-    names = {"brt": ":Boîtier", "srv": ":Serveur", "pst": ":PC du chariot", "glpi": ":GLPI", "tech": "Technicien"}
-    top, bottom = 60, 760
+    b = [text(30, 30, "Diagramme de séquence (sd) – l’imprimante est figée : elle dit « tout va bien » mais rien ne sort", 16, "bold", anchor="start")]
+    L = {"sec": 70, "pcs": 215, "srv": 410, "imp": 600, "brt": 770, "glpi": 930, "tech": 1085}
+    names = {"sec": "Secrétaire", "pcs": ":PC secrétaire", "srv": ":Serveur", "imp": ":Imprimante", "brt": ":Boîtier", "glpi": ":GLPI", "tech": "Technicien"}
+    top, bottom = 60, 830
     for k, x in L.items():
-        if k == "tech":
+        if k in ("sec", "tech"):
             b.append(actor(x, top - 8, ""))
             b.append(text(x, top + 82, names[k], 14, "bold"))
             y0 = top + 92
         else:
             hl = k in ("brt", "srv")
-            b.append(f'<rect x="{x - 75}" y="{top}" width="150" height="40" fill="{BLUE_BG if hl else "#fff"}" stroke="{BLUE if hl else "#4b5563"}" stroke-width="1.4"/>')
+            b.append(f'<rect x="{x - 68}" y="{top}" width="136" height="40" fill="{BLUE_BG if hl else "#fff"}" stroke="{BLUE if hl else "#4b5563"}" stroke-width="1.4"/>')
             b.append(text(x, top + 26, names[k], 14, "bold"))
             y0 = top + 40
         b.append(line([(x, y0), (x, bottom)], dashed=True, color=LINE))
 
-    def msg(a, c, y, label, ret=False):
+    def msg(a, c, y, label, ret=False, lx=None):
         x1, x2 = L[a], L[c]
-        return arrow(x1, y, x2 - (6 if x2 > x1 else -6), y, label, ly=y - 6, dashed=ret, open_head=ret, size=12.5)
+        return arrow(x1, y, x2 - (6 if x2 > x1 else -6), y, label, lx=lx, ly=y - 6, dashed=ret, open_head=ret, size=12)
 
     def self_(a, y, label, l2=None):
         x = L[a]
         o = line([(x, y), (x + 40, y), (x + 40, y + 22), (x + 6, y + 22)])
         o += arrow(x + 20, y + 22, x + 4, y + 22)
-        o += text(x + 48, y + 8, label, 12.5, fill=GREY, anchor="start")
+        o += text(x + 48, y + 8, label, 12, fill=GREY, anchor="start")
         if l2:
-            o += text(x + 48, y + 24, l2, 12.5, fill=GREY, anchor="start")
+            o += text(x + 48, y + 24, l2, 12, fill=GREY, anchor="start")
         return o
 
     def note(y, t):
         return text(30, y, t, 12.5, BLUE, anchor="start", italic=True)
     y = 170
-    b.append(note(y, "10:42:07 – le chariot passe le seuil de l’ascenseur"))
-    b.append(self_("brt", y + 12, "1. secousse 2,1 g (interruption)"))
-    b.append(msg("brt", "srv", y + 65, "2. « secousse » (MQTT/TLS)"))
-    b.append(note(y + 105, "10:42:09 – le PC s’éteint"))
-    b.append(self_("brt", y + 117, "3. 5 V → 0 V ; le boîtier"))
-    b.append(text(L["brt"] + 48, y + 141, "continue sur sa batterie", 12.5, fill=GREY, anchor="start"))
-    b.append(msg("brt", "srv", y + 175, "4. « coupure » + n° de séquence"))
-    b.append(self_("srv", y + 187, "5. règle : secousse 2 s avant la coupure,", "batterie chargée → faux contact probable"))
-    b.append(note(y + 255, "10:42:40"))
-    b.append(msg("srv", "glpi", y + 260, "6. proposer le ticket (palier 2) – API REST HTTPS"))
-    b.append(msg("tech", "glpi", y + 300, "7. valide d’un clic"))
-    b.append(note(y + 345, "10:43:20 – le PC est rallumé"))
-    b.append(msg("srv", "pst", y + 365, "8. diagnostic (WinRM HTTPS, JEA)"))
-    b.append(self_("pst", y + 377, "9. Get-WinEvent, batterie,", "powercfg, disque (lecture seule)"))
-    b.append(msg("pst", "srv", y + 440, "10. Kernel-Power 41, batterie 65 %", ret=True))
-    b.append(msg("srv", "glpi", y + 485, "11. suivi : frise + rapport joints au ticket"))
-    b.append(msg("glpi", "tech", y + 530, "12. lit le ticket", ret=True))
-    b.append(self_("tech", y + 545, ""))
-    b.append(text(L["tech"] - 12, y + 566, "13. refixe le connecteur,", 12.5, fill=GREY, anchor="end"))
-    b.append(text(L["tech"] - 12, y + 582, "ferme le ticket lui-même", 12.5, fill=GREY, anchor="end"))
-    b.append(text(30, 790, "Palier 1 : le système note seulement « j’aurais ouvert un ticket ». Palier 3 (V2) : il l’ouvre seul. Les pannes suivantes du jour s’ajoutent au même ticket.", 12.5, fill=GREY, anchor="start"))
-    save("4_sequence", svg(1160, 805, "".join(b)))
+    b.append(note(y, "9:10:00 – la secrétaire imprime un compte rendu"))
+    b.append(msg("sec", "pcs", y + 30, "1. imprimer (5 p.)"))
+    b.append(msg("pcs", "srv", y + 65, "2. travail d’impression (IPP)"))
+    b.append(msg("srv", "imp", y + 100, "3. les 5 pages"))
+    b.append(note(y + 140, "9:10:30 – rien ne sort"))
+    b.append(msg("brt", "srv", y + 165, "4. vibration : non ; feuilles : 0 (MQTT)"))
+    b.append(msg("srv", "imp", y + 200, "5. état ? (SNMP)"))
+    b.append(msg("imp", "srv", y + 235, "6. « prête, aucune erreur »", ret=True))
+    b.append(msg("srv", "pcs", y + 270, "7. file ? (JEA)"))
+    b.append(msg("pcs", "srv", y + 305, "8. 0 document", ret=True))
+    b.append(self_("srv", y + 325, "9. envoyé, rien ne bouge, elle dit « ça va »", "→ imprimante figée"))
+    b.append(msg("srv", "glpi", y + 390, "10. ticket + « redémarrer ? » (palier 2)"))
+    b.append(msg("srv", "brt", y + 425, "11. écran « Bloquée »", lx=690))
+    b.append(note(y + 465, "9:11:10"))
+    b.append(msg("tech", "srv", y + 485, "12. valide le redémarrage", lx=840))
+    b.append(msg("srv", "imp", y + 520, "13. redémarrage"))
+    b.append(note(y + 560, "9:14:00"))
+    b.append(msg("brt", "srv", y + 580, "14. vibration ; 5 feuilles comptées"))
+    b.append(msg("srv", "glpi", y + 615, "15. résolu, preuve jointe"))
+    b.append(msg("srv", "brt", y + 650, "16. écran « Réparé »", lx=690))
+    b.append(text(30, 860, "Palier 1 : le système conseille seulement. Palier 3 (V2) : il redémarre seul, la nuit, et le note dans le ticket.", 12.5, fill=GREY, anchor="start"))
+    save("4_sequence", svg(1160, 875, "".join(b)))
 
 
 # ---------------------------------------------------------------- Gantt
@@ -293,32 +316,32 @@ def gantt():
     start = dt.date(2027, 1, 1)
     end = dt.date(2027, 5, 15)
     days = (end - start).days + 1
-    X0, X1 = 400, 1150
+    X0, X1 = 430, 1150
     px = (X1 - X0) / days
     xd = lambda d: X0 + (d - start).days * px
     D = dt.date
     tasks = [
         ("Cadrage", None),
         ("1. Besoin, cahier des charges, planning (12 h)", (D(2027, 1, 4), D(2027, 1, 22)), "c3"),
-        ("V1 – voir la panne et ouvrir le ticket", None),
-        ("2. Boîtier : câblage, secousses, MQTT, mémoire (35 h)", (D(2027, 1, 18), D(2027, 3, 5)), "c8"),
-        ("5. Diagnostic : PowerShell, WinRM, JEA (18 h)", (D(2027, 1, 25), D(2027, 3, 26)), "c8"),
-        ("3. Physique : étalonnage, chutes, incertitudes (10 h)", (D(2027, 2, 1), D(2027, 3, 12)), "phy"),
-        ("8. Réseau : DHCP, DNS, NTP, captures (8 h)", (D(2027, 2, 8), D(2027, 4, 9)), "c10"),
-        ("4. Serveur : réception, base, règles (20 h)", (D(2027, 2, 15), D(2027, 3, 19)), "c8"),
-        ("6. GLPI : installation, API, paliers (15 h)", (D(2027, 3, 15), D(2027, 4, 16)), "c8"),
-        ("7. Corrélation SQL, rapport (12 h)", (D(2027, 3, 29), D(2027, 4, 16)), "c8"),
-        ("V2 – mesurer et conclure", None),
-        ("7. (suite) Frise Grafana, température, palier 3", (D(2027, 4, 12), D(2027, 4, 23)), "c8"),
-        ("9. Campagne d’essai, indicateurs, bilan (10 h)", (D(2027, 4, 19), D(2027, 5, 7)), "c3"),
-        ("10. Dossier et préparation de l’oral (10 h)", (D(2027, 5, 3), D(2027, 5, 14)), "c1"),
+        ("V1 – voir la panne, trouver la cause, ouvrir le ticket", None),
+        ("2. Maquette : GLPI, CUPS, VM Windows 11, imprimante (12 h)", (D(2027, 1, 11), D(2027, 1, 29)), "c10"),
+        ("3. Boîtier : vibration, feuilles, bouton, écran (27 h)", (D(2027, 1, 18), D(2027, 3, 5)), "c8"),
+        ("4. Physique : vibration, vitesse des feuilles (10 h)", (D(2027, 2, 1), D(2027, 3, 12)), "phy"),
+        ("5. Serveur : règles, SNMP, vérifications réseau (22 h)", (D(2027, 2, 8), D(2027, 3, 19)), "c8"),
+        ("7. Réseau : DHCP, DNS, NTP, SNMP, captures (8 h)", (D(2027, 2, 8), D(2027, 4, 9)), "c10"),
+        ("6. PowerShell : file d’impression (JEA), AD (14 h)", (D(2027, 2, 22), D(2027, 3, 26)), "c8"),
+        ("8. GLPI : tickets à paliers, écran, tableau de bord (16 h)", (D(2027, 3, 15), D(2027, 4, 16)), "c8"),
+        ("V2 – RFID et PC neufs", None),
+        ("9. RFID : carte, preuve, station des PC neufs (14 h)", (D(2027, 4, 6), D(2027, 4, 30)), "c8"),
+        ("10. Campagne d’essai, indicateurs, bilan (7 h)", (D(2027, 4, 26), D(2027, 5, 7)), "c3"),
+        ("11. Dossier et préparation de l’oral (8 h)", (D(2027, 5, 3), D(2027, 5, 14)), "c1"),
         ("Journal de bord, journal IA, réunions (tout le long)", (D(2027, 1, 4), D(2027, 5, 14)), "c3"),
     ]
     col = {"c3": "#7c3aed", "c10": "#059669", "c8": BLUE, "phy": "#d97706", "c1": "#db2777"}
     rowh = 28
     top = 95
     H = top + len(tasks) * rowh + 110
-    b = [text(30, 30, "Planning prévisionnel du 1er janvier au 15 mai 2027 (150 h, 10 tâches)", 16, "bold", anchor="start")]
+    b = [text(30, 30, "Planning prévisionnel du 1er janvier au 15 mai 2027 (150 h, 11 tâches)", 16, "bold", anchor="start")]
     months = [(D(2027, m, 1), n) for m, n in [(1, "Janvier"), (2, "Février"), (3, "Mars"), (4, "Avril"), (5, "Mai")]]
     for i, (d, n) in enumerate(months):
         d2 = months[i + 1][0] if i + 1 < len(months) else end + dt.timedelta(days=1)

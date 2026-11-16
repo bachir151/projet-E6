@@ -76,7 +76,6 @@
   <tr><td class="k">Les PC des nouveaux médecins</td><td class="q">Il met le PC dans le domaine, le range dans le bon service de l'AD, puis lance un script qui installe les applications. « Sans le domaine, on ne peut rien faire. »</td><td>Une tâche fréquente, faite à la main, où une erreur de service est vite arrivée.</td></tr>
   <tr><td class="k">Les tickets</td><td class="q">« Il y a trop de tickets. » Certains utilisateurs viennent aussi directement au service.</td><td>Les tickets arrivent mal décrits : « l'imprimante ne marche pas ».</td></tr>
   <tr><td class="k">Sa méthode</td><td class="q">Il prend d'abord la main à distance. Si c'est vraiment bloqué, il se déplace.</td><td>Un bon diagnostic à distance évite des déplacements.</td></tr>
-  <tr><td class="k">Les chariots de soins</td><td class="q">« Les chariots, il n'y a pas de problème. »</td><td>On ne bâtit pas le projet sur les chariots.</td></tr>
 </table>
 
 <h2><span class="n">2</span>Ce qui existe déjà, et ce qui manque</h2>
@@ -159,7 +158,7 @@
   <text x="824" y="196" font-size="13" fill="#3a4a5c">imprimantes</text>
   <text x="824" y="224" font-size="13" fill="#3a4a5c">PC en préparation</text>
   <rect x="680" y="258" width="300" height="76" rx="8" fill="#fff" stroke="#1d2733" stroke-width="2"/>
-  <text x="694" y="286" font-size="15" font-weight="700" fill="#1d2733">Annuaire AD (domaine)</text>
+  <text x="694" y="286" font-size="15" font-weight="700" fill="#1d2733">Annuaire AD (Samba, Ubuntu)</text>
   <text x="694" y="310" font-size="14" fill="#3a4a5c">le service de chaque PC</text>
   <rect x="680" y="354" width="300" height="76" rx="8" fill="#fff" stroke="#1d2733" stroke-width="2"/>
   <text x="694" y="382" font-size="15" font-weight="700" fill="#1d2733">Partage réseau</text>
@@ -535,10 +534,18 @@ Add-Computer -DomainName "maquette.lan" -OUPath $commande.ou `
   <tr><td class="k">Lecteur RFID (RC522, ou PN532 pour les cartes sécurisées) (× 2)</td><td>Lire les cartes</td><td>≈ 3 à 15 € l'unité</td></tr>
   <tr><td class="k">Cartes et étiquettes RFID</td><td>Cartes simples (copiables, pour la démonstration) et cartes sécurisées</td><td>≈ 0,5 € (simples) à 3 € (sécurisées) l'unité</td></tr>
   <tr><td class="k">Imprimante réseau</td><td>Imprimante de test</td><td>Lycée ou récupération</td></tr>
-  <tr><td class="k">PC Windows (× 2), serveur Ubuntu</td><td>PC de la secrétaire, PC neuf, serveur et GLPI</td><td>Lycée</td></tr>
-  <tr><td class="k">Contrôleur de domaine</td><td>L'AD de la maquette</td><td>Commun aux projets du lycée</td></tr>
+  <tr><td class="k">Serveur Ubuntu</td><td>Serveur, GLPI, machines virtuelles</td><td>Lycée</td></tr>
+  <tr><td class="k">Annuaire AD simulé par Samba (Ubuntu)</td><td>Le domaine de la maquette</td><td>Gratuit, commun aux projets du lycée</td></tr>
+  <tr><td class="k">PC Windows (× 2) : machines virtuelles Windows 11 Entreprise</td><td>PC de la secrétaire, PC neuf</td><td>Version d'évaluation gratuite (90 jours) ; ou Windows 11 Pro</td></tr>
 </table>
 <p>Total à acheter : <b>de l'ordre de 100 à 150 €</b>, hors imprimante et PC.</p>
+
+<div class="box navy"><span class="t">Windows 11 Famille et Active Directory</span>
+<p>Les PC du lycée sont sous Windows 11 Famille. Cette édition <b>ne peut rejoindre aucun domaine</b>, ni Windows Server ni Samba. La maquette est donc montée ainsi :</p>
+<ul>
+  <li><b>L'annuaire AD est simulé par Samba</b> sur un PC Ubuntu. Pour Windows, c'est un vrai contrôleur de domaine Active Directory : jonction au domaine, unités d'organisation par service, lecture LDAP, commande PowerShell <i>Add-Computer -OUPath</i>.</li>
+  <li><b>Les PC Windows sont des machines virtuelles Windows 11 Entreprise</b> (version d'évaluation gratuite de 90 jours, sur le site de Microsoft), qui tournent sur les PC Ubuntu (KVM ou VirtualBox 7, avec une puce TPM simulée). Autre solution : des licences Windows 11 Pro ou Éducation, si le lycée en dispose.</li>
+</ul></div>
 
 <h2><span class="n">9</span>Comment savoir si ça marche</h2>
 <p>Des essais chiffrés, faits sur la maquette. Les seuils sont des propositions, à valider avec le tuteur.</p>
@@ -567,7 +574,6 @@ Add-Computer -DomainName "maquette.lan" -OUPath $commande.ou `
 <ul>
   <li><b>Un réseau de neurones</b> pour reconnaître les pannes : il faudrait provoquer des dizaines de bourrages, il serait difficile à expliquer, et il faudrait le réentraîner pour chaque modèle. Les quatre témoins et des règles simples suffisent.</li>
   <li><b>Un micro</b> sur l'imprimante : il capterait aussi les conversations. Le capteur de vibration ne sent que la machine.</li>
-  <li><b>Les chariots de soins</b> : Wassim dit qu'ils ne posent pas de problème.</li>
 </ul></div>
 
 <h2><span class="n">11</span>Ce qui n'est pas encore vérifié</h2>
@@ -578,6 +584,7 @@ Add-Computer -DomainName "maquette.lan" -OUPath $commande.ou `
   <tr><td class="k">Redémarrage de l'imprimante par le réseau</td><td>Dépend du modèle ; sinon, prise connectée du commerce.</td></tr>
   <tr><td class="k">Cartes sécurisées avec l'ESP32</td><td>Tester une bibliothèque pour le PN532 avec les NTAG 424 DNA.</td></tr>
   <tr><td class="k">Une imprimante réseau disponible au lycée</td><td>À demander.</td></tr>
+  <tr><td class="k">Machines virtuelles Windows 11 sur les PC Ubuntu</td><td>Vérifier la mémoire (environ 4 Go par machine) et la virtualisation dans le BIOS. Une évaluation dure 90 jours : prévoir de la réinstaller pendant le projet.</td></tr>
   <tr><td class="k">Proximité avec le projet de Lorenzo</td><td>Lorenzo installe aussi des logiciels pour les nouveaux agents. À différencier : chez Wassim, la préparation est déclenchée par les cartes et suivie dans GLPI.</td></tr>
   <tr><td class="k">Mesures physiques</td><td>À définir plus tard. Pistes : la vibration de l'imprimante (fréquences, seuil), la vitesse de sortie des feuilles (pages par minute mesurées et annoncées).</td></tr>
 </table>
