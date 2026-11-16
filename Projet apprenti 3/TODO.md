@@ -22,6 +22,14 @@
 | 0 h pour le réseau | 8 h réservées à l'exploitation réseau |
 | Charge réaliste ≈ 178 h avec IA | V1 ≈ 108 h, V2 ≈ 40 h (avec les ajouts du 11/11), marge ≈ 2 h |
 
+## Installations : option B choisie (15/11)
+- Constat : les grandes organisations règlent déjà l'essentiel (nuit + réveil à distance, heures d'activité de Windows Update, mises à jour en arrière-plan, hotpatch, PSAppDeployToolkit). Le radar ne les remplace pas : il leur donne l'information « l'agent est-il là ? ».
+- Décision : l'orchestrateur maison est remplacé par **PSAppDeployToolkit** (PowerShell, libre). La présence devient une **condition** que l'outil interroge.
+- Lorenzo écrit : `Test-PosteAbsent` (lecture de l'état de présence), le déclenchement sur l'événement « absent », les scripts de déploiement par paquet, le report si un logiciel est ouvert, l'envoi des résultats au serveur.
+- Piège à vérifier : en mode silencieux, la fermeture des logiciels de PSADT peut les fermer sans demander → ne pas l'utiliser ; reporter à la place (règle « aucun logiciel fermé »).
+- Essai R6 : comparer à un outil **bien réglé** (nuit + heures d'activité + report si logiciel ouvert), pas seulement à « heure fixe 12 h 30 ».
+- [ ] Mettre à jour la page HTML, le formulaire et la présentation.
+
 ## Physique (validée par l'enseignant ; reste à valider avec le collègue de physique)
 - Garder : R1 seuils, R2 + R3 zone de détection, R4 délai de détection (indicateur clé), R5 court ; exposition en calcul seul.
 - Mettre de côté : E1–E3 (wattmètre, bilan énergétique), sauf E1 court si la sobriété revient.
@@ -43,3 +51,6 @@
 3. Délai actuel du verrouillage sur inactivité ?
 4. Comment les installations sont-elles lancées aujourd'hui (outil, horaires) ?
 5. Disposition des bureaux : bureaux partagés ou plateau ouvert, distance au bureau voisin ? (et, à l'accueil, distance à l'usager)
+6. Quel outil installe les logiciels aujourd'hui (SCCM, WAPT, Intune, autre) et à quelles heures ? Pourquoi les installations dérangent-elles quand même ? Les postes restent-ils allumés la nuit ?
+7. Les agents ont-ils une carte à puce ? Sert-elle aussi de badge pour les portes ?
+8. Durée moyenne d'une absence courte du poste (imprimante, collègue) ?
