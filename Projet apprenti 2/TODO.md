@@ -20,7 +20,11 @@ Rien ne bouge sur le projet tant que ces réponses ne sont pas arrivées. Les do
 - [ ] Harmoniser la case « Projet développé : Entreprise » avec le texte « maquette au lycée »
 
 ## Autres points
-- [ ] Page HTML interactive et présentation 3Blue1Brown (3 documents par apprenti, décision du 11/11)
+- [x] Page HTML interactive : `livrables/page-html/boite-noire.html` (3 démos : corrélateur, chaîne de la carte, journal chaîné ; simulateur de réserve d'énergie ; testée dans un navigateur, ordinateur et téléphone)
+- [x] Présentation 3Blue1Brown : `livrables/powerpoint-3b1b/Projet_E6_Yaksan_3b1b.pptx` (34 diapositives, 385 animations au clic, notes de l'orateur ; reconstruire avec `build.sh`)
+- [ ] Relire les deux livrables ; la partie « solutions existantes » est écrite de mémoire et à vérifier (point « appui long sur le bouton » de l'événement 41 de Windows en particulier)
+- [ ] Les deux livrables suivent les décisions du 11/11 (V1 ≈ 113 h, V2 ≈ 35 h, P3 et P4 principaux, pas de défi HMAC) : le formulaire académique doit être mis à jour pour être cohérent
+- [ ] Titre du projet : « Boîte noire du poste » conservé dans les livrables ; proposition plus professionnelle à décider (« Analyse post-incident des postes de travail »)
 
 - [ ] Confirmer que Yaksan = apprenti 2
 - [ ] Compléter à la main dans le formulaire : adresse, site, téléphone, mail de l'entreprise ; nom et fonction du tuteur
