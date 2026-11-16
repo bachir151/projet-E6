@@ -31,6 +31,7 @@
 - [x] Dossier V2 (PDF) : **pas de mise à jour** (décision du 11/11 : seuls la page HTML, le formulaire et la présentation sont demandés)
 - [x] Propositions ci-dessus validées (11/11)
 - [x] Formulaire académique rempli (version corrigée et enrichie) : `fiche-academique/Fiche_presentation_E6_Lorenzo.docx` et `.pdf` (13 p.). À compléter à la main : adresse, site, téléphone, mail de l'entreprise ; nom et fonction du tuteur
+- [x] Contrôle avant envoi (12/11) : formulaire prêt ; coordonnées entreprise et tuteur à écrire à la main
 - [ ] Validation de la réalisation au lycée par l'académie
 
 ## Questions pour la visite du tuteur
