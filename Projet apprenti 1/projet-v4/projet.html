@@ -312,6 +312,19 @@
 </ol>
 <p>Le gros bouton rouge sert quand la secrétaire voit un problème que les capteurs n'ont pas vu. Elle appuie : le ticket s'ouvre avec le nom exact de l'imprimante, sans rien écrire.</p>
 
+<h3>Le boîtier lui-même</h3>
+<table>
+  <tr><th style="width:26%">Pièce</th><th>Rôle</th></tr>
+  <tr><td class="k">ESP32</td><td>Le petit ordinateur du boîtier. Il lit les capteurs et parle au serveur.</td></tr>
+  <tr><td class="k">Accéléromètre</td><td>Sent la vibration. Le boîtier doit être <b>fixé de façon rigide</b> sur l'imprimante (adhésif épais ou vis), sinon la vibration se perd.</td></tr>
+  <tr><td class="k">Capteur infrarouge</td><td>Relié au boîtier par un fil, placé au-dessus de la sortie du papier. Il compte les feuilles.</td></tr>
+  <tr><td class="k">Gros bouton rouge</td><td>« Ça ne marche pas » : ouvre un ticket avec le nom exact de l'imprimante.</td></tr>
+  <tr><td class="k">Écran à encre électronique</td><td>Donne des nouvelles. Il garde son image même sans courant : le message reste lisible si le boîtier est débranché.</td></tr>
+  <tr><td class="k">Lecteur RFID</td><td>Lit la carte de Wassim à son arrivée et à son départ.</td></tr>
+  <tr><td class="k">Alimentation</td><td>Un bloc USB 5 V du commerce branché sur une prise, ou le port USB de l'imprimante s'il en a un. Aucun câblage 230 V.</td></tr>
+  <tr><td class="k">Liaison avec le serveur</td><td>Par le Wi-Fi. Variante : les boîtiers parlent en <b>ESP-NOW</b> (liaison directe entre ESP32) à une seule passerelle reliée au réseau. Ainsi, aucun mot de passe Wi-Fi n'est stocké dans chaque boîtier.</td></tr>
+</table>
+
 <h3>Quatre témoins</h3>
 <table>
   <tr><th style="width:20%">Témoin</th><th style="width:32%">Ce qu'il dit</th><th>Comment</th></tr>
@@ -338,6 +351,8 @@
   <tr><th style="width:24%">Ajout</th><th>Ce que ça fait</th></tr>
   <tr><td class="k">L'encre avant la panne</td><td>À 10 % d'encre, le serveur ouvre un ticket préventif. L'écran affiche <span class="screen">Encre 8 % – cartouche prévue</span>. La panne n'arrive jamais.</td></tr>
   <tr><td class="k">Le bon VLAN (AD)</td><td>Le ticket ne dit plus « hors réseau » mais « l'imprimante est dans le réseau de la radiologie, elle devrait être dans celui de la cardiologie ». Le système vérifie, il ne change rien au réseau.</td></tr>
+  <tr><td class="k">Les vérifications réseau</td><td>Quand l'imprimante ne répond pas, le serveur cherche où ça bloque : répond-elle au <b>ping</b> ? Son nom est-il connu du <b>DNS</b> ? A-t-elle reçu son adresse du <b>DHCP</b> ? Les ports d'impression <b>9100</b> (impression directe) et <b>631</b> (IPP) sont-ils ouverts ? Le ticket dit lequel bloque.</td></tr>
+  <tr><td class="k">Réglé sur place</td><td>Si la secrétaire règle le problème elle-même (elle remet du papier, elle retire la feuille coincée), les feuilles ressortent et le capteur les compte. Le ticket est marqué « résolu sur place », avec cette preuve. Wassim ne se déplace pas.</td></tr>
   <tr><td class="k">La preuve de réparation</td><td>Quand Wassim repose sa carte en partant, le serveur envoie une page de test. Le capteur de feuilles la voit sortir : le ticket est fermé avec « page de test sortie à 10 h 42 ». Si elle ne sort pas, le ticket reste ouvert.</td></tr>
   <tr><td class="k">Le redémarrage à distance</td><td>Pour l'imprimante figée : ordre de redémarrage par le réseau si le modèle l'accepte, sinon prise connectée du commerce. On avance en trois niveaux de confiance (voir la partie Sécurité).</td></tr>
   <tr><td class="k">Option : l'étagère des cartouches</td><td>Quand l'encre est basse, la LED de la bonne cartouche s'allume sur l'étagère. Wassim la prend, un capteur de poids le voit, le stock baisse dans GLPI.</td></tr>
@@ -471,9 +486,10 @@ Add-Computer -DomainName "maquette.lan" -OUPath $commande.ou `
   <tr><td class="k">Le diagnostic à distance fait plus que prévu</td><td>Point d'accès PowerShell limité (JEA) : une liste fermée de commandes, un compte sans droit d'administrateur.</td><td>Une commande hors liste est refusée et tracée.</td></tr>
   <tr><td class="k">Une carte RFID est copiée</td><td>Les cartes bon marché (MIFARE Classic) se copient : leur protection est cassée depuis 2008. Le numéro de carte ne suffit donc pas : confirmation sur l'écran, puis carte sécurisée qui prouve son identité par chiffrement (NTAG 424 DNA ou DESFire).</td><td>Avec un système naïf, la copie marche. Avec le système corrigé, elle est refusée et tracée.</td></tr>
   <tr><td class="k">Un pirate cherche les imprimantes</td><td>Une fausse imprimante (un ESP32) répond comme une vraie. Personne n'a de raison de lui parler.</td><td>Un « attaquant » scanne le réseau : alerte sur le tableau de bord et ticket de sécurité.</td></tr>
+  <tr><td class="k">Quelqu'un écoute le réseau</td><td>En SNMP version 2, le « mot de passe » (la communauté) circule en clair. On passe en <b>SNMP version 3</b>, chiffré et authentifié, si l'imprimante le permet.</td><td>Deux captures Wireshark : en version 2, la communauté se lit ; en version 3, plus rien de lisible.</td></tr>
   <tr><td class="k">Une réparation automatique se trompe</td><td>Trois niveaux de confiance (ci-dessous).</td><td>Le journal montre chaque décision et qui l'a prise.</td></tr>
   <tr><td class="k">Le mot de passe de l'AD traîne</td><td>Un compte dédié, qui peut seulement ajouter des PC dans les services. Il est demandé à l'exécution, jamais écrit dans le script.</td><td>On montre le script : aucun mot de passe dedans.</td></tr>
-  <tr><td class="k">Le système abîme GLPI</td><td>Son compte ajoute des tickets et des suivis, mais ne supprime rien. Il ne ferme un ticket qu'après la carte de Wassim et la page de test.</td><td>Une suppression demandée par le système est refusée.</td></tr>
+  <tr><td class="k">Le système abîme GLPI</td><td>Son compte ajoute des tickets et des suivis, mais ne supprime rien. Il ne ferme un ticket qu'avec une preuve : la carte de Wassim et la page de test, ou les feuilles qui ressortent quand la secrétaire a réglé le problème elle-même.</td><td>Une suppression demandée par le système est refusée.</td></tr>
 </table>
 
 <h3>Trois niveaux de confiance</h3>
@@ -501,6 +517,7 @@ Add-Computer -DomainName "maquette.lan" -OUPath $commande.ou `
   <tr><td class="time">9 h 10</td><td>En cardiologie, la secrétaire imprime un compte rendu. Rien ne sort. Pas de vibration, aucune feuille, mais l'imprimante répond « tout va bien ». Le serveur conclut : imprimante figée. Ticket ouvert, pastille rouge. L'écran du boîtier : <span class="screen">Bloquée – Wassim arrive</span>.</td></tr>
   <tr><td class="time">9 h 11</td><td>Niveau 2 : le système propose « redémarrer l'imprimante ». Wassim clique depuis son bureau.</td></tr>
   <tr><td class="time">9 h 14</td><td>L'imprimante repart, les 3 feuilles sortent, le capteur les compte. Le ticket se ferme avec la preuve. Wassim ne s'est pas déplacé.</td></tr>
+  <tr><td class="time">10 h 05</td><td>En pédiatrie, l'écran du boîtier affiche <span class="screen">Bac 2 vide</span>. La secrétaire remet du papier, les feuilles sortent, le capteur les compte. Le ticket est marqué « résolu sur place ». Personne ne s'est déplacé.</td></tr>
   <tr><td class="time">11 h 30</td><td>L'imprimante de la radiologie passe sous 10 % d'encre. Ticket préventif ; sur l'étagère, la LED de la bonne cartouche s'allume.</td></tr>
   <tr><td class="time">15 h 20</td><td>Un bourrage en pédiatrie. Wassim y va, pose sa carte (arrivée 15 h 26), retire la feuille, repose sa carte. La page de test sort. Durée notée : 7 minutes.</td></tr>
   <tr><td class="time">16 h 02</td><td>Sur la maquette, un « attaquant » scanne le réseau. La fausse imprimante répond… et donne l'alerte.</td></tr>
@@ -523,18 +540,37 @@ Add-Computer -DomainName "maquette.lan" -OUPath $commande.ou `
 </table>
 <p>Total à acheter : <b>de l'ordre de 100 à 150 €</b>, hors imprimante et PC.</p>
 
-<div style="page-break-inside: avoid"><h2><span class="n">9</span>Dans quel ordre construire</h2>
+<h2><span class="n">9</span>Comment savoir si ça marche</h2>
+<p>Des essais chiffrés, faits sur la maquette. Les seuils sont des propositions, à valider avec le tuteur.</p>
+<table>
+  <tr><th style="width:42%">Essai</th><th style="width:30%">Ce qu'on mesure</th><th>Objectif proposé</th></tr>
+  <tr><td>10 pannes d'imprimante provoquées (papier retiré, feuille bloquée, câble débranché, mauvais réseau, imprimante figée, file bloquée sur le PC)</td><td>La cause écrite dans le ticket est-elle la bonne ?</td><td>Au moins 9 sur 10</td></tr>
+  <tr><td>Panne provoquée, chronomètre en main</td><td>Temps entre l'impression ratée et le ticket</td><td>Moins d'1 minute</td></tr>
+  <tr><td>1 heure d'impressions normales</td><td>Fausses alertes</td><td>Aucune</td></tr>
+  <tr><td>10 pages de test après réparation</td><td>Feuilles vues par le capteur</td><td>10 sur 10</td></tr>
+  <tr><td>10 essais avec une carte RFID copiée</td><td>Copies refusées et tracées</td><td>10 sur 10</td></tr>
+  <tr><td>Commande hors liste envoyée au PC</td><td>Refusée et tracée</td><td>Toujours</td></tr>
+  <tr><td>5 PC neufs préparés avec la station</td><td>Rangés dans le bon service de l'AD, applications installées, fiche GLPI à jour</td><td>5 sur 5</td></tr>
+</table>
+
+<div style="page-break-inside: avoid"><h2><span class="n">10</span>Dans quel ordre construire</h2>
 <table>
   <tr><th style="width:24%">Étape</th><th>Ce qu'on construit</th></tr>
   <tr><td class="k">1. Le cœur</td><td>Le boîtier (vibration, feuilles, bouton, écran), le serveur, les tickets GLPI, le tableau de bord.</td></tr>
   <tr><td class="k">2. Le rendre malin</td><td>Le PC comme quatrième témoin (PowerShell) ; le bon VLAN avec l'AD ; l'encre avant la panne ; la carte de Wassim et la preuve de réparation.</td></tr>
   <tr><td class="k">3. Les PC neufs</td><td>La station RFID, le script PowerShell, le rangement dans l'AD, la mise à jour de GLPI.</td></tr>
   <tr><td class="k">4. Aller loin</td><td>Le redémarrage en trois niveaux ; la fausse imprimante ; la démonstration de la carte copiée et des cartes sécurisées.</td></tr>
-  <tr><td class="k">5. Le spectacle (option)</td><td>L'étagère des cartouches ; l'hôpital en miniature (plan en plexiglas, une LED par imprimante).</td></tr>
+  <tr><td class="k">5. Le spectacle (option)</td><td>L'étagère des cartouches ; l'hôpital en miniature (plan en plexiglas, une LED par imprimante ; on touche un service sur le plan, grâce aux broches tactiles de l'ESP32, et l'écran affiche ce service).</td></tr>
 </table>
 <div class="box alerte"><p><b>Attention à la taille :</b> l'ensemble dépasse sans doute ce qu'on peut faire en 150 heures. Les étapes 1 à 3 forment un projet complet. Les étapes 4 et 5 se garderont ou se couperont plus tard.</p></div></div>
+<div class="box navy"><span class="t">Pistes écartées, et pourquoi</span>
+<ul>
+  <li><b>Un réseau de neurones</b> pour reconnaître les pannes : il faudrait provoquer des dizaines de bourrages, il serait difficile à expliquer, et il faudrait le réentraîner pour chaque modèle. Les quatre témoins et des règles simples suffisent.</li>
+  <li><b>Un micro</b> sur l'imprimante : il capterait aussi les conversations. Le capteur de vibration ne sent que la machine.</li>
+  <li><b>Les chariots de soins</b> : Wassim dit qu'ils ne posent pas de problème.</li>
+</ul></div>
 
-<h2><span class="n">10</span>Ce qui n'est pas encore vérifié</h2>
+<h2><span class="n">11</span>Ce qui n'est pas encore vérifié</h2>
 <table>
   <tr><th style="width:36%">Point</th><th>Comment le lever</th></tr>
   <tr><td class="k">La vibration distingue « imprime » et « attend »</td><td>Premier essai sur l'imprimante du lycée, en début de projet.</td></tr>
@@ -546,7 +582,17 @@ Add-Computer -DomainName "maquette.lan" -OUPath $commande.ou `
   <tr><td class="k">Mesures physiques</td><td>À définir plus tard. Pistes : la vibration de l'imprimante (fréquences, seuil), la vitesse de sortie des feuilles (pages par minute mesurées et annoncées).</td></tr>
 </table>
 
-<h2><span class="n">11</span>Pour aller plus loin</h2>
+<h2><span class="n">12</span>Questions au tuteur</h2>
+<ol>
+  <li>Parmi les tickets, quelle part concerne les imprimantes ? les PC neufs ? (ordre de grandeur sur un mois)</li>
+  <li>Les imprimantes sont-elles en réseau (adresse IP) ? Dans un VLAN à part ? Publiées dans l'AD ?</li>
+  <li>Wassim a-t-il le droit de lire l'état des imprimantes (page web, SNMP) ?</li>
+  <li>Dans l'AD, Wassim fait-il plus que ranger les PC dans le bon service (comptes, groupes, stratégies) ?</li>
+  <li>Les scripts d'installation : qui les écrit ? Combien de profils existent (médecin, secrétaire, infirmier…) ?</li>
+  <li>Le service utilise-t-il déjà des badges ou des cartes RFID ?</li>
+</ol>
+
+<h2><span class="n">13</span>Pour aller plus loin</h2>
 <ul style="font-size:8.6pt">
   <li>F. D. Garcia <i>et al.</i>, « Dismantling MIFARE Classic », <i>ESORICS 2008</i>, Springer, LNCS 5283 : pourquoi les cartes bon marché se copient.</li>
   <li>NXP, fiche technique <i>NTAG 424 DNA</i> : le fonctionnement d'une carte qui prouve son identité.</li>
