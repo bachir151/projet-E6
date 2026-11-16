@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Le service informatique augmenté – projet de Wassim</title>
+<style>
+  @page { size: A4 portrait; margin: 15mm 15mm 16mm 15mm;
+    @bottom-left { content: "Projet de Wassim · document de travail du 16/11/2026 · contexte anonymisé, réalisation sur maquette"; font: 7pt Inter, sans-serif; color: #8a93a0; }
+    @bottom-right { content: counter(page) " / " counter(pages); font: 7pt Inter, sans-serif; color: #8a93a0; } }
+  * { box-sizing: border-box; }
+  body { font-family: Inter, "DejaVu Sans", sans-serif; font-size: 9.6pt; line-height: 1.42; color: #1d2733; margin: 0; }
+  h1 { font-size: 23pt; line-height: 1.1; margin: 0 0 4pt; color: #1f3a5f; font-weight: 800; letter-spacing: -.01em; }
+  .sub { font-size: 13pt; color: #0b7a84; font-weight: 600; margin: 0 0 10pt; }
+  .kicker { font-size: 7.6pt; letter-spacing: .14em; text-transform: uppercase; color: #5a6675; font-weight: 600; margin-bottom: 6pt; }
+  h2 { font-size: 13.5pt; color: #1f3a5f; margin: 16pt 0 6pt; padding-bottom: 3pt; border-bottom: 1.2pt solid #1f3a5f; page-break-after: avoid; font-weight: 800; }
+  h2 .n { color: #0b7a84; margin-right: 5pt; }
+  h3 { font-size: 10.8pt; color: #1f3a5f; margin: 11pt 0 4pt; page-break-after: avoid; }
+  p { margin: 0 0 5pt; }
+  ul, ol { margin: 0 0 6pt; padding-left: 14pt; }
+  li { margin: 0 0 2.5pt; }
+  b { color: #15283f; }
+  .lead { font-size: 11pt; line-height: 1.45; }
+  .box { border: 0.7pt solid #c7cfd8; border-left: 3pt solid #0b7a84; background: #f4f8f9; padding: 7pt 10pt; margin: 8pt 0; page-break-inside: avoid; }
+  .box.navy { border-left-color: #1f3a5f; background: #f3f6fa; }
+  .box.alerte { border-left-color: #b86e00; background: #fbf6ee; }
+  .box p:last-child, .box ul:last-child { margin-bottom: 0; }
+  .box .t { display: block; font-weight: 700; color: #1f3a5f; margin-bottom: 3pt; }
+  table { width: 100%; border-collapse: collapse; margin: 5pt 0 8pt; font-size: 8.8pt; page-break-inside: auto; }
+  th { background: #1f3a5f; color: #fff; text-align: left; padding: 3.5pt 6pt; font-weight: 600; vertical-align: bottom; }
+  td { border-bottom: 0.6pt solid #d5dbe2; padding: 3pt 6pt; vertical-align: top; }
+  tr { page-break-inside: avoid; }
+  td.k { font-weight: 600; color: #1f3a5f; }
+  .ok { color: #2b8a55; font-weight: 700; } .warn { color: #b86e00; font-weight: 700; } .bad { color: #c3352b; font-weight: 700; }
+  .screen { font-family: "DejaVu Sans Mono", monospace; font-size: 7.6pt; font-weight: 700; background: #e3e1d8; border: 1pt solid #1d2733; border-radius: 2pt; padding: 1.5pt 4pt; display: inline-block; text-transform: uppercase; }
+  figure { margin: 8pt 0 10pt; page-break-inside: avoid; }
+  figure svg { width: 100%; height: auto; display: block; border: 0.7pt solid #c7cfd8; border-radius: 4pt; }
+  figcaption { font-size: 8pt; color: #5a6675; margin-top: 3pt; }
+  .legend { font-size: 8pt; color: #5a6675; margin-top: 3pt; }
+  .legend span { margin-right: 12pt; }
+  .steps { list-style: none; padding: 0; margin: 4pt 0 8pt; }
+  .steps li { position: relative; padding-left: 22pt; margin-bottom: 4pt; min-height: 15pt; }
+  .steps li .b { position: absolute; left: 0; top: 0; width: 15pt; height: 15pt; border-radius: 50%; background: #0b7a84; color: #fff; font-weight: 700; font-size: 8.5pt; text-align: center; line-height: 15pt; }
+  pre { font-family: "DejaVu Sans Mono", monospace; font-size: 7.8pt; line-height: 1.4; background: #10202f; color: #e6edf3; padding: 8pt 10pt; border-radius: 3pt; white-space: pre-wrap; page-break-inside: avoid; margin: 5pt 0 8pt; }
+  pre .c { color: #8fb3c9; }
+  .three { display: flex; gap: 8pt; margin: 6pt 0; }
+  .three > div { flex: 1; border: 0.7pt solid #c7cfd8; border-top: 3pt solid #0b7a84; padding: 6pt 8pt; page-break-inside: avoid; }
+  .three b.t { display: block; color: #1f3a5f; font-size: 10pt; margin-bottom: 2pt; }
+  .q { font-style: italic; color: #3a4a5c; }
+  .small { font-size: 8.4pt; color: #4a5868; }
+  .pb { page-break-before: always; }
+  .time { font-weight: 700; color: #0b7a84; white-space: nowrap; }
+</style>
+</head>
+<body>
+
+<div class="kicker">BTS CIEL · Projet de Wassim · proposition de travail</div>
+<h1>Le service informatique augmenté</h1>
+<p class="sub">De l'imprimante muette au PC du nouveau médecin</p>
+
+<p class="lead">Wassim est technicien de support au service informatique d'un centre hospitalier. Ses journées tournent autour de deux choses : <b>des imprimantes qui ne marchent pas</b> et <b>des PC à préparer</b> pour les médecins qui arrivent. Ce projet lui construit deux outils, reliés au même serveur, au même outil de tickets (GLPI) et au même tableau de bord.</p>
+
+<div class="three">
+  <div><b class="t">Le boîtier de l'imprimante</b>Collé sur l'imprimante, il sent si elle travaille, compte les feuilles qui sortent, et prévient le service quand quelque chose ne va pas.</div>
+  <div><b class="t">La station des PC neufs</b>Wassim pose trois cartes RFID : la sienne, celle du PC, celle du profil. Un script PowerShell prépare le PC tout seul.</div>
+  <div><b class="t">Le cerveau commun</b>Un serveur qui compare, décide et écrit dans GLPI. Un tableau de bord qui montre tout d'un coup d'œil.</div>
+</div>
+
+<div class="box navy"><span class="t">Le projet en une phrase</span>
+<p>Quand une imprimante tombe en panne, le système le voit, trouve la cause, aide à réparer et prouve que c'est réparé ; quand un médecin arrive, son PC se prépare en posant trois cartes.</p></div>
+
+<h2><span class="n">1</span>Le point de départ : ce que Wassim fait vraiment</h2>
+<p>Tout part de l'entretien avec Wassim (16 novembre 2026). Voici ce qu'il a dit, en résumé.</p>
+<table>
+  <tr><th style="width:27%">Sujet</th><th style="width:43%">Ce que dit Wassim</th><th>Ce qu'on en retient</th></tr>
+  <tr><td class="k">Les imprimantes</td><td class="q">« Le plus gros problème, c'est les imprimantes. » Elles sont allumées mais n'impriment pas. Il regarde si elles sont dans le bon VLAN, s'il manque de l'encre.</td><td>C'est la panne n° 1. Les vérifications sont toujours les mêmes : on peut les automatiser.</td></tr>
+  <tr><td class="k">Les PC des nouveaux médecins</td><td class="q">Il met le PC dans le domaine, le range dans le bon service de l'AD, puis lance un script qui installe les applications. « Sans le domaine, on ne peut rien faire. »</td><td>Une tâche fréquente, faite à la main, où une erreur de service est vite arrivée.</td></tr>
+  <tr><td class="k">Les tickets</td><td class="q">« Il y a trop de tickets. » Certains utilisateurs viennent aussi directement au service.</td><td>Les tickets arrivent mal décrits : « l'imprimante ne marche pas ».</td></tr>
+  <tr><td class="k">Sa méthode</td><td class="q">Il prend d'abord la main à distance. Si c'est vraiment bloqué, il se déplace.</td><td>Un bon diagnostic à distance évite des déplacements.</td></tr>
+  <tr><td class="k">Les chariots de soins</td><td class="q">« Les chariots, il n'y a pas de problème. »</td><td>On ne bâtit pas le projet sur les chariots.</td></tr>
+</table>
+
+<h2><span class="n">2</span>Ce qui existe déjà, et ce qui manque</h2>
+<table>
+  <tr><th style="width:25%">Outil existant</th><th style="width:35%">Ce qu'il fait bien</th><th>Ce qui lui manque</th></tr>
+  <tr><td class="k">Page web de l'imprimante</td><td>Montre son état et son niveau d'encre.</td><td>Une imprimante à la fois. Elle peut dire « tout va bien » alors qu'elle est figée.</td></tr>
+  <tr><td class="k">Supervision (Centreon, Zabbix…)</td><td>Surveille toutes les imprimantes du réseau.</td><td>Ne voit pas si une feuille sort vraiment. Ne regarde pas le PC qui imprime. Lourde à installer.</td></tr>
+  <tr><td class="k">Prise en main à distance</td><td>Wassim voit le PC comme s'il y était.</td><td>Les mêmes vérifications à refaire à la main, ticket après ticket.</td></tr>
+  <tr><td class="k">GLPI</td><td>Suit les tickets et la liste du matériel.</td><td>Le ticket ne contient que la phrase de l'utilisateur. Personne ne prouve que la réparation a marché.</td></tr>
+  <tr><td class="k">Script d'installation actuel</td><td>Installe les applications rapidement.</td><td>Le choix du service et du profil se fait à la main. GLPI n'est pas mis à jour tout seul.</td></tr>
+</table>
+<div class="box"><p><b>Ce qui manque partout :</b> un témoin physique (« la feuille est-elle sortie ? ») et un lien automatique entre ce qui se passe sur le terrain, l'AD et GLPI.</p></div>
+
+<h2 class="pb"><span class="n">3</span>Vue d'ensemble</h2>
+<figure>
+<svg viewBox="0 0 1000 590" xmlns="http://www.w3.org/2000/svg" font-family="Inter, DejaVu Sans, sans-serif">
+  <defs>
+    <marker id="a1" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#0b7a84"/></marker>
+  </defs>
+  <rect x="0" y="0" width="1000" height="590" fill="#ffffff"/>
+  <!-- Zone A -->
+  <rect x="12" y="12" width="350" height="290" rx="12" fill="#eef2f6"/>
+  <text x="28" y="38" font-size="14" font-weight="700" fill="#5a6675" letter-spacing="1.5">DANS UN SERVICE DE SOINS</text>
+  <rect x="70" y="56" width="60" height="40" fill="#fff" stroke="#1d2733" stroke-width="1.5"/>
+  <line x1="78" y1="68" x2="122" y2="68" stroke="#c7cfd8" stroke-width="2"/><line x1="78" y1="78" x2="116" y2="78" stroke="#c7cfd8" stroke-width="2"/>
+  <rect x="38" y="84" width="124" height="22" rx="5" fill="#fff" stroke="#1d2733" stroke-width="2"/>
+  <rect x="30" y="102" width="140" height="80" rx="8" fill="#fff" stroke="#1d2733" stroke-width="2"/>
+  <text x="100" y="136" font-size="16" font-weight="700" text-anchor="middle" fill="#1d2733">Imprimante</text>
+  <rect x="48" y="152" width="104" height="18" rx="3" fill="#eef2f6" stroke="#1d2733" stroke-width="1.5"/>
+  <rect x="180" y="94" width="58" height="92" rx="8" fill="#fff" stroke="#1d2733" stroke-width="2"/>
+  <rect x="187" y="102" width="44" height="28" rx="2" fill="#e3e1d8" stroke="#1d2733" stroke-width="1.2"/>
+  <circle cx="209" cy="160" r="13" fill="#c3352b"/>
+  <text x="248" y="110" font-size="16" font-weight="700" fill="#1d2733">Le boîtier</text>
+  <text x="248" y="130" font-size="14" fill="#3a4a5c">vibration, feuilles</text>
+  <text x="248" y="148" font-size="14" fill="#3a4a5c">bouton, écran</text>
+  <text x="248" y="166" font-size="14" fill="#3a4a5c">lecteur RFID</text>
+  <rect x="34" y="214" width="92" height="58" rx="5" fill="#fff" stroke="#1d2733" stroke-width="2"/>
+  <rect x="41" y="221" width="78" height="40" rx="2" fill="#eef2f6"/>
+  <rect x="72" y="272" width="16" height="10" fill="#fff" stroke="#1d2733" stroke-width="1.5"/>
+  <text x="140" y="240" font-size="16" font-weight="700" fill="#1d2733">PC de la secrétaire</text>
+  <text x="140" y="260" font-size="14" fill="#3a4a5c">PowerShell : file d'impression</text>
+  <!-- Zone B -->
+  <rect x="12" y="318" width="350" height="260" rx="12" fill="#eef2f6"/>
+  <text x="28" y="344" font-size="14" font-weight="700" fill="#5a6675" letter-spacing="1.5">À L'ATELIER INFORMATIQUE</text>
+  <rect x="30" y="372" width="112" height="112" rx="10" fill="#fff" stroke="#1d2733" stroke-width="2"/>
+  <rect x="40" y="382" width="92" height="36" rx="2" fill="#e3e1d8" stroke="#1d2733" stroke-width="1.2"/>
+  <circle cx="52" cy="436" r="5" fill="#2b8a55"/><circle cx="68" cy="436" r="5" fill="#2b8a55"/><circle cx="84" cy="436" r="5" fill="#b86e00"/><circle cx="100" cy="436" r="5" fill="#c7cfd8"/><circle cx="116" cy="436" r="5" fill="#c7cfd8"/>
+  <circle cx="86" cy="464" r="11" fill="#2b8a55"/>
+  <g>
+    <rect x="152" y="372" width="62" height="34" rx="5" fill="#fff" stroke="#0b7a84" stroke-width="1.8"/><text x="183" y="394" font-size="12" text-anchor="middle" fill="#1d2733">Wassim</text>
+    <rect x="152" y="412" width="62" height="34" rx="5" fill="#fff" stroke="#0b7a84" stroke-width="1.8"/><text x="183" y="434" font-size="12" text-anchor="middle" fill="#1d2733">Profil</text>
+    <rect x="152" y="452" width="62" height="34" rx="5" fill="#fff" stroke="#0b7a84" stroke-width="1.8"/><text x="183" y="474" font-size="12" text-anchor="middle" fill="#1d2733">PC</text>
+  </g>
+  <text x="30" y="512" font-size="16" font-weight="700" fill="#1d2733">Station de préparation</text>
+  <text x="30" y="532" font-size="14" fill="#3a4a5c">3 cartes RFID, écran, LED, bouton</text>
+  <rect x="244" y="380" width="96" height="62" rx="5" fill="#fff" stroke="#1d2733" stroke-width="2"/>
+  <rect x="251" y="387" width="82" height="44" rx="2" fill="#10202f"/>
+  <text x="258" y="413" font-size="12" font-family="DejaVu Sans Mono, monospace" fill="#7fd4dc">PS&gt; _</text>
+  <rect x="284" y="442" width="16" height="10" fill="#fff" stroke="#1d2733" stroke-width="1.5"/>
+  <text x="292" y="480" font-size="16" font-weight="700" text-anchor="middle" fill="#1d2733">PC neuf</text>
+  <text x="292" y="498" font-size="14" text-anchor="middle" fill="#3a4a5c">PowerShell</text>
+  <!-- Serveur -->
+  <rect x="440" y="232" width="134" height="124" rx="10" fill="#fff" stroke="#1d2733" stroke-width="2.2"/>
+  <rect x="454" y="248" width="106" height="24" rx="3" fill="#eef2f6" stroke="#1d2733" stroke-width="1.2"/>
+  <rect x="454" y="282" width="106" height="24" rx="3" fill="#eef2f6" stroke="#1d2733" stroke-width="1.2"/>
+  <rect x="454" y="316" width="106" height="24" rx="3" fill="#eef2f6" stroke="#1d2733" stroke-width="1.2"/>
+  <circle cx="546" cy="260" r="4" fill="#2b8a55"/><circle cx="546" cy="294" r="4" fill="#2b8a55"/><circle cx="546" cy="328" r="4" fill="#b86e00"/>
+  <text x="507" y="380" font-size="17" font-weight="800" text-anchor="middle" fill="#1f3a5f">Serveur</text>
+  <text x="507" y="400" font-size="14" text-anchor="middle" fill="#3a4a5c">compare, décide, commande</text>
+  <!-- Colonne droite -->
+  <rect x="680" y="18" width="300" height="96" rx="8" fill="#fff" stroke="#1d2733" stroke-width="2"/>
+  <rect x="680" y="18" width="300" height="28" rx="8" fill="#0b7a84"/><rect x="680" y="34" width="300" height="12" fill="#0b7a84"/>
+  <text x="694" y="38" font-size="15" font-weight="700" fill="#fff">GLPI</text>
+  <text x="694" y="70" font-size="14" fill="#1d2733">tickets des imprimantes</text>
+  <text x="694" y="92" font-size="14" fill="#1d2733">fiches des PC (stock, service)</text>
+  <rect x="680" y="134" width="300" height="104" rx="8" fill="#fff" stroke="#1d2733" stroke-width="2"/>
+  <text x="694" y="158" font-size="15" font-weight="700" fill="#1d2733">Tableau de bord</text>
+  <circle cx="706" cy="190" r="9" fill="#2b8a55"/><circle cx="736" cy="190" r="9" fill="#2b8a55"/><circle cx="766" cy="190" r="9" fill="#c3352b"/><circle cx="796" cy="190" r="9" fill="#2b8a55"/>
+  <circle cx="706" cy="218" r="9" fill="#2b8a55"/><circle cx="736" cy="218" r="9" fill="#b86e00"/><circle cx="766" cy="218" r="9" fill="#2b8a55"/><circle cx="796" cy="218" r="9" fill="#2b8a55"/>
+  <text x="824" y="196" font-size="13" fill="#3a4a5c">imprimantes</text>
+  <text x="824" y="224" font-size="13" fill="#3a4a5c">PC en préparation</text>
+  <rect x="680" y="258" width="300" height="76" rx="8" fill="#fff" stroke="#1d2733" stroke-width="2"/>
+  <text x="694" y="286" font-size="15" font-weight="700" fill="#1d2733">Annuaire AD (domaine)</text>
+  <text x="694" y="310" font-size="14" fill="#3a4a5c">le service de chaque PC</text>
+  <rect x="680" y="354" width="300" height="76" rx="8" fill="#fff" stroke="#1d2733" stroke-width="2"/>
+  <text x="694" y="382" font-size="15" font-weight="700" fill="#1d2733">Partage réseau</text>
+  <text x="694" y="406" font-size="14" fill="#3a4a5c">applications de chaque profil</text>
+  <rect x="680" y="450" width="300" height="60" rx="8" fill="#fff" stroke="#c3352b" stroke-width="2" stroke-dasharray="6 4"/>
+  <text x="694" y="476" font-size="15" font-weight="700" fill="#c3352b">Fausse imprimante (piège)</text>
+  <text x="694" y="498" font-size="13" fill="#3a4a5c">personne ne doit lui parler</text>
+  <rect x="680" y="524" width="300" height="54" rx="8" fill="#fff" stroke="#8a93a0" stroke-width="1.5" stroke-dasharray="3 4"/>
+  <text x="694" y="548" font-size="14" font-weight="700" fill="#5a6675">Option : étagère des cartouches</text>
+  <text x="694" y="568" font-size="13" fill="#5a6675">Option : hôpital en miniature</text>
+  <!-- Flèches -->
+  <path d="M364,150 C405,150 410,240 438,262" fill="none" stroke="#0b7a84" stroke-width="2.5" marker-start="url(#a1)" marker-end="url(#a1)"/>
+  <text x="380" y="140" font-size="13" fill="#0b7a84" font-weight="700">Wi-Fi</text>
+  <path d="M364,268 C400,268 410,300 438,306" fill="none" stroke="#0b7a84" stroke-width="2.5" stroke-dasharray="7 5" marker-start="url(#a1)" marker-end="url(#a1)"/>
+  <path d="M364,440 C405,440 412,345 438,336" fill="none" stroke="#0b7a84" stroke-width="2.5" marker-start="url(#a1)" marker-end="url(#a1)"/>
+  <path d="M576,250 C620,200 640,80 676,66" fill="none" stroke="#0b7a84" stroke-width="2.5" marker-start="url(#a1)" marker-end="url(#a1)"/>
+  <path d="M576,276 C620,270 640,196 676,190" fill="none" stroke="#0b7a84" stroke-width="2.5" marker-end="url(#a1)"/>
+  <path d="M576,300 L676,296" fill="none" stroke="#0b7a84" stroke-width="2.5" stroke-dasharray="7 5" marker-start="url(#a1)" marker-end="url(#a1)"/>
+  <path d="M676,476 C630,470 610,380 578,348" fill="none" stroke="#c3352b" stroke-width="2.5" marker-end="url(#a1)"/>
+  <text x="600" y="482" font-size="13" fill="#c3352b" font-weight="700" text-anchor="end">alerte</text>
+  <path d="M364,520 C450,560 610,540 676,414" fill="none" stroke="#0b7a84" stroke-width="2" stroke-dasharray="2 5" stroke-linecap="round"/>
+  <text x="440" y="560" font-size="13" fill="#5a6675">le PC neuf lit l'AD et le partage</text>
+</svg>
+<div class="legend"><span>━ information envoyée</span><span>╍ question et réponse</span><span>┈ accès du PC neuf</span><span style="color:#c3352b">━ alerte de sécurité</span></div>
+<figcaption>Figure 1 – Les deux outils de terrain (à gauche) et le cerveau commun (au centre et à droite).</figcaption>
+</figure>
+
+<p>Le projet a <b>deux outils sur le terrain</b> et <b>un seul cerveau</b>.</p>
+<ul>
+  <li><b>Sur le terrain :</b> le boîtier de l'imprimante, dans les services de soins ; la station de préparation, à l'atelier du service informatique.</li>
+  <li><b>Le cerveau :</b> un serveur qui reçoit tout, compare, décide, et écrit dans GLPI. Il lit l'AD pour savoir à quel service appartient chaque PC.</li>
+  <li><b>Ce que voit Wassim :</b> les tickets dans GLPI, et un tableau de bord avec une pastille de couleur par imprimante et par PC en préparation.</li>
+  <li><b>La sécurité :</b> une fausse imprimante cachée dans le réseau sert de piège.</li>
+</ul>
+
+<h2 class="pb"><span class="n">4</span>Partie 1 – Le boîtier de l'imprimante</h2>
+<figure>
+<svg viewBox="0 0 960 640" xmlns="http://www.w3.org/2000/svg" font-family="Inter, DejaVu Sans, sans-serif">
+  <defs>
+    <marker id="a2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#0b7a84"/></marker>
+  </defs>
+  <rect x="0" y="0" width="960" height="640" fill="#ffffff"/>
+  <rect x="10" y="40" width="420" height="590" rx="14" fill="#eef2f6"/>
+  <text x="28" y="68" font-size="14" font-weight="700" fill="#5a6675" letter-spacing="1.5">DANS LE SERVICE DE SOINS</text>
+  <rect x="450" y="40" width="500" height="590" rx="14" fill="#eef2f6"/>
+  <text x="468" y="68" font-size="14" font-weight="700" fill="#5a6675" letter-spacing="1.5">AU SERVICE INFORMATIQUE</text>
+  <!-- PC -->
+  <rect x="40" y="90" width="120" height="76" rx="6" fill="#fff" stroke="#1d2733" stroke-width="2"/>
+  <rect x="48" y="98" width="104" height="58" rx="3" fill="#eef2f6"/>
+  <rect x="92" y="166" width="16" height="12" fill="#fff" stroke="#1d2733" stroke-width="2"/>
+  <rect x="72" y="178" width="56" height="6" rx="2" fill="#fff" stroke="#1d2733" stroke-width="2"/>
+  <text x="100" y="208" font-size="16" font-weight="700" text-anchor="middle" fill="#1d2733">PC de la secrétaire</text>
+  <!-- Imprimante -->
+  <rect x="215" y="255" width="110" height="70" rx="2" fill="#fff" stroke="#1d2733" stroke-width="1.5"/>
+  <line x1="228" y1="270" x2="310" y2="270" stroke="#c7cfd8" stroke-width="2"/><line x1="228" y1="282" x2="300" y2="282" stroke="#c7cfd8" stroke-width="2"/><line x1="228" y1="294" x2="312" y2="294" stroke="#c7cfd8" stroke-width="2"/>
+  <rect x="160" y="300" width="220" height="34" rx="6" fill="#fff" stroke="#1d2733" stroke-width="2"/>
+  <rect x="150" y="330" width="240" height="130" rx="10" fill="#fff" stroke="#1d2733" stroke-width="2"/>
+  <text x="270" y="382" font-size="17" font-weight="700" text-anchor="middle" fill="#1d2733">Imprimante</text>
+  <rect x="175" y="412" width="190" height="30" rx="4" fill="#eef2f6" stroke="#1d2733" stroke-width="1.5"/>
+  <text x="270" y="433" font-size="14" text-anchor="middle" fill="#5a6675">bac 2</text>
+  <!-- Capteur de feuilles -->
+  <rect x="330" y="226" width="40" height="22" rx="4" fill="#eef2f6" stroke="#1d2733" stroke-width="2"/>
+  <circle cx="350" cy="237" r="5" fill="#c3352b"/>
+  <line x1="340" y1="250" x2="312" y2="272" stroke="#c3352b" stroke-width="2" stroke-dasharray="4 4"/>
+  <text x="352" y="216" font-size="14" text-anchor="middle" fill="#3a4a5c">capteur de feuilles</text>
+  <path d="M330,237 C200,200 84,260 84,320" fill="none" stroke="#5a6675" stroke-width="2" stroke-dasharray="2 5" stroke-linecap="round"/>
+  <!-- Boîtier -->
+  <rect x="36" y="320" width="96" height="150" rx="12" fill="#fff" stroke="#1d2733" stroke-width="2"/>
+  <rect x="46" y="334" width="76" height="54" rx="3" fill="#e3e1d8" stroke="#1d2733" stroke-width="1.5"/>
+  <text x="52" y="350" font-size="10" font-weight="700" font-family="DejaVu Sans Mono, monospace" fill="#26261f">BAC 2 VIDE</text>
+  <text x="52" y="365" font-size="10" font-weight="700" font-family="DejaVu Sans Mono, monospace" fill="#26261f">TICKET 1234</text>
+  <text x="52" y="380" font-size="10" font-weight="700" font-family="DejaVu Sans Mono, monospace" fill="#26261f">→ WASSIM</text>
+  <circle cx="84" cy="426" r="23" fill="#c3352b"/>
+  <text x="84" y="433" font-size="20" font-weight="700" text-anchor="middle" fill="#fff">!</text>
+  <path d="M136,384 q7,12 0,24" fill="none" stroke="#b86e00" stroke-width="2.2" stroke-linecap="round"/>
+  <path d="M141,380 q9,16 0,32" fill="none" stroke="#b86e00" stroke-width="2.2" stroke-linecap="round"/>
+  <text x="84" y="494" font-size="17" font-weight="700" text-anchor="middle" fill="#1d2733">Le boîtier</text>
+  <!-- Carte de Wassim -->
+  <rect x="40" y="520" width="88" height="54" rx="7" fill="#fff" stroke="#0b7a84" stroke-width="2"/>
+  <rect x="50" y="530" width="20" height="14" rx="2" fill="#d9b44a"/>
+  <text x="84" y="564" font-size="13" text-anchor="middle" fill="#1d2733">Wassim</text>
+  <path d="M84,516 q-8,-6 0,-14" fill="none" stroke="#0b7a84" stroke-width="2"/>
+  <path d="M84,516 q8,-6 0,-14" fill="none" stroke="#0b7a84" stroke-width="2"/>
+  <g><circle cx="146" cy="547" r="12" fill="#0b7a84"/><text x="146" y="552" font-size="13" font-weight="700" text-anchor="middle" fill="#fff">8</text></g>
+  <text x="84" y="600" font-size="14" text-anchor="middle" fill="#3a4a5c">carte RFID</text>
+  <!-- Serveur -->
+  <rect x="520" y="290" width="130" height="130" rx="10" fill="#fff" stroke="#1d2733" stroke-width="2.2"/>
+  <rect x="534" y="306" width="102" height="24" rx="3" fill="#eef2f6" stroke="#1d2733" stroke-width="1.2"/>
+  <rect x="534" y="342" width="102" height="24" rx="3" fill="#eef2f6" stroke="#1d2733" stroke-width="1.2"/>
+  <rect x="534" y="378" width="102" height="24" rx="3" fill="#eef2f6" stroke="#1d2733" stroke-width="1.2"/>
+  <circle cx="622" cy="318" r="4" fill="#2b8a55"/><circle cx="622" cy="354" r="4" fill="#2b8a55"/><circle cx="622" cy="390" r="4" fill="#b86e00"/>
+  <text x="585" y="446" font-size="17" font-weight="800" text-anchor="middle" fill="#1f3a5f">Serveur</text>
+  <text x="585" y="466" font-size="14" text-anchor="middle" fill="#3a4a5c">compare et décide</text>
+  <!-- GLPI -->
+  <rect x="740" y="98" width="196" height="126" rx="10" fill="#fff" stroke="#1d2733" stroke-width="2"/>
+  <rect x="740" y="98" width="196" height="30" rx="10" fill="#0b7a84"/><rect x="740" y="114" width="196" height="14" fill="#0b7a84"/>
+  <text x="754" y="119" font-size="14" font-weight="700" fill="#fff">GLPI · ticket 1234</text>
+  <text x="754" y="152" font-size="12" font-family="DejaVu Sans Mono, monospace" fill="#1d2733">Imprimante cardio-2</text>
+  <text x="754" y="174" font-size="12" font-family="DejaVu Sans Mono, monospace" fill="#1d2733">Cause : bac 2 vide</text>
+  <text x="754" y="196" font-size="12" font-family="DejaVu Sans Mono, monospace" fill="#1d2733">Suivi : Wassim</text>
+  <!-- Tableau de bord -->
+  <rect x="740" y="290" width="196" height="116" rx="8" fill="#fff" stroke="#1d2733" stroke-width="2"/>
+  <rect x="750" y="300" width="176" height="96" rx="4" fill="#eef2f6"/>
+  <text x="762" y="320" font-size="13" fill="#3a4a5c">Imprimantes</text>
+  <circle cx="774" cy="344" r="9" fill="#2b8a55"/><circle cx="810" cy="344" r="9" fill="#2b8a55"/><circle cx="846" cy="344" r="9" fill="#c3352b"/><circle cx="882" cy="344" r="9" fill="#2b8a55"/>
+  <circle cx="774" cy="374" r="9" fill="#2b8a55"/><circle cx="810" cy="374" r="9" fill="#b86e00"/><circle cx="846" cy="374" r="9" fill="#2b8a55"/><circle cx="882" cy="374" r="9" fill="#2b8a55"/>
+  <text x="838" y="430" font-size="16" font-weight="700" text-anchor="middle" fill="#1d2733">Tableau de bord</text>
+  <!-- AD -->
+  <rect x="740" y="490" width="196" height="70" rx="8" fill="#fff" stroke="#1d2733" stroke-width="2"/>
+  <text x="756" y="518" font-size="15" font-weight="700" fill="#1d2733">Annuaire AD</text>
+  <text x="756" y="540" font-size="13" fill="#3a4a5c">service de chaque PC</text>
+  <!-- Flèches -->
+  <path d="M164,120 C330,90 470,176 556,286" fill="none" stroke="#0b7a84" stroke-width="2.6" marker-end="url(#a2)"/>
+  <text x="330" y="100" font-size="15" font-weight="700" text-anchor="middle" fill="#0b7a84">« Imprime 5 pages »</text>
+  <g><circle cx="338" cy="124" r="12" fill="#0b7a84"/><text x="338" y="129" font-size="13" font-weight="700" text-anchor="middle" fill="#fff">1</text></g>
+  <path d="M164,146 C320,126 450,206 532,288" fill="none" stroke="#0b7a84" stroke-width="2.6" stroke-dasharray="8 6" marker-start="url(#a2)" marker-end="url(#a2)"/>
+  <g><circle cx="337" cy="166" r="12" fill="#0b7a84"/><text x="337" y="171" font-size="13" font-weight="700" text-anchor="middle" fill="#fff">4</text></g>
+  <text x="250" y="192" font-size="14" text-anchor="middle" fill="#0b7a84">PowerShell : file d'impression</text>
+  <path d="M516,350 L396,350" fill="none" stroke="#0b7a84" stroke-width="2.6" marker-end="url(#a2)"/>
+  <text x="456" y="340" font-size="14" text-anchor="middle" fill="#1d2733">les 5 pages</text>
+  <path d="M516,398 L396,398" fill="none" stroke="#0b7a84" stroke-width="2.6" stroke-dasharray="8 6" marker-start="url(#a2)" marker-end="url(#a2)"/>
+  <g><circle cx="456" cy="398" r="12" fill="#0b7a84"/><text x="456" y="403" font-size="13" font-weight="700" text-anchor="middle" fill="#fff">3</text></g>
+  <text x="456" y="430" font-size="14" text-anchor="middle" fill="#1d2733">« Ça va ? »</text>
+  <path d="M132,455 C200,560 430,560 518,412" fill="none" stroke="#0b7a84" stroke-width="2.6" marker-start="url(#a2)" marker-end="url(#a2)"/>
+  <g><circle cx="250" cy="525" r="12" fill="#0b7a84"/><text x="250" y="530" font-size="13" font-weight="700" text-anchor="middle" fill="#fff">2</text></g>
+  <text x="250" y="560" font-size="14" text-anchor="middle" fill="#1d2733">ce que le boîtier sent</text>
+  <g><circle cx="409" cy="506" r="12" fill="#0b7a84"/><text x="409" y="511" font-size="13" font-weight="700" text-anchor="middle" fill="#fff">7</text></g>
+  <text x="409" y="540" font-size="14" text-anchor="middle" fill="#1d2733">ce que l'écran affiche</text>
+  <path d="M640,288 C670,240 700,200 736,176" fill="none" stroke="#0b7a84" stroke-width="2.6" marker-start="url(#a2)" marker-end="url(#a2)"/>
+  <g><circle cx="686" cy="223" r="12" fill="#0b7a84"/><text x="686" y="228" font-size="13" font-weight="700" text-anchor="middle" fill="#fff">6</text></g>
+  <path d="M654,350 L736,350" fill="none" stroke="#0b7a84" stroke-width="2.6" marker-end="url(#a2)"/>
+  <path d="M652,410 C700,420 700,525 736,525" fill="none" stroke="#0b7a84" stroke-width="2.6" stroke-dasharray="8 6" marker-start="url(#a2)" marker-end="url(#a2)"/>
+  <g><circle cx="698" cy="471" r="12" fill="#0b7a84"/><text x="698" y="476" font-size="13" font-weight="700" text-anchor="middle" fill="#fff">5</text></g>
+  <text x="690" y="510" font-size="14" text-anchor="end" fill="#1d2733">réseau attendu</text>
+</svg>
+<div class="legend"><span>━ information envoyée</span><span>╍ question et réponse</span><span>┈ fil entre le capteur de feuilles et le boîtier</span></div>
+<figcaption>Figure 2 – Le boîtier de l'imprimante. Les numéros suivent les étapes ci-dessous.</figcaption>
+</figure>
+
+<h3>Ce qui se passe, étape par étape</h3>
+<ol class="steps">
+  <li><span class="b">1</span><b>La secrétaire imprime 5 pages.</b> L'impression passe par le serveur, qui l'envoie à l'imprimante. Le serveur sait donc combien de pages sont demandées.</li>
+  <li><span class="b">2</span><b>Le boîtier dit ce qu'il sent :</b> l'imprimante vibre-t-elle ? Combien de feuilles sont sorties ?</li>
+  <li><span class="b">3</span><b>Le serveur demande à l'imprimante comment elle va</b> (par le réseau, protocole SNMP) : « tout va bien », « plus de papier », « bourrage », niveau d'encre.</li>
+  <li><span class="b">4</span><b>Le serveur regarde le PC de la secrétaire</b> avec PowerShell : des documents sont-ils bloqués dans la file d'impression de Windows ?</li>
+  <li><span class="b">5</span><b>Le serveur lit l'AD :</b> le PC est rangé dans le service « Cardiologie », donc l'imprimante doit être dans le réseau de la cardiologie.</li>
+  <li><span class="b">6</span><b>Le serveur compare et décide.</b> S'il y a un problème, il ouvre un ticket GLPI avec la cause probable, et la pastille passe au rouge sur le tableau de bord.</li>
+  <li><span class="b">7</span><b>L'écran du boîtier donne des nouvelles :</b> <span class="screen">Bac 2 vide</span>, puis <span class="screen">Wassim arrive</span>, puis <span class="screen">Réparé</span>.</li>
+  <li><span class="b">8</span><b>Wassim pose sa carte RFID</b> sur le boîtier en arrivant, puis en partant. Le ticket note l'heure d'arrivée et la durée de l'intervention.</li>
+</ol>
+<p>Le gros bouton rouge sert quand la secrétaire voit un problème que les capteurs n'ont pas vu. Elle appuie : le ticket s'ouvre avec le nom exact de l'imprimante, sans rien écrire.</p>
+
+<h3>Quatre témoins</h3>
+<table>
+  <tr><th style="width:20%">Témoin</th><th style="width:32%">Ce qu'il dit</th><th>Comment</th></tr>
+  <tr><td class="k">La vibration</td><td>« Les moteurs tournent. »</td><td>Le boîtier est collé sur l'imprimante. Quand elle imprime, elle tremble ; un petit accéléromètre le sent.</td></tr>
+  <tr><td class="k">Les feuilles</td><td>« 3 feuilles sont sorties. »</td><td>Un capteur à lumière infrarouge, au-dessus de la sortie, voit passer chaque feuille et les compte.</td></tr>
+  <tr><td class="k">L'imprimante</td><td>« Je vais bien », « bourrage »…</td><td>Le serveur l'interroge par le réseau (SNMP). Elle dit ce qu'elle croit savoir. Parfois, elle se trompe.</td></tr>
+  <tr><td class="k">Le PC</td><td>« 5 pages attendent chez moi. »</td><td>Un script PowerShell, lancé à distance, compte les documents en attente. Il ne lit jamais leur nom : un nom de fichier peut contenir le nom d'un patient.</td></tr>
+</table>
+
+<h3>Le serveur compare : six situations</h3>
+<table>
+  <tr><th style="width:11%">Vibration</th><th style="width:10%">Feuilles</th><th style="width:16%">Imprimante</th><th style="width:15%">PC</th><th style="width:28%">Ce que ça veut dire</th><th>Écran du boîtier</th></tr>
+  <tr><td>oui</td><td>5 / 5</td><td>« ça va »</td><td>rien en attente</td><td><span class="ok">Tout va bien.</span> Aucun ticket.</td><td><span class="screen">Prête</span></td></tr>
+  <tr><td>non</td><td>0 / 5</td><td>« plus de papier »</td><td>rien en attente</td><td><span class="warn">Elle le dit elle-même.</span> Souvent réglé sur place.</td><td><span class="screen">Bac 2 vide</span></td></tr>
+  <tr><td>oui, puis arrêt</td><td>2 / 5</td><td>« bourrage »</td><td>rien en attente</td><td><span class="bad">Feuille coincée</span> après la 2ᵉ page.</td><td><span class="screen">Feuille coincée</span></td></tr>
+  <tr><td>non</td><td>0 / 5</td><td>« ça va »</td><td>rien en attente</td><td><span class="bad">Imprimante figée :</span> elle dit que tout va bien, mais rien ne bouge. <b>C'est le cas décrit par Wassim.</b></td><td><span class="screen">Bloquée</span></td></tr>
+  <tr><td>non</td><td>0 / 5</td><td>« ça va »</td><td><b>5 pages bloquées</b></td><td><span class="bad">Le problème est dans le PC,</span> pas dans l'imprimante.</td><td><span class="screen">Prête</span></td></tr>
+  <tr><td>non</td><td>0 / 5</td><td>ne répond pas</td><td>—</td><td><span class="bad">Plus sur le réseau,</span> ou pas dans le réseau attendu par l'AD (mauvais VLAN).</td><td><span class="screen">Hors réseau</span></td></tr>
+</table>
+<div class="box"><p><b>L'idée clé :</b> l'imprimante dit ce qu'elle croit, les capteurs disent ce qui se passe vraiment, le PC dit ce qu'il a envoyé. Le serveur compare les trois pour écrire la bonne cause dans le ticket.</p></div>
+
+<h3>Ce qu'on ajoute au boîtier</h3>
+<table>
+  <tr><th style="width:24%">Ajout</th><th>Ce que ça fait</th></tr>
+  <tr><td class="k">L'encre avant la panne</td><td>À 10 % d'encre, le serveur ouvre un ticket préventif. L'écran affiche <span class="screen">Encre 8 % – cartouche prévue</span>. La panne n'arrive jamais.</td></tr>
+  <tr><td class="k">Le bon VLAN (AD)</td><td>Le ticket ne dit plus « hors réseau » mais « l'imprimante est dans le réseau de la radiologie, elle devrait être dans celui de la cardiologie ». Le système vérifie, il ne change rien au réseau.</td></tr>
+  <tr><td class="k">La preuve de réparation</td><td>Quand Wassim repose sa carte en partant, le serveur envoie une page de test. Le capteur de feuilles la voit sortir : le ticket est fermé avec « page de test sortie à 10 h 42 ». Si elle ne sort pas, le ticket reste ouvert.</td></tr>
+  <tr><td class="k">Le redémarrage à distance</td><td>Pour l'imprimante figée : ordre de redémarrage par le réseau si le modèle l'accepte, sinon prise connectée du commerce. On avance en trois niveaux de confiance (voir la partie Sécurité).</td></tr>
+  <tr><td class="k">Option : l'étagère des cartouches</td><td>Quand l'encre est basse, la LED de la bonne cartouche s'allume sur l'étagère. Wassim la prend, un capteur de poids le voit, le stock baisse dans GLPI.</td></tr>
+</table>
+
+<h2 class="pb"><span class="n">5</span>Partie 2 – La station des PC neufs</h2>
+<figure>
+<svg viewBox="0 0 1000 480" xmlns="http://www.w3.org/2000/svg" font-family="Inter, DejaVu Sans, sans-serif">
+  <defs>
+    <marker id="a3" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#0b7a84"/></marker>
+  </defs>
+  <rect x="0" y="0" width="1000" height="480" fill="#ffffff"/>
+  <rect x="10" y="10" width="570" height="460" rx="14" fill="#eef2f6"/>
+  <text x="28" y="38" font-size="14" font-weight="700" fill="#5a6675" letter-spacing="1.5">À L'ATELIER DU SERVICE INFORMATIQUE</text>
+  <rect x="600" y="10" width="390" height="460" rx="14" fill="#eef2f6"/>
+  <text x="618" y="38" font-size="14" font-weight="700" fill="#5a6675" letter-spacing="1.5">SERVEURS (MAQUETTE)</text>
+  <!-- Cartes -->
+  <rect x="26" y="60" width="132" height="66" rx="8" fill="#fff" stroke="#0b7a84" stroke-width="2"/>
+  <rect x="36" y="70" width="20" height="14" rx="2" fill="#d9b44a"/>
+  <text x="36" y="104" font-size="14" font-weight="700" fill="#1d2733">Carte de Wassim</text>
+  <text x="36" y="119" font-size="12" fill="#5a6675">qui travaille ?</text>
+  <rect x="26" y="150" width="132" height="66" rx="8" fill="#fff" stroke="#0b7a84" stroke-width="2"/>
+  <rect x="36" y="160" width="20" height="14" rx="2" fill="#d9b44a"/>
+  <text x="36" y="194" font-size="14" font-weight="700" fill="#1d2733">Carte profil</text>
+  <text x="36" y="209" font-size="12" fill="#5a6675">Cardio – médecin</text>
+  <rect x="26" y="240" width="132" height="66" rx="8" fill="#fff" stroke="#0b7a84" stroke-width="2"/>
+  <rect x="36" y="250" width="20" height="14" rx="2" fill="#d9b44a"/>
+  <text x="36" y="284" font-size="14" font-weight="700" fill="#1d2733">Étiquette du PC</text>
+  <text x="36" y="299" font-size="12" fill="#5a6675">PC n° 5CG12</text>
+  <path d="M160,93 L206,140" fill="none" stroke="#0b7a84" stroke-width="2.4" marker-end="url(#a3)"/>
+  <path d="M160,183 L206,190" fill="none" stroke="#0b7a84" stroke-width="2.4" marker-end="url(#a3)"/>
+  <path d="M160,273 L206,240" fill="none" stroke="#0b7a84" stroke-width="2.4" marker-end="url(#a3)"/>
+  <g><circle cx="182" cy="112" r="12" fill="#0b7a84"/><text x="182" y="117" font-size="13" font-weight="700" text-anchor="middle" fill="#fff">1</text></g>
+  <g><circle cx="182" cy="186" r="12" fill="#0b7a84"/><text x="182" y="191" font-size="13" font-weight="700" text-anchor="middle" fill="#fff">2</text></g>
+  <g><circle cx="182" cy="257" r="12" fill="#0b7a84"/><text x="182" y="262" font-size="13" font-weight="700" text-anchor="middle" fill="#fff">3</text></g>
+  <!-- Station -->
+  <rect x="210" y="104" width="160" height="176" rx="14" fill="#fff" stroke="#1d2733" stroke-width="2.2"/>
+  <rect x="222" y="118" width="136" height="64" rx="3" fill="#e3e1d8" stroke="#1d2733" stroke-width="1.5"/>
+  <text x="230" y="139" font-size="11" font-weight="700" font-family="DejaVu Sans Mono, monospace" fill="#26261f">PC 5CG12</text>
+  <text x="230" y="156" font-size="11" font-weight="700" font-family="DejaVu Sans Mono, monospace" fill="#26261f">→ CARDIO, MÉDECIN</text>
+  <text x="230" y="173" font-size="11" font-weight="700" font-family="DejaVu Sans Mono, monospace" fill="#26261f">VALIDER ?</text>
+  <circle cx="238" cy="206" r="7" fill="#2b8a55"/><circle cx="264" cy="206" r="7" fill="#2b8a55"/><circle cx="290" cy="206" r="7" fill="#2b8a55"/><circle cx="316" cy="206" r="7" fill="#b86e00"/><circle cx="342" cy="206" r="7" fill="#c7cfd8"/>
+  <circle cx="290" cy="248" r="17" fill="#2b8a55"/>
+  <text x="290" y="253" font-size="12" font-weight="700" text-anchor="middle" fill="#fff">OK</text>
+  <text x="290" y="306" font-size="16" font-weight="700" text-anchor="middle" fill="#1d2733">Station de préparation</text>
+  <text x="290" y="325" font-size="13" text-anchor="middle" fill="#3a4a5c">ESP32, lecteur RFID, écran, LED</text>
+  <!-- PC neuf -->
+  <rect x="404" y="128" width="136" height="88" rx="6" fill="#fff" stroke="#1d2733" stroke-width="2"/>
+  <rect x="412" y="136" width="120" height="66" rx="3" fill="#10202f"/>
+  <text x="420" y="160" font-size="11" font-family="DejaVu Sans Mono, monospace" fill="#7fd4dc">PS&gt; preparer.ps1</text>
+  <text x="420" y="178" font-size="11" font-family="DejaVu Sans Mono, monospace" fill="#e6edf3">domaine… OK</text>
+  <text x="420" y="194" font-size="11" font-family="DejaVu Sans Mono, monospace" fill="#e6edf3">applis… 3/5</text>
+  <rect x="464" y="216" width="16" height="12" fill="#fff" stroke="#1d2733" stroke-width="2"/>
+  <rect x="446" y="228" width="52" height="6" rx="2" fill="#fff" stroke="#1d2733" stroke-width="2"/>
+  <text x="472" y="258" font-size="16" font-weight="700" text-anchor="middle" fill="#1d2733">PC neuf</text>
+  <text x="472" y="276" font-size="13" text-anchor="middle" fill="#3a4a5c">script PowerShell</text>
+  <!-- Droite -->
+  <rect x="628" y="60" width="176" height="74" rx="8" fill="#fff" stroke="#1d2733" stroke-width="2"/>
+  <text x="642" y="90" font-size="15" font-weight="700" fill="#1d2733">Annuaire AD</text>
+  <text x="642" y="114" font-size="13" fill="#3a4a5c">contrôleur de domaine</text>
+  <rect x="628" y="158" width="176" height="74" rx="8" fill="#fff" stroke="#1d2733" stroke-width="2"/>
+  <text x="642" y="188" font-size="15" font-weight="700" fill="#1d2733">Partage réseau</text>
+  <text x="642" y="212" font-size="13" fill="#3a4a5c">applis par profil</text>
+  <rect x="628" y="296" width="140" height="110" rx="10" fill="#fff" stroke="#1d2733" stroke-width="2.2"/>
+  <rect x="642" y="312" width="112" height="22" rx="3" fill="#eef2f6" stroke="#1d2733" stroke-width="1.2"/>
+  <rect x="642" y="344" width="112" height="22" rx="3" fill="#eef2f6" stroke="#1d2733" stroke-width="1.2"/>
+  <rect x="642" y="376" width="112" height="22" rx="3" fill="#eef2f6" stroke="#1d2733" stroke-width="1.2"/>
+  <text x="698" y="430" font-size="16" font-weight="800" text-anchor="middle" fill="#1f3a5f">Serveur</text>
+  <text x="698" y="450" font-size="13" text-anchor="middle" fill="#3a4a5c">garde les commandes</text>
+  <rect x="826" y="296" width="150" height="110" rx="10" fill="#fff" stroke="#1d2733" stroke-width="2"/>
+  <rect x="826" y="296" width="150" height="28" rx="10" fill="#0b7a84"/><rect x="826" y="310" width="150" height="14" fill="#0b7a84"/>
+  <text x="840" y="316" font-size="14" font-weight="700" fill="#fff">GLPI</text>
+  <text x="840" y="346" font-size="12" font-family="DejaVu Sans Mono, monospace" fill="#1d2733">PC 5CG12</text>
+  <text x="840" y="368" font-size="12" font-family="DejaVu Sans Mono, monospace" fill="#1d2733">En service</text>
+  <text x="840" y="390" font-size="12" font-family="DejaVu Sans Mono, monospace" fill="#1d2733">Cardiologie</text>
+  <!-- Flèches -->
+  <path d="M372,250 C450,390 560,420 624,372" fill="none" stroke="#0b7a84" stroke-width="2.6" marker-start="url(#a3)" marker-end="url(#a3)"/>
+  <g><circle cx="503" cy="382" r="12" fill="#0b7a84"/><text x="503" y="387" font-size="13" font-weight="700" text-anchor="middle" fill="#fff">4</text></g>
+  <text x="470" y="440" font-size="13" text-anchor="middle" fill="#1d2733">commande validée · avancement</text>
+  <path d="M542,205 C590,230 640,250 660,292" fill="none" stroke="#0b7a84" stroke-width="2.6" stroke-dasharray="8 6" marker-start="url(#a3)" marker-end="url(#a3)"/>
+  <g><circle cx="592" cy="231" r="12" fill="#0b7a84"/><text x="592" y="236" font-size="13" font-weight="700" text-anchor="middle" fill="#fff">5</text></g>
+  <g><circle cx="640" cy="265" r="12" fill="#0b7a84"/><text x="640" y="270" font-size="13" font-weight="700" text-anchor="middle" fill="#fff">8</text></g>
+  <path d="M542,150 C575,120 595,98 624,97" fill="none" stroke="#0b7a84" stroke-width="2.6" marker-start="url(#a3)" marker-end="url(#a3)"/>
+  <g><circle cx="584" cy="114" r="12" fill="#0b7a84"/><text x="584" y="119" font-size="13" font-weight="700" text-anchor="middle" fill="#fff">6</text></g>
+  <path d="M624,195 L544,190" fill="none" stroke="#0b7a84" stroke-width="2.6" marker-end="url(#a3)"/>
+  <g><circle cx="584" cy="192" r="12" fill="#0b7a84"/><text x="584" y="197" font-size="13" font-weight="700" text-anchor="middle" fill="#fff">7</text></g>
+  <path d="M770,352 L822,352" fill="none" stroke="#0b7a84" stroke-width="2.6" marker-end="url(#a3)"/>
+  <g><circle cx="796" cy="352" r="12" fill="#0b7a84"/><text x="796" y="357" font-size="13" font-weight="700" text-anchor="middle" fill="#fff">9</text></g>
+</svg>
+<figcaption>Figure 3 – La station des PC neufs. Les numéros suivent les étapes ci-dessous.</figcaption>
+</figure>
+
+<h3>Ce qui se passe, étape par étape</h3>
+<ol class="steps">
+  <li><span class="b">1</span><b>Wassim pose sa carte</b> sur la station : elle sait qui travaille.</li>
+  <li><span class="b">2</span><b>Il pose la carte profil,</b> par exemple « Cardiologie – médecin » : elle sait pour qui est le PC.</li>
+  <li><span class="b">3</span><b>Il pose l'étiquette RFID du PC</b> (collée sur le PC portable ou sur son carton) : elle sait quel PC. Le lien entre l'étiquette et le numéro de série du PC est dans GLPI, depuis l'entrée du PC en stock.</li>
+  <li><span class="b">4</span><b>L'écran résume :</b> <span class="screen">PC 5CG12 → Cardio, médecin. Valider ?</span> Wassim appuie sur le bouton. Le serveur enregistre la commande.</li>
+  <li><span class="b">5</span><b>Sur le PC neuf, Wassim lance un seul script PowerShell</b>, comme aujourd'hui avec son chemin d'accès. Le script lit le numéro de série du PC et demande sa commande au serveur.</li>
+  <li><span class="b">6</span><b>Le script met le PC dans le domaine, directement dans le bon service de l'AD.</b> Plus d'erreur de rangement.</li>
+  <li><span class="b">7</span><b>Il installe les applications du profil</b> depuis le partage réseau.</li>
+  <li><span class="b">8</span><b>Il vérifie que tout est en place et le dit au serveur.</b> Les LED de la station avancent à chaque étape.</li>
+  <li><span class="b">9</span><b>GLPI est mis à jour :</b> la fiche du PC passe de « en stock » à « en service – Cardiologie ».</li>
+</ol>
+
+<h3>Avant et après</h3>
+<table>
+  <tr><th style="width:30%">Étape</th><th style="width:35%">Aujourd'hui</th><th>Avec la station</th></tr>
+  <tr><td class="k">Choisir le service et le profil</td><td>À la main, de mémoire</td><td>Une carte qu'on pose ; l'écran demande de valider</td></tr>
+  <tr><td class="k">Ranger le PC dans l'AD</td><td>Après coup, dans la console de l'AD</td><td>Directement au moment de l'entrée dans le domaine</td></tr>
+  <tr><td class="k">Installer les applications</td><td>Script lancé avec un chemin d'accès</td><td>Le même principe, choisi par le profil</td></tr>
+  <tr><td class="k">Vérifier</td><td>À l'œil</td><td>Le script vérifie et rend compte</td></tr>
+  <tr><td class="k">Mettre à jour GLPI</td><td>À la main, ou oublié</td><td>Automatique</td></tr>
+</table>
+
+<h3>À quoi ressemble le script (esquisse, non testée)</h3>
+<pre><span class="c"># preparer.ps1 : lancé par Wassim sur le PC neuf (extrait simplifié)</span>
+$serie    = (Get-CimInstance Win32_BIOS).SerialNumber
+$commande = Invoke-RestMethod "https://serveur.maquette.lan/commande/$serie"
+<span class="c"># La commande contient : nom du PC, service (unité d'organisation AD), profil</span>
+$compte = Get-Credential -Message "Compte de jonction au domaine"   <span class="c"># jamais écrit dans le script</span>
+Add-Computer -DomainName "maquette.lan" -OUPath $commande.ou `
+             -NewName $commande.nom -Credential $compte -Restart
+<span class="c"># Après le redémarrage, une seconde partie installe les applications du profil,
+# vérifie chaque installation et envoie un compte rendu au serveur.</span></pre>
+
+<h2><span class="n">6</span>La sécurité</h2>
+<p>Le système touche à des PC, à des imprimantes et à l'AD. Chaque risque a sa protection et sa démonstration.</p>
+<table>
+  <tr><th style="width:26%">Risque</th><th style="width:40%">Protection</th><th>Démonstration</th></tr>
+  <tr><td class="k">Le diagnostic à distance fait plus que prévu</td><td>Point d'accès PowerShell limité (JEA) : une liste fermée de commandes, un compte sans droit d'administrateur.</td><td>Une commande hors liste est refusée et tracée.</td></tr>
+  <tr><td class="k">Une carte RFID est copiée</td><td>Les cartes bon marché (MIFARE Classic) se copient : leur protection est cassée depuis 2008. Le numéro de carte ne suffit donc pas : confirmation sur l'écran, puis carte sécurisée qui prouve son identité par chiffrement (NTAG 424 DNA ou DESFire).</td><td>Avec un système naïf, la copie marche. Avec le système corrigé, elle est refusée et tracée.</td></tr>
+  <tr><td class="k">Un pirate cherche les imprimantes</td><td>Une fausse imprimante (un ESP32) répond comme une vraie. Personne n'a de raison de lui parler.</td><td>Un « attaquant » scanne le réseau : alerte sur le tableau de bord et ticket de sécurité.</td></tr>
+  <tr><td class="k">Une réparation automatique se trompe</td><td>Trois niveaux de confiance (ci-dessous).</td><td>Le journal montre chaque décision et qui l'a prise.</td></tr>
+  <tr><td class="k">Le mot de passe de l'AD traîne</td><td>Un compte dédié, qui peut seulement ajouter des PC dans les services. Il est demandé à l'exécution, jamais écrit dans le script.</td><td>On montre le script : aucun mot de passe dedans.</td></tr>
+  <tr><td class="k">Le système abîme GLPI</td><td>Son compte ajoute des tickets et des suivis, mais ne supprime rien. Il ne ferme un ticket qu'après la carte de Wassim et la page de test.</td><td>Une suppression demandée par le système est refusée.</td></tr>
+</table>
+
+<h3>Trois niveaux de confiance</h3>
+<p>Valable pour toute action du système : redémarrer une imprimante, relancer le service d'impression d'un PC.</p>
+<table>
+  <tr><th style="width:22%">Niveau</th><th style="width:43%">Ce que fait le système</th><th>Quand passer au suivant</th></tr>
+  <tr><td class="k">1. Il conseille</td><td>Il écrit « il faudrait la redémarrer » dans le ticket, sans rien faire.</td><td>Quand ses conseils sont justes pendant toute une période d'essai.</td></tr>
+  <tr><td class="k">2. Il propose</td><td>Il prépare l'action ; Wassim clique pour la lancer.</td><td>Quand Wassim n'a jamais eu à refuser.</td></tr>
+  <tr><td class="k">3. Il agit seul</td><td>Il agit seul, la nuit uniquement, et le note dans le ticket.</td><td>Toujours réversible : on peut revenir au niveau 2.</td></tr>
+</table>
+
+<h3>Vie privée</h3>
+<ul>
+  <li>Aucune donnée patient. Le script lit le <b>nombre</b> de documents en attente, jamais leur nom.</li>
+  <li>Pas de micro, pas de caméra : le boîtier sent seulement la vibration de la machine.</li>
+  <li>La carte de Wassim sert à mesurer le temps des pannes, pas à surveiller Wassim. À dire clairement au tuteur.</li>
+</ul>
+
+<h2><span class="n">7</span>Une journée avec le système</h2>
+<p class="small">Scénario fictif, joué sur la maquette.</p>
+<table>
+  <tr><th style="width:12%">Heure</th><th>Ce qui se passe</th></tr>
+  <tr><td class="time">8 h 40</td><td>Le Dr Martin arrive lundi en cardiologie. Wassim pose sa carte, la carte « Cardiologie – médecin » et l'étiquette du PC sur la station, puis valide. Il lance le script sur le PC neuf et part faire autre chose. Les LED avancent.</td></tr>
+  <tr><td class="time">9 h 05</td><td>La dernière LED est verte. Dans GLPI, le PC est « en service – Cardiologie ». Dans l'AD, il est rangé au bon endroit.</td></tr>
+  <tr><td class="time">9 h 10</td><td>En cardiologie, la secrétaire imprime un compte rendu. Rien ne sort. Pas de vibration, aucune feuille, mais l'imprimante répond « tout va bien ». Le serveur conclut : imprimante figée. Ticket ouvert, pastille rouge. L'écran du boîtier : <span class="screen">Bloquée – Wassim arrive</span>.</td></tr>
+  <tr><td class="time">9 h 11</td><td>Niveau 2 : le système propose « redémarrer l'imprimante ». Wassim clique depuis son bureau.</td></tr>
+  <tr><td class="time">9 h 14</td><td>L'imprimante repart, les 3 feuilles sortent, le capteur les compte. Le ticket se ferme avec la preuve. Wassim ne s'est pas déplacé.</td></tr>
+  <tr><td class="time">11 h 30</td><td>L'imprimante de la radiologie passe sous 10 % d'encre. Ticket préventif ; sur l'étagère, la LED de la bonne cartouche s'allume.</td></tr>
+  <tr><td class="time">15 h 20</td><td>Un bourrage en pédiatrie. Wassim y va, pose sa carte (arrivée 15 h 26), retire la feuille, repose sa carte. La page de test sort. Durée notée : 7 minutes.</td></tr>
+  <tr><td class="time">16 h 02</td><td>Sur la maquette, un « attaquant » scanne le réseau. La fausse imprimante répond… et donne l'alerte.</td></tr>
+</table>
+
+<h2><span class="n">8</span>Le matériel</h2>
+<p class="small">Prix en ordres de grandeur, à confirmer au moment de la commande.</p>
+<table>
+  <tr><th style="width:34%">Élément</th><th style="width:40%">Rôle</th><th>Prix indicatif</th></tr>
+  <tr><td class="k">ESP32 (× 3)</td><td>Boîtier, station, fausse imprimante</td><td>≈ 8 à 15 € l'unité</td></tr>
+  <tr><td class="k">Accéléromètre (MPU6050)</td><td>Sentir la vibration</td><td>≈ 3 à 5 €</td></tr>
+  <tr><td class="k">Capteur infrarouge de passage</td><td>Compter les feuilles</td><td>≈ 2 à 5 €</td></tr>
+  <tr><td class="k">Écran à encre électronique 2,9 pouces (× 2)</td><td>Écran du boîtier et de la station</td><td>≈ 15 à 25 € l'unité</td></tr>
+  <tr><td class="k">Gros bouton, LED RGB</td><td>Signaler, montrer l'avancement</td><td>≈ 5 à 10 €</td></tr>
+  <tr><td class="k">Lecteur RFID (RC522, ou PN532 pour les cartes sécurisées) (× 2)</td><td>Lire les cartes</td><td>≈ 3 à 15 € l'unité</td></tr>
+  <tr><td class="k">Cartes et étiquettes RFID</td><td>Cartes simples (copiables, pour la démonstration) et cartes sécurisées</td><td>≈ 0,5 € (simples) à 3 € (sécurisées) l'unité</td></tr>
+  <tr><td class="k">Imprimante réseau</td><td>Imprimante de test</td><td>Lycée ou récupération</td></tr>
+  <tr><td class="k">PC Windows (× 2), serveur Ubuntu</td><td>PC de la secrétaire, PC neuf, serveur et GLPI</td><td>Lycée</td></tr>
+  <tr><td class="k">Contrôleur de domaine</td><td>L'AD de la maquette</td><td>Commun aux projets du lycée</td></tr>
+</table>
+<p>Total à acheter : <b>de l'ordre de 100 à 150 €</b>, hors imprimante et PC.</p>
+
+<div style="page-break-inside: avoid"><h2><span class="n">9</span>Dans quel ordre construire</h2>
+<table>
+  <tr><th style="width:24%">Étape</th><th>Ce qu'on construit</th></tr>
+  <tr><td class="k">1. Le cœur</td><td>Le boîtier (vibration, feuilles, bouton, écran), le serveur, les tickets GLPI, le tableau de bord.</td></tr>
+  <tr><td class="k">2. Le rendre malin</td><td>Le PC comme quatrième témoin (PowerShell) ; le bon VLAN avec l'AD ; l'encre avant la panne ; la carte de Wassim et la preuve de réparation.</td></tr>
+  <tr><td class="k">3. Les PC neufs</td><td>La station RFID, le script PowerShell, le rangement dans l'AD, la mise à jour de GLPI.</td></tr>
+  <tr><td class="k">4. Aller loin</td><td>Le redémarrage en trois niveaux ; la fausse imprimante ; la démonstration de la carte copiée et des cartes sécurisées.</td></tr>
+  <tr><td class="k">5. Le spectacle (option)</td><td>L'étagère des cartouches ; l'hôpital en miniature (plan en plexiglas, une LED par imprimante).</td></tr>
+</table>
+<div class="box alerte"><p><b>Attention à la taille :</b> l'ensemble dépasse sans doute ce qu'on peut faire en 150 heures. Les étapes 1 à 3 forment un projet complet. Les étapes 4 et 5 se garderont ou se couperont plus tard.</p></div></div>
+
+<h2><span class="n">10</span>Ce qui n'est pas encore vérifié</h2>
+<table>
+  <tr><th style="width:36%">Point</th><th>Comment le lever</th></tr>
+  <tr><td class="k">La vibration distingue « imprime » et « attend »</td><td>Premier essai sur l'imprimante du lycée, en début de projet.</td></tr>
+  <tr><td class="k">Placer le capteur de feuilles sans démonter l'imprimante</td><td>Essai de fixation au-dessus du bac de sortie, selon le modèle.</td></tr>
+  <tr><td class="k">Redémarrage de l'imprimante par le réseau</td><td>Dépend du modèle ; sinon, prise connectée du commerce.</td></tr>
+  <tr><td class="k">Cartes sécurisées avec l'ESP32</td><td>Tester une bibliothèque pour le PN532 avec les NTAG 424 DNA.</td></tr>
+  <tr><td class="k">Une imprimante réseau disponible au lycée</td><td>À demander.</td></tr>
+  <tr><td class="k">Proximité avec le projet de Lorenzo</td><td>Lorenzo installe aussi des logiciels pour les nouveaux agents. À différencier : chez Wassim, la préparation est déclenchée par les cartes et suivie dans GLPI.</td></tr>
+  <tr><td class="k">Mesures physiques</td><td>À définir plus tard. Pistes : la vibration de l'imprimante (fréquences, seuil), la vitesse de sortie des feuilles (pages par minute mesurées et annoncées).</td></tr>
+</table>
+
+<h2><span class="n">11</span>Pour aller plus loin</h2>
+<ul style="font-size:8.6pt">
+  <li>F. D. Garcia <i>et al.</i>, « Dismantling MIFARE Classic », <i>ESORICS 2008</i>, Springer, LNCS 5283 : pourquoi les cartes bon marché se copient.</li>
+  <li>NXP, fiche technique <i>NTAG 424 DNA</i> : le fonctionnement d'une carte qui prouve son identité.</li>
+  <li>J. Müller, V. Mladenov, J. Somorovsky, J. Schwenk, « SoK: Exploiting Network Printers », <i>IEEE Symposium on Security and Privacy</i>, 2017 : pourquoi les imprimantes sont des cibles.</li>
+  <li>RFC 3805, <i>Printer MIB v2</i> (2004) et RFC 2790, <i>Host Resources MIB</i> (2000) : ce qu'une imprimante sait dire en SNMP.</li>
+  <li>Microsoft Learn : pages des commandes <i>Add-Computer</i>, <i>Get-PrintJob</i>, et « Just Enough Administration » (JEA).</li>
+  <li>T. Plunk, J. Petty, T. Leonhardt, J. Hicks, <i>Learn PowerShell in a Month of Lunches</i>, 4ᵉ éd., Manning, 2022 : pour que Wassim apprenne PowerShell pas à pas. Pas de traduction française connue.</li>
+  <li>M. Weiser, J. S. Brown, « Designing Calm Technology », <i>PowerGrid Journal</i>, 1996 : l'information qui se lit d'un coup d'œil, comme l'écran du boîtier.</li>
+</ul>
+
+</body>
+</html>

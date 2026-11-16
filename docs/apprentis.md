@@ -1,5 +1,7 @@
 # Les 4 projets E6 : état au 11 novembre 2026
 
+> **16/11/2026, suite** : nouvelle piste pour **Wassim (1)**, retenue par l'enseignant : « Le service informatique augmenté » (boîtier de l'imprimante à quatre témoins + station RFID de préparation des PC neufs avec PowerShell, GLPI, AD, tableau de bord). Document de travail : `Projet apprenti 1/projet-v4/Projet_Wassim_service_informatique_augmente.pdf` (9 p.). Taille au-delà de 150 h : à tailler.
+>
 > **16/11/2026** : entretien avec **Wassim (1)** : NUC sans batterie sur la batterie du chariot, « les chariots, il n'y a pas de problème » ; ses vraies pannes sont les **imprimantes** et les **PC lents**. Le besoin du formulaire envoyé est fragile : options et proposition dans `Projet apprenti 1/entretien-wassim-2026-11-16.md`. **Décision de l'enseignant attendue.**
 >
 > **16/11/2026** : entretien avec le tuteur de **Lorenzo (3)** : besoins confirmés, parc de portables, règle « 2 ou 3 refus puis mise à jour forcée ». Formulaire à corriger avant envoi : voir `Projet apprenti 3/entretien-tuteur-2026-11-16.md`.
