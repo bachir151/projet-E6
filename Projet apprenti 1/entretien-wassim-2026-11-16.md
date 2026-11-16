@@ -9,7 +9,9 @@ Passages incertains de la transcription, interprétés ici : « PC d'élan » = 
 - Le service a en stock des **postes neufs, des écrans neufs**, parfois des **micros** pour les médecins.
 - Wassim **met le PC dans le domaine** : il apparaît alors dans l'AD. Il le **range ensuite dans le bon service** (l'unité d'organisation du service).
 - Il installe les applications dont le médecin a besoin. Souvent avec des **scripts déjà faits** : il saisit un **chemin d'accès** (un partage réseau) sur le PC, le script installe toutes les applications.
+- Le script se lance **sur le PC**, pas depuis l'AD : à la question « ça se fait sur l'AD ? », il répond « non, c'est sur le fichier du PC ». Il faut que le PC soit déjà dans le domaine.
 - « **Sans le domaine, on ne peut rien faire.** » « En vrai, c'est rapide. »
+- Ce qu'il fait dans l'AD : **voir le nouveau PC et le déplacer dans l'unité d'organisation du service**. Rien n'indique qu'il crée des GPO ou des comptes (à confirmer, question 6).
 
 ### Les pannes
 - **Le plus gros problème : les imprimantes.** Elles sont allumées mais n'impriment pas. Il vérifie si l'imprimante est **dans le bon VLAN**, s'il manque de l'**encre**.
@@ -33,6 +35,7 @@ Le formulaire envoyé le 12/11 (« Supervision instrumentée des chariots de soi
 |---|---|---|
 | Wassim traite des tickets de niveau 1 et 2 | Oui, « trop de tickets » | Confirmé : GLPI et les paliers restent pertinents |
 | Diagnostic à distance | Il prend la main à distance avant de se déplacer | Confirmé : le diagnostic JEA en lecture seule colle à sa pratique |
+| Environnement Active Directory | Domaine, AD, PC rangés par service | Confirmé : le contrôleur de domaine commun de la maquette lui sert aussi |
 | Chariots gérés par son service | Oui | Confirmé |
 
 ### Ce qui est faux ou fragile
@@ -53,7 +56,7 @@ Le formulaire envoyé le 12/11 (« Supervision instrumentée des chariots de soi
 | Ce qu'on garde du formulaire envoyé | Presque tout | **Serveur, JEA, compte GLPI restreint, paliers, PostgreSQL, Gantt** ; la question de sécurité reste la même | Peu |
 | Ce qu'on perd | — | Boîtier ESP32 sur le chariot, INA219, Li-Po, chutes contrôlées | Boîtier et physique |
 | Doublons | Aucun | Léger avec Yaksan (diagnostic du poste) : à séparer (voir §4) | **Fort** avec Lorenzo (installations, socle) et Aziza (distribution) |
-| C10 | Correct | **Très bon** : SNMP, adressage et VLAN **vérifiés** (pas configurés), DHCP/DNS, ports 9100 et 631, captures | Correct (DNS du domaine, partage SMB) |
+| C10 | Correct | **Très bon** : lecture de l'AD (LDAP), SNMP, adressage et VLAN **vérifiés** (pas configurés), DHCP/DNS, ports 9100 et 631, captures | Correct (DNS du domaine, partage SMB) |
 | Physique | Bonne (déjà écrite) | **À reconstruire** (proposition au §4) | Difficile à trouver |
 | Avis | Non : besoin fragile | **Oui (recommandée)** | Non : doublons |
 
@@ -64,10 +67,16 @@ Titre provisoire : **« Imprimante muette, PC lent : le ticket arrive avec son d
 ### Principe
 1. Un ticket GLPI arrive (catégorie « imprimante » ou « PC lent »).
 2. Le serveur lance le pré-diagnostic, **en lecture seule** :
+   - **AD (lecture LDAP)** : le PC du ticket est-il dans le domaine ? Dans quelle unité d'organisation, donc **quel service** ? Quelles imprimantes sont publiées pour ce service ? Le service donne le **réseau attendu** : c'est la référence qui permet de dire « l'imprimante n'est pas dans le bon VLAN ». Sans l'AD, cette vérification n'a pas de point de comparaison.
    - **Imprimante** : répond-elle (ping) ? Est-elle **dans le bon réseau** (adresse et masque comparés au plan d'adressage du service, bail DHCP, nom DNS) ? Ports 9100 (impression brute) et 631 (IPP) ouverts ? **État et niveau d'encre lus en SNMP** (Printer-MIB, RFC 3805 ; HOST-RESOURCES-MIB, RFC 2790 : `hrPrinterStatus`, `hrPrinterDetectedErrorState`, `prtMarkerSuppliesLevel`) ? File d'attente bloquée sur le PC (JEA) ?
    - **PC lent** (JEA, comme dans le formulaire) : type de disque (`Get-PhysicalDisk`, `MediaType`), RAM et taux d'utilisation, mémoire paginée, espace disque, latence disque mesurée.
 3. Le serveur écrit dans le ticket la **cause probable** et le **geste conseillé** (« encre noire à 2 % », « imprimante hors du réseau du service », « disque HDD : poste à remplacer », « 4 Go de RAM saturés : ajouter 4 Go »).
 4. **Paliers** (inchangés dans l'esprit) : 1. simulation (il note ce qu'il aurait écrit) ; 2. il propose, le technicien valide ; 3. il écrit seul. Une action corrective (relancer le spouleur d'impression) n'existe qu'au palier 2, avec confirmation humaine, et reste **hors de la liste JEA de V1**.
+
+### Place de l'AD (limite C09 / C10)
+- Wassim **lit** l'AD (LDAP, compte de service en lecture seule) : C10, exploitation de l'existant. Il ne crée ni GPO, ni comptes, ni unités d'organisation : cela relève de C09 (E5) et le contrôleur de domaine commun est préparé par l'enseignant, comme pour Lorenzo et Yaksan.
+- Une **règle de cohérence** utile et réaliste : PC rangé dans le service A, imprimante demandée dans le réseau du service B → signalé dans le ticket. Elle reprend son geste réel (« je le mets dans le bon service ») et sa vérification réelle (« le bon VLAN »).
+- Extension possible : **PC resté hors de toute unité de service** (oublié dans le conteneur `Computers` par défaut) → signalé. Lecture seule, aucun déplacement automatique ; un déplacement ne serait proposé qu'au palier 2, avec confirmation.
 
 ### Séparation avec Yaksan (2)
 Yaksan : mises à jour Windows ratées et chaîne carte → navigateur, vues par un boîtier témoin. Wassim : **imprimantes réseau** et **performance matérielle** (disque, RAM), déclenchés par le ticket. Pas de boîtier témoin chez Wassim.
@@ -95,10 +104,10 @@ Variante si le professeur de physique refuse : humidité du papier et bourrages 
 | Pré-diagnostic PC lent (JEA, script PowerShell) | 18 |
 | GLPI : API, lecture des tickets, écriture du diagnostic, paliers | 18 |
 | Physique : latence, vibration, incertitudes | 14 |
-| Exploitation du réseau : DHCP, DNS, NTP, captures SNMP et IPP | 12 |
+| Exploitation du réseau : DHCP, DNS, NTP, lecture LDAP de l'AD, captures SNMP, IPP et LDAP | 14 |
 | Campagne d'essai (pannes provoquées), indicateurs, bilan | 14 |
 | Dossier et soutenance | 12 |
-| **Total** | **≈ 134 h** (marge ≈ 16 h) |
+| **Total** | **≈ 136 h** (marge ≈ 14 h) |
 
 ### Indicateurs possibles
 - 10 pannes d'imprimante provoquées (câble débranché, mauvais réseau, encre basse simulée, file bloquée) : cause juste dans au moins 8 cas.
@@ -118,6 +127,8 @@ Variante si le professeur de physique refuse : humidité du papier et bourrages 
 3. Les imprimantes sont-elles **réseau** (adresse IP) ou branchées en USB ? Dans un VLAN dédié ?
 4. Wassim a-t-il le droit de **lire l'état des imprimantes** (page web, SNMP) ?
 5. Les « scripts déjà faits » d'installation : qui les écrit ? (Pour savoir si Wassim peut en parler sans les reproduire.)
+6. Dans l'AD, Wassim fait-il plus que ranger les PC dans le bon service (comptes, groupes, GPO) ?
+7. Les imprimantes sont-elles publiées dans l'AD, avec leur emplacement ?
 
 ## 7. Lectures utiles
 - C. Ruemmler, J. Wilkes, « An Introduction to Disk Drive Modeling », *IEEE Computer*, 27(3), 1994 : le modèle de référence (déplacement de la tête, attente de rotation). Pas de traduction française.
