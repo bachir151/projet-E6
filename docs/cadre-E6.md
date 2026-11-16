@@ -12,6 +12,34 @@ Arrêté du 25 janvier 2023 portant définition du BTS « Cybersécurité, Infor
 - Une commission académique examine et valide les propositions de sujets des équipes enseignantes (scolaires, apprentis).
 - Le dossier de présentation du projet comprend : la situation du projet dans son contexte ; le cahier des charges ; les contraintes techniques et économiques ; les ressources ; les délais.
 
+## Référentiel officiel lu le 12/11/2026
+Source : référentiel BTS CIEL, Éduscol STI (PDF de 91 p., pages 62-63 et 74-77) —
+https://sti.eduscol.education.fr/sites/eduscol.education.fr.sti/files/textes/bts/bts-cybersecurite-informatique-reseaux-electronique-ciel-option-informatique-et-reseaux-rentree-2023/15957-bts-cybersecurite-informatique-reseaux-electronique.pdf
+
+### Forme de l'épreuve selon le statut (règlement d'examen, p. 62)
+- Scolaires (public ou sous contrat), **apprentis de CFA habilités**, formation continue en établissement public : **forme ponctuelle orale, 1 h**.
+- Formation continue en établissement public habilité au CCF : CCF (livret de suivi, bilans, commission au dernier trimestre).
+- Hors contrat, apprentis de CFA non habilités, candidats au titre de l'expérience : ponctuelle orale, 1 h.
+
+### Forme ponctuelle (p. 75-76)
+- Projet de 150 h encadré par les enseignants de STI et de physique.
+- Le candidat « réalise et met en service tout ou partie d'un ouvrage, d'une installation, d'un équipement sur un support authentique à caractère industriel qui utilise des technologies actuelles ».
+- « Pour les apprentis les projets doivent impérativement être développés dans l'entreprise. »
+- Le support et la problématique sont validés par une commission académique annuelle, sous la responsabilité de l'inspecteur, au 1er trimestre de l'année de l'examen.
+- **La note combine trois notes** : (1) une note de l'équipe pédagogique appuyée sur le stage en entreprise ; (2) une note de l'équipe pédagogique sur les compétences développées pendant le projet ; (3) une note de la commission d'interrogation à la soutenance orale. Les poids ne sont pas dans le référentiel : ils sont dans la circulaire nationale d'organisation (non lue).
+
+### Support du projet et dossiers (p. 76-77)
+- Dossier remis au candidat : contexte, cahier des charges, contraintes techniques et économiques, ressources, délais.
+- **À la fin du projet, le candidat remet un dossier technique** : partie commune (10 p. max) + partie personnelle (20 p. max par étudiant).
+- Les documents validés par la commission sont **contractuels** et joints au dossier du candidat pour le jury.
+- Projet non validé ou à modifier fortement : il repasse en commission. **Sans validation, le candidat ne peut pas se présenter au BTS.**
+
+### Compétences (annexe III, p. 33-41)
+- C01 est « Communiquer en situation professionnelle (**français/anglais**) ».
+- C10 : scripts, ligne de commande, prise en main à distance et sa législation, supervision (SNMP), outils de traçabilité et de rapport d'incident, sauvegarde, mises à jour, réglementation (CNIL/RGPD, réglementation du secteur) ; côté physique : capteurs, communications, actionneurs, **appareils de mesure, mesures et incertitudes** (niveau 3).
+- VLAN, ACL, pare-feu et routage figurent dans les connaissances de **C09** (installer), pas de C10 : cela confirme l'interprétation ci-dessous.
+- Activités du pôle : D1 cahier des charges, D2 développement logiciel, D3 gestion d'incidents (tickets par criticité, remédiation, rapport, escalade), D4 valorisation de la donnée (collecte, stockage en base dédiée, **au moins une sauvegarde hors connexion**, script de traitement, rapport d'analyse), D5 audit.
+
 ## Compétences (option A)
 | Compétence | Épreuve |
 |---|---|

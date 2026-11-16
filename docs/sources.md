@@ -3,6 +3,7 @@
 | Sujet | Source | Ce qu'on en retient |
 |---|---|---|
 | Définition du BTS CIEL, épreuve E6 | Légifrance, arrêté du 25 janvier 2023 — https://www.legifrance.gouv.fr/jorf/article_jo/JORFARTI000047226098 | E6 coef. 7, oral 1 h, projet 150 h encadré STI + physique ; « Pour les apprentis les projets doivent impérativement être développés dans l'entreprise » ; commission de validation des sujets |
+| Référentiel complet BTS CIEL (91 p.) | Éduscol STI — https://sti.eduscol.education.fr/textes/referentiel-bts-cybersecurite-informatique-et-reseaux-electronique | Définition E6 (p. 74-77), règlement d'examen (p. 62), compétences (p. 33-41) ; lu le 12/11/2026 |
 | Répartition des compétences par épreuve | Académie de Normandie, présentation BTS CIEL — https://physique-chimie.ac-normandie.fr/IMG/pdf/bts_ciel_-_organisation.pdf | C01, C03, C08, C10 en E6 (option A) ; C09 en E5 |
 | Versions SharePoint | Practical365 — https://practical365.com/?p=61552 | 500 versions par fichier par défaut |
 | Catalogue de fichiers Windows | Microsoft Learn, New-FileCatalog — https://learn.microsoft.com/en-us/previous-versions/powershell/module/microsoft.powershell.security/new-filecatalog | Version 2 = SHA-256 ; Windows uniquement |
