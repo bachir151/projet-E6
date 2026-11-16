@@ -165,7 +165,7 @@ renderer.setSize(innerWidth, innerHeight);
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.05;
+renderer.toneMappingExposure = 0.95;
 
 const scene = new THREE.Scene();
 const BG = 0x0b1016;
@@ -187,7 +187,7 @@ const pmrem = new THREE.PMREMGenerator(renderer);
 scene.environment = pmrem.fromScene(new RoomEnvironment(renderer), 0.04).texture;
 
 scene.add(new THREE.HemisphereLight(0xbfd4ff, 0x20160e, 0.35));
-const key = new THREE.DirectionalLight(0xfff0dc, 2.4);
+const key = new THREE.DirectionalLight(0xfff0dc, 1.6);
 key.position.set(110, 280, 170);
 key.target.position.set(0, 0, -10);
 key.castShadow = true;
@@ -204,7 +204,7 @@ scene.add(rim);
 const composer = new EffectComposer(renderer);
 composer.setPixelRatio(PR);
 composer.addPass(new RenderPass(scene, camera));
-const bloom = new UnrealBloomPass(new THREE.Vector2(innerWidth, innerHeight), 0.7, 0.4, 0.95);
+const bloom = new UnrealBloomPass(new THREE.Vector2(innerWidth, innerHeight), 0.8, 0.45, 1.9);
 composer.addPass(bloom);
 composer.addPass(new OutputPass());
 
@@ -256,7 +256,7 @@ const M = {
   gold: std(0xd8aa4c, 0.28, 1),
   chip: std(0x101114, 0.4, 0.05),
   plBlack: std(0x121314, 0.55, 0),
-  plWhite: std(0xefeee9, 0.42, 0),
+  plWhite: std(0xcfcdc6, 0.5, 0),
   plGray: std(0x8e959b, 0.4, 0.55),
   alu: std(0xc9cdd2, 0.36, 1),
   steel: std(0xb8bcc2, 0.25, 1),
@@ -265,7 +265,7 @@ const M = {
   orangeRub: std(0xd2621c, 0.7, 0),
   nylon: std(0xf3f0e6, 0.6, 0),
   cork: std(0xa57a52, 0.95, 0),
-  acrylic: new THREE.MeshPhysicalMaterial({ color: 0xdbe8f0, roughness: 0.08, metalness: 0, transparent: true, opacity: 0.35, clearcoat: 1 }),
+  acrylic: new THREE.MeshPhysicalMaterial({ color: 0x8fa6b4, roughness: 0.15, metalness: 0, transparent: true, opacity: 0.22, clearcoat: 0.6, envMapIntensity: 0.4 }),
   cableBlue: std(0x2a6fd6, 0.45, 0),
   cableYellow: std(0xe8c130, 0.45, 0),
   cableGray: std(0x9aa1a8, 0.5, 0),
@@ -289,10 +289,10 @@ const floor = new THREE.Mesh(new THREE.PlaneGeometry(3000, 3000), std(0xffffff, 
 floor.rotation.x = -Math.PI / 2; floor.position.y = -76; floor.receiveShadow = true; scene.add(floor);
 
 const deskTex = canvasTex(2048, 1024, (g, w, h) => {
-  g.fillStyle = '#c3bfb6'; g.fillRect(0, 0, w, h);
+  g.fillStyle = '#7d7a74'; g.fillRect(0, 0, w, h);
   for (let i = 0; i < 26000; i++) { const a = Math.random() * 0.05; g.fillStyle = Math.random() < .5 ? `rgba(0,0,0,${a})` : `rgba(255,255,255,${a})`; g.fillRect(Math.random() * w, Math.random() * h, 3, 1.5); }
 });
-const deskTop = mesh(RB(240, 4, 122, 0.8), std(0xffffff, 0.62, 0, { map: deskTex.tex }), 0, -2, -10);
+const deskTop = mesh(RB(240, 4, 122, 0.8), std(0xffffff, 0.78, 0, { map: deskTex.tex, envMapIntensity: 0.5 }), 0, -2, -10);
 deskTop.castShadow = false;
 mesh(BOX(240.4, 1.2, 122.4), std(0x2c2f33, 0.5, 0.2), 0, -3.4, -10);
 for (const [x, z] of [[-114, -66], [114, -66], [-114, 46], [114, 46]]) mesh(BOX(5, 72, 5), M.darkMetal, x, -40, z);
@@ -393,7 +393,7 @@ function bbTex(w, h) {
 function makeBreadboard(w = 8.2, d = 5.5) {
   const g = new THREE.Group();
   mesh(RB(w, 0.85, d, 0.08, 2), M.plWhite, 0, -0.425, 0, g);
-  flat(w, d, std(0xffffff, 0.55, 0, { map: bbTex(w, d).tex }), 0, 0.002, 0, g);
+  flat(w, d, std(0xcfcdc6, 0.6, 0, { map: bbTex(w, d).tex }), 0, 0.002, 0, g);
   return g;
 }
 
@@ -440,7 +440,7 @@ function makeLED(name, color) {
 }
 function setLED(name, on) {
   const L = ledLights[name]; if (!L) return;
-  L.mat.emissiveIntensity = on ? 9 : 0.05; L.pl.intensity = on ? 40 : 0;
+  L.mat.emissiveIntensity = on ? 14 : 0.05; L.pl.intensity = on ? 40 : 0;
 }
 function makeResistor(bands) {
   const g = new THREE.Group();
@@ -690,14 +690,14 @@ const badgeTex = canvasTex(512, 324, (g, w, h) => {
   g.fillStyle = '#13222c'; g.font = 'bold 44px Arial'; g.fillText('A-12', 190, 160);
   g.font = '24px Arial'; g.fillStyle = '#56656f'; g.fillText('Service maintenance', 190, 200); g.fillText('RFID 13,56 MHz', 190, 236);
 });
-const badge = mesh(RB(8.56, 0.08, 5.4, 0.3, 2), std(0xffffff, 0.35, 0, { map: badgeTex.tex }), 56, 0.04, 30);
+const badge = mesh(RB(8.56, 0.08, 5.4, 0.3, 2), std(0xc8c8c8, 0.45, 0, { map: badgeTex.tex }), 51, 0.04, 35);
 badge.rotation.y = 0.25;
 const BADGE_HOME = badge.position.clone(), BADGE_ROT = badge.rotation.clone();
 const tag7Tex = canvasTex(256, 256, (g, w, h) => {
   g.fillStyle = '#1b1b1b'; g.fillRect(0, 0, w, h); g.fillStyle = '#e8e8e8'; g.font = 'bold 54px Arial'; g.fillText('PC-07', 40, 120);
   g.font = '28px Arial'; g.fillText('anti-métal', 52, 170);
 });
-const tag7 = mesh(RB(4.4, 0.25, 4.4, 0.4, 2), std(0xffffff, 0.5, 0, { map: tag7Tex.tex }), 54, 0.13, 40);
+const tag7 = mesh(RB(4.4, 0.25, 4.4, 0.4, 2), std(0xffffff, 0.5, 0, { map: tag7Tex.tex }), 40, 0.13, 36);
 const TAG7_HOME = tag7.position.clone();
 
 /* ---- Banc de physique ---- */
@@ -786,12 +786,12 @@ function label(group, pos, title, sub, cls = '') {
   const o = new CSS2DObject(d); o.position.copy(pos); scene.add(o); labelGroups[group].push(o); return o;
 }
 label('overview', V(-92, 50, -40), 'Serveur', 'Ubuntu · nginx HTTPS · Flask · SQLite');
-label('overview', V(-32, 8, -50), 'Switch du lycée', 'réseau en place (C10)');
+label('overview', V(-40, 6, -60), 'Switch du lycée', 'réseau en place (C10)');
 label('overview', V(10, 20, -56), 'Borne Wi-Fi du bureau', '');
 label('overview', V(-82, 26, 4), 'Poste du référent', 'Windows 11 · signe le kit');
-label('overview', V(-26, 27, 0), 'PC de maintenance', 'agent PowerShell · BITS');
-label('overview', V(4, 4, 27), 'Téléphone', 'partage de connexion 4G');
-label('overview', V(36, 6, 18), 'Borne de sortie', 'ESP32 + lecteur RFID');
+label('overview', V(-26, 24, 12), 'PC de maintenance', 'agent PowerShell · BITS');
+label('overview', V(2, 3, 34), 'Téléphone', 'partage de connexion 4G');
+label('overview', V(40, 5, 24), 'Borne de sortie', 'ESP32 + lecteur RFID');
 label('overview', V(84, 7, 16), 'Banc de physique', 'ESP32 + 2 capteurs');
 label('overview', V(62, 48, -46), 'PC du lycée', 'tableau de bord');
 label('borne', W(esp1, V(0.9, 0.6, 0)), 'ESP32-WROOM-32', 'Wi-Fi, HTTPS', 'small');
@@ -842,10 +842,10 @@ function go(name, o = {}) {
   const id = runId;
   return new Promise((res, rej) => {
     const kind = o.kind || 'req';
-    const m = new THREE.Mesh(sphereGeo, glowMat(COL[kind] ?? kind, o.glow ?? 3.2));
+    const m = new THREE.Mesh(sphereGeo, glowMat(COL[kind] ?? kind, o.glow ?? 7));
     m.scale.setScalar(o.size ?? P.size); scene.add(m);
     const trail = [];
-    if (!o.noTrail) for (let i = 0; i < 6; i++) { const t = new THREE.Mesh(sphereGeo, glowMat(COL[kind] ?? kind, 2)); t.scale.setScalar((o.size ?? P.size) * (0.8 - i * 0.11)); t.material.opacity = 0.5 - i * 0.07; t.visible = false; scene.add(t); trail.push(t); }
+    if (!o.noTrail) for (let i = 0; i < 6; i++) { const t = new THREE.Mesh(sphereGeo, glowMat(COL[kind] ?? kind, 3)); t.scale.setScalar((o.size ?? P.size) * (0.8 - i * 0.11)); t.material.opacity = 0.5 - i * 0.07; t.visible = false; scene.add(t); trail.push(t); }
     let lab = null;
     if (o.label && showLabels) { lab = tag(o.label, CSS[kind] || '#fff'); lab.position.set(0, 1.2, 0); m.add(lab); }
     packets.push({ m, trail, hist: [], lab, P, t: reverse ? 1 : 0, dir: reverse ? -1 : 1, speed: o.speed ?? P.speed, dropAt: o.dropAt, res, rej, id, seed: Math.random() * 10, falling: false });
@@ -1166,25 +1166,26 @@ const steps = [
   text: `<p>L'agent passe son <b>badge</b> (« qui part ») puis le <b>PC</b>, qui porte une étiquette RFID collée dessous (« quel PC part »). Le lecteur RC522 lit les numéros et les transmet à l'ESP32 par le <b>bus SPI</b>.</p>
          <p>L'ESP32 demande au serveur, en Wi-Fi et HTTPS : « PC-04 est-il à jour ? ». Réponse oui → <b>LED verte</b> et bip. La sortie est enregistrée.</p>
          <p>Le badge <b>identifie</b>, il ne prouve pas : il trace une sortie, il ne contrôle pas un accès.</p>`,
-  cam: [[50, 34, 66], [32, 2, 18]], labels: 'borne',
+  cam: [[48, 21, 46], [34, 2, 19]], labels: 'borne',
   async run() {
     await sleep(500);
     await cardToReader(badge, BADGE_HOME, 'badge 04:A3:7F:12 → agent A-12');
     badge.rotation.copy(BADGE_ROT);
-    flyTo([46, 48, 80], [26, 4, 16], 1.4);
+    flyTo([44, 34, 64], [26, 4, 16], 1.4);
     await laptopToReader('étiquette → PC-04');
+    const back = laptopHome();
     flyTo([30, 120, 140], [-10, 10, -20], 1.8);
     await route(borneUp, { kind: 'borne', label: 'GET /pc/04/etat · 🔑' });
     await sleep(200);
     await route(borneDown, { kind: 'kit', label: 'à jour · v13 · rapport 08:42' });
-    flyTo([50, 34, 66], [32, 2, 18], 1.2);
+    flyTo([48, 21, 46], [34, 2, 19], 1.2);
     await go('led_G', { kind: 'kit', size: 0.14, noTrail: true });
     setLED('green', true); beep(2400, 0.25);
     await sleep(900);
     route(borneUp, { kind: 'borne', label: 'POST /sorties (A-12, PC-04, v13, 08:47)' }).then(() => { world.lastExit = 'PC-04 · agent A-12 · kit v13 · 08:47'; drawDash(); }).catch(() => {});
     await sleep(1600);
     setLED('green', false);
-    await laptopHome();
+    await back;
   }
 },
 {
@@ -1192,14 +1193,14 @@ const steps = [
   text: `<p><b>PC-07</b> n'a pas envoyé de rapport depuis 3 jours : le serveur répond « rapport ancien » → <b>LED rouge</b> et long bip.</p>
          <p>Ensuite, on <b>arrête le serveur</b>. La borne n'a pas de réponse : les LED <b>clignotent en alternance</b> = « vérification impossible ». La sortie est gardée en mémoire.</p>
          <p>Règle d'or : un serveur muet ne veut <b>jamais</b> dire « à jour ».</p>`,
-  cam: [[50, 34, 66], [32, 2, 18]], labels: 'borne',
+  cam: [[48, 21, 46], [34, 2, 19]], labels: 'borne',
   async run() {
     await sleep(400);
     await cardToReader(tag7, TAG7_HOME, 'étiquette → PC-07');
     flyTo([30, 120, 140], [-10, 10, -20], 1.6);
     await route(borneUp, { kind: 'borne', label: 'GET /pc/07/etat · 🔑' });
     await route(borneDown, { kind: 'err', label: 'rapport ancien (3 jours)' });
-    flyTo([50, 34, 66], [32, 2, 18], 1.2);
+    flyTo([48, 21, 46], [34, 2, 19], 1.2);
     await go('led_R', { kind: 'err', size: 0.14, noTrail: true });
     setLED('red', true); beep(900, 0.9, 0.06);
     await sleep(1600); setLED('red', false);
@@ -1208,13 +1209,13 @@ const steps = [
     await sleep(1000);
     world.serverOn = false;
     await sleep(900);
-    flyTo([50, 34, 66], [32, 2, 18], 1.4);
+    flyTo([48, 21, 46], [34, 2, 19], 1.4);
     await cardToReader(tag7, TAG7_HOME, 'étiquette → PC-07');
     flyTo([30, 120, 140], [-10, 10, -20], 1.6);
     await route(['borneToAP', 'apToSw'], { kind: 'borne', label: 'GET /pc/07/etat' });
     await go('srvLink', { kind: 'borne', label: '… pas de réponse', dropAt: 0.9 });
     await sleep(800);
-    flyTo([50, 34, 66], [32, 2, 18], 1.2);
+    flyTo([48, 21, 46], [34, 2, 19], 1.2);
     await sleep(1000);
     world.ledAlt = true;
     await sleep(4000);
@@ -1225,7 +1226,7 @@ const steps = [
   text: `<p>Question : un PC qui sort du froid, combien de temps attendre avant de l'allumer, pour éviter la <b>buée</b> à l'intérieur ?</p>
          <p>Un bloc d'aluminium refroidi à 0 °C imite le PC. Le <b>DS18B20</b> (fil 1-Wire) mesure le bloc, le <b>SHT40</b> (bus I²C) mesure l'air : 20 °C et 50 % d'humidité, donc un point de rosée d'environ 9,3 °C.</p>
          <p>Tant que le bloc est sous 9,3 °C, la buée se forme. Le modèle prévoit une attente d'environ <b>0,62 τ</b>. On le compare aux mesures.</p>`,
-  cam: [[92, 26, 50], [82, 2, 12]], labels: 'banc',
+  cam: [[90, 15, 34], [83, 2, 15]], labels: 'banc',
   async run() {
     world.dashMode = 'curve'; world.curve = []; drawDash();
     readDS.visible = readSHT.visible = showLabels;
@@ -1394,7 +1395,7 @@ function tick() {
     if (!L.used) { L.m.color.setRGB(0.02, 0.06, 0.03); return; }
     const act = now - L.last < 0.25;
     const on = act ? Math.sin(now * 60 + i) > 0 : Math.sin(now * 1.3 + i * 2) > -0.6;
-    L.m.color.setRGB(0.15, 1, 0.35).multiplyScalar(on ? (act ? 3 : 1.6) : 0.12);
+    L.m.color.setRGB(0.15, 1, 0.35).multiplyScalar(on ? (act ? 4 : 2.2) : 0.12);
   });
   const sd = server.userData;
   sd.pwr.material.color.setRGB(0.2, 1, 0.45).multiplyScalar(world.serverOn ? 3 : 0.04);
@@ -1410,12 +1411,17 @@ function tick() {
   requestAnimationFrame(tick);
 }
 
+/* Le centre de la scène est décalé à droite du panneau d'explication (grands écrans). */
+function viewShift() {
+  const w = innerWidth, h = innerHeight, panelW = $('#panel').offsetWidth + 16;
+  if (w > 860) camera.setViewOffset(w, h, -panelW / 2, 0, w, h); else camera.clearViewOffset();
+}
 addEventListener('resize', () => {
-  camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix();
+  camera.aspect = innerWidth / innerHeight; viewShift(); camera.updateProjectionMatrix();
   renderer.setSize(innerWidth, innerHeight); composer.setSize(innerWidth, innerHeight);
   labelRenderer.setSize(innerWidth, innerHeight);
 });
-camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix();
+camera.aspect = innerWidth / innerHeight; viewShift(); camera.updateProjectionMatrix();
 
 (document.fonts ? document.fonts.ready : Promise.resolve()).then(() => { if (cur === 0) baseline(0); });
 goStep(0);

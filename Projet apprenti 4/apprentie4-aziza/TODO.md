@@ -7,6 +7,7 @@
 - [x] Brouillon de réponse au tuteur pour la visite de la semaine 50
 - [x] PowerPoint 22 diapositives (`livrables/powerpoint/`) et présentation animée style 3Blue1Brown (`livrables/presentation-animee/`, publiée : https://claude.ai/artifact/5QmQjfLHFvt1T8ps5yHTca)
 - [x] Prompts : image du banc (ChatGPT), présentation 3D (Gemini)
+- [x] Animation 3D interactive de la maquette (`livrables/animation-3d/maquette-3d.html`, Three.js, 8 étapes, vues maquette / terrain, `?lite` pour les PC peu puissants) (14/11)
 
 ## À faire
 - [ ] **12 nov.** : signature et cachet de la fiche par le tuteur ; retour au plus tard le **13 nov.**
