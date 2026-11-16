@@ -1,0 +1,26 @@
+Leur portable doivent rester en mise en veille prolongé , reveille le week-end pour faire le mise a jour , 
+
+
+certaines personnes qui amenent leur pc chez eux, mise à jour pandnat le temps travail , encart qui aaprait --> oui ou non , certains ne veullent pas répondre par oui --> tirer les oreilles ; 2 ou 3 fois on laisse pas le choix a l'agent --> mise à jour forcée 
+
+
+Ils font pas le windows + L ; les etourdis qui ne le font pas pourtant on leur dit de faire ça ;
+
+
+
+
+Les missions de Lorenzo :
+
+- Soclage : on utilse pas le windows du commerce ; windows 11  revue à votre sauce impérativement , sinon pas de conenction au domaine (Domaine national, une personne qui travaille à la dgfip peut se connecter au réseau , il a acces a l'ordinateur) ; 
+
+- On a une AD , c'est à Anger , tout ce qui
+- Un personne est inscrite dans l'annuaire DGFIP , elle a une adreesse mail, elle est créé au niveau de l'AD, en ce moment LOrenzo peut creer des sessio (sans AD on peut rien faire ). 
+
+-Une image toute prete (windows sauce dgfip) avec une clé , on boote sur la clé l'image.  grâce à rufus la clé bootable. 
+
+- Lorenzo accompagne les collègue quand ils font des installations imprimantes; il n'a pas de codes admin pour toyut ce qui est installation (des qu'il y a blocage il faut un code admin). 
+
+- Installer un écran ou remplacer un écran (si logiciel compte admin)
+
+
+
