@@ -1,4 +1,10 @@
-# Lorenzo (apprenti 3) – suivi (au 16 novembre 2026)
+# Lorenzo (apprenti 3) – suivi (au 18 novembre 2026)
+
+## Décidé le 18/11 : la partie AD passe en extension
+- Le poste Windows 11 de la maquette **n'est plus dans un domaine** en V1 (groupe de travail). Le filet de sécurité (blocage après 10 min) vient d'une **stratégie locale**.
+- **En extension, si le temps le permet** : jonction à un domaine AD de maquette, filet par GPO, LAPS, captures Kerberos et LDAP.
+- C10 en V1 : DHCP, DNS, NTP (dérive mesurée), HTTPS (TLS), SMB (débit mesuré), captures Wireshark. Plus de machine virtuelle Windows Server.
+- Reporté dans le formulaire (13 p.), les schémas, la page HTML et la présentation 3Blue1Brown.
 
 ## Entretien avec le tuteur (16/11) : voir `entretien-tuteur-2026-11-16.md`
 - Besoins **confirmés par des faits** : agents qui ne font pas Windows + L ; fenêtre « installer ? oui/non », refus répétés, mise à jour forcée après 2 ou 3 refus.

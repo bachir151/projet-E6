@@ -4,6 +4,8 @@
 >
 > **16/11/2026** : entretien avec **Wassim (1)** : « les chariots, il n'y a pas de problème » ; ses vraies pannes sont les **imprimantes** ; il prépare aussi les PC des nouveaux médecins (domaine, AD, script). Notes : `Projet apprenti 1/entretien-wassim-2026-11-16.md`.
 >
+> **18/11/2026, décision de l'enseignant** : chez **Lorenzo (3)**, la partie AD (domaine, GPO, LAPS, Kerberos/LDAP) passe **en extension, si le temps le permet**. En V1, le poste est hors domaine et le filet de sécurité vient d'une stratégie locale. Formulaire, schémas, page HTML et présentation mis à jour.
+
 > **16/11/2026** : entretien avec le tuteur de **Lorenzo (3)** : besoins confirmés, parc de portables, règle « 2 ou 3 refus puis mise à jour forcée ». Formulaire à corriger avant envoi : voir `Projet apprenti 3/entretien-tuteur-2026-11-16.md`.
 >
 > **Mise à jour du 12/11/2026 (dite par l'enseignant)** : les formulaires académiques de **Yaksan (2)**, **Aziza (4)** et **Wassim (1)** sont **envoyés**. Il ne reste que **Lorenzo (3)**.

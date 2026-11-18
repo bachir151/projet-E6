@@ -316,13 +316,13 @@ const node = (x, y, w, h, t, sub, col, n, dash) => {
 node(0.4, 1.9, 2.0, 1.1, "Boîtier", "radar + ESP32 + lumière", BLUE);
 node(3.2, 1.75, 2.4, 1.4, "Poste Windows 11", "service de présence\njournal + tâches", BLUE);
 node(6.6, 1.0, 2.9, 1.1, "Serveur Ubuntu", "API, base, tableau de bord", BLUE, "anim_3_f_sv");
-node(3.3, 3.75, 2.2, 1.0, "Contrôleur de domaine", "commun : comptes, GPO, heure", GREY, "anim_2_f_dc", true);
-node(6.8, 3.75, 2.6, 1.0, "Routeur ISR 4331", "source d'heure (NTP)", GREY, "anim_2_f~d300_rt", true);
+node(3.3, 3.75, 2.2, 1.0, "Domaine AD (extension)", "si le temps le permet : GPO, LAPS", GREY, "anim_2_f_dc", true);
+node(6.8, 3.75, 2.6, 1.0, "Routeur ISR 4331", "DHCP, DNS, NTP", GREY, "anim_2_f~d300_rt", true);
 L(s, 2.4, 2.45, 3.2, 2.45, { c: BLUE, arrow: false, n: "anim_1_f_l1" });
 T(s, "USB · signé", { x: 2.35, y: 2.1, w: 0.9, h: 0.3, fontSize: 10, color: BLUE, align: "center", objectName: "anim_1_f_l1t" });
 O(s, 2.4, 2.38, 0.14, YEL, "anim_1_f~t200+m~0.7:0~t900~d300_pk1");
 L(s, 4.4, 3.15, 4.4, 3.75, { c: GREY, arrow: false, n: "anim_2_f_l2" });
-T(s, "Kerberos, DNS, LDAP", { x: 4.5, y: 3.3, w: 1.8, h: 0.3, fontSize: 10, color: GREY, objectName: "anim_2_f_l2t" });
+T(s, "Kerberos, LDAP (ext.)", { x: 4.5, y: 3.3, w: 1.8, h: 0.3, fontSize: 10, color: GREY, objectName: "anim_2_f_l2t" });
 L(s, 5.5, 4.25, 6.8, 4.25, { c: GREY, arrow: false, n: "anim_2_f_l3" });
 T(s, "NTP", { x: 5.9, y: 3.95, w: 0.6, h: 0.3, fontSize: 10, color: GREY, objectName: "anim_2_f_l3t" });
 L(s, 5.6, 2.1, 6.6, 1.6, { c: BLUE, arrow: false, n: "anim_3_f_l4" });
@@ -330,7 +330,7 @@ T(s, "HTTPS · jour, sans heure", { x: 5.0, y: 1.25, w: 1.6, h: 0.5, fontSize: 1
 O(s, 5.55, 2.03, 0.14, YEL, "anim_3_f~t200+m~1.0:-0.5~t900~d300_pk2");
 R(s, 0.4, 3.75, 2.6, 1.0, { fill: BG, line: BLUE, lw: 2, n: "anim_4_f_lg1" });
 T(s, "cadre plein : réalisé par Lorenzo\npointillés : fourni par le lycée", { x: 0.5, y: 3.85, w: 2.4, h: 0.8, fontSize: 11, color: GREY, objectName: "anim_4_f_lg2" });
-s.addNotes("Clic 1 : le boîtier parle au poste par USB, chaque message est signé. Clic 2 : le poste utilise le réseau en place, le contrôleur de domaine commun et l'heure donnée par le routeur. Lorenzo ne les configure pas : il les exploite et capture les échanges, c'est la compétence C10. Clic 3 : le serveur reçoit seulement les résultats d'installation, datés au jour, jamais l'heure des absences.");
+s.addNotes("Clic 1 : le boîtier parle au poste par USB, chaque message est signé. Clic 2 : le poste utilise le réseau en place, et le routeur (adresse, nom, heure). Le domaine AD est une extension, si le temps le permet. Lorenzo ne les configure pas : il les exploite et capture les échanges, c'est la compétence C10. Clic 3 : le serveur reçoit seulement les résultats d'installation, datés au jour, jamais l'heure des absences.");
 
 // ======================= 6. SÉCURITÉ =======================
 s = section(6, "Et si on triche ?", "Un faux boîtier qui dit toujours « présent ».", "6 · Sécurité");

@@ -274,11 +274,13 @@ R.texte("Un ", ("boîtier de présence", "g"), " (radar 24 GHz, ESP32, lumière 
 R.image(IMG("0_synoptique"), 17.6, "Synoptique de l’architecture (maquette de démonstration).")
 R.titre("Progression du projet")
 R.puce(("V1 (obligatoire, ≈ 108 h) : ", "g"), "boîtier, service de présence, blocage avec avertissement, "
-       "messages signés (faux boîtier refusé), filet de sécurité GPO, essais de physique R1 à R5, exploitation du réseau.")
+       "messages signés (faux boîtier refusé), filet de sécurité (blocage après inactivité réglé par stratégie locale), "
+       "essais de physique R1 à R5, exploitation du réseau.")
 R.puce(("V2 (visée, ≈ 40 h) : ", "g"), "installations pendant les absences, retour de l’agent sans perte, serveur, "
        "tableau de bord du parc, mesure de l’apport (essai R6), installation d’un poste neuf à paliers.")
 R.puce(("Extensions : ", "g"), "assistant de réglage, détection d’un radar masqué, veille du soir, fiche de "
-       "contrôle d’un poste neuf, lien avec l’outil de déploiement réel.")
+       "contrôle d’un poste neuf, lien avec l’outil de déploiement réel ; ", ("si le temps le permet", "g"), " : jonction du "
+       "poste à un domaine AD de maquette (filet par GPO, mot de passe administrateur géré par LAPS, captures Kerberos et LDAP).")
 R.titre("Limites de l’étude")
 R.puce("Maquette sur un réseau de laboratoire isolé : aucun accès au système d’information de l’entreprise, "
        "aucune donnée réelle ; Windows Update n’est pas testable (paquets MSI de test à la place).")
@@ -334,7 +336,7 @@ R.tableau(
         ["E2 – Ne pas gêner", "Aucun blocage pendant 30 min de travail assis, dont 10 min de lecture sans clavier ; retour pendant l’orange = annulation", "T02, T03", "V1"],
         ["E3 – Agent seul", "Le collègue du bureau voisin ou une personne qui passe n’est pas compté : agent parti, écran bloqué", "R2, R3, T04", "V1"],
         ["E4 – Vrai boîtier", "Chaque message signé ; faux boîtier démasqué ; enrôlement seulement avec appui physique", "T06, T19, T20", "V1"],
-        ["E5 – Filet de sécurité", "Boîtier débranché ou radar masqué : alerte, blocage GPO toujours actif", "T05", "V1"],
+        ["E5 – Filet de sécurité", "Boîtier débranché ou radar masqué : alerte, blocage après inactivité (stratégie locale) toujours actif", "T05", "V1"],
         ["E6 – Installer au bon moment", "Aucune installation devant l’agent ; retour au milieu sans perte ; nombre d’installations évitées devant l’agent, mesuré", "T07–T11, R6", "V2"],
         ["E7 – Vie privée", "Aucune heure ni durée d’absence dans la base du serveur", "T23", "V1–V2"],
         ["E8 – Données du parc", "Tableau de bord : installations réussies, reports et raisons, postes en retard", "démonstration", "V2"],
@@ -356,19 +358,20 @@ R.image(IMG("4_sequence"), 16.5, "Figure 4 – Diagramme de séquence : départ,
 R = Redac(P[55])
 R.puce("Matériel à acheter : ", ("environ 25 € (minimal) à 60 € (confort)", "g"), ", prix à confirmer : 2 radars "
        "LD2410 (dont un de secours), LED RVB, résistances, boîtier plastique ; wattmètre et INA219 en option.")
-R.puce("PC, serveur, réseau et oscilloscope : fournis par le lycée. Logiciels libres ; Windows Server et Windows 11 "
-       "en versions d’évaluation gratuites (aucune licence à acheter).")
+R.puce("PC, serveur, réseau et oscilloscope : fournis par le lycée. Logiciels libres ; Windows 11 "
+       "en version d’évaluation gratuite (aucune licence à acheter).")
 
 R = Redac(P[60])
 R.puce(("Poste : ", "g"), "Windows 11 Entreprise en évaluation (90 jours), en machine virtuelle VirtualBox sur un PC "
-       "Ubuntu, membre du domaine ; radar transmis par USB à la machine virtuelle ; réinstallation prévue "
+       "Ubuntu, hors domaine (groupe de travail ; le domaine AD est une extension) ; radar transmis par USB à la machine virtuelle ; réinstallation prévue "
        "début avril (fin des 90 jours), après export des journaux et des mesures ; service PowerShell au compte "
        "SYSTÈME, journal dédié, tâches planifiées « sur événement », stratégie AllSigned.")
 R.puce(("Serveur : ", "g"), "Ubuntu Server, API Python FastAPI, base SQLite, partage Samba des paquets MSI de test.")
 R.puce(("Boîtier : ", "g"), "ESP32 programmé en C++ (Arduino) ; radar LD2410 en liaison série à 256 000 bauds ; "
        "messages signés en HMAC-SHA256.")
 R.puce(("Réseau : ", "g"), "réseau de laboratoire isolé (switchs HP ProCurve, routeur Cisco ISR 4331), exploité "
-       "tel quel ; contrôleur de domaine commun préparé par l’enseignant. Aucun VLAN ni ACL à créer.")
+       "tel quel : DHCP, DNS et NTP fournis par le routeur. Aucun VLAN ni ACL à créer. En extension : un domaine AD de "
+       "maquette, si le temps le permet.")
 R.puce(("Interdits : ", "g"), "pas de câblage 230 V (alimentation USB 5 V), pas de caméra, aucune donnée réelle.")
 
 R = Redac(P[64])
@@ -381,9 +384,11 @@ R.puce("Mesures de physique avec incertitudes ; chaque réglage (distance, déla
 R = Redac(P[68])
 R.puce(("Boîtier authentique : ", "g"), "clé créée par le boîtier à l’enrôlement (appui physique), chaque "
        "message signé avec un compteur ; un faux boîtier est démasqué.")
-R.puce(("Échec sûr : ", "g"), "radar masqué ou débranché = absent ou anomalie ; filet GPO toujours actif.")
+R.puce(("Échec sûr : ", "g"), "radar masqué ou débranché = absent ou anomalie ; blocage après inactivité (stratégie "
+       "locale) toujours actif.")
 R.puce(("Poste : ", "g"), "journal dédié en écriture SYSTÈME seulement ; agents non administrateurs ; mot de "
-       "passe administrateur local géré par Windows LAPS ; scripts signés.")
+       "passe administrateur local fort, jamais écrit dans un script (Windows LAPS en extension, avec le "
+       "domaine) ; scripts signés.")
 R.puce(("Installations : ", "g"), "empreinte SHA-256 vérifiée ; logiciel ouvert = report ; jamais de redémarrage "
        "avec une session ouverte.")
 R.puce(("Serveur : ", "g"), "HTTPS, jeton par poste stocké haché, requêtes SQL paramétrées, page web authentifiée.")
@@ -392,15 +397,15 @@ R.puce(("Vie privée : ", "g"), "présence gardée sur le poste ; résultats dat
 
 # ================================================================== 2.3 RESSOURCES
 R = Redac(P[73])
-R.puce(("Matériel du lycée : ", "g"), "PC Ubuntu avec VirtualBox (machines virtuelles du serveur, du contrôleur de domaine et du "
+R.puce(("Matériel du lycée : ", "g"), "PC Ubuntu avec VirtualBox (machines virtuelles du serveur et du "
        "poste Windows 11, 16 Go de mémoire conseillés), switchs HP ProCurve, routeur Cisco ISR 4331, ESP32 (dont un « faux boîtier »), "
        "oscilloscope, multimètre.")
 R.puce(("Matériel à commander (décembre 2026) : ", "g"), "radars LD2410, LED RVB, boîtier plastique, petite "
        "plaque métallique pour les essais.")
 R.puce(("Logiciels : ", "g"), "PowerShell, Visual Studio Code, Python et FastAPI, SQLite, Samba, Arduino IDE, "
-       "Wireshark, Git ; VirtualBox ; Windows Server en évaluation (180 jours) ; Windows 11 Entreprise en évaluation (90 jours) ; paquets MSI de logiciels libres.")
+       "Wireshark, Git ; VirtualBox ; Windows 11 Entreprise en évaluation (90 jours) ; paquets MSI de logiciels libres.")
 R.puce(("Documents : ", "g"), "fiche de présentation validée par le tuteur, documentation du module LD2410, "
-       "Microsoft Learn (Planificateur de tâches, msiexec, audit, LAPS), recommandations de la CNIL, charte IA du lycée.")
+       "Microsoft Learn (Planificateur de tâches, msiexec, audit, stratégie de sécurité locale), recommandations de la CNIL, charte IA du lycée.")
 
 # ================================================================== 3 RÉPARTITION
 t = T[4]
@@ -431,7 +436,7 @@ textes = {
     "Mise en œuvre": "boîtier de présence (radar LD2410, ESP32, LED RVB) placé sous le bureau, face au siège ; "
                      "réglage de la zone de détection à partir des mesures.",
     "Configuration": "journal dédié protégé, tâches « sur événement », stratégie AllSigned, jetons et TLS de "
-                     "l’API ; vérification des GPO du domaine commun (inactivité, audit 4800/4801) ; exploitation "
+                     "l’API ; stratégie locale du poste (blocage après inactivité, audit 4800/4801) ; exploitation "
                      "du réseau en place.",
     "Réalisation": "firmware du boîtier, service de présence (machine à états), messages signés et enrôlement, "
                    "orchestrateur d’installation, serveur et tableau de bord du parc, essais R1 à R6, recette T01 à T24.",
@@ -461,9 +466,10 @@ R.puce(("C03 Gérer un projet : ", "g"), "planning, journal de bord, passage V1 
        "risques (vie privée, USB, fausses détections) et du budget.")
 R.puce(("C08 Coder : ", "g"), "C++ sur ESP32 (lecture des trames radar, HMAC), PowerShell (service, tâches, "
        "orchestrateur, script à paliers), Python FastAPI et SQL (serveur, tableau de bord).")
-R.puce(("C10 Exploiter un réseau : ", "g"), "jonction au domaine (DHCP, DNS SRV, Kerberos, LDAP, SMB), NTP et "
-       "échec Kerberos avec une horloge décalée, HTTPS vers l’API, téléchargement SMB d’un paquet : débit mesuré "
-       "comparé au débit du lien ; captures Wireshark commentées.")
+R.puce(("C10 Exploiter un réseau : ", "g"), "bail DHCP et nom DNS du poste et du serveur, heure NTP commune et "
+       "dérive d’horloge mesurée, HTTPS vers l’API (poignée de main TLS), téléchargement SMB d’un paquet : débit "
+       "mesuré comparé au débit du lien ; captures Wireshark commentées. En extension : jonction au domaine "
+       "(Kerberos, LDAP, échec Kerberos avec une horloge décalée).")
 R.puce(("Physique : ", "g"), "radar FMCW (λ, ΔR = c/2B, micro-mouvements, Doppler) ; R1 seuils, R2–R3 zone, "
        "R4 délai de détection, R5 fausses alertes, avec incertitudes ; exposition aux ondes (calcul majorant).")
 
@@ -490,8 +496,8 @@ for i in range(102, 122):
 # ================================================================== 6 ÉVALUATION
 cocher(cases(P[125])[0])
 R2 = nouveau_par_apres(P[125], "No Spacing")
-rr = R2.add_run("Matériel du lycée ; radars et petits composants à commander en décembre 2026 ; Windows Server "
-                "en évaluation (180 jours) ; poste Windows 11 en évaluation (90 jours), réinstallé début avril.")
+rr = R2.add_run("Matériel du lycée ; radars et petits composants à commander en décembre 2026 ; "
+                "poste Windows 11 en évaluation (90 jours), réinstallé début avril.")
 rr.italic = True
 rr.font.size = Pt(9.5)
 
@@ -501,7 +507,7 @@ R.puce("L’agent lit sans toucher au clavier : ", ("rien ne se passe", "g"), ".
 R.puce("L’agent se lève : lumière orange, puis ", ("écran bloqué en quelques secondes", "g"),
        " (délai mesuré, comparé aux 10 minutes actuelles) ; un collègue au bureau voisin ou qui passe "
        "derrière ne change rien.")
-R.puce("Un faux boîtier qui dit toujours « présent » est ", ("démasqué", "g"), " ; boîtier débranché : le filet GPO reste actif.")
+R.puce("Un faux boîtier qui dit toujours « présent » est ", ("démasqué", "g"), " ; boîtier débranché : le blocage après inactivité reste actif.")
 R.puce("Pendant une absence, un logiciel ", ("s’installe sans déranger", "g"), " ; si l’agent revient, son travail n’est pas touché.")
 R.puce("Sur une journée jouée, ", ("aucune installation devant l’agent", "g"), ", contre N avec l’outil classique (essai R6).")
 R.puce("Le technicien voit sur le tableau de bord les installations, les reports et leurs raisons ; la base ne "

@@ -85,15 +85,17 @@ def save(name, content):
 def synoptique():
     b = [text(30, 34, "Synoptique de la maquette au lycée (réseau de laboratoire isolé, aucune donnée réelle)", 16, "bold", anchor="start")]
     b.append(box(30, 60, 300, 160, "Boîtier de présence", ["radar 24 GHz (LD2410)", "ESP32 + lumière tricolore", "chaque message signé (HMAC)", "sous le bureau, face au siège"], hl=True))
-    b.append(box(420, 60, 330, 200, "Poste Windows 11 (VM)", ["service de présence (SYSTÈME)", "journal « PostePresence »", "tâche « Verrou » (session agent)", "tâche « Maintenance » (V2)", "script d’installation à paliers"]))
+    b.append(box(420, 60, 330, 200, "Poste Windows 11 (VM)", ["service de présence (SYSTÈME)", "journal « PostePresence »", "tâche « Verrou » (session agent)", "tâche « Maintenance » (V2)", "script d’installation à paliers", "blocage 10 min : stratégie locale"]))
     b.append(arrow(330, 140, 418, 140, "USB série", ly=132, both=True))
     b.append(box(840, 60, 290, 150, "Serveur Ubuntu", ["API Python (FastAPI), SQLite", "liste des installations", "tableau de bord du parc", "partage des paquets (SMB)"], hl=True))
     b.append(arrow(750, 130, 838, 130, "HTTPS + jeton", ly=122))
     b.append(arrow(750, 190, 838, 190, "SMB (paquets)", ly=182))
-    b.append(box(420, 330, 330, 110, "Contrôleur de domaine commun", ["AD DS, DNS, DHCP, NTP", "GPO : blocage après 10 min (filet)", "préparé par l’enseignant"]))
-    b.append(arrow(585, 328, 585, 262, "Kerberos, LDAP, DNS, SMB", lx=595, ly=300, both=True, anchor="start"))
-    b.append(box(840, 360, 290, 80, "Routeur Cisco ISR 4331", ["passerelle, source NTP"]))
-    b.append(arrow(838, 400, 752, 400, "NTP", ly=392))
+    b.append(box(420, 330, 330, 110, "Domaine AD (extension)", ["jonction du poste au domaine", "filet par GPO, LAPS", "si le temps le permet"], dashed=True))
+    b.append(arrow(585, 328, 585, 262, "Kerberos, LDAP (extension)", lx=595, ly=300, both=True, dashed=True, anchor="start"))
+    b.append(box(840, 360, 290, 80, "Routeur Cisco ISR 4331", ["passerelle · DHCP, DNS, NTP"]))
+    b.append(line([(838, 420), (795, 420), (795, 245)]))
+    b.append(arrow(795, 245, 752, 245))
+    b.append(text(802, 345, "DHCP, DNS, NTP", 12, fill=GREY, anchor="start"))
     b.append(box(840, 250, 290, 80, "PC du technicien", ["navigateur, Wireshark"]))
     b.append(arrow(985, 248, 985, 212, "HTTPS", lx=995, ly=235, anchor="start"))
     b.append(box(30, 300, 300, 100, "Outil de déploiement réel", ["en entreprise : il garde la liste", "des logiciels (extension)"], dashed=True))
@@ -172,8 +174,8 @@ def contexte():
         return box(x, y, w, 64, title, [sub], dashed=dashed, stereo="«external»", tsize=14, lsize=12)
     b.append(ext(430, 60, 260, "Poste Windows 11", "support du projet (session, logiciels)"))
     b.append(arrow(560, 126, 560, sy - 2, "verrouillage, installations", lx=570, ly=180, both=True, anchor="start"))
-    b.append(ext(880, 60, 230, "Contrôleur de domaine", "commun : GPO, heure"))
-    b.append(arrow(880, 110, sx + sw + 2, sy + 30, "filet GPO, Kerberos", lx=835, ly=205, both=True))
+    b.append(ext(880, 60, 230, "Domaine AD", "extension : GPO, LAPS", dashed=True))
+    b.append(arrow(880, 110, sx + sw + 2, sy + 30, "(extension)", lx=835, ly=205, both=True, dashed=True))
     b.append(actor(1000, 300, "Collègue, visiteur", "de passage : à ne pas détecter"))
     b.append(arrow(950, 345, sx + sw + 2, 320, "ne doit pas compter", lx=840, ly=322))
     b.append(ext(880, 470, 230, "Outil de déploiement", "de l’entreprise (extension)", dashed=True))
@@ -282,14 +284,14 @@ def gantt():
     tasks = [
         ("Lancement", None),
         ("Besoin chiffré, cahier des charges, vie privée", (D(2027, 1, 4), D(2027, 1, 15)), "c3"),
-        ("Maquette : domaine commun, GPO filet, journal", (D(2027, 1, 11), D(2027, 1, 22)), "c10"),
+        ("Maquette : poste Windows 11, stratégie locale, journal", (D(2027, 1, 11), D(2027, 1, 22)), "c10"),
         ("V1 – blocage de l’écran", None),
         ("Boîtier : montage, firmware, lumière", (D(2027, 1, 18), D(2027, 2, 12)), "c8"),
         ("Physique R1–R3 : seuils et zone", (D(2027, 2, 1), D(2027, 2, 26)), "phy"),
         ("Message signé + enrôlement du boîtier", (D(2027, 2, 8), D(2027, 2, 26)), "c8"),
         ("Service de présence + blocage", (D(2027, 2, 15), D(2027, 3, 12)), "c8"),
         ("Physique R4–R5 : délai, fausses alertes", (D(2027, 3, 1), D(2027, 3, 19)), "phy"),
-        ("Captures réseau : DHCP, DNS, Kerberos, SMB, HTTPS", (D(2027, 2, 22), D(2027, 4, 2)), "c10"),
+        ("Captures réseau : DHCP, DNS, NTP, SMB, HTTPS", (D(2027, 2, 22), D(2027, 4, 2)), "c10"),
         ("Recette V1", (D(2027, 3, 8), D(2027, 3, 19)), "c10"),
         ("Poste Windows 11 réinstallé (fin des 90 jours)", (D(2027, 4, 5), D(2027, 4, 9)), "c10"),
         ("V2 – installer au bon moment", None),
