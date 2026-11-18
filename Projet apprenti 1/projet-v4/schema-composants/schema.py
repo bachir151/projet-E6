@@ -62,7 +62,7 @@ t(380, 145, "papier humide ?", 11, ORA, it=True); ln([(330, 150), (245, 165)], O
 t(380, 160, "→ mesuré par le SHT31 (V2)", 10.5, ORA, it=True)
 
 # PC secrétaire
-box(40, 690, 430, 70, "PC de la secrétaire (VM Windows 11, domaine)", ["imprime via CUPS · point d’accès JEA (file d’impression)"])
+box(40, 690, 430, 70, "PC de la secrétaire (VM Windows 11)", ["imprime via CUPS · point d’accès JEA (file d’impression)"])
 
 # ---------------- réseau
 r(540, 75, 230, 700, "#f8fafc", "#d1d5db", 1, rx=12); t(655, 97, "RÉSEAU DE LA MAQUETTE", 12, "bold", GREY)
@@ -71,7 +71,7 @@ box(560, 135, 190, 70, "Point d’accès Wi-Fi", ["boîtiers ESP32"])
 box(560, 330, 190, 70, "Switch HP ProCurve", ["Ethernet du lycée"])
 r(560, 470, 190, 120, "#fff", "#9ca3af", 1, True); t(655, 494, "Services réseau", 13, "bold")
 t(655, 514, "DHCP · DNS · NTP", 12, c="#374151"); t(655, 532, "fournis par le serveur", 11.5, c="#374151")
-t(655, 548, "Ubuntu (DNS : Samba AD)", 11.5, c="#374151"); t(655, 570, "pas de routeur : un seul réseau", 11, GREY, it=True)
+t(655, 548, "Ubuntu", 11.5, c="#374151"); t(655, 570, "pas de routeur : un seul réseau", 11, GREY, it=True)
 ln([(655, 207), (655, 328)], GREY, 1.4, False, False)
 
 # ---------------- serveurs
@@ -83,12 +83,8 @@ for i, (n, l) in enumerate(mods):
     y = 148 + i*56
     r(860, y, 360, 46, "#fff", BLUE, 1.2); t(870, y + 19, n, 13, "bold", a="start"); t(870, y + 36, l, 11.5, "#374151", a="start")
 box(1270, 112, 190, 90, "GLPI (Docker)", ["tickets à paliers", "données fictives"], BBG, BLUE)
-box(1270, 230, 190, 90, "Annuaire AD", ["Samba sur Ubuntu", "service de chaque PC"])
-box(1270, 345, 190, 70, "Partage réseau", ["applications par profil"], OBG, ORA)
-box(840, 470, 300, 80, "Station des PC neufs (V2)", ["ESP32, lecteur RFID, écran, LED", "3 cartes : technicien, profil, PC"], OBG, ORA)
-box(1170, 470, 290, 80, "PC neuf (VM Windows, V2)", ["script PowerShell : domaine,", "service AD, applications"], OBG, ORA)
-box(840, 600, 300, 70, "PC du technicien", ["navigateur : GLPI, Grafana"])
-box(1170, 600, 290, 70, "Fausse imprimante (extension)", ["ESP32 piège : alerte si scannée"], "#fff", "#9ca3af", True)
+box(840, 480, 300, 70, "PC du technicien", ["navigateur : GLPI, Grafana"])
+box(1170, 480, 290, 70, "Fausse imprimante (extension)", ["ESP32 piège : alerte si scannée"], "#fff", "#9ca3af", True)
 
 # ---------------- liaisons (protocoles)
 ln([(472, 455), (520, 455), (520, 170), (558, 170)], BLUE, 2)
@@ -98,12 +94,7 @@ ln([(858, 290), (790, 290), (790, 250), (242, 250), (242, 200)], GRN, 1.8); lab(
 ln([(472, 725), (800, 725), (800, 260), (858, 260)], PUR, 1.8, start=True)
 lab(640, 719, "WinRM HTTPS 5986 (JEA) · IPP 631 vers CUPS", PUR)
 ln([(1222, 171), (1268, 157)], BLUE, 1.6); lab(1245, 186, "API REST HTTPS", BLUE, sz=10.5)
-ln([(1222, 230), (1268, 275)], GRN, 1.6); lab(1252, 222, "LDAP", GRN, sz=10.5)
-ln([(1200, 468), (1200, 444)], ORA, 1.4); lab(1206, 460, "HTTPS (commande)", ORA, "start", 10.5)
-ln([(990, 468), (990, 444)], ORA, 1.4); lab(1020, 460, "MQTT", ORA, "start", 10.5)
-ln([(1365, 468), (1365, 417)], ORA, 1.4); lab(1372, 448, "SMB", ORA, "start", 10.5)
-ln([(1440, 468), (1440, 440), (1470, 440), (1470, 300), (1462, 300)], ORA, 1.4); lab(1466, 337, "Kerberos, LDAP", ORA, "end", 10.5)
-ln([(838, 635), (810, 635), (810, 82), (1365, 82), (1365, 110)], INK, 1.3, dash=True); lab(1100, 86, "HTTPS (GLPI, Grafana)", INK, sz=10.5)
+ln([(838, 515), (810, 515), (810, 82), (1365, 82), (1365, 110)], INK, 1.3, dash=True); lab(1100, 86, "HTTPS (GLPI, Grafana)", INK, sz=10.5)
 
 # ---------------- légende étapes
 r(20, 795, 1460, 150, "#fff", "#d1d5db", 1, rx=10)
@@ -111,7 +102,7 @@ t(36, 820, "Ce qui se passe quand une impression rate", 14, "bold", a="start")
 steps = ["1. La secrétaire imprime : CUPS sur le serveur sait combien de pages sont demandées.",
          "2. Le boîtier envoie en MQTT ce qu’il sent : vibration (MPU6050), feuilles comptées (infrarouge), humidité (SHT31, V2).",
          "3. Le serveur interroge l’imprimante en SNMP (« prête », « plus de papier », encre) et le PC par JEA (documents bloqués ?).",
-         "4. Il lit l’AD (LDAP) pour connaître le réseau attendu du service, compare les 4 témoins et trouve la cause.",
+         "4. Il compare les 4 témoins et trouve la cause (imprimante figée, papier, bourrage, PC, réseau).",
          "5. Il ouvre le ticket GLPI (API REST), met à jour Grafana et renvoie un message à l’écran du boîtier (« BLOQUÉE », « RÉPARÉ »)."]
 for i, s in enumerate(steps):
     t(36, 845 + i*19, s, 12.5, c="#374151", a="start")
