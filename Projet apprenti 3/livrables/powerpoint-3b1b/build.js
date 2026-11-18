@@ -220,7 +220,7 @@ s.addNotes("Troisième partie : la solution, construite à partir de la cause.")
 s = content("Une information, deux décisions", "3 · Solution");
 R(s, 0.5, 1.9, 2.6, 1.4, { fill: PANEL2, line: BLUE, lw: 2 });
 T(s, "Boîtier radar", { x: 0.5, y: 2.05, w: 2.6, h: 0.4, fontSize: 18, bold: true, align: "center" });
-T(s, "sous le bureau", { x: 0.5, y: 2.5, w: 2.6, h: 0.3, fontSize: 13, color: GREY, align: "center" });
+T(s, "sur le bureau", { x: 0.5, y: 2.5, w: 2.6, h: 0.3, fontSize: 13, color: GREY, align: "center" });
 chip(s, 3.45, 2.42, "présent ?", YEL, "anim_1_f_ch", 1.3);
 L(s, 3.1, 2.6, 3.45, 2.6, { c: YEL, n: "anim_1_f_a0" });
 L(s, 4.75, 2.6, 5.4, 1.75, { c: GRN, n: "anim_2_f_a1" });
@@ -229,10 +229,10 @@ T(s, "V1 · Bloquer l'écran", { x: 5.6, y: 1.3, w: 3.8, h: 0.4, fontSize: 18, b
 T(s, "l'agent part : orange 3 s, puis verrouillage", { x: 5.6, y: 1.75, w: 3.8, h: 0.4, fontSize: 13, color: GREY, objectName: "anim_2_f_d1s" });
 L(s, 4.75, 2.6, 5.4, 3.45, { c: BLUE, n: "anim_3_f_a2" });
 R(s, 5.4, 2.9, 4.1, 1.15, { fill: PANEL, line: BLUE, lw: 2, n: "anim_3_f_d2" });
-T(s, "V2 · Installer au bon moment", { x: 5.6, y: 3.0, w: 3.8, h: 0.4, fontSize: 18, bold: true, color: BLUE, objectName: "anim_3_f_d2t" });
-T(s, "absent depuis 20 min : les paquets prévus s'installent", { x: 5.6, y: 3.45, w: 3.8, h: 0.4, fontSize: 13, color: GREY, objectName: "anim_3_f_d2s" });
+T(s, "V2 · Maintenir au bon moment", { x: 5.6, y: 3.0, w: 3.8, h: 0.4, fontSize: 18, bold: true, color: BLUE, objectName: "anim_3_f_d2t" });
+T(s, "après 2 reports : maintenance à la prochaine absence", { x: 5.6, y: 3.45, w: 3.8, h: 0.4, fontSize: 13, color: GREY, objectName: "anim_3_f_d2s" });
 T(s, "Règle d'or : boîtier en panne → le blocage après 10 min protège encore. Rien ne ferme le travail de l'agent.", { x: 0.5, y: 4.4, w: 9, h: 0.6, fontSize: 15, color: YEL, objectName: "anim_4_f_r" });
-s.addNotes("Le boîtier ne fait qu'une chose : dire chaque seconde si quelqu'un est assis. Le PC en tire deux décisions. Version 1, obligatoire : bloquer l'écran. Version 2, visée : installer pendant les absences. Et une règle d'or : la sécurité ne dépend jamais du boîtier seul.");
+s.addNotes("Le boîtier ne fait qu'une chose : dire chaque seconde si quelqu'un est assis. Le PC en tire deux décisions. Version 1, obligatoire : bloquer l'écran. Le verrouillage se fait sur le poste : il marche même si le serveur ou le réseau tombe. Version 2, visée : après 2 reports, la maintenance imposée se fait à la prochaine absence, jamais devant l'agent. Et une règle d'or : la sécurité ne dépend jamais du boîtier seul.");
 
 s = content("Comment un radar voit quelqu'un d'immobile", "3 · Solution");
 box(s, 0.6, 2.6, GRN);
@@ -314,8 +314,8 @@ const node = (x, y, w, h, t, sub, col, n, dash) => {
   T(s, sub, { x: x + 0.05, y: y + 0.45, w: w - 0.1, h: h - 0.5, fontSize: 11, color: GREY, align: "center", objectName: nm(n, "s") });
 };
 node(0.4, 1.9, 2.0, 1.1, "Boîtier", "radar + ESP32 + lumière", BLUE);
-node(3.2, 1.75, 2.4, 1.4, "Poste Windows 11", "service de présence\njournal + tâches", BLUE);
-node(6.6, 1.0, 2.9, 1.1, "Serveur Ubuntu", "API, base, tableau de bord", BLUE, "anim_3_f_sv");
+node(3.2, 1.75, 2.4, 1.4, "Poste Windows 11", "service de présence\nverrou local · agent d'état", BLUE);
+node(6.6, 1.0, 2.9, 1.1, "Serveur Ubuntu", "API Python : états, événements\ntableau de bord", BLUE, "anim_3_f_sv");
 node(3.3, 3.75, 2.2, 1.0, "Domaine AD (extension)", "si le temps le permet : GPO, LAPS", GREY, "anim_2_f_dc", true);
 node(6.8, 3.75, 2.6, 1.0, "Routeur ISR 4331", "DHCP, DNS, NTP", GREY, "anim_2_f~d300_rt", true);
 L(s, 2.4, 2.45, 3.2, 2.45, { c: BLUE, arrow: false, n: "anim_1_f_l1" });
@@ -326,7 +326,7 @@ T(s, "Kerberos, LDAP (ext.)", { x: 4.5, y: 3.3, w: 1.8, h: 0.3, fontSize: 10, co
 L(s, 5.5, 4.25, 6.8, 4.25, { c: GREY, arrow: false, n: "anim_2_f_l3" });
 T(s, "NTP", { x: 5.9, y: 3.95, w: 0.6, h: 0.3, fontSize: 10, color: GREY, objectName: "anim_2_f_l3t" });
 L(s, 5.6, 2.1, 6.6, 1.6, { c: BLUE, arrow: false, n: "anim_3_f_l4" });
-T(s, "HTTPS · jour, sans heure", { x: 5.0, y: 1.25, w: 1.6, h: 0.5, fontSize: 10, color: BLUE, objectName: "anim_3_f_l4t" });
+T(s, "HTTPS · événements, états", { x: 5.0, y: 1.25, w: 1.6, h: 0.5, fontSize: 10, color: BLUE, objectName: "anim_3_f_l4t" });
 O(s, 5.55, 2.03, 0.14, YEL, "anim_3_f~t200+m~1.0:-0.5~t900~d300_pk2");
 R(s, 0.4, 3.75, 2.6, 1.0, { fill: BG, line: BLUE, lw: 2, n: "anim_4_f_lg1" });
 T(s, "cadre plein : réalisé par Lorenzo\npointillés : fourni par le lycée", { x: 0.5, y: 3.85, w: 2.4, h: 0.8, fontSize: 11, color: GREY, objectName: "anim_4_f_lg2" });
@@ -413,7 +413,7 @@ s = section(9, "Le parcours", "Environ 150 heures, de janvier à mai.", "9 · Pa
 s.addNotes("Neuvième partie : l'organisation du projet.");
 
 s = content("V1 obligatoire, V2 visée, puis les extensions", "9 · Parcours");
-const cols = [["V1 · ≈ 108 h", GRN, "boîtier et lumière\nblocage avec avertissement\nmessages signés\nfilet de sécurité\nessais R1 à R5\nréseau capturé"], ["V2 · ≈ 40 h", BLUE, "installation pendant les absences\nserveur\ntableau de bord du parc\nessai R6\nposte neuf à paliers"], ["Extensions", GREY, "assistant de réglage\nradar masqué détecté\nveille du soir\nlien avec l'outil réel"]];
+const cols = [["V1 · ≈ 108 h", GRN, "boîtier et lumière\nmessages signés\nverrou local + avertissement\nfilet de sécurité\névénements vers l'API\nessais R1 à R5, réseau capturé"], ["V2 · ≈ 40 h", BLUE, "maintenance à la prochaine\nabsence (2 reports)\nagent d'état PowerShell\ntableau de bord du parc\nessai R6"], ["Extensions", GREY, "assistant de réglage\nradar masqué détecté\nmode hors bureau\nréveil du week-end"]];
 cols.forEach(([t, c, d], i) => { R(s, 0.5 + i * 3.05, 1.1, 2.85, 2.6, { fill: PANEL, line: c, lw: 2, dash: i === 2, n: `anim_${i + 1}_f_c${i}` }); T(s, t, { x: 0.7 + i * 3.05, y: 1.2, w: 2.5, h: 0.4, fontSize: 17, bold: true, color: c, objectName: `anim_${i + 1}_f_ct${i}` }); T(s, d, { x: 0.7 + i * 3.05, y: 1.7, w: 2.5, h: 1.9, fontSize: 13, color: GREY, objectName: `anim_${i + 1}_f_cd${i}` }); });
 const rv = [["R1 · 29/01", "besoin chiffré, maquette, le radar détecte"], ["R2 · 19/03", "V1 complète"], ["R3 · 14/05", "V2, démonstration complète"]];
 rv.forEach(([t, d], i) => { chip(s, 0.5 + i * 3.05, 3.95, t, YEL, `anim_4_f~d${i * 200}_r${i}`, 1.4); T(s, d, { x: 0.5 + i * 3.05, y: 4.38, w: 2.85, h: 0.5, fontSize: 12, color: GREY, objectName: `anim_4_f~d${i * 200}_rt${i}` }); });

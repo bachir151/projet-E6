@@ -300,10 +300,10 @@ footer{padding-block:40px 60px;color:var(--muted);font-size:.85rem}
     <p class="kicker">BTS CIEL IR · Épreuve E6 · Apprenti 3 (Lorenzo)</p>
     <h1>Poste <span>attentif</span></h1>
     <p class="thesis">L'ordinateur sait enfin si quelqu'un est devant lui.</p>
-    <p class="sub">Un petit radar sous le bureau sent si l'agent est assis, même immobile. Quand il part, l'écran se bloque. Quand il n'est pas là, les installations se font sans le déranger.</p>
+    <p class="sub">Un petit radar posé sur le bureau sent si l'agent est assis, même immobile. Quand il part, l'écran se bloque. Quand il n'est pas là, les installations se font sans le déranger.</p>
     <div class="chips"><span class="chip">Radar 24 GHz</span><span class="chip">ESP32 + lumière</span><span class="chip">PowerShell</span><span class="chip">Serveur Python</span><span class="chip">Aucune caméra</span></div>
   </div>
-  <div class="hero-art" id="heroScene" aria-label="Dessin : un agent assis, le radar sous le bureau envoie des ondes vers lui"></div>
+  <div class="hero-art" id="heroScene" aria-label="Dessin : un agent assis, le radar sur le bureau envoie des ondes vers lui"></div>
 </header>
 
 <!-- 1 -->
@@ -369,7 +369,7 @@ footer{padding-block:40px 60px;color:var(--muted);font-size:.85rem}
 <!-- 3 -->
 <section class="s" id="solution">
   <div class="s-head"><span class="num">3</span><h2>La solution de Lorenzo</h2>
-    <p class="lead">Un boîtier sous le bureau, branché au PC par un câble USB. Il dit une seule chose, chaque seconde : « quelqu'un est là » ou « personne ». Le PC décide quoi faire.</p></div>
+    <p class="lead">Un boîtier posé sur le bureau, branché au portable par un câble USB. Il dit une seule chose, chaque seconde : « quelqu'un est là » ou « personne ». Le PC décide quoi faire.</p></div>
   <div class="grid2">
     <div class="panel box-art">
       <h3>Le boîtier, pièce par pièce</h3>
@@ -385,7 +385,7 @@ footer{padding-block:40px 60px;color:var(--muted);font-size:.85rem}
   </div>
   <div class="actions">
     <div class="act"><span class="lvl">Version 1 · obligatoire</span><h3>Bloquer l'écran</h3><p>L'agent part : lumière orange 3 secondes, puis l'écran se bloque.</p></div>
-    <div class="act"><span class="lvl">Version 2 · visée</span><h3>Installer au bon moment</h3><p>L'agent est absent depuis 20 minutes : les logiciels prévus s'installent sans le déranger.</p></div>
+    <div class="act"><span class="lvl">Version 2 · visée</span><h3>Maintenir au bon moment</h3><p>L'agent a déjà reporté 2 fois : la mise à jour imposée se fait à sa prochaine absence, pas devant lui.</p></div>
     <div class="act opt"><span class="lvl">En option</span><h3>Économiser l'énergie</h3><p>Le soir, un poste oublié allumé passe en veille, sans perdre le travail.</p></div>
   </div>
   <p class="rule">Règle d'or : si le boîtier tombe en panne ou est débranché, le blocage habituel de Windows après 10 minutes continue de protéger. Et rien ne ferme jamais le travail de l'agent.</p>
@@ -505,9 +505,9 @@ footer{padding-block:40px 60px;color:var(--muted);font-size:.85rem}
   <div class="s-head"><span class="num">9</span><h2>Le parcours de Lorenzo</h2>
     <p class="lead">Environ 150 heures, de janvier à mai. D'abord ce qui est obligatoire, ensuite ce qui est visé, le reste seulement s'il reste du temps.</p></div>
   <div class="road">
-    <div class="stage v1"><p class="h">≈ 108 h</p><h3>Version 1 · obligatoire</h3><ul><li>Le boîtier : radar, lumière, ESP32</li><li>Le blocage de l'écran avec avertissement</li><li>Le code secret sur chaque message</li><li>Le filet de sécurité de Windows</li><li>Les mesures R1 à R4</li><li>Les échanges réseau vérifiés et capturés</li></ul></div>
-    <div class="stage v2"><p class="h">≈ 40 h</p><h3>Version 2 · visée</h3><ul><li>Les installations pendant les absences</li><li>Le retour de l'agent au milieu : rien n'est touché</li><li>Un petit serveur : liste des installations, résultats</li><li><strong>Tableau de bord du parc</strong> : réussites du premier coup, reports et leurs raisons, postes en retard, sans aucune donnée sur les agents</li><li><strong>Mesure de l'apport</strong> : sur une journée jouée, combien d'installations seraient tombées devant l'agent, avec et sans le boîtier (essai R6)</li><li>L'installation d'un poste neuf, d'abord en simulation</li></ul></div>
-    <div class="stage ext"><p class="h">s'il reste du temps</p><h3>Extensions</h3><ul><li>Un assistant de réglage : l'agent s'assoit, se lève, le poste propose les seuils</li><li>Détecter un radar masqué</li><li>La veille du soir et le bilan d'énergie</li><li>La fiche de contrôle d'un poste neuf</li><li>Un radar qui sépare l'agent et l'usager</li></ul></div>
+    <div class="stage v1"><p class="h">≈ 108 h</p><h3>Version 1 · obligatoire</h3><ul><li>Le boîtier : radar, lumière, ESP32</li><li>Le code secret sur chaque message</li><li>Le verrouillage avec avertissement, <strong>fait sur le poste</strong> : il marche même si le serveur ou le réseau tombe</li><li>Le filet de sécurité de Windows</li><li>Les événements envoyés au serveur Ubuntu (API Python)</li><li>Les mesures R1 à R4</li><li>Les échanges réseau vérifiés et capturés</li></ul></div>
+    <div class="stage v2"><p class="h">≈ 40 h</p><h3>Version 2 · visée</h3><ul><li>Après 2 reports, la maintenance imposée se fait <strong>à la prochaine absence</strong>, jamais devant l'agent</li><li>Le retour de l'agent au milieu : rien n'est touché</li><li>Un agent PowerShell : redémarrage en attente, version de Windows</li><li><strong>Tableau de bord du parc</strong> : verrouillages et reports par poste, redémarrages en attente, sans aucune donnée sur les agents</li><li><strong>Mesure de l'apport</strong> : sur une journée jouée, combien d'installations seraient tombées devant l'agent, avec et sans le boîtier (essai R6)</li></ul></div>
+    <div class="stage ext"><p class="h">s'il reste du temps</p><h3>Extensions</h3><ul><li>Un assistant de réglage : l'agent s'assoit, se lève, le poste propose les seuils</li><li>Détecter un radar masqué</li><li>Le mode « hors bureau » (portable à domicile)</li><li>Le réveil du week-end</li><li>Un radar qui sépare l'agent et l'usager</li></ul></div>
   </div>
   <div class="hours" aria-label="Répartition des heures">
     <span style="width:72%;background:var(--radar)">V1 · 108 h</span>
@@ -719,13 +719,13 @@ $('#bridgeArt').innerHTML = `<svg viewBox="0 0 900 230" role="img" aria-label="L
   <text x="170" y="94" text-anchor="middle" font-size="13" fill="var(--radar-ink)" font-family="var(--f-body)" font-weight="700">QUOI installer, sur QUELS postes</text>
   <rect x="20" y="124" width="300" height="86" rx="12" fill="var(--surface)" stroke="var(--radar)" stroke-width="2.2"/>
   <text x="170" y="156" text-anchor="middle" font-family="var(--f-display)" font-weight="700" font-size="16" fill="var(--ink)">Boîtier de Lorenzo</text>
-  <text x="170" y="180" text-anchor="middle" font-size="13" fill="var(--muted)" font-family="var(--f-body)">radar sous le bureau</text>
+  <text x="170" y="180" text-anchor="middle" font-size="13" fill="var(--muted)" font-family="var(--f-body)">radar sur le bureau</text>
   <text x="170" y="198" text-anchor="middle" font-size="13" fill="var(--radar-ink)" font-family="var(--f-body)" font-weight="700">QUAND : l'agent est-il là ?</text>
   <path id="br1" d="M320 63 C420 63 440 115 560 115" fill="none" stroke="var(--muted)" stroke-width="1.6"/>
   <path id="br2" d="M320 167 C420 167 440 115 560 115" fill="none" stroke="var(--muted)" stroke-width="1.6"/>
   <rect x="560" y="70" width="320" height="90" rx="14" fill="var(--radar-soft)" stroke="var(--radar)" stroke-width="2"/>
   <text x="720" y="106" text-anchor="middle" font-family="var(--f-display)" font-weight="800" font-size="18" fill="var(--ink)">Installation au bon moment</text>
-  <text x="720" y="132" text-anchor="middle" font-size="13" fill="var(--muted)" font-family="var(--f-body)">pendant les absences, jamais devant l'agent</text>
+  <text x="720" y="132" text-anchor="middle" font-size="13" fill="var(--muted)" font-family="var(--f-body)">à la prochaine absence, jamais devant l'agent</text>
   ${reduce ? '' : `<circle r="5" class="pkb" fill="var(--muted)"><animateMotion dur="2.4s" repeatCount="indefinite"><mpath href="#br1"/></animateMotion></circle>
   <circle r="5" fill="var(--radar)"><animateMotion dur="2.4s" begin="1.2s" repeatCount="indefinite"><mpath href="#br2"/></animateMotion></circle>`}
 </svg>`;
@@ -774,7 +774,7 @@ const S = {
     ['10 h 00', 'Elle part en réunion', 'Le radar ne la voit plus. La lumière passe à l\'orange pendant 3 secondes : si elle était juste penchée, tout s\'annule.', ['good','Avertissement'], {agent:'absent', screen:'open', led:'orange', usager:'present', fake:'off'}],
     ['10 h 00 + 8 s', 'L\'écran se bloque', 'Elle n\'est pas revenue : l\'écran se bloque tout seul. Le collègue qui passe ne peut rien lire, ni rien faire en son nom.', ['good','Dossier protégé en quelques secondes'], {agent:'absent', screen:'locked', led:'red', usager:'lean', fake:'off'}],
     ['10 h 05', 'Martine revient', 'Elle tape son mot de passe, comme d\'habitude. La lumière redevient verte.', ['good','Rien de changé pour elle'], {agent:'present', screen:'open', led:'green', usager:'none', fake:'off'}],
-    ['12 h 20', 'La pause déjeuner', 'Absente depuis 20 minutes : le logiciel prévu par le technicien s\'installe. Si elle revient au milieu, son travail n\'est pas touché.', ['good','Installation sans déranger'], {agent:'absent', screen:'install', led:'red', usager:'none', fake:'off'}],
+    ['12 h 20', 'La pause déjeuner', 'Elle a déjà reporté 2 fois la mise à jour : elle se fait maintenant, pendant son absence. Si elle revient au milieu, son travail n\'est pas touché.', ['good','Installation sans déranger'], {agent:'absent', screen:'install', led:'red', usager:'none', fake:'off'}],
     ['15 h 00', 'Tentative de triche', 'Quelqu\'un branche un faux boîtier qui dit toujours « Martine est là ». Il ne connaît pas le code secret : l\'ordinateur bloque quand même et donne l\'alerte.', ['good','Faux boîtier démasqué'], {agent:'absent', screen:'locked', led:'red', usager:'none', fake:'on'}],
   ],
   sans: [
