@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Maquette 3D du kit</title>
+<link rel="icon" href="data:,">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Atkinson+Hyperlegible:wght@400;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
@@ -39,8 +40,9 @@ button{font:inherit;cursor:pointer}
 
 /* étiquettes 3D */
 .lab{font-family:var(--f-body);font-size:12px;line-height:1.25;color:#e9f1f5;background:rgba(10,16,22,.78);
-  border:1px solid rgba(255,255,255,.18);border-radius:7px;padding:4px 8px;white-space:nowrap;transform:translateY(-14px);
-  box-shadow:0 2px 10px rgba(0,0,0,.35)}
+  border:1px solid rgba(255,255,255,.18);border-radius:7px;padding:4px 8px;white-space:nowrap;transform:translateY(-14px)}
+/* les étiquettes bougent à chaque image : une couche GPU chacune, sans ombre portée (moins de travail pour le navigateur) */
+#labels>div{will-change:transform}
 .lab b{font-family:var(--f-display);font-weight:600;font-size:15px;letter-spacing:.01em;display:block}
 .lab span{color:#a9bac4}
 .lab.small{font-size:11px;padding:2px 6px}
@@ -174,6 +176,9 @@ renderer.setPixelRatio(PR);
 renderer.setSize(innerWidth, innerHeight);
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+/* ombres recalculées seulement quand quelque chose bouge (voir tick) : la caméra qui tourne ne les change pas */
+renderer.shadowMap.autoUpdate = false; renderer.shadowMap.needsUpdate = true;
+let shadowFrames = 3;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 1.0;
 
@@ -959,15 +964,15 @@ label('overview', V(-92, 50, -40), 'Serveur', 'Ubuntu · nginx HTTPS · Flask ·
 label('overview', V(-40, 6, -60), 'Switch du lycée', 'réseau en place (C10)');
 label('overview', V(10, 20, -56), 'Borne Wi-Fi du bureau', '');
 label('overview', V(-82, 26, 4), 'Poste du référent', 'Windows 11 · signe le kit');
-label('overview', V(-26, 24, 12), 'PC de maintenance', 'agent PowerShell · BITS');
+label('overview', V(-42, 16, 8), 'PC de maintenance', 'agent PowerShell · BITS');
 label('overview', V(2, 3, 34), 'Téléphone', 'partage de connexion 4G');
 label('overview', V(40, 5, 24), 'Borne de sortie', 'ESP32 + lecteur RFID');
 label('overview', V(84, 7, 16), 'Banc de physique', 'ESP32 + 2 capteurs');
 label('overview', V(62, 48, -46), 'PC du lycée', 'tableau de bord');
 label('borne', W(esp1, V(0.9, 0.6, 0)), 'ESP32-WROOM-32', 'Wi-Fi, HTTPS', 'small');
 label('borne', W(rc, V(0, 0.4, 1.4)), 'Lecteur RC522', 'bus SPI · 13,56 MHz', 'small');
-label('borne', W(ledG, V(0, 1.4, 0)), 'LED verte', 'GPIO 25', 'small');
-label('borne', W(ledR, V(0, 1.4, 0)), 'LED rouge', 'GPIO 26', 'small');
+label('borne', W(ledG, V(-0.8, 1.4, 0.5)), 'LED verte', 'GPIO 25', 'small');
+label('borne', W(ledR, V(0.4, 2.6, -0.3)), 'LED rouge', 'GPIO 26', 'small');
 label('borne', W(buzzer, V(0, 1.2, 0)), 'Buzzer', 'GPIO 27', 'small');
 label('borne', badge.position.clone().add(V(0, 0.6, 0)), 'Badge de l\'agent', '« qui part »', 'small');
 label('borne', tag7.position.clone().add(V(0, 0.6, 0)), 'Étiquette d\'un autre PC', '« quel PC part »', 'small');
@@ -1458,7 +1463,7 @@ function clearAnims() {
 }
 async function goStep(i) {
   i = Math.max(0, Math.min(steps.length - 1, i));
-  runId++; const id = runId; clearAnims(); cur = i;
+  runId++; const id = runId; clearAnims(); cur = i; shadowFrames = 3;
   const s = steps[i];
   baseline(i);
   labelMode = s.labels; refreshLabels();
@@ -1486,7 +1491,7 @@ $('#bNext').onclick = () => goStep(cur + 1);
 $('#bReplay').onclick = () => goStep(cur);
 $('#bAuto').onclick = e => { auto = !auto; e.currentTarget.setAttribute('aria-pressed', auto); e.currentTarget.classList.toggle('main', auto); if (auto) goStep(cur + 1 < steps.length ? cur : 0); };
 function setTerrain(t) {
-  world.terrain = t; $('#mMaq').setAttribute('aria-pressed', !t); $('#mTer').setAttribute('aria-pressed', t);
+  shadowFrames = 3; world.terrain = t; $('#mMaq').setAttribute('aria-pressed', !t); $('#mTer').setAttribute('aria-pressed', t);
   mast.visible = t; goStep(cur);
 }
 $('#mMaq').onclick = () => setTerrain(false);
@@ -1496,7 +1501,7 @@ $('#bSnd').onclick = e => { soundOn = !soundOn; e.currentTarget.setAttribute('ar
 /* ambiance nuit / jour (mémorisée dans le navigateur si possible) */
 let amb = 'nuit';
 function setAmbiance(name) {
-  amb = PAL[name] ? name : 'nuit'; const p = PAL[amb];
+  shadowFrames = 3; amb = PAL[name] ? name : 'nuit'; const p = PAL[amb];
   scene.background.set(p.bg); scene.fog.color.set(p.bg); scene.fog.near = p.fog[0]; scene.fog.far = p.fog[1];
   wallMat.color.set(p.wall); floorMat.color.set(p.floor);
   key.color.set(p.key); key.intensity = p.keyI; rim.color.set(p.win); rim.intensity = p.winI;
@@ -1592,6 +1597,8 @@ function tick() {
   netemMat.opacity = world.netemShow && !world.terrain ? 0.32 + 0.1 * Math.sin(now * 5) : 0;
   if (seal.scale.x > 0.1) seal.material.rotation = Math.sin(now * 2) * 0.08;
 
+  if (tweens.length || packets.length) shadowFrames = 2;
+  if (shadowFrames > 0) { renderer.shadowMap.needsUpdate = true; shadowFrames--; }
   composer.render();
   labelRenderer.render(scene, camera);
   requestAnimationFrame(tick);
