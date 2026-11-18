@@ -291,7 +291,8 @@ R.titre("Progression du projet")
 R.puce(("V1 (obligatoire) : ", "g"), "boîtier (vibration, feuilles, bouton, écran), serveur, comparaison des "
        "quatre témoins, vérifications réseau, ticket GLPI aux paliers 1 et 2, retour sur l’écran, tableau de bord.")
 R.puce(("V2 (visée) : ", "g"), "carte RFID du technicien (arrivée, départ, durée) et preuve de réparation par page "
-       "de test ; encre surveillée avant la panne ; station des PC neufs ; palier 3.")
+       "de test ; encre surveillée avant la panne ; humidité du local croisée avec les bourrages ; station des PC "
+       "neufs ; palier 3.")
 R.puce(("Extensions : ", "g"), "redémarrage de l’imprimante figée à distance ; fausse imprimante servant de piège ; "
        "cartes RFID sécurisées ; SNMP version 3 ; étagère des cartouches.")
 R.titre("Limites de l’étude")
@@ -398,8 +399,8 @@ R.image(IMG("4_sequence"), 17.6, "Figure 4 – Diagramme de séquence : l’impr
 
 # ================================================================== 2.2 CONTRAINTES
 R = Redac(P[55])
-R.puce("Matériel à acheter : ", ("70 à 120 € environ", "g"), " (à confirmer sur devis) : 2 ESP32, accéléromètre, "
-       "capteur infrarouge, 2 écrans à encre électronique, bouton, LED, 2 lecteurs RFID, cartes RFID, boîtiers.")
+R.puce("Matériel à acheter : ", ("75 à 125 € environ", "g"), " (à confirmer sur devis) : 2 ESP32, accéléromètre, "
+       "capteur infrarouge, capteur de température et d’humidité SHT31 (V2), 2 écrans à encre électronique, bouton, LED, 2 lecteurs RFID, cartes RFID, boîtiers.")
 R.puce("PC Ubuntu, réseau, imprimante réseau (du lycée ou de récupération) : fournis par le lycée. Les PC Windows sont "
        "des machines virtuelles Windows 11 Entreprise (évaluation gratuite de 90 jours) ou des PC sous Windows 11 Pro.")
 R.puce("Tous les logiciels sont libres ou gratuits (Samba, GLPI, CUPS, Mosquitto, PostgreSQL, Grafana).")
@@ -407,7 +408,7 @@ R.puce("Tous les logiciels sont libres ou gratuits (Samba, GLPI, CUPS, Mosquitto
 R = Redac(P[60])
 R.puce(("Boîtier : ", "g"), "ESP32 programmé en C++ ; accéléromètre lu en continu, énergie de vibration calculée "
        "chaque seconde ; capteur infrarouge sur interruption (comptage des feuilles) ; bouton ; écran à encre ; "
-       "alimentation par bloc USB 5 V ; MQTT sur TLS ; lecteur RFID en V2.")
+       "alimentation par bloc USB 5 V ; MQTT sur TLS ; capteur SHT31 (température, humidité, I²C) et lecteur RFID en V2.")
 R.puce(("Serveur : ", "g"), "PC Ubuntu ; CUPS (serveur d’impression : il connaît les travaux envoyés) ; Mosquitto ; "
        "service Python (règles, SNMP avec pysnmp, pilotage du PC avec pywinrm, LDAP avec ldap3, API REST de GLPI) ; "
        "PostgreSQL ; tableau de bord Grafana.")
@@ -449,6 +450,7 @@ R.tableau(
         ["Windows 11 Famille ne rejoint pas un domaine", "Machines virtuelles Windows 11 Entreprise (évaluation) ou Windows 11 Pro"],
         ["WinRM avec JEA difficile à piloter depuis Linux", "Test dès les premières semaines ; repli : script local planifié qui envoie en HTTPS"],
         ["Nombre de pages d’un travail mal connu de CUPS", "Compteur de pages de l’imprimante lu en SNMP"],
+        ["Pas de bourrage observé avec le papier humide", "Le volet physique repose d’abord sur la prise d’eau du papier, mesurable à coup sûr ; le lien avec les bourrages est un résultat, pas une condition"],
         ["Retard sur la V2", "La V1 forme un projet complet ; la station des PC neufs peut être réduite"],
     ],
     [7.6, 10.4])
@@ -457,9 +459,9 @@ R.tableau(
 R = Redac(P[73])
 R.puce(("Matériel du lycée : ", "g"), "ESP32, PC Ubuntu (serveur, Samba, GLPI dans Docker, machines virtuelles), "
        "imprimante réseau, réseau de la maquette (Wi-Fi, switchs HP ProCurve, routeur Cisco ISR 4331), multimètre ; "
-       "laboratoire de physique.")
-R.puce(("Matériel à commander (décembre 2026) : ", "g"), "accéléromètre, capteur infrarouge, écrans à encre, "
-       "bouton, LED, lecteurs et cartes RFID, boîtiers, connectique.")
+       "laboratoire de physique (hygromètre de référence, balance au centigramme).")
+R.puce(("Matériel à commander (décembre 2026) : ", "g"), "accéléromètre, capteur infrarouge, capteur SHT31, "
+       "écrans à encre, bouton, LED, lecteurs et cartes RFID, boîtiers, connectique.")
 R.puce(("Logiciels : ", "g"), "PlatformIO ou Arduino IDE, Samba, CUPS, Mosquitto, Python (paho-mqtt, pysnmp, pywinrm, "
        "ldap3), PostgreSQL, Docker, GLPI, Grafana, PowerShell, Wireshark, Git, Visual Studio Code.")
 R.puce(("Documents : ", "g"), "fiche de présentation validée par le tuteur, fiches techniques des capteurs, RFC 3805 "
@@ -536,6 +538,7 @@ R.tableau(
         ["Vibration", "Enregistrement à 1 kHz, imprimante en veille puis en impression, 20 essais", "Énergie de vibration et fréquences des moteurs (transformée de Fourier) ; seuil = moyenne en veille + k écarts-types ; taux de fausses détections mesuré"],
         ["Échantillonnage", "Même vibration vue à plusieurs fréquences d’échantillonnage", "Condition de Shannon : choix de la fréquence la plus basse qui garde l’information"],
         ["Vitesse des feuilles", "Durée de passage d’une feuille A4 devant le capteur, 30 feuilles", "v = L / Δt (L = 297 mm) ; moyenne, écart-type, incertitude s/√N ; cadence mesurée comparée à celle du fabricant ; délai d’alerte « aucune feuille » justifié"],
+        ["Humidité et papier (V2)", "SHT31 comparé à un hygromètre de référence ; feuilles pesées après 48 h en boîte fermée à humidité basse, puis au-dessus d’une solution saturée de sel (≈ 75 %), 10 feuilles par condition", "Prise d’eau du papier (variation de masse en %) en fonction de l’humidité, avec incertitudes ; impression des deux lots et bourrages comptés par le boîtier ; seuil d’alerte « local trop humide » justifié par la mesure"],
     ],
     [3.2, 6.6, 8.2])
 
@@ -562,12 +565,12 @@ R.tableau(
         ["1", "Analyse du besoin, cahier des charges, planification", "12", "C03, C01 · revue 1"],
         ["2", "Maquette : GLPI, CUPS, machines virtuelles Windows 11 dans le domaine Samba, imprimante", "12", "C10"],
         ["3", "Boîtier : vibration, capteur de feuilles, bouton, écran, MQTT", "27", "C08"],
-        ["4", "Physique : étalonnage, vibration, vitesse des feuilles, incertitudes", "10", "physique"],
+        ["4", "Physique : étalonnage, vibration, vitesse des feuilles, humidité (V2), incertitudes", "12", "physique"],
         ["5", "Serveur : règles de comparaison, SNMP, vérifications réseau", "22", "C08 · revue 2"],
         ["6", "PowerShell : file d’impression par JEA ; lecture de l’AD", "14", "C08, C10"],
         ["7", "Exploitation du réseau : DHCP, DNS, NTP, SNMP, captures", "8", "C10"],
         ["8", "GLPI : tickets à paliers, retour sur l’écran, tableau de bord", "16", "C08"],
-        ["9", "RFID : carte du technicien, preuve de réparation, station des PC neufs (V2)", "14", "C08"],
+        ["9", "RFID : carte du technicien, preuve de réparation, station des PC neufs (V2)", "12", "C08"],
         ["10", "Campagne d’essai, indicateurs, bilan « adopter ou non »", "7", "C03 · revue 3"],
         ["11", "Dossier technique et préparation de la soutenance", "8", "C01"],
         ["", "Total", "150", ""],
@@ -580,7 +583,7 @@ for i in range(102, 122):
 cocher(cases(P[125])[0])
 R2 = nouveau_par_apres(P[125], "No Spacing")
 rr = R2.add_run("Matériel du lycée (ESP32, PC Ubuntu, imprimante réseau) ; capteurs, écrans, lecteurs et cartes RFID "
-                "à commander en décembre 2026 (70 à 120 €, à confirmer sur devis).")
+                "à commander en décembre 2026 (75 à 125 €, à confirmer sur devis).")
 rr.italic = True
 rr.font.size = Pt(9.5)
 

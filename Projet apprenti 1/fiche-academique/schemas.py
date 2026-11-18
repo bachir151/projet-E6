@@ -156,7 +156,7 @@ def exigences():
         b.append(line([(x + W / 2, 180 if i < 4 else 370), (x + W / 2, y)]))
     b.append(line([(xs[0] + W / 2, 370), (xs[3] + W / 2, 370)]))
     b.append(line([(xs[3] + W / 2, 180), (xs[3] + W + 12, 180), (xs[3] + W + 12, 370), (xs[3] + W / 2, 370)]))
-    b.append(text(30, 562, "Le symbole ⊕ indique que E0 se décompose en E1 à E8. V1 : E1 à E7 (paliers 1 et 2). V2 : E8, carte de Wassim, preuve de réparation, encre, palier 3.", 12.5, fill=GREY, anchor="start"))
+    b.append(text(30, 562, "Le symbole ⊕ indique que E0 se décompose en E1 à E8. V1 : E1 à E7 (paliers 1 et 2). V2 : E8, carte de Wassim, preuve de réparation, encre, humidité, palier 3.", 12.5, fill=GREY, anchor="start"))
     save("1_exigences", svg(1125, 575, "".join(b)))
 
 
@@ -326,13 +326,13 @@ def gantt():
         ("V1 – voir la panne, trouver la cause, ouvrir le ticket", None),
         ("2. Maquette : GLPI, CUPS, VM Windows 11, imprimante (12 h)", (D(2027, 1, 11), D(2027, 1, 29)), "c10"),
         ("3. Boîtier : vibration, feuilles, bouton, écran (27 h)", (D(2027, 1, 18), D(2027, 3, 5)), "c8"),
-        ("4. Physique : vibration, vitesse des feuilles (10 h)", (D(2027, 2, 1), D(2027, 3, 12)), "phy"),
+        ("4. Physique : vibration, feuilles, humidité (12 h)", (D(2027, 2, 1), D(2027, 3, 12)), "phy"),
         ("5. Serveur : règles, SNMP, vérifications réseau (22 h)", (D(2027, 2, 8), D(2027, 3, 19)), "c8"),
         ("7. Réseau : DHCP, DNS, NTP, SNMP, captures (8 h)", (D(2027, 2, 8), D(2027, 4, 9)), "c10"),
         ("6. PowerShell : file d’impression (JEA), AD (14 h)", (D(2027, 2, 22), D(2027, 3, 26)), "c8"),
         ("8. GLPI : tickets à paliers, écran, tableau de bord (16 h)", (D(2027, 3, 15), D(2027, 4, 16)), "c8"),
         ("V2 – RFID et PC neufs", None),
-        ("9. RFID : carte, preuve, station des PC neufs (14 h)", (D(2027, 4, 6), D(2027, 4, 30)), "c8"),
+        ("9. RFID : carte, preuve, station des PC neufs (12 h)", (D(2027, 4, 6), D(2027, 4, 30)), "c8"),
         ("10. Campagne d’essai, indicateurs, bilan (7 h)", (D(2027, 4, 26), D(2027, 5, 7)), "c3"),
         ("11. Dossier et préparation de l’oral (8 h)", (D(2027, 5, 3), D(2027, 5, 14)), "c1"),
         ("Journal de bord, journal IA, réunions (tout le long)", (D(2027, 1, 4), D(2027, 5, 14)), "c3"),
