@@ -1,0 +1,40 @@
+<body>
+<canvas id="scene" aria-label="Maquette 3D animée : imprimante réseau avec son boîtier ESP32 et ses capteurs, point d'accès Wi-Fi, switch, serveur Ubuntu, PC de la secrétaire et poste du technicien"></canvas>
+<div id="labels"></div>
+
+<div id="top">
+  <div id="brand">
+    <div class="eye">Projet E6 · apprenti 1</div>
+    <h1>Le service informatique augmenté<br>maquette en 3D</h1>
+  </div>
+  <div id="tools">
+    <button class="tbtn" id="bLab" aria-pressed="true">Étiquettes</button>
+    <button class="tbtn" id="bSnd" aria-pressed="true">Son</button>
+  </div>
+</div>
+
+<div id="panel" role="region" aria-live="polite">
+  <div id="stepno"></div>
+  <div id="title"></div>
+  <div id="text"></div>
+  <div id="note"></div>
+  <div id="ctrl">
+    <button id="bPrev" aria-label="Étape précédente">◀</button>
+    <button id="bReplay" aria-label="Rejouer l'étape">↻ Rejouer</button>
+    <button id="bNext" class="main" aria-label="Étape suivante">Suivant ▶</button>
+    <button id="bAuto" aria-pressed="false" title="Enchaîner les étapes">Auto</button>
+    <div id="dots"></div>
+  </div>
+  <div id="legend">
+    <span style="--c:#c18cff">capteurs (I²C, GPIO, SPI)</span>
+    <span style="--c:#ffb020">MQTT (boîtier)</span>
+    <span style="--c:#3ddc84">SNMP (imprimante)</span>
+    <span style="--c:#4aa8ff">impression (IPP)</span>
+    <span style="--c:#b07cff">PowerShell JEA</span>
+    <span style="--c:#9fd0ff">GLPI (HTTPS)</span>
+    <span style="--c:#ff5a4d">panne, refus</span>
+  </div>
+</div>
+<div id="hint">Glisser : tourner · Molette : zoom · Clic droit : déplacer<br>Flèches ← → : étapes · R : rejouer</div>
+<div id="err">Cette animation a besoin de WebGL. Ouvre la page dans un navigateur récent (Chrome, Edge, Firefox).</div>
+
