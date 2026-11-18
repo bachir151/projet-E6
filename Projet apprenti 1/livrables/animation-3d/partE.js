@@ -106,9 +106,12 @@ async function printSheets(n) {
     const k0 = sheets.length;
     const end = SHEET_OUT.clone().add(V(0, k0 * 0.07, 0));
     let counted = false;
+    s.position.copy(SHEET_IN); s.scale.z = 0.001;
+    /* 1) la feuille sort de la fente (elle « pousse » vers l'avant) ; 2) elle retombe dans le réceptacle */
     await anim(1.0, k => {
-      s.position.lerpVectors(SHEET_IN, end, k);
-      if (!counted && k > 0.45) {
+      if (k < 0.75) { s.scale.z = Math.max(0.001, k / 0.75); s.position.copy(SHEET_IN); s.rotation.x = 0; }
+      else { const q = (k - 0.75) / 0.25; s.scale.z = 1; s.position.lerpVectors(SHEET_IN, end, q); s.rotation.x = 0.035 * (1 - q); }
+      if (!counted && k > 0.3) {
         counted = true; world.count++;
         ir.userData.obs.material.color.setRGB(0.15, 1, 0.35).multiplyScalar(4);
         setTimeout(() => ir.userData.obs.material.color.setRGB(0.15, 1, 0.35).multiplyScalar(0.1), 220);
@@ -131,7 +134,7 @@ function baseline(i) {
   drawLap('idle'); drawTech(); drawPrnLCD('Prête', 'cardio-2 · 10.0.20.31'); drawEink('PRÊTE', 'tout va bien');
   prnLedMat.color.setRGB(0.2, 1, 0.45).multiplyScalar(3);
   setRGB(0x22ff55);
-  for (const r of [readVib, readHum, readCnt, readSrv]) r.visible = false;
+  for (const r of [readVib, readHum, readCnt, readSrv]) { r.userData.on = false; r.visible = false; }
   btn.userData.dome.position.y = 0.5;
   badge.position.copy(BADGE_HOME); badge.rotation.copy(BADGE_ROT);
 }
@@ -174,7 +177,7 @@ const steps = [
   title: '1. Le boîtier, de près',
   text: `<p>Un boîtier en plexiglas, <b>collé de façon rigide</b> sur l'imprimante (sinon la vibration se perd). Dedans, des modules du commerce :</p>
          <p>• <b>ESP32 DevKit</b> : le petit ordinateur, en Wi-Fi.<br>• <b>MPU6050</b> (carte bleue GY-521) : sent la <b>vibration</b>, bus I²C.<br>• <b>SHT31</b> (carte violette, V2) : <b>température et humidité</b>, même bus I²C, près des trous d'aération.<br>• <b>FC-51</b> : capteur infrarouge sur une équerre, au-dessus de la sortie : il <b>compte les feuilles</b>.<br>• <b>Écran e-paper</b>, <b>bouton d'arcade</b> rouge, <b>LED RGB</b>, et le lecteur <b>RC522</b> (V2).</p>`,
-  cam: [[-12, 64, 14], [-47, 35, -33]], labels: 'boitier',
+  cam: [[-33, 55, -5], [-51, 34, -33]], labels: 'boitier',
   async run() {
     setRead(readVib, 'vibration : <b>0,01 g</b> (au repos)'); setRead(readHum, 'SHT31 : <b>46 %</b> · 22,4 °C');
     while (true) {
@@ -263,7 +266,7 @@ const steps = [
   text: `<p>Le <b>SHT31</b> mesure la température et l'humidité de l'air autour de l'imprimante, toutes les minutes.</p>
          <p>Quand l'air devient trop humide, le papier absorbe de l'eau, gonfle et se coince plus souvent. Au-delà du <b>seuil</b> (ici 65 %), le serveur ouvre un <b>ticket préventif</b>.</p>
          <p><b>Physique :</b> au lycée, Wassim pèse des feuilles gardées 48 h à humidité basse puis haute (≈ 75 %, au-dessus d'eau salée). Le seuil vient de ces mesures, avec leurs incertitudes.</p>`,
-  cam: [[-18, 58, -2], [-42, 35, -40]], labels: 'boitier',
+  cam: [[-23, 50, -20], [-42, 34, -40]], labels: 'boitier',
   async run() {
     setRead(readHum, 'SHT31 : <b>46 %</b> · 22,4 °C');
     for (let k = 0; k <= 7; k++) {
@@ -271,7 +274,7 @@ const steps = [
       setRead(readHum, `SHT31 : <b>${world.hum} %</b> · ${world.temp.toFixed(1).replace('.', ',')} °C`);
       await go('w_shtSDA', { kind: 'sens', label: 'I²C 0x44', size: 0.16 });
     }
-    flyTo([40, 110, 140], [-10, 18, -24], 1.6);
+    flyTo([40, 110, 140], [-10, 18, -24], 1.6); labelMode = 'overview'; refreshLabels();
     await route(UP, { kind: 'mqtt', label: 'MQTT · HR 74 % · 23,1 °C' });
     srv('humidité <b>74 %</b> &gt; seuil 65 %');
     world.pastille = 'warn';
@@ -286,14 +289,14 @@ const steps = [
   title: '6. Le gros bouton rouge',
   text: `<p>La secrétaire voit un problème que les capteurs ne voient pas (une impression pâle, par exemple). Elle appuie sur le <b>bouton</b>.</p>
          <p>Le ticket s'ouvre tout seul, avec le <b>nom exact de l'imprimante</b>. Elle n'a rien à écrire, et l'écran confirme le numéro du ticket.</p>`,
-  cam: [[-24, 60, 14], [-45, 37, -32]], labels: 'boitier',
+  cam: [[-27, 55, -9], [-44, 36, -31]], labels: 'boitier',
   async run() {
     await sleep(700);
     await anim(0.18, k => btn.userData.dome.position.y = lerp(0.5, 0.15, k)); beep(900, 0.05);
     btn.userData.domeMat.emissiveIntensity = 1.5;
     await go('w_btn', { kind: 'sens', label: 'GPIO 26', size: 0.18 });
     await anim(0.18, k => btn.userData.dome.position.y = lerp(0.15, 0.5, k)); btn.userData.domeMat.emissiveIntensity = 0.05;
-    flyTo([40, 110, 140], [-10, 18, -24], 1.6);
+    flyTo([40, 110, 140], [-10, 18, -24], 1.6); labelMode = 'overview'; refreshLabels();
     await route(UP, { kind: 'mqtt', label: 'MQTT · bouton · cardio-2' });
     await route(TO_TEC, { kind: 'glpi', label: 'API GLPI · ticket 1235' });
     ticket('1235', 'Signalé sur place : cardio-2', 'nouveau', '#c2382e', 'bouton du boîtier, 10:52');
@@ -305,7 +308,7 @@ const steps = [
   title: '7. La carte du technicien (V2)',
   text: `<p>En arrivant devant l'imprimante, le technicien pose sa <b>carte RFID</b> sur le boîtier. Le lecteur <b>RC522</b> la lit à travers le couvercle.</p>
          <p>Le ticket note l'<b>heure d'arrivée</b>, puis la <b>durée</b> de l'intervention quand il repose sa carte en partant. Cela sert à mesurer le temps des pannes, pas à surveiller le technicien.</p>`,
-  cam: [[-20, 62, 18], [-46, 36, -30]], labels: 'boitier',
+  cam: [[-36, 54, -4], [-50, 35, -30]], labels: 'boitier',
   async run() {
     ticket('1235', 'Signalé sur place : cardio-2', 'nouveau', '#c2382e', 'bouton du boîtier, 10:52');
     const above = W(rc, V(0, 3.2, 0));
@@ -358,7 +361,7 @@ async function goStep(i) {
   i = Math.max(0, Math.min(steps.length - 1, i));
   runId++; const id = runId; clearAnims(); cur = i;
   const s = steps[i];
-  baseline(i);
+  baseline(i); shadowFrames = 3;
   labelMode = s.labels; refreshLabels();
   $('#stepno').textContent = i === 0 ? 'Introduction' : `Étape ${i} / ${steps.length - 1}`;
   $('#title').textContent = s.title;
@@ -390,6 +393,7 @@ controls.addEventListener('start', () => { cam.k = 1; });
    13. Boucle d'animation
    ===================================================================== */
 const clock = new THREE.Clock();
+let shadowFrames = 3;   // nombre d'images où l'on recalcule encore les ombres
 function tick() {
   const dt = Math.min(clock.getDelta(), 0.05), now = clock.elapsedTime;
   if (cam.k < 1) {
@@ -431,6 +435,8 @@ function tick() {
   const dAct = now - world.srvAct < 0.6 || Math.sin(now * 2.1) > 0.97;
   sd.disk.material.color.setRGB(1, 0.6, 0.1).multiplyScalar(dAct && Math.sin(now * 40) > 0 ? 3 : 0.05);
   esp.userData.pled.material.color.setRGB(1, 0.16, 0.1).multiplyScalar(4);
+  if (world.vib || tweens.length) shadowFrames = 2;          // feuilles, badge, bouton, vibration
+  if (shadowFrames > 0) { renderer.shadowMap.needsUpdate = true; shadowFrames--; }
   composer.render();
   labelRenderer.render(scene, camera);
   requestAnimationFrame(tick);
@@ -449,6 +455,9 @@ camera.aspect = innerWidth / innerHeight; viewShift(); camera.updateProjectionMa
 goStep(0);
 tick();
 window.__goStep = goStep;
+/* aide pour vérifier de près dans la console : __view([x, y, z], [cible x, y, z]) */
+window.__stats = () => ({ appels: renderer.info.render.calls, triangles: renderer.info.render.triangles, objets: (() => { let n = 0; scene.traverse(o => { if (o.isMesh) n++; }); return n; })() });
+window.__view = (p, t) => { cam.k = 1; controls.autoRotate = false; camera.position.set(...p); controls.target.set(...t); controls.update(); };
 </script>
 </body>
 </html>

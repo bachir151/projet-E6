@@ -14,7 +14,7 @@ import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
    Unité : 1 = 1 cm. Le dessus du bureau est à y = 0.
    ===================================================================== */
 const $ = s => document.querySelector(s);
-/* ?lite : mode léger pour les PC peu puissants (moins de pixels, ombres plus simples) */
+/* ?lite : mode léger pour les PC peu puissants (moins de pixels, pas de halo lumineux, ombres simples) */
 const LITE = new URLSearchParams(location.search).has('lite');
 const PR = LITE ? 1 : Math.min(devicePixelRatio, 2);
 let renderer;
@@ -24,16 +24,20 @@ try {
 renderer.setPixelRatio(PR);
 renderer.setSize(innerWidth, innerHeight);
 renderer.shadowMap.enabled = true;
-renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.shadowMap.type = LITE ? THREE.PCFShadowMap : THREE.PCFSoftShadowMap;
+/* ombres recalculées seulement quand un objet bouge (voir tick) : la scène a ~340 objets, cela évite de tout redessiner deux fois par image */
+renderer.shadowMap.autoUpdate = false;
+renderer.shadowMap.needsUpdate = true;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 0.95;
+renderer.toneMappingExposure = 0.9;
 
 const scene = new THREE.Scene();
 const BG = 0x0b1016;
 scene.background = new THREE.Color(BG);
 scene.fog = new THREE.Fog(BG, 520, 1300);
 
-const camera = new THREE.PerspectiveCamera(38, innerWidth / innerHeight, 0.5, 4000);
+/* near = 1 (et non 0,5) : plus de précision de profondeur, plus de grésillement sur les écrans vus de loin */
+const camera = new THREE.PerspectiveCamera(38, innerWidth / innerHeight, 1, 4000);
 camera.position.set(70, 160, 250);
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
@@ -65,8 +69,8 @@ scene.add(rim);
 const composer = new EffectComposer(renderer);
 composer.setPixelRatio(PR);
 composer.addPass(new RenderPass(scene, camera));
-const bloom = new UnrealBloomPass(new THREE.Vector2(innerWidth, innerHeight), 0.8, 0.45, 1.9);
-composer.addPass(bloom);
+const bloom = new UnrealBloomPass(new THREE.Vector2(innerWidth, innerHeight), 0.8, 0.45, 2.2);
+if (!LITE) composer.addPass(bloom);   // le halo coûte une dizaine de passes plein écran
 composer.addPass(new OutputPass());
 
 const labelRenderer = new CSS2DRenderer({ element: $('#labels') });
@@ -112,14 +116,14 @@ const M = {
   pcbBlack: std(0x16191d, 0.5, 0.1),
   pcbBlue: std(0x1f55ad, 0.45, 0.1),
   modPCB: std(0x1d2733, 0.5, 0.1),
-  shield: std(0xd9dce1, 0.26, 1),
-  chrome: std(0xdfe2e6, 0.18, 1),
+  shield: std(0xd9dce1, 0.42, 1, { envMapIntensity: 0.6 }),   // métal brossé : pas de reflet éblouissant en gros plan
+  chrome: std(0xdfe2e6, 0.25, 1, { envMapIntensity: 0.7 }),
   gold: std(0xd8aa4c, 0.28, 1),
   chip: std(0x101114, 0.4, 0.05),
   plBlack: std(0x121314, 0.55, 0),
   plWhite: std(0xcfcdc6, 0.5, 0),
   plGray: std(0x8e959b, 0.4, 0.55),
-  alu: std(0xc9cdd2, 0.36, 1),
+  alu: std(0xc9cdd2, 0.5, 1, { envMapIntensity: 0.6 }),   // alu brossé : pas d'éblouissement
   steel: std(0xb8bcc2, 0.25, 1),
   darkMetal: std(0x24282d, 0.42, 0.75),
   rubber: std(0x1a1a1a, 0.85, 0),
@@ -254,7 +258,7 @@ function bbTex(w, h) {
 function makeBreadboard(w = 8.2, d = 5.5) {
   const g = new THREE.Group();
   mesh(RB(w, 0.85, d, 0.08, 2), M.plWhite, 0, -0.425, 0, g);
-  flat(w, d, std(0xcfcdc6, 0.6, 0, { map: bbTex(w, d).tex }), 0, 0.002, 0, g);
+  flat(w, d, std(0xcfcdc6, 0.6, 0, { map: bbTex(w, d).tex }), 0, 0.012, 0, g);
   return g;
 }
 
@@ -273,12 +277,12 @@ const rcTex = canvasTex(400, 600, (g, w, h) => {
 function rr(g, x, y, w, h, r) { g.beginPath(); g.moveTo(x + r, y); g.arcTo(x + w, y, x + w, y + h, r); g.arcTo(x + w, y + h, x, y + h, r); g.arcTo(x, y + h, x, y, r); g.arcTo(x, y, x + w, y, r); g.closePath(); }
 
 /** Lecteur RFID RC522 : 4 cm (x) × 6 cm (z), connecteur 8 broches sur le bord -z. Origine = centre du circuit. */
-function makeRC522() {
+function makeRC522(standUp = false) {
   const g = new THREE.Group();
   mesh(BOX(4, 0.16, 6), M.pcbBlue, 0, 0, 0, g);
   flat(4, 6, std(0xffffff, 0.45, 0.1, { map: rcTex.tex }), 0, 0.082, 0, g);
   mesh(BOX(1, 0.12, 1), M.chip, 0, 0.14, 1.0, g);
-  for (const [x, z] of [[-1.6, -2.6], [1.6, -2.6], [-1.6, 2.6], [1.6, 2.6]]) mesh(new THREE.CylinderGeometry(0.18, 0.18, 1.2, 12), M.nylon, x, -0.68, z, g);
+  for (const [x, z] of [[-1.6, -2.6], [1.6, -2.6], [-1.6, 2.6], [1.6, 2.6]]) mesh(new THREE.CylinderGeometry(0.18, 0.18, 1.2, 12), M.nylon, x, standUp ? 0.68 : -0.68, z, g);
   mesh(BOX(2.03, 0.25, 0.25), M.plBlack, 0, 0.205, -2.7, g);
   for (let k = 0; k < 8; k++) mesh(pinGeo, M.gold, (k - 3.5) * 0.254, 0.4, -2.7, g, false);
   return g;
@@ -351,14 +355,14 @@ function makeLaptop({ body = 0x3a3f46, rugged = false, w = 32, d = 22 } = {}) {
   const g = new THREE.Group();
   const bmat = std(body, 0.45, 0.6);
   mesh(RB(w, 1.8, d, 0.7), bmat, 0, 0.9, 0, g);
-  flat(w - 4, d * 0.42, std(0xffffff, 0.7, 0, { map: keyTex.tex }), 0, 1.805, -d * 0.12, g);
-  flat(10, 6, std(body, 0.3, 0.5, { color: new THREE.Color(body).multiplyScalar(1.15) }), 0, 1.806, d * 0.3, g);
+  flat(w - 4, d * 0.42, std(0xffffff, 0.7, 0, { map: keyTex.tex }), 0, 1.84, -d * 0.12, g);
+  flat(10, 6, std(body, 0.3, 0.5, { color: new THREE.Color(body).multiplyScalar(1.15) }), 0, 1.85, d * 0.3, g);
   const pivot = new THREE.Group(); pivot.position.set(0, 1.8, -d / 2 + 0.4); g.add(pivot);
   const lh = d - 0.8;
   mesh(RB(w, lh, 0.7, 0.35), bmat, 0, lh / 2, -0.1, pivot);
   const sc = canvasTex(1024, 640, () => {});
-  const scr = front(w - 2.2, lh - 2.4, makeScreenMat(sc), 0, lh / 2 + 0.2, 0.26, pivot);
-  mesh(BOX(w - 1.4, lh - 1.6, 0.05), M.glassDark, 0, lh / 2 + 0.2, 0.23, pivot, false);
+  const scr = front(w - 2.2, lh - 2.4, makeScreenMat(sc), 0, lh / 2 + 0.2, 0.36, pivot);
+  mesh(BOX(w - 1.4, lh - 1.6, 0.05), M.glassDark, 0, lh / 2 + 0.2, 0.29, pivot, false);
   pivot.rotation.x = -0.24;
   if (rugged) {
     for (const [x, z] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) mesh(RB(3.2, 2.4, 3.2, 0.5), M.orangeRub, x * (w / 2 - 1.2), 1.0, z * (d / 2 - 1.2), g);
@@ -381,11 +385,11 @@ const srvFront = canvasTex(400, 880, (g, w, h) => {
 function makeServer() {
   const g = new THREE.Group();
   mesh(RB(20, 44, 46, 0.8), M.darkMetal, 0, 22, 0, g);
-  front(19, 41.8, std(0xffffff, 0.5, 0.4, { map: srvFront.tex }), 0, 22, 23.02, g);
-  mesh(new THREE.TorusGeometry(0.9, 0.18, 12, 32), M.chrome, 6.5, 41, 23.1, g);
+  front(19, 41.8, std(0xffffff, 0.5, 0.4, { map: srvFront.tex }), 0, 22, 23.08, g);
+  mesh(new THREE.TorusGeometry(0.9, 0.18, 12, 32), M.chrome, 6.5, 41, 23.16, g);
   const glow = (c) => new THREE.MeshBasicMaterial({ color: new THREE.Color(c).multiplyScalar(3), toneMapped: false });
-  const pwr = mesh(new THREE.CircleGeometry(0.35, 20), glow(0x32ff7a), 6.5, 41, 23.12, g, false);
-  const disk = mesh(new THREE.CircleGeometry(0.3, 20), glow(0xffa31a), 4.0, 41, 23.12, g, false);
+  const pwr = mesh(new THREE.CircleGeometry(0.35, 20), glow(0x32ff7a), 6.5, 41, 23.2, g, false);
+  const disk = mesh(new THREE.CircleGeometry(0.3, 20), glow(0xffa31a), 4.0, 41, 23.2, g, false);
   for (const [x, z] of [[-8, -20], [8, -20], [-8, 20], [8, 20]]) mesh(new THREE.CylinderGeometry(1.2, 1.2, 0.8, 16), M.rubber, x, -0.4 + 0.4, z, g);
   g.userData = { pwr, disk };
   return g;
@@ -411,11 +415,11 @@ const portLEDs = [];
 function makeSwitch() {
   const g = new THREE.Group();
   mesh(RB(SW.w, SW.h, SW.d, 0.25), M.plGray, 0, SW.h / 2, 0, g);
-  front(SW.w, SW.h, std(0xffffff, 0.45, 0.5, { map: swFront.tex }), 0, SW.h / 2, SW.d / 2 + 0.01, g);
+  front(SW.w, SW.h, std(0xffffff, 0.45, 0.5, { map: swFront.tex }), 0, SW.h / 2, SW.d / 2 + 0.05, g);
   for (let i = 0; i < 24; i++) {
     const p = portPx(i);
     const m = new THREE.MeshBasicMaterial({ color: new THREE.Color(0x2bff6a).multiplyScalar(0.15), toneMapped: false });
-    const led = mesh(new THREE.PlaneGeometry(0.16, 0.16), m, (p.x - 35) / 1760 * SW.w - SW.w / 2, SW.h - (p.y - 15) / 176 * SW.h, SW.d / 2 + 0.03, g, false);
+    const led = mesh(new THREE.PlaneGeometry(0.16, 0.16), m, (p.x - 35) / 1760 * SW.w - SW.w / 2, SW.h - (p.y - 15) / 176 * SW.h, SW.d / 2 + 0.09, g, false);
     portLEDs.push({ m, last: -9, used: false });
   }
   for (const x of [-20, 20]) for (const z of [-10, 10]) mesh(new THREE.CylinderGeometry(0.8, 0.8, 0.3, 12), M.rubber, x, 0.15, z, g);
@@ -429,7 +433,7 @@ function makeAP() {
   for (const x of [-6, 6]) {
     const a = mesh(RB(1.2, 15, 0.7, 0.3), M.plBlack, x, 9, -6.6, g); a.rotation.z = x < 0 ? 0.12 : -0.12;
   }
-  const led = mesh(new THREE.CircleGeometry(0.3, 16), new THREE.MeshBasicMaterial({ color: new THREE.Color(0x3d9bff).multiplyScalar(3), toneMapped: false }), 0, 1.4, 7.01, g, false);
+  const led = mesh(new THREE.CircleGeometry(0.3, 16), new THREE.MeshBasicMaterial({ color: new THREE.Color(0x3d9bff).multiplyScalar(3), toneMapped: false }), 0, 1.4, 7.06, g, false);
   return g;
 }
 
@@ -440,7 +444,7 @@ function makeMonitor() {
   const panel = new THREE.Group(); panel.position.set(0, 26, -1.5); panel.rotation.x = -0.06; g.add(panel);
   mesh(RB(56, 33.5, 2.4, 0.6), std(0x16181b, 0.4, 0.4), 0, 0, 0, panel);
   const sc = canvasTex(1280, 740, () => {});
-  front(54, 31.2, makeScreenMat(sc), 0, 0.3, 1.22, panel);
+  front(54, 31.2, makeScreenMat(sc), 0, 0.3, 1.28, panel);
   return { g, screen: sc };
 }
 
@@ -448,8 +452,8 @@ function makeSFF() {
   const g = new THREE.Group();
   mesh(RB(9, 30, 28, 0.6), std(0x202327, 0.45, 0.6), 0, 15, 0, g);
   const glow = new THREE.MeshBasicMaterial({ color: new THREE.Color(0x4fc3ff).multiplyScalar(3), toneMapped: false });
-  mesh(new THREE.CircleGeometry(0.4, 16), glow, 0, 27, 14.02, g, false);
-  for (const y of [21, 19]) mesh(BOX(1.4, 0.6, 0.1), M.plBlack, 0, y, 14.02, g, false);
+  mesh(new THREE.CircleGeometry(0.4, 16), glow, 0, 27, 14.06, g, false);
+  for (const y of [21, 19]) mesh(BOX(1.4, 0.6, 0.1), M.plBlack, 0, y, 14.08, g, false);
   return g;
 }
 

@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Maquette 3D imprimante</title>
+<link rel="icon" href="data:,">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Atkinson+Hyperlegible:wght@400;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
@@ -32,8 +33,9 @@ button{font:inherit;cursor:pointer}
 
 /* étiquettes 3D */
 .lab{font-family:var(--f-body);font-size:12px;line-height:1.25;color:#e9f1f5;background:rgba(10,16,22,.78);
-  border:1px solid rgba(255,255,255,.18);border-radius:7px;padding:4px 8px;white-space:nowrap;transform:translateY(-14px);
-  box-shadow:0 2px 10px rgba(0,0,0,.35)}
+  border:1px solid rgba(255,255,255,.18);border-radius:7px;padding:4px 8px;white-space:nowrap;transform:translateY(-14px)}
+/* les étiquettes bougent à chaque image : une couche GPU chacune, sans ombre portée (moins de travail pour le navigateur) */
+#labels>div{will-change:transform}
 .lab b{font-family:var(--f-display);font-weight:600;font-size:15px;letter-spacing:.01em;display:block}
 .lab span{color:#a9bac4}
 .lab.small{font-size:11px;padding:2px 6px}
@@ -149,7 +151,7 @@ import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
    Unité : 1 = 1 cm. Le dessus du bureau est à y = 0.
    ===================================================================== */
 const $ = s => document.querySelector(s);
-/* ?lite : mode léger pour les PC peu puissants (moins de pixels, ombres plus simples) */
+/* ?lite : mode léger pour les PC peu puissants (moins de pixels, pas de halo lumineux, ombres simples) */
 const LITE = new URLSearchParams(location.search).has('lite');
 const PR = LITE ? 1 : Math.min(devicePixelRatio, 2);
 let renderer;
@@ -159,16 +161,20 @@ try {
 renderer.setPixelRatio(PR);
 renderer.setSize(innerWidth, innerHeight);
 renderer.shadowMap.enabled = true;
-renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.shadowMap.type = LITE ? THREE.PCFShadowMap : THREE.PCFSoftShadowMap;
+/* ombres recalculées seulement quand un objet bouge (voir tick) : la scène a ~340 objets, cela évite de tout redessiner deux fois par image */
+renderer.shadowMap.autoUpdate = false;
+renderer.shadowMap.needsUpdate = true;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 0.95;
+renderer.toneMappingExposure = 0.9;
 
 const scene = new THREE.Scene();
 const BG = 0x0b1016;
 scene.background = new THREE.Color(BG);
 scene.fog = new THREE.Fog(BG, 520, 1300);
 
-const camera = new THREE.PerspectiveCamera(38, innerWidth / innerHeight, 0.5, 4000);
+/* near = 1 (et non 0,5) : plus de précision de profondeur, plus de grésillement sur les écrans vus de loin */
+const camera = new THREE.PerspectiveCamera(38, innerWidth / innerHeight, 1, 4000);
 camera.position.set(70, 160, 250);
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
@@ -200,8 +206,8 @@ scene.add(rim);
 const composer = new EffectComposer(renderer);
 composer.setPixelRatio(PR);
 composer.addPass(new RenderPass(scene, camera));
-const bloom = new UnrealBloomPass(new THREE.Vector2(innerWidth, innerHeight), 0.8, 0.45, 1.9);
-composer.addPass(bloom);
+const bloom = new UnrealBloomPass(new THREE.Vector2(innerWidth, innerHeight), 0.8, 0.45, 2.2);
+if (!LITE) composer.addPass(bloom);   // le halo coûte une dizaine de passes plein écran
 composer.addPass(new OutputPass());
 
 const labelRenderer = new CSS2DRenderer({ element: $('#labels') });
@@ -247,14 +253,14 @@ const M = {
   pcbBlack: std(0x16191d, 0.5, 0.1),
   pcbBlue: std(0x1f55ad, 0.45, 0.1),
   modPCB: std(0x1d2733, 0.5, 0.1),
-  shield: std(0xd9dce1, 0.26, 1),
-  chrome: std(0xdfe2e6, 0.18, 1),
+  shield: std(0xd9dce1, 0.42, 1, { envMapIntensity: 0.6 }),   // métal brossé : pas de reflet éblouissant en gros plan
+  chrome: std(0xdfe2e6, 0.25, 1, { envMapIntensity: 0.7 }),
   gold: std(0xd8aa4c, 0.28, 1),
   chip: std(0x101114, 0.4, 0.05),
   plBlack: std(0x121314, 0.55, 0),
   plWhite: std(0xcfcdc6, 0.5, 0),
   plGray: std(0x8e959b, 0.4, 0.55),
-  alu: std(0xc9cdd2, 0.36, 1),
+  alu: std(0xc9cdd2, 0.5, 1, { envMapIntensity: 0.6 }),   // alu brossé : pas d'éblouissement
   steel: std(0xb8bcc2, 0.25, 1),
   darkMetal: std(0x24282d, 0.42, 0.75),
   rubber: std(0x1a1a1a, 0.85, 0),
@@ -389,7 +395,7 @@ function bbTex(w, h) {
 function makeBreadboard(w = 8.2, d = 5.5) {
   const g = new THREE.Group();
   mesh(RB(w, 0.85, d, 0.08, 2), M.plWhite, 0, -0.425, 0, g);
-  flat(w, d, std(0xcfcdc6, 0.6, 0, { map: bbTex(w, d).tex }), 0, 0.002, 0, g);
+  flat(w, d, std(0xcfcdc6, 0.6, 0, { map: bbTex(w, d).tex }), 0, 0.012, 0, g);
   return g;
 }
 
@@ -408,12 +414,12 @@ const rcTex = canvasTex(400, 600, (g, w, h) => {
 function rr(g, x, y, w, h, r) { g.beginPath(); g.moveTo(x + r, y); g.arcTo(x + w, y, x + w, y + h, r); g.arcTo(x + w, y + h, x, y + h, r); g.arcTo(x, y + h, x, y, r); g.arcTo(x, y, x + w, y, r); g.closePath(); }
 
 /** Lecteur RFID RC522 : 4 cm (x) × 6 cm (z), connecteur 8 broches sur le bord -z. Origine = centre du circuit. */
-function makeRC522() {
+function makeRC522(standUp = false) {
   const g = new THREE.Group();
   mesh(BOX(4, 0.16, 6), M.pcbBlue, 0, 0, 0, g);
   flat(4, 6, std(0xffffff, 0.45, 0.1, { map: rcTex.tex }), 0, 0.082, 0, g);
   mesh(BOX(1, 0.12, 1), M.chip, 0, 0.14, 1.0, g);
-  for (const [x, z] of [[-1.6, -2.6], [1.6, -2.6], [-1.6, 2.6], [1.6, 2.6]]) mesh(new THREE.CylinderGeometry(0.18, 0.18, 1.2, 12), M.nylon, x, -0.68, z, g);
+  for (const [x, z] of [[-1.6, -2.6], [1.6, -2.6], [-1.6, 2.6], [1.6, 2.6]]) mesh(new THREE.CylinderGeometry(0.18, 0.18, 1.2, 12), M.nylon, x, standUp ? 0.68 : -0.68, z, g);
   mesh(BOX(2.03, 0.25, 0.25), M.plBlack, 0, 0.205, -2.7, g);
   for (let k = 0; k < 8; k++) mesh(pinGeo, M.gold, (k - 3.5) * 0.254, 0.4, -2.7, g, false);
   return g;
@@ -486,14 +492,14 @@ function makeLaptop({ body = 0x3a3f46, rugged = false, w = 32, d = 22 } = {}) {
   const g = new THREE.Group();
   const bmat = std(body, 0.45, 0.6);
   mesh(RB(w, 1.8, d, 0.7), bmat, 0, 0.9, 0, g);
-  flat(w - 4, d * 0.42, std(0xffffff, 0.7, 0, { map: keyTex.tex }), 0, 1.805, -d * 0.12, g);
-  flat(10, 6, std(body, 0.3, 0.5, { color: new THREE.Color(body).multiplyScalar(1.15) }), 0, 1.806, d * 0.3, g);
+  flat(w - 4, d * 0.42, std(0xffffff, 0.7, 0, { map: keyTex.tex }), 0, 1.84, -d * 0.12, g);
+  flat(10, 6, std(body, 0.3, 0.5, { color: new THREE.Color(body).multiplyScalar(1.15) }), 0, 1.85, d * 0.3, g);
   const pivot = new THREE.Group(); pivot.position.set(0, 1.8, -d / 2 + 0.4); g.add(pivot);
   const lh = d - 0.8;
   mesh(RB(w, lh, 0.7, 0.35), bmat, 0, lh / 2, -0.1, pivot);
   const sc = canvasTex(1024, 640, () => {});
-  const scr = front(w - 2.2, lh - 2.4, makeScreenMat(sc), 0, lh / 2 + 0.2, 0.26, pivot);
-  mesh(BOX(w - 1.4, lh - 1.6, 0.05), M.glassDark, 0, lh / 2 + 0.2, 0.23, pivot, false);
+  const scr = front(w - 2.2, lh - 2.4, makeScreenMat(sc), 0, lh / 2 + 0.2, 0.36, pivot);
+  mesh(BOX(w - 1.4, lh - 1.6, 0.05), M.glassDark, 0, lh / 2 + 0.2, 0.29, pivot, false);
   pivot.rotation.x = -0.24;
   if (rugged) {
     for (const [x, z] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) mesh(RB(3.2, 2.4, 3.2, 0.5), M.orangeRub, x * (w / 2 - 1.2), 1.0, z * (d / 2 - 1.2), g);
@@ -516,11 +522,11 @@ const srvFront = canvasTex(400, 880, (g, w, h) => {
 function makeServer() {
   const g = new THREE.Group();
   mesh(RB(20, 44, 46, 0.8), M.darkMetal, 0, 22, 0, g);
-  front(19, 41.8, std(0xffffff, 0.5, 0.4, { map: srvFront.tex }), 0, 22, 23.02, g);
-  mesh(new THREE.TorusGeometry(0.9, 0.18, 12, 32), M.chrome, 6.5, 41, 23.1, g);
+  front(19, 41.8, std(0xffffff, 0.5, 0.4, { map: srvFront.tex }), 0, 22, 23.08, g);
+  mesh(new THREE.TorusGeometry(0.9, 0.18, 12, 32), M.chrome, 6.5, 41, 23.16, g);
   const glow = (c) => new THREE.MeshBasicMaterial({ color: new THREE.Color(c).multiplyScalar(3), toneMapped: false });
-  const pwr = mesh(new THREE.CircleGeometry(0.35, 20), glow(0x32ff7a), 6.5, 41, 23.12, g, false);
-  const disk = mesh(new THREE.CircleGeometry(0.3, 20), glow(0xffa31a), 4.0, 41, 23.12, g, false);
+  const pwr = mesh(new THREE.CircleGeometry(0.35, 20), glow(0x32ff7a), 6.5, 41, 23.2, g, false);
+  const disk = mesh(new THREE.CircleGeometry(0.3, 20), glow(0xffa31a), 4.0, 41, 23.2, g, false);
   for (const [x, z] of [[-8, -20], [8, -20], [-8, 20], [8, 20]]) mesh(new THREE.CylinderGeometry(1.2, 1.2, 0.8, 16), M.rubber, x, -0.4 + 0.4, z, g);
   g.userData = { pwr, disk };
   return g;
@@ -546,11 +552,11 @@ const portLEDs = [];
 function makeSwitch() {
   const g = new THREE.Group();
   mesh(RB(SW.w, SW.h, SW.d, 0.25), M.plGray, 0, SW.h / 2, 0, g);
-  front(SW.w, SW.h, std(0xffffff, 0.45, 0.5, { map: swFront.tex }), 0, SW.h / 2, SW.d / 2 + 0.01, g);
+  front(SW.w, SW.h, std(0xffffff, 0.45, 0.5, { map: swFront.tex }), 0, SW.h / 2, SW.d / 2 + 0.05, g);
   for (let i = 0; i < 24; i++) {
     const p = portPx(i);
     const m = new THREE.MeshBasicMaterial({ color: new THREE.Color(0x2bff6a).multiplyScalar(0.15), toneMapped: false });
-    const led = mesh(new THREE.PlaneGeometry(0.16, 0.16), m, (p.x - 35) / 1760 * SW.w - SW.w / 2, SW.h - (p.y - 15) / 176 * SW.h, SW.d / 2 + 0.03, g, false);
+    const led = mesh(new THREE.PlaneGeometry(0.16, 0.16), m, (p.x - 35) / 1760 * SW.w - SW.w / 2, SW.h - (p.y - 15) / 176 * SW.h, SW.d / 2 + 0.09, g, false);
     portLEDs.push({ m, last: -9, used: false });
   }
   for (const x of [-20, 20]) for (const z of [-10, 10]) mesh(new THREE.CylinderGeometry(0.8, 0.8, 0.3, 12), M.rubber, x, 0.15, z, g);
@@ -564,7 +570,7 @@ function makeAP() {
   for (const x of [-6, 6]) {
     const a = mesh(RB(1.2, 15, 0.7, 0.3), M.plBlack, x, 9, -6.6, g); a.rotation.z = x < 0 ? 0.12 : -0.12;
   }
-  const led = mesh(new THREE.CircleGeometry(0.3, 16), new THREE.MeshBasicMaterial({ color: new THREE.Color(0x3d9bff).multiplyScalar(3), toneMapped: false }), 0, 1.4, 7.01, g, false);
+  const led = mesh(new THREE.CircleGeometry(0.3, 16), new THREE.MeshBasicMaterial({ color: new THREE.Color(0x3d9bff).multiplyScalar(3), toneMapped: false }), 0, 1.4, 7.06, g, false);
   return g;
 }
 
@@ -575,7 +581,7 @@ function makeMonitor() {
   const panel = new THREE.Group(); panel.position.set(0, 26, -1.5); panel.rotation.x = -0.06; g.add(panel);
   mesh(RB(56, 33.5, 2.4, 0.6), std(0x16181b, 0.4, 0.4), 0, 0, 0, panel);
   const sc = canvasTex(1280, 740, () => {});
-  front(54, 31.2, makeScreenMat(sc), 0, 0.3, 1.22, panel);
+  front(54, 31.2, makeScreenMat(sc), 0, 0.3, 1.28, panel);
   return { g, screen: sc };
 }
 
@@ -583,8 +589,8 @@ function makeSFF() {
   const g = new THREE.Group();
   mesh(RB(9, 30, 28, 0.6), std(0x202327, 0.45, 0.6), 0, 15, 0, g);
   const glow = new THREE.MeshBasicMaterial({ color: new THREE.Color(0x4fc3ff).multiplyScalar(3), toneMapped: false });
-  mesh(new THREE.CircleGeometry(0.4, 16), glow, 0, 27, 14.02, g, false);
-  for (const y of [21, 19]) mesh(BOX(1.4, 0.6, 0.1), M.plBlack, 0, y, 14.02, g, false);
+  mesh(new THREE.CircleGeometry(0.4, 16), glow, 0, 27, 14.06, g, false);
+  for (const y of [21, 19]) mesh(BOX(1.4, 0.6, 0.1), M.plBlack, 0, y, 14.08, g, false);
   return g;
 }
 
@@ -695,9 +701,9 @@ const prnFrontTex = canvasTex(1040, 540, (g, w, h) => {
 });
 const prn = new THREE.Group(); prn.position.set(-60, 0, -28); scene.add(prn);
 const prnBody = new THREE.Group(); prn.add(prnBody);
-const prnMat = std(0xdcdddf, 0.55, 0.02), prnDark = std(0x3a3e44, 0.5, 0.1), prnMid = std(0xb8bbbf, 0.5, 0.05);
+const prnMat = std(0xc9cbce, 0.6, 0.02), prnDark = std(0x3a3e44, 0.5, 0.1), prnMid = std(0xb8bbbf, 0.5, 0.05);
 mesh(RB(PRD.w, PRD.h, PRD.d, 1.2), prnMat, 0, PRD.h / 2, 0, prnBody);
-front(PRD.w - 0.4, PRD.h - 0.6, std(0xffffff, 0.55, 0.02, { map: prnFrontTex.tex }), 0, PRD.h / 2, PRD.d / 2 + 0.01, prnBody);
+front(PRD.w - 0.4, PRD.h - 0.6, std(0xe6e6e6, 0.6, 0.02, { map: prnFrontTex.tex }), 0, PRD.h / 2, PRD.d / 2 + 0.04, prnBody);
 for (const [x, z] of [[-22, -18], [22, -18], [-22, 18], [22, 18]]) mesh(new THREE.CylinderGeometry(1.2, 1.2, 0.6, 14), M.rubber, x, 0.3, z, prnBody);
 /* dessus : réceptacle de sortie à gauche, bloc plat à droite (le boîtier y est fixé) */
 const OUT = { x0: -26, x1: 0, z0: -22, z1: 12 };               // réceptacle (coordonnées locales)
@@ -717,10 +723,12 @@ mesh(BOX(1.6, 1.3, 0.6), std(0x111214, 0.6), 20, 6, -PRD.d / 2 - 0.2, prnBody);
 drawPrnLCD('Prête', 'cardio-2 · 10.0.20.31');
 
 /* feuilles A4 qui sortent */
-const sheetGeo = BOX(21, 0.06, 29.7);
-const sheetMat = std(0xfbfbf8, 0.75, 0);
+const sheetGeo = BOX(21, 0.06, 29.7); sheetGeo.translate(0, 0, 29.7 / 2);   // origine = bord arrière de la feuille
+const sheetMat = std(0xf4f4f0, 0.8, 0);
 const sheets = [];
-const SHEET_IN = V(-13, PRD.h + 2.1, -32), SHEET_OUT = V(-13, PRD.h + 0.85, -2);
+/* SHEET_IN : la feuille sort de la fente (face avant de la barre, z = -14).
+   SHEET_OUT : bord arrière de la feuille posée au fond du réceptacle (dessus du fond à PRD.h + 0,8). */
+const SHEET_IN = V(-13, PRD.h + 1.9, -14.0), SHEET_OUT = V(-13, PRD.h + 0.84, -13.7);
 function sheetWorld(local) { return W(prn, local); }
 
 /* ---------------------------------------------------------------------
@@ -825,7 +833,8 @@ function makeArcade() {
   const domeMat = new THREE.MeshPhysicalMaterial({ color: 0xe02020, roughness: 0.25, clearcoat: 1, emissive: 0xff1010, emissiveIntensity: 0.05 });
   const dome = new THREE.Group(); dome.position.y = 0.5; g.add(dome);
   mesh(new THREE.CylinderGeometry(2.35, 2.35, 0.6, 40), domeMat, 0, 0.3, 0, dome);
-  const cap = mesh(new THREE.SphereGeometry(2.35, 40, 14, 0, Math.PI * 2, 0, 0.55), domeMat, 0, -0.98, 0, dome);
+  /* calotte bombée : rayon 4,9 cm, base de 2,35 cm de rayon, 6 mm de haut (avant : petite calotte creuse et décollée) */
+  const cap = mesh(new THREE.SphereGeometry(4.9, 48, 12, 0, Math.PI * 2, 0, Math.asin(2.35 / 4.9)), domeMat, 0, 1.2 - 4.9, 0, dome);
   mesh(new THREE.CylinderGeometry(2.6, 2.6, 2.4, 6), std(0x1b1b1b, 0.6), 0, -1.4, 0, g);   // écrou
   mesh(BOX(2.0, 1.4, 1.2), std(0xf2f2f2, 0.5), 0, -3.2, 0, g);                             // micro-rupteur
   g.userData = { dome, domeMat };
@@ -839,23 +848,23 @@ function makeRGB() {
   mesh(new THREE.CylinderGeometry(0.29, 0.29, 0.08, 24), mat, 0, 0.54, 0, g);
   mesh(new THREE.CylinderGeometry(0.25, 0.25, 0.5, 24), mat, 0, 0.8, 0, g);
   mesh(new THREE.SphereGeometry(0.25, 24, 12, 0, Math.PI * 2, 0, Math.PI / 2), mat, 0, 1.05, 0, g);
-  const pl = new THREE.PointLight(0xffffff, 0, 25, 2); pl.position.set(0, 1.2, 0.2); g.add(pl);
+  const pl = new THREE.PointLight(0xffffff, 0, 25, 2); pl.position.set(0, 2.4, 0.8); g.add(pl);   // hors de la LED, sinon elle s'éclaire elle-même en blanc
   g.userData = { mat, pl };
   return g;
 }
 function setRGB(hex) {
   const u = rgb.userData;
   if (hex === null) { u.mat.emissive.set(0x000000); u.pl.intensity = 0; return; }
-  u.mat.emissive.set(hex).multiplyScalar(6); u.pl.color.set(hex); u.pl.intensity = 30;
+  u.mat.emissive.set(hex).multiplyScalar(1.8); u.pl.color.set(hex); u.pl.intensity = 0.35;   // une LED 5 mm éclaire peu : sinon la plaque blanche voisine éblouit
 }
 
 /* ---------------------------------------------------------------------
    6.3 Le boîtier : plexiglas fixé sur le bloc droit de l'imprimante
    --------------------------------------------------------------------- */
 const BX = { w: 18, h: 7, d: 22 };
-const box = new THREE.Group(); box.position.set(13, PRD.h + 4.5, -6); prn.add(box);   // dessus du bloc droit
+const box = new THREE.Group(); box.position.set(13, PRD.h + 4.5 + 0.25, -6); prn.add(box);   // dessus du bloc droit + 2,5 mm d'adhésif
 mesh(RB(BX.w, 0.4, BX.d, 0.3), std(0x1a1c1f, 0.6), 0, 0.2, 0, box);                 // fond
-const acryl = new THREE.MeshPhysicalMaterial({ color: 0xb9d4e2, roughness: 0.08, transparent: true, opacity: 0.16, clearcoat: 1, depthWrite: false, side: THREE.DoubleSide });
+const acryl = new THREE.MeshPhysicalMaterial({ color: 0xb9d4e2, roughness: 0.18, transparent: true, opacity: 0.16, clearcoat: 0.25, clearcoatRoughness: 0.2, envMapIntensity: 0.6, depthWrite: false, side: THREE.DoubleSide });  // moins miroir : évite l'éblouissement en gros plan
 mesh(BOX(BX.w, BX.h, 0.3), acryl, 0, BX.h / 2, BX.d / 2, box, false);
 mesh(BOX(BX.w, BX.h, 0.3), acryl, 0, BX.h / 2, -BX.d / 2, box, false);
 mesh(BOX(0.3, BX.h, BX.d), acryl, BX.w / 2, BX.h / 2, 0, box, false);
@@ -864,7 +873,7 @@ mesh(BOX(BX.w + 0.4, 0.3, BX.d + 0.4), acryl, 0, BX.h + 0.15, 0, box, false);   
 for (let i = 0; i < 6; i++) mesh(new THREE.CircleGeometry(0.35, 14), std(0x0d0f12, 0.9), 5 + (i % 3) * 1.2, 3.5 + Math.floor(i / 3) * 1.2, -BX.d / 2 - 0.16, box, false).rotation.y = Math.PI; // aérations (SHT31)
 for (const [x, z] of [[-8.5, -10.5], [8.5, -10.5], [-8.5, 10.5], [8.5, 10.5]]) mesh(new THREE.CylinderGeometry(0.3, 0.3, BX.h, 10), M.steel, x, BX.h / 2, z, box);
 /* adhésif double face épais (fixation rigide, utile pour l'accéléromètre) */
-mesh(BOX(BX.w - 1, 0.25, BX.d - 1), std(0xe9e3c9, 0.9), 0, -0.12, 0, box, false);
+mesh(BOX(BX.w - 1, 0.25, BX.d - 1), std(0xe9e3c9, 0.9), 0, -0.125, 0, box, false);
 
 const bb = makeBreadboard(8.2, 5.5); bb.position.set(1.5, 0.4 + 0.85, 1); box.add(bb);
 const esp = makeESP32(); esp.position.set(1.5, 0.4 + 0.85 + 0.75, 1); box.add(esp);
@@ -872,23 +881,22 @@ const mpu = makeGY521(); mpu.position.set(-6, 1.3, -6); box.add(mpu);           
 for (const [x, z] of [[-0.83, -0.58], [0.83, -0.58], [-0.83, 0.58], [0.83, 0.58]]) mesh(new THREE.CylinderGeometry(0.16, 0.16, 0.9, 8), M.gold, -6 + x, 0.85, -6 + z, box);
 const sht = makeSHT31(); sht.position.set(5.6, 1.3, -9.3); box.add(sht);            // près des aérations
 for (const [x, z] of [[-0.55, -0.4], [0.55, -0.4], [-0.55, 0.4], [0.55, 0.4]]) mesh(new THREE.CylinderGeometry(0.13, 0.13, 0.9, 8), M.nylon, 5.6 + x, 0.85, -9.3 + z, box);
-const rgb = makeRGB(); rgb.position.set(-1.5, 1.25, -1.2); box.add(rgb);
-for (const x of [-0.5, 0.0, 0.5]) { const r = makeResistor([0xc0392b, 0xc0392b, 0x6b3a1e, 0xd4af37]); r.scale.setScalar(0.8); r.position.set(-1.5 + x, 1.25, -2.2); r.rotation.y = Math.PI / 2; box.add(r); }
+const rgb = makeRGB(); rgb.position.set(-2.0, 1.25, -1.3); box.add(rgb);
+for (const x of [-0.7, 0.3, 1.3]) { const r = makeResistor([0xc0392b, 0xc0392b, 0x6b3a1e, 0xd4af37]); r.scale.setScalar(0.8); r.position.set(x, 1.25, -1.5); box.add(r); }
 /* écran e-paper sur la face avant, incliné vers l'utilisateur */
 const eink = makeEink(); eink.position.set(-3.5, 3.8, BX.d / 2 + 0.35); eink.rotation.x = Math.PI / 2; box.add(eink);
 /* bouton d'arcade sur le couvercle */
 const btn = makeArcade(); btn.position.set(4.5, BX.h + 0.3, 4.5); box.add(btn);
 /* lecteur RFID (V2) sous le couvercle, à l'avant gauche */
-const rc = makeRC522(); rc.rotation.y = Math.PI / 2; rc.position.set(-5.2, BX.h - 1.3, 5.5); box.add(rc);
-/* entretoises du RC522 inversées : on les cache en le posant sur deux supports */
-mesh(BOX(4.5, 0.3, 0.6), std(0x1a1c1f, 0.6), -5.2, BX.h - 0.55, 3.0, box);
-mesh(BOX(4.5, 0.3, 0.6), std(0x1a1c1f, 0.6), -5.2, BX.h - 0.55, 8.0, box);
+/* il pend sous le couvercle, tenu par ses 4 entretoises de 12 mm vissées dans le plexiglas (antenne à 1,5 cm de la carte posée dessus) */
+const rc = makeRC522(true); rc.rotation.y = Math.PI / 2; rc.position.set(-5.2, BX.h - 1.28, 5.5); box.add(rc);
 
 /* capteur infrarouge au-dessus de la sortie du papier, sur une équerre */
-const brk = new THREE.Group(); brk.position.set(-13, PRD.h + 6, -13.2); prn.add(brk);
+const brk = new THREE.Group(); brk.position.set(-13, PRD.h + 7.4, -13.2); prn.add(brk);
 mesh(BOX(4.2, 0.25, 3.2), M.alu, 0, 0, 0.6, brk);
-mesh(BOX(4.2, 3.0, 0.25), M.alu, 0, -1.4, -1.0, brk);
-const ir = makeFC51(); ir.rotation.z = -Math.PI / 2; ir.position.set(0, -0.35, 1.2); brk.add(ir);  // LED vers le bas
+mesh(BOX(4.2, 4.0, 0.25), M.alu, 0, -1.9, -1.0, brk);                 // collée sur la face avant de la barre
+for (const x of [-1.4, 1.4]) mesh(new THREE.CylinderGeometry(0.22, 0.22, 0.12, 12), M.steel, x, -2.9, -0.86, brk).rotation.x = Math.PI / 2;  // vis
+const ir = makeFC51(); ir.rotation.z = -Math.PI / 2; ir.position.set(0, -1.7, 1.2); brk.add(ir);  // carte sous l'équerre, LED vers le bas
 /* bloc USB 5 V + multiprise sur le bureau */
 const strip = new THREE.Group(); strip.position.set(-22, 0, -60); scene.add(strip);
 mesh(RB(30, 3.6, 5.5, 0.6), M.plWhite, 0, 1.8, 0, strip);
@@ -940,12 +948,15 @@ wires.eSCK = wire(ekPin(0), pB('D18'), 0xf4d03f, 1.5);
 wires.eMOSI = wire(ekPin(1), pB('D23'), 0x2ecc71, 1.7);
 wire(ekPin(2), pB('D5'), 0xff8c1a, 1.9); wire(ekPin(3), pB('D4'), 0x9b59b6, 2.1);
 /* RC522 (SPI, V2) : même bus, CS D15, MISO D19 */
-wires.rSCK = wire(rcP('SCK'), pB('D18', 0.8), 0xf4d03f, 0.8);
-wires.rMISO = wire(rcP('MISO'), pB('D19'), 0x3498db, 0.9);
-wire(rcP('SDA'), pB('D15'), 0xff8c1a, 1.0); wire(rcP('GND'), pB('GND', 1.3), 0x222222, 1.0); wire(rcP('V33'), pB('V33', 1.3), 0xe74c3c, 1.1);
+wires.rSCK = wire(rcP('SCK'), pB('D18', 0.8), 0xf4d03f, 0.2);
+wires.rMISO = wire(rcP('MISO'), pB('D19'), 0x3498db, 0.25);
+wire(rcP('SDA'), pB('D15'), 0xff8c1a, 0.3); wire(rcP('GND'), pB('GND', 1.3), 0x222222, 0.2); wire(rcP('V33'), pB('V33', 1.3), 0xe74c3c, 0.25);
 /* câble USB : ESP32 → chargeur 5 V */
-{ const a = W(esp, V(-2.75, 0.22, 0)); const sl = W(box, V(-BX.w / 2, 1.2, 2));
-  cable([a, a.clone().add(V(-1, 0, 0)), sl, sl.clone().add(V(-2, -2, 0)), W(prn, V(26.5, 20, -20)), W(prn, V(26.8, 3, -24)), V(-30, 0.3, -48), V(-32, 3, -58), W(strip, V(-10, 4, 2.3))], M.cableBlack, 0.18); }
+{ const a = W(esp, V(-2.75, 0.22, 0)); const sl = W(box, V(-BX.w / 2 - 0.3, 1.0, 2));
+  const top = PRD.h + 4.5 + 0.2;   // dessus du bloc droit + rayon du câble
+  cable([a, a.clone().add(V(-1.2, 0, 0)), sl, W(prn, V(2.2, top + 0.3, -3)), W(prn, V(1.8, top, -10)), W(prn, V(1.8, top, -20.5)),
+         W(prn, V(1.8, top - 1, -22.6)), W(prn, V(2.2, PRD.h - 4, -22.4)), W(prn, V(3, 2, -22.6)), W(prn, V(5, 0.25, -27)),
+         V(-40, 0.25, -56), V(-33.5, 1.5, -57.2), W(strip, V(-10, 4, 2.3))], M.cableBlack, 0.18); }
 
 /* ---------------------------------------------------------------------
    6.5 Réseau, serveur, postes
@@ -1013,19 +1024,19 @@ function label(group, pos, title, sub, cls = '') {
   d.innerHTML = `<b>${title}</b>${sub ? `<span>${sub}</span>` : ''}`;
   const o = new CSS2DObject(d); o.position.copy(pos); scene.add(o); labelGroups[group].push(o); return o;
 }
-label('overview', W(prn, V(-8, 44, 0)), 'Imprimante réseau', 'SNMP 161 · IPP 631 · RAW 9100');
+label('overview', W(prn, V(-14, 13, PRD.d / 2 + 1)), 'Imprimante réseau', 'SNMP 161 · IPP 631 · RAW 9100');
 label('overview', W(box, V(0, 12, 0)), 'Boîtier ESP32', 'vibration · feuilles · humidité · bouton · écran');
 label('overview', V(-2, 24, -58), 'Point d\'accès Wi-Fi', 'réseau en place');
-label('overview', V(24, 9, -62), 'Switch HP ProCurve', 'Ethernet du lycée');
+label('overview', V(24, 9, -62), 'Switch du lycée', 'réseau en place');
 label('overview', V(92, 50, -42), 'Serveur Ubuntu', 'Mosquitto · Python · CUPS · PostgreSQL · GLPI · Grafana');
-label('overview', W(lap.g, V(0, 24, 0)), 'PC de la secrétaire', 'Windows 11 · point d\'accès JEA');
+label('overview', W(lap.g, V(0, 27, -14)), 'PC de la secrétaire', 'Windows 11 · point d\'accès JEA');
 label('overview', V(54, 50, 6), 'Poste du technicien', 'GLPI et tableau de bord');
 label('overview', V(-22, 10, -60), 'Bloc USB 5 V', 'aucun câblage 230 V', 'small');
 label('boitier', W(esp, V(0.9, 0.7, 0)), 'ESP32 DevKit', 'Wi-Fi · MQTT/TLS · heure NTP', 'small');
 label('boitier', W(mpu, V(0, 0.5, 0)), 'MPU6050 (GY-521)', 'vibration · I²C 0x68', 'small');
 label('boitier', W(sht, V(0, 0.5, 0)), 'SHT31 (V2)', 'température, humidité · I²C 0x44', 'small');
 label('boitier', W(ir, V(2, 0.2, 0)), 'FC-51 infrarouge', 'compte les feuilles · GPIO 27', 'small');
-label('boitier', W(eink, V(0, 0.4, 0)), 'Écran e-paper 2,9″', 'SPI · garde l\'image sans courant', 'small');
+label('boitier', W(eink, V(-2.5, 0.4, 2.6)), 'Écran e-paper 2,9″', 'SPI · garde l\'image sans courant', 'small');
 label('boitier', W(btn, V(0, 1.6, 0)), 'Bouton d\'arcade', '« ça ne marche pas » · GPIO 26', 'small');
 label('boitier', W(rgb, V(0, 1.4, 0)), 'LED RGB', 'état du boîtier', 'small');
 label('boitier', W(rc, V(0, 0.4, 0)), 'Lecteur RC522 (V2)', 'carte du technicien · SPI', 'small');
@@ -1038,9 +1049,10 @@ const readSrv = mkRead(V(92, 62, -42), '#ffb020');
 let showLabels = true, labelMode = 'overview';
 function refreshLabels() {
   for (const g in labelGroups) for (const o of labelGroups[g]) o.visible = showLabels && g === labelMode;
-  for (const r of [readVib, readHum, readCnt, readSrv]) r.element.style.display = showLabels ? '' : 'none';
+  /* le rendu des étiquettes impose display selon .visible : on agit donc sur .visible, pas sur le style */
+  for (const r of [readVib, readHum, readCnt, readSrv]) r.visible = !!r.userData.on && showLabels;
 }
-function setRead(o, html) { o.element.innerHTML = html; o.visible = !!html; }
+function setRead(o, html) { o.element.innerHTML = html; o.userData.on = !!html; o.visible = o.userData.on && showLabels; }
 
 /* ---- son ---- */
 let soundOn = true, actx = null;
@@ -1149,9 +1161,12 @@ async function printSheets(n) {
     const k0 = sheets.length;
     const end = SHEET_OUT.clone().add(V(0, k0 * 0.07, 0));
     let counted = false;
+    s.position.copy(SHEET_IN); s.scale.z = 0.001;
+    /* 1) la feuille sort de la fente (elle « pousse » vers l'avant) ; 2) elle retombe dans le réceptacle */
     await anim(1.0, k => {
-      s.position.lerpVectors(SHEET_IN, end, k);
-      if (!counted && k > 0.45) {
+      if (k < 0.75) { s.scale.z = Math.max(0.001, k / 0.75); s.position.copy(SHEET_IN); s.rotation.x = 0; }
+      else { const q = (k - 0.75) / 0.25; s.scale.z = 1; s.position.lerpVectors(SHEET_IN, end, q); s.rotation.x = 0.035 * (1 - q); }
+      if (!counted && k > 0.3) {
         counted = true; world.count++;
         ir.userData.obs.material.color.setRGB(0.15, 1, 0.35).multiplyScalar(4);
         setTimeout(() => ir.userData.obs.material.color.setRGB(0.15, 1, 0.35).multiplyScalar(0.1), 220);
@@ -1174,7 +1189,7 @@ function baseline(i) {
   drawLap('idle'); drawTech(); drawPrnLCD('Prête', 'cardio-2 · 10.0.20.31'); drawEink('PRÊTE', 'tout va bien');
   prnLedMat.color.setRGB(0.2, 1, 0.45).multiplyScalar(3);
   setRGB(0x22ff55);
-  for (const r of [readVib, readHum, readCnt, readSrv]) r.visible = false;
+  for (const r of [readVib, readHum, readCnt, readSrv]) { r.userData.on = false; r.visible = false; }
   btn.userData.dome.position.y = 0.5;
   badge.position.copy(BADGE_HOME); badge.rotation.copy(BADGE_ROT);
 }
@@ -1217,7 +1232,7 @@ const steps = [
   title: '1. Le boîtier, de près',
   text: `<p>Un boîtier en plexiglas, <b>collé de façon rigide</b> sur l'imprimante (sinon la vibration se perd). Dedans, des modules du commerce :</p>
          <p>• <b>ESP32 DevKit</b> : le petit ordinateur, en Wi-Fi.<br>• <b>MPU6050</b> (carte bleue GY-521) : sent la <b>vibration</b>, bus I²C.<br>• <b>SHT31</b> (carte violette, V2) : <b>température et humidité</b>, même bus I²C, près des trous d'aération.<br>• <b>FC-51</b> : capteur infrarouge sur une équerre, au-dessus de la sortie : il <b>compte les feuilles</b>.<br>• <b>Écran e-paper</b>, <b>bouton d'arcade</b> rouge, <b>LED RGB</b>, et le lecteur <b>RC522</b> (V2).</p>`,
-  cam: [[-12, 64, 14], [-47, 35, -33]], labels: 'boitier',
+  cam: [[-33, 55, -5], [-51, 34, -33]], labels: 'boitier',
   async run() {
     setRead(readVib, 'vibration : <b>0,01 g</b> (au repos)'); setRead(readHum, 'SHT31 : <b>46 %</b> · 22,4 °C');
     while (true) {
@@ -1306,7 +1321,7 @@ const steps = [
   text: `<p>Le <b>SHT31</b> mesure la température et l'humidité de l'air autour de l'imprimante, toutes les minutes.</p>
          <p>Quand l'air devient trop humide, le papier absorbe de l'eau, gonfle et se coince plus souvent. Au-delà du <b>seuil</b> (ici 65 %), le serveur ouvre un <b>ticket préventif</b>.</p>
          <p><b>Physique :</b> au lycée, Wassim pèse des feuilles gardées 48 h à humidité basse puis haute (≈ 75 %, au-dessus d'eau salée). Le seuil vient de ces mesures, avec leurs incertitudes.</p>`,
-  cam: [[-18, 58, -2], [-42, 35, -40]], labels: 'boitier',
+  cam: [[-23, 50, -20], [-42, 34, -40]], labels: 'boitier',
   async run() {
     setRead(readHum, 'SHT31 : <b>46 %</b> · 22,4 °C');
     for (let k = 0; k <= 7; k++) {
@@ -1314,7 +1329,7 @@ const steps = [
       setRead(readHum, `SHT31 : <b>${world.hum} %</b> · ${world.temp.toFixed(1).replace('.', ',')} °C`);
       await go('w_shtSDA', { kind: 'sens', label: 'I²C 0x44', size: 0.16 });
     }
-    flyTo([40, 110, 140], [-10, 18, -24], 1.6);
+    flyTo([40, 110, 140], [-10, 18, -24], 1.6); labelMode = 'overview'; refreshLabels();
     await route(UP, { kind: 'mqtt', label: 'MQTT · HR 74 % · 23,1 °C' });
     srv('humidité <b>74 %</b> &gt; seuil 65 %');
     world.pastille = 'warn';
@@ -1329,14 +1344,14 @@ const steps = [
   title: '6. Le gros bouton rouge',
   text: `<p>La secrétaire voit un problème que les capteurs ne voient pas (une impression pâle, par exemple). Elle appuie sur le <b>bouton</b>.</p>
          <p>Le ticket s'ouvre tout seul, avec le <b>nom exact de l'imprimante</b>. Elle n'a rien à écrire, et l'écran confirme le numéro du ticket.</p>`,
-  cam: [[-24, 60, 14], [-45, 37, -32]], labels: 'boitier',
+  cam: [[-27, 55, -9], [-44, 36, -31]], labels: 'boitier',
   async run() {
     await sleep(700);
     await anim(0.18, k => btn.userData.dome.position.y = lerp(0.5, 0.15, k)); beep(900, 0.05);
     btn.userData.domeMat.emissiveIntensity = 1.5;
     await go('w_btn', { kind: 'sens', label: 'GPIO 26', size: 0.18 });
     await anim(0.18, k => btn.userData.dome.position.y = lerp(0.15, 0.5, k)); btn.userData.domeMat.emissiveIntensity = 0.05;
-    flyTo([40, 110, 140], [-10, 18, -24], 1.6);
+    flyTo([40, 110, 140], [-10, 18, -24], 1.6); labelMode = 'overview'; refreshLabels();
     await route(UP, { kind: 'mqtt', label: 'MQTT · bouton · cardio-2' });
     await route(TO_TEC, { kind: 'glpi', label: 'API GLPI · ticket 1235' });
     ticket('1235', 'Signalé sur place : cardio-2', 'nouveau', '#c2382e', 'bouton du boîtier, 10:52');
@@ -1348,7 +1363,7 @@ const steps = [
   title: '7. La carte du technicien (V2)',
   text: `<p>En arrivant devant l'imprimante, le technicien pose sa <b>carte RFID</b> sur le boîtier. Le lecteur <b>RC522</b> la lit à travers le couvercle.</p>
          <p>Le ticket note l'<b>heure d'arrivée</b>, puis la <b>durée</b> de l'intervention quand il repose sa carte en partant. Cela sert à mesurer le temps des pannes, pas à surveiller le technicien.</p>`,
-  cam: [[-20, 62, 18], [-46, 36, -30]], labels: 'boitier',
+  cam: [[-36, 54, -4], [-50, 35, -30]], labels: 'boitier',
   async run() {
     ticket('1235', 'Signalé sur place : cardio-2', 'nouveau', '#c2382e', 'bouton du boîtier, 10:52');
     const above = W(rc, V(0, 3.2, 0));
@@ -1401,7 +1416,7 @@ async function goStep(i) {
   i = Math.max(0, Math.min(steps.length - 1, i));
   runId++; const id = runId; clearAnims(); cur = i;
   const s = steps[i];
-  baseline(i);
+  baseline(i); shadowFrames = 3;
   labelMode = s.labels; refreshLabels();
   $('#stepno').textContent = i === 0 ? 'Introduction' : `Étape ${i} / ${steps.length - 1}`;
   $('#title').textContent = s.title;
@@ -1433,6 +1448,7 @@ controls.addEventListener('start', () => { cam.k = 1; });
    13. Boucle d'animation
    ===================================================================== */
 const clock = new THREE.Clock();
+let shadowFrames = 3;   // nombre d'images où l'on recalcule encore les ombres
 function tick() {
   const dt = Math.min(clock.getDelta(), 0.05), now = clock.elapsedTime;
   if (cam.k < 1) {
@@ -1474,6 +1490,8 @@ function tick() {
   const dAct = now - world.srvAct < 0.6 || Math.sin(now * 2.1) > 0.97;
   sd.disk.material.color.setRGB(1, 0.6, 0.1).multiplyScalar(dAct && Math.sin(now * 40) > 0 ? 3 : 0.05);
   esp.userData.pled.material.color.setRGB(1, 0.16, 0.1).multiplyScalar(4);
+  if (world.vib || tweens.length) shadowFrames = 2;          // feuilles, badge, bouton, vibration
+  if (shadowFrames > 0) { renderer.shadowMap.needsUpdate = true; shadowFrames--; }
   composer.render();
   labelRenderer.render(scene, camera);
   requestAnimationFrame(tick);
@@ -1492,6 +1510,9 @@ camera.aspect = innerWidth / innerHeight; viewShift(); camera.updateProjectionMa
 goStep(0);
 tick();
 window.__goStep = goStep;
+/* aide pour vérifier de près dans la console : __view([x, y, z], [cible x, y, z]) */
+window.__stats = () => ({ appels: renderer.info.render.calls, triangles: renderer.info.render.triangles, objets: (() => { let n = 0; scene.traverse(o => { if (o.isMesh) n++; }); return n; })() });
+window.__view = (p, t) => { cam.k = 1; controls.autoRotate = false; camera.position.set(...p); controls.target.set(...t); controls.update(); };
 </script>
 </body>
 </html>
