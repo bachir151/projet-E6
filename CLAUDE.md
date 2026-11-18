@@ -25,7 +25,7 @@ Ce dépôt sert à concevoir et documenter les projets individuels E6 de 4 appre
 
 ## Organisation du dépôt
 - `docs/` : cadre E6, état des 4 projets, charte IA, sources vérifiées.
-- `Projet apprenti 1/` : dossier V3 de Wassim (PDF, 24 p.), source du projet.
+- `Projet apprenti 1/` : projet « Le service informatique augmenté » (décision du 16/11) ; `fiche-academique/`, `projet-v4/` (document de travail), `questions-jury/`, notes d'entretien ; anciennes versions (chariots, dossier V3) dans `archives/`.
 - `Projet apprenti 2/` : synthèse de 3 pages (PDF), source du projet ; `fiche-academique/` ; `TODO.md`.
 - `Projet apprenti 3/` : dossier V2 de Lorenzo (PDF, 33 p.), source du projet ; `fiche-academique/` ; `livrables/page-html/` ; `TODO.md`.
 - `Projet apprenti 4/` : fiche technique d'Aziza (PDF) et `apprentie4-aziza/` (spécification `projet.md`, décisions, questions de visite, TODO).
