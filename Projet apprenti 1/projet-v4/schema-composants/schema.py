@@ -69,8 +69,10 @@ r(540, 75, 230, 700, "#f8fafc", "#d1d5db", 1, rx=12); t(655, 97, "RÉSEAU DE LA 
 t(655, 113, "exploité, non reconfiguré (C10)", 11, GREY, it=True)
 box(560, 135, 190, 70, "Point d’accès Wi-Fi", ["boîtiers ESP32"])
 box(560, 330, 190, 70, "Switch HP ProCurve", ["Ethernet du lycée"])
-box(560, 560, 190, 90, "Routeur Cisco ISR 4331", ["passerelle", "DHCP · DNS · NTP"])
-ln([(655, 207), (655, 328)], GREY, 1.4, False, False); ln([(655, 402), (655, 558)], GREY, 1.4, False, False)
+r(560, 470, 190, 120, "#fff", "#9ca3af", 1, True); t(655, 494, "Services réseau", 13, "bold")
+t(655, 514, "DHCP · DNS · NTP", 12, c="#374151"); t(655, 532, "fournis par le serveur", 11.5, c="#374151")
+t(655, 548, "Ubuntu (DNS : Samba AD)", 11.5, c="#374151"); t(655, 570, "pas de routeur : un seul réseau", 11, GREY, it=True)
+ln([(655, 207), (655, 328)], GREY, 1.4, False, False)
 
 # ---------------- serveurs
 r(820, 75, 660, 700, "#fafafa", "#d1d5db", 1, rx=12); t(836, 97, "SERVEURS (PC UBUNTU)", 12, "bold", GREY, "start")
@@ -102,7 +104,6 @@ ln([(990, 468), (990, 444)], ORA, 1.4); lab(1020, 460, "MQTT", ORA, "start", 10.
 ln([(1365, 468), (1365, 417)], ORA, 1.4); lab(1372, 448, "SMB", ORA, "start", 10.5)
 ln([(1440, 468), (1440, 440), (1470, 440), (1470, 300), (1462, 300)], ORA, 1.4); lab(1466, 337, "Kerberos, LDAP", ORA, "end", 10.5)
 ln([(838, 635), (810, 635), (810, 82), (1365, 82), (1365, 110)], INK, 1.3, dash=True); lab(1100, 86, "HTTPS (GLPI, Grafana)", INK, sz=10.5)
-ln([(752, 605), (838, 635)], GREY, 1.2, dash=True); lab(793, 640, "NTP, DNS", GREY, sz=10.5)
 
 # ---------------- légende étapes
 r(20, 795, 1460, 150, "#fff", "#d1d5db", 1, rx=10)
