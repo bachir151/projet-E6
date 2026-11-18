@@ -27,6 +27,13 @@
 html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);font-family:var(--f-body);color:var(--ink)}
 canvas#scene{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none}
 #labels{position:fixed;inset:0;pointer-events:none}
+/* voile en haut de l'écran : le titre reste lisible même en gros plan */
+#scrim{position:fixed;left:0;right:0;top:0;height:130px;pointer-events:none;
+  background:linear-gradient(180deg,rgba(8,12,18,.72),rgba(8,12,18,0))}
+:root[data-amb="jour"] #scrim{background:linear-gradient(180deg,rgba(236,239,242,.85),rgba(236,239,242,0))}
+:root[data-amb="jour"] #brand{color:#13222c;text-shadow:none}
+:root[data-amb="jour"] #brand .eye{color:#1d5a86}
+:root[data-amb="jour"] #hint{color:#3c4a54;text-shadow:none}
 button{font:inherit;cursor:pointer}
 :focus-visible{outline:3px solid #f0b93a;outline-offset:2px}
 
@@ -96,6 +103,7 @@ button{font:inherit;cursor:pointer}
 </head>
 <body>
 <canvas id="scene" aria-label="Maquette 3D animée : serveur, switch, borne Wi-Fi, PC, borne de sortie ESP32 et banc de physique"></canvas>
+<div id="scrim"></div>
 <div id="labels"></div>
 
 <div id="top">
@@ -108,6 +116,7 @@ button{font:inherit;cursor:pointer}
       <button id="mMaq" aria-pressed="true" title="Ce qui est construit au lycée">Maquette</button>
       <button id="mTer" aria-pressed="false" title="Ce qui se passe en vrai">Terrain</button>
     </div>
+    <button class="tbtn" id="bAmb" title="Changer l'ambiance lumineuse de la pièce">Ambiance : nuit</button>
     <button class="tbtn" id="bLab" aria-pressed="true">Étiquettes</button>
     <button class="tbtn" id="bSnd" aria-pressed="true">Son</button>
   </div>
@@ -147,6 +156,7 @@ import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+import { GTAOPass } from 'three/addons/postprocessing/GTAOPass.js';
 
 /* =====================================================================
    1. Moteur : rendu, caméra, lumières, post-traitement
@@ -165,14 +175,24 @@ renderer.setSize(innerWidth, innerHeight);
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 0.95;
+renderer.toneMappingExposure = 1.0;
 
+/* Deux ambiances. Les couleurs des messages (légende) ne changent pas.
+   nuit = « heure bleue » : pièce bleu ardoise, lumière chaude au plafond, ciel du soir à la fenêtre.
+   jour = « atelier clair » : murs grège, lumière du jour. */
+const PAL = {
+  nuit: { bg: 0x0f151d, wall: 0x2b3644, floor: 0x3b3733, skyTop: '#0d1a36', skyMid: '#2b4778', skyLow: '#f29a58', sky: 1.0,
+          key: 0xffdfb6, keyI: 1.4, win: 0x7fa2ff, winI: 0.85, hemiS: 0x9cb6ff, hemiG: 0x2a1d12, hemiI: 0.3, exp: 0.9, fog: [650, 1500] },
+  jour: { bg: 0xd5dade, wall: 0xe2ded6, floor: 0x8f8a84, skyTop: '#8fbfee', skyMid: '#c9e1f5', skyLow: '#f4f1e4', sky: 1.2,
+          key: 0xfff3e2, keyI: 1.7, win: 0xe8f0ff, winI: 1.3, hemiS: 0xe0eaff, hemiG: 0x6b5a48, hemiI: 0.6, exp: 0.86, fog: [800, 1900] },
+};
 const scene = new THREE.Scene();
-const BG = 0x0b1016;
+const BG = PAL.nuit.bg;
 scene.background = new THREE.Color(BG);
-scene.fog = new THREE.Fog(BG, 520, 1300);
+scene.fog = new THREE.Fog(BG, 650, 1500);
 
-const camera = new THREE.PerspectiveCamera(38, innerWidth / innerHeight, 0.5, 4000);
+/* near = 1 (et non 0,5) : plus de précision de profondeur, donc plus de grésillement sur les écrans vus de loin */
+const camera = new THREE.PerspectiveCamera(38, innerWidth / innerHeight, 1, 4000);
 camera.position.set(70, 160, 250);
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
@@ -180,14 +200,16 @@ controls.dampingFactor = 0.08;
 controls.target.set(0, 5, -12);
 controls.maxPolarAngle = Math.PI * 0.495;
 controls.minDistance = 6;
-controls.maxDistance = 800;
+controls.maxDistance = 560;
 controls.autoRotateSpeed = 0.35;
 
 const pmrem = new THREE.PMREMGenerator(renderer);
 scene.environment = pmrem.fromScene(new RoomEnvironment(renderer), 0.04).texture;
 
-scene.add(new THREE.HemisphereLight(0xbfd4ff, 0x20160e, 0.35));
-const key = new THREE.DirectionalLight(0xfff0dc, 1.6);
+const hemi = new THREE.HemisphereLight(0x9cb6ff, 0x2a1d12, 0.32);
+scene.add(hemi);
+/* lumière principale : plafonnier, chaude, qui donne les ombres */
+const key = new THREE.DirectionalLight(0xffdfb6, 1.75);
 key.position.set(110, 280, 170);
 key.target.position.set(0, 0, -10);
 key.castShadow = true;
@@ -197,13 +219,33 @@ key.shadow.bias = -0.0004;
 key.shadow.normalBias = 0.04;
 key.shadow.radius = 3;
 scene.add(key, key.target);
-const rim = new THREE.DirectionalLight(0x86b8ff, 0.9);
-rim.position.set(-220, 140, -220);
+/* lumière de la fenêtre (mur de gauche) : froide, sans ombre */
+const rim = new THREE.DirectionalLight(0x7fa2ff, 0.85);
+rim.position.set(-420, 150, 20);
 scene.add(rim);
 
 const composer = new EffectComposer(renderer);
 composer.setPixelRatio(PR);
 composer.addPass(new RenderPass(scene, camera));
+/* Occlusion ambiante (GTAO) : assombrit les coins et le dessous des objets.
+   C'est ce qui « pose » les objets sur le bureau. Désactivée en mode ?lite. */
+let gtao = null;
+if (!LITE) {
+  gtao = new GTAOPass(scene, camera, innerWidth, innerHeight);
+  gtao.output = GTAOPass.OUTPUT.Default;
+  gtao.blendIntensity = 0.9;
+  gtao.updateGtaoMaterial({ radius: 5, distanceExponent: 1.4, thickness: 3, scale: 1.2, samples: 16 });
+  gtao.updatePdMaterial({ lumaPhi: 10, depthPhi: 2, normalPhi: 3, radius: 5, rings: 2, samples: 16 });
+  /* les objets transparents ou lumineux (paquets, anneaux, LED, manchon netem) ne font pas d'ombre douce */
+  gtao.overrideVisibility = function () {
+    const cache = this._visibilityCache;
+    this.scene.traverse(o => {
+      cache.set(o, o.visible);
+      if (o.isPoints || o.isLine || o.isSprite || (o.isMesh && (o.material.transparent || o.material.isMeshBasicMaterial))) o.visible = false;
+    });
+  };
+  composer.addPass(gtao);
+}
 const bloom = new UnrealBloomPass(new THREE.Vector2(innerWidth, innerHeight), 0.8, 0.45, 1.9);
 composer.addPass(bloom);
 composer.addPass(new OutputPass());
@@ -247,6 +289,18 @@ function front(w, h, mat, x, y, z, parent) {
 const std = (color, roughness = 0.5, metalness = 0, extra = {}) =>
   new THREE.MeshStandardMaterial({ color, roughness, metalness, ...extra });
 
+/* Grain fin (bruit) : sert de carte de rugosité et de relief. Sans lui, plastiques et métaux
+   ont l'air de pâte à modeler, parce que leur reflet est parfaitement uniforme. */
+const grain = canvasTex(512, 512, (g, w, h) => {
+  const img = g.createImageData(w, h);
+  for (let i = 0; i < img.data.length; i += 4) { const v = 200 + Math.random() * 55; img.data[i] = img.data[i + 1] = img.data[i + 2] = v; img.data[i + 3] = 255; }
+  g.putImageData(img, 0, 0);
+});
+grain.tex.colorSpace = THREE.NoColorSpace;
+grain.tex.wrapS = grain.tex.wrapT = THREE.RepeatWrapping; grain.tex.repeat.set(3, 3);
+const grained = (color, roughness, metalness, bump = 0.015) =>
+  std(color, roughness, metalness, { roughnessMap: grain.tex, bumpMap: grain.tex, bumpScale: bump });
+
 const M = {
   pcbBlack: std(0x16191d, 0.5, 0.1),
   pcbBlue: std(0x1f55ad, 0.45, 0.1),
@@ -255,14 +309,14 @@ const M = {
   chrome: std(0xdfe2e6, 0.18, 1),
   gold: std(0xd8aa4c, 0.28, 1),
   chip: std(0x101114, 0.4, 0.05),
-  plBlack: std(0x121314, 0.55, 0),
-  plWhite: std(0xcfcdc6, 0.5, 0),
-  plGray: std(0x8e959b, 0.4, 0.55),
-  alu: std(0xc9cdd2, 0.36, 1),
+  plBlack: grained(0x141518, 0.6, 0),
+  plWhite: grained(0xd9d5cc, 0.6, 0, 0.008),
+  plGray: grained(0x9aa1a7, 0.45, 0.6),
+  alu: grained(0xc4c9ce, 0.34, 1, 0.006),
   steel: std(0xb8bcc2, 0.25, 1),
-  darkMetal: std(0x24282d, 0.42, 0.75),
-  rubber: std(0x1a1a1a, 0.85, 0),
-  orangeRub: std(0xd2621c, 0.7, 0),
+  darkMetal: grained(0x262a30, 0.5, 0.7),
+  rubber: grained(0x1a1a1a, 0.9, 0, 0.03),
+  orangeRub: grained(0xd9682b, 0.75, 0, 0.03),
   nylon: std(0xf3f0e6, 0.6, 0),
   cork: std(0xa57a52, 0.95, 0),
   acrylic: new THREE.MeshPhysicalMaterial({ color: 0x8fa6b4, roughness: 0.15, metalness: 0, transparent: true, opacity: 0.22, clearcoat: 0.6, envMapIntensity: 0.4 }),
@@ -276,27 +330,115 @@ const wireMats = {};
 const wireMat = c => wireMats[c] || (wireMats[c] = std(c, 0.45, 0));
 
 /* =====================================================================
-   3. La pièce : sol, bureau
+   3. La pièce : sol, deux murs (fenêtre, tableau blanc), bureau en chêne, tapis
+   Les murs sont des plans à une seule face : vus de derrière, ils
+   disparaissent (effet « maison de poupée »), la caméra n'est jamais bloquée.
    ===================================================================== */
+const ROOM = { y: -76, back: -150, left: -270, h: 300 };
+/* sol : grandes dalles de 60 cm, légères différences de teinte (lino de salle de TP) */
 const floorTex = canvasTex(1024, 1024, (g, w, h) => {
-  g.fillStyle = '#1b1f23'; g.fillRect(0, 0, w, h);
-  for (let i = 0; i < 9000; i++) { g.fillStyle = `rgba(255,255,255,${Math.random() * 0.035})`; g.fillRect(Math.random() * w, Math.random() * h, 2, 2); }
-  g.strokeStyle = 'rgba(0,0,0,.55)'; g.lineWidth = 3;
-  for (let i = 0; i <= 4; i++) { g.beginPath(); g.moveTo(i * w / 4, 0); g.lineTo(i * w / 4, h); g.stroke(); g.beginPath(); g.moveTo(0, i * h / 4); g.lineTo(w, i * h / 4); g.stroke(); }
+  const n = 4, s = w / n;
+  for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) { const v = 214 + Math.random() * 22; g.fillStyle = `rgb(${v},${v},${v})`; g.fillRect(i * s, j * s, s, s); }
+  for (let k = 0; k < 40000; k++) { g.fillStyle = Math.random() < .5 ? `rgba(0,0,0,${Math.random() * .07})` : `rgba(255,255,255,${Math.random() * .07})`; g.fillRect(Math.random() * w, Math.random() * h, 2, 2); }
+  g.strokeStyle = 'rgba(0,0,0,.28)'; g.lineWidth = 2;
+  for (let i = 0; i <= n; i++) { g.beginPath(); g.moveTo(i * s, 0); g.lineTo(i * s, h); g.stroke(); g.beginPath(); g.moveTo(0, i * s); g.lineTo(w, i * s); g.stroke(); }
 });
-floorTex.tex.wrapS = floorTex.tex.wrapT = THREE.RepeatWrapping; floorTex.tex.repeat.set(10, 10);
-const floor = new THREE.Mesh(new THREE.PlaneGeometry(3000, 3000), std(0xffffff, 0.85, 0, { map: floorTex.tex }));
-floor.rotation.x = -Math.PI / 2; floor.position.y = -76; floor.receiveShadow = true; scene.add(floor);
+floorTex.tex.wrapS = floorTex.tex.wrapT = THREE.RepeatWrapping; floorTex.tex.repeat.set(5, 5);
+const floorMat = std(PAL.nuit.floor, 0.62, 0, { map: floorTex.tex, roughnessMap: grain.tex });
+const floor = new THREE.Mesh(new THREE.PlaneGeometry(1200, 1200), floorMat);
+floor.rotation.x = -Math.PI / 2; floor.position.set(0, ROOM.y, 150); floor.receiveShadow = true; scene.add(floor);
 
-const deskTex = canvasTex(2048, 1024, (g, w, h) => {
-  g.fillStyle = '#7d7a74'; g.fillRect(0, 0, w, h);
-  for (let i = 0; i < 26000; i++) { const a = Math.random() * 0.05; g.fillStyle = Math.random() < .5 ? `rgba(0,0,0,${a})` : `rgba(255,255,255,${a})`; g.fillRect(Math.random() * w, Math.random() * h, 3, 1.5); }
+const wallMat = std(PAL.nuit.wall, 0.95, 0, { bumpMap: grain.tex, bumpScale: 0.04 });
+const backWall = new THREE.Mesh(new THREE.PlaneGeometry(720, ROOM.h), wallMat);
+backWall.position.set(90, ROOM.y + ROOM.h / 2, ROOM.back); backWall.receiveShadow = true; scene.add(backWall);
+const leftWall = new THREE.Mesh(new THREE.PlaneGeometry(600, ROOM.h), wallMat);
+leftWall.rotation.y = Math.PI / 2; leftWall.position.set(ROOM.left, ROOM.y + ROOM.h / 2, 150); leftWall.receiveShadow = true; scene.add(leftWall);
+/* plinthes */
+const plinthMat = std(0x1c2129, 0.6, 0);
+mesh(BOX(720, 8, 1.6), plinthMat, 90, ROOM.y + 4, ROOM.back + 0.8, scene, false);
+mesh(BOX(1.6, 8, 600), plinthMat, ROOM.left + 0.8, ROOM.y + 4, 150, scene, false);
+
+/* fenêtre (mur de gauche) : ciel dessiné, cadre, store vénitien relevé aux deux tiers */
+const sky = canvasTex(256, 512, () => {});
+function drawSky(p) {
+  sky.redraw((g, w, h) => {
+    const gr = g.createLinearGradient(0, 0, 0, h); gr.addColorStop(0, p.skyTop); gr.addColorStop(0.62, p.skyMid); gr.addColorStop(1, p.skyLow);
+    g.fillStyle = gr; g.fillRect(0, 0, w, h);
+    g.fillStyle = 'rgba(10,14,22,.55)';           /* silhouette des bâtiments d'en face */
+    for (let x = 0; x < w; x += 34) { const bh = 30 + Math.random() * 70; g.fillRect(x, h - bh, 30, bh); }
+  });
+}
+const skyMat = new THREE.MeshBasicMaterial({ map: sky.tex, toneMapped: false });
+const WIN = { z: 10, y: 95, w: 130, h: 150 };
+const win = new THREE.Group(); win.position.set(ROOM.left + 0.5, WIN.y, WIN.z); win.rotation.y = Math.PI / 2; scene.add(win);
+front(WIN.w, WIN.h, skyMat, 0, 0, 0, win);
+const frameMat = std(0xe8e6e1, 0.5, 0);
+for (const [x, y, w, h] of [[0, WIN.h / 2, WIN.w + 8, 6], [0, -WIN.h / 2, WIN.w + 12, 7], [-WIN.w / 2, 0, 6, WIN.h + 6], [WIN.w / 2, 0, 6, WIN.h + 6], [0, 0, 4, WIN.h]])
+  mesh(BOX(w, h, 4), frameMat, x, y, 2, win);
+mesh(BOX(WIN.w + 16, 2, 12), frameMat, 0, -WIN.h / 2 - 3, 6, win);      /* rebord */
+for (let i = 0; i < 22; i++) { const s = mesh(BOX(WIN.w - 4, 2.6, 0.3), std(0xe6e3dc, 0.6, 0), 0, WIN.h / 2 - 6 - i * 2.4, 5, win, false); s.rotation.x = 0.5; }
+mesh(BOX(WIN.w, 4, 4), frameMat, 0, WIN.h / 2 - 2, 5, win);
+
+/* tableau blanc (mur du fond) : un schéma au feutre, comme en vrai */
+const wbTex = canvasTex(1800, 1000, (g, w, h) => {
+  g.fillStyle = '#f6f6f3'; g.fillRect(0, 0, w, h);
+  const gr = g.createLinearGradient(0, 0, w, h); gr.addColorStop(0, 'rgba(255,255,255,0)'); gr.addColorStop(.5, 'rgba(255,255,255,.6)'); gr.addColorStop(1, 'rgba(0,0,0,.04)');
+  g.fillStyle = gr; g.fillRect(0, 0, w, h);
+  g.lineCap = 'round'; g.lineJoin = 'round';
+  const pen = (c, lw) => { g.strokeStyle = c; g.fillStyle = c; g.lineWidth = lw; };
+  const wob = (x1, y1, x2, y2) => { g.beginPath(); g.moveTo(x1, y1); g.quadraticCurveTo((x1 + x2) / 2 + (Math.random() - .5) * 14, (y1 + y2) / 2 + (Math.random() - .5) * 14, x2, y2); g.stroke(); };
+  const box = (x, y, bw, bh, t) => { wob(x, y, x + bw, y); wob(x + bw, y, x + bw, y + bh); wob(x + bw, y + bh, x, y + bh); wob(x, y + bh, x, y); g.font = 'italic 46px "Segoe Print","Comic Sans MS",cursive'; g.fillText(t, x + 22, y + bh / 2 + 16); };
+  pen('#1d3f8a', 7); box(120, 160, 330, 130, 'référent'); box(720, 160, 330, 130, 'serveur'); box(1320, 160, 340, 130, 'PC (4G)');
+  wob(450, 225, 720, 225); wob(1050, 225, 1320, 225);
+  g.font = 'italic 38px "Segoe Print","Comic Sans MS",cursive'; g.fillText('SFTP', 540, 200); g.fillText('HTTPS', 1120, 200);
+  pen('#b3261e', 7); g.font = 'italic 52px "Segoe Print","Comic Sans MS",cursive'; g.fillText('signé + version ↑', 640, 420);
+  wob(620, 440, 1080, 445);
+  pen('#1f6b3a', 7); g.font = 'italic 44px "Segoe Print","Comic Sans MS",cursive';
+  g.fillText('T(t) = Ta + (T0 − Ta)·e^(−t/τ)', 140, 640); g.fillText('rosée ≈ 9,3 °C', 140, 720);
+  pen('#222', 5); wob(1250, 820, 1250, 560); wob(1250, 820, 1640, 820);
+  g.beginPath(); for (let i = 0; i <= 40; i++) { const x = 1250 + i * 9.5, y = 820 - 230 * (1 - Math.exp(-i / 12)); i ? g.lineTo(x, y) : g.moveTo(x, y); } g.stroke();
 });
-const deskTop = mesh(RB(240, 4, 122, 0.8), std(0xffffff, 0.78, 0, { map: deskTex.tex, envMapIntensity: 0.5 }), 0, -2, -10);
+const wb = new THREE.Group(); wb.position.set(-20, 105, ROOM.back + 1.2); scene.add(wb);
+front(176, 98, std(0xffffff, 0.22, 0, { map: wbTex.tex }), 0, 0, 0.6, wb);
+const wbFrame = std(0xbfc4c9, 0.35, 1);
+for (const [x, y, w, h] of [[0, 50, 182, 3], [0, -50, 182, 3], [-89.5, 0, 3, 100], [89.5, 0, 3, 100]]) mesh(BOX(w, h, 2), wbFrame, x, y, 0.4, wb);
+mesh(BOX(150, 1.6, 6), wbFrame, 0, -52, 3, wb);
+for (const [x, c] of [[-40, 0x1d3f8a], [-30, 0xb3261e], [-20, 0x1f6b3a]]) { const f = mesh(new THREE.CylinderGeometry(0.8, 0.8, 12, 12), std(c, 0.5), x, -50.4, 3, wb); f.rotation.z = Math.PI / 2; }
+
+/* bureau : plateau en chêne clair (stratifié), cadre en acier noir */
+const deskTex = canvasTex(2048, 1024, (g, w, h) => {
+  const gr = g.createLinearGradient(0, 0, w, h); gr.addColorStop(0, '#b78c5f'); gr.addColorStop(1, '#a87d52');
+  g.fillStyle = gr; g.fillRect(0, 0, w, h);
+  for (let i = 0; i < 260; i++) {                      /* fil du bois */
+    const y0 = Math.random() * h, amp = 4 + Math.random() * 14, f = 0.002 + Math.random() * 0.004, ph = Math.random() * 6;
+    g.strokeStyle = `rgba(${90 + Math.random() * 30},${52 + Math.random() * 20},${22},${0.04 + Math.random() * 0.12})`;
+    g.lineWidth = 0.8 + Math.random() * 2.6; g.beginPath();
+    for (let x = 0; x <= w; x += 16) { const y = y0 + Math.sin(x * f + ph) * amp + Math.sin(x * f * 3.1 + ph) * amp * 0.25; x ? g.lineTo(x, y) : g.moveTo(x, y); }
+    g.stroke();
+  }
+  for (let i = 0; i < 9000; i++) { g.fillStyle = `rgba(70,40,15,${Math.random() * 0.18})`; g.fillRect(Math.random() * w, Math.random() * h, 3 + Math.random() * 5, 1); }  /* pores */
+});
+const deskMat = new THREE.MeshPhysicalMaterial({ map: deskTex.tex, roughness: 0.48, roughnessMap: grain.tex, clearcoat: 0.28, clearcoatRoughness: 0.38 });
+const deskTop = mesh(RB(240, 3, 122, 0.9, 4), deskMat, 0, -1.5, -10);
 deskTop.castShadow = false;
-mesh(BOX(240.4, 1.2, 122.4), std(0x2c2f33, 0.5, 0.2), 0, -3.4, -10);
-for (const [x, z] of [[-114, -66], [114, -66], [-114, 46], [114, 46]]) mesh(BOX(5, 72, 5), M.darkMetal, x, -40, z);
-mesh(BOX(232, 4, 3), M.darkMetal, 0, -60, -66);
+const frameBlack = grained(0x18191c, 0.55, 0.6);
+mesh(BOX(226, 6, 4), frameBlack, 0, -6, -66, scene);
+mesh(BOX(226, 6, 4), frameBlack, 0, -6, 46, scene);
+for (const x of [-114, 114]) {
+  mesh(BOX(5, 70, 5), frameBlack, x, -38, -66); mesh(BOX(5, 70, 5), frameBlack, x, -38, 46);
+  mesh(BOX(5, 5, 118), frameBlack, x, -6, -10);
+  mesh(RB(6, 1.6, 8, 0.6), M.rubber, x, -75.2, -66); mesh(RB(6, 1.6, 8, 0.6), M.rubber, x, -75.2, 46);
+}
+mesh(BOX(226, 3, 3), frameBlack, 0, -60, -66);
+/* tapis antistatique sous la partie électronique (borne + banc) : contraste avec les plaques blanches */
+const matTex = canvasTex(512, 256, (g, w, h) => {
+  g.fillStyle = '#2d4a47'; g.fillRect(0, 0, w, h);
+  g.strokeStyle = 'rgba(255,255,255,.07)'; g.lineWidth = 1;
+  for (let x = 0; x < w; x += 16) { g.beginPath(); g.moveTo(x, 0); g.lineTo(x, h); g.stroke(); }
+  for (let y = 0; y < h; y += 16) { g.beginPath(); g.moveTo(0, y); g.lineTo(w, y); g.stroke(); }
+  g.fillStyle = '#d7b13a'; g.fillRect(w - 40, h - 40, 24, 24);   /* bouton de mise à la terre */
+});
+const esdMat = mesh(RB(90, 0.3, 42, 0.8, 2), std(0xffffff, 0.9, 0, { map: matTex.tex, roughnessMap: grain.tex }), 59, -0.13, 21, scene, false);
 
 /* =====================================================================
    4. Composants électroniques (cartes, capteurs, LED, fils)
@@ -339,7 +481,7 @@ const antMat = std(0xffffff, 0.4, 0.2, { map: antTex.tex });
 function makeESP32() {
   const g = new THREE.Group();
   mesh(BOX(5.2, 0.16, 2.85), M.pcbBlack, 0, 0, 0, g);
-  flat(5.2, 2.85, espSilkMat, 0, 0.082, 0, g);
+  flat(5.2, 2.85, espSilkMat, 0, 0.09, 0, g);
   mesh(BOX(2.55, 0.08, 1.8), M.modPCB, 1.3, 0.12, 0, g);
   mesh(RB(1.76, 0.3, 1.72, 0.04, 2), M.shield, 0.92, 0.31, 0, g);
   flat(1.6, 1.6, modMarkMat, 0.92, 0.462, 0, g);
@@ -393,7 +535,7 @@ function bbTex(w, h) {
 function makeBreadboard(w = 8.2, d = 5.5) {
   const g = new THREE.Group();
   mesh(RB(w, 0.85, d, 0.08, 2), M.plWhite, 0, -0.425, 0, g);
-  flat(w, d, std(0xcfcdc6, 0.6, 0, { map: bbTex(w, d).tex }), 0, 0.002, 0, g);
+  flat(w, d, std(0xe9e5dc, 0.6, 0, { map: bbTex(w, d).tex }), 0, 0.012, 0, g);
   return g;
 }
 
@@ -415,7 +557,7 @@ function rr(g, x, y, w, h, r) { g.beginPath(); g.moveTo(x + r, y); g.arcTo(x + w
 function makeRC522() {
   const g = new THREE.Group();
   mesh(BOX(4, 0.16, 6), M.pcbBlue, 0, 0, 0, g);
-  flat(4, 6, std(0xffffff, 0.45, 0.1, { map: rcTex.tex }), 0, 0.082, 0, g);
+  flat(4, 6, std(0xffffff, 0.45, 0.1, { map: rcTex.tex }), 0, 0.09, 0, g);
   mesh(BOX(1, 0.12, 1), M.chip, 0, 0.14, 1.0, g);
   for (const [x, z] of [[-1.6, -2.6], [1.6, -2.6], [-1.6, 2.6], [1.6, 2.6]]) mesh(new THREE.CylinderGeometry(0.18, 0.18, 1.2, 12), M.nylon, x, -0.68, z, g);
   mesh(BOX(2.03, 0.25, 0.25), M.plBlack, 0, 0.205, -2.7, g);
@@ -488,16 +630,16 @@ const keyTex = canvasTex(1024, 420, (g, w, h) => {
 /** Ordinateur portable. Origine = centre du dessous. Écran animé (canvas). */
 function makeLaptop({ body = 0x3a3f46, rugged = false, w = 32, d = 22 } = {}) {
   const g = new THREE.Group();
-  const bmat = std(body, 0.45, 0.6);
+  const bmat = grained(body, 0.42, 0.65, 0.006);
   mesh(RB(w, 1.8, d, 0.7), bmat, 0, 0.9, 0, g);
-  flat(w - 4, d * 0.42, std(0xffffff, 0.7, 0, { map: keyTex.tex }), 0, 1.805, -d * 0.12, g);
-  flat(10, 6, std(body, 0.3, 0.5, { color: new THREE.Color(body).multiplyScalar(1.15) }), 0, 1.806, d * 0.3, g);
+  flat(w - 4, d * 0.42, std(0xffffff, 0.7, 0, { map: keyTex.tex }), 0, 1.84, -d * 0.12, g);
+  flat(10, 6, std(body, 0.3, 0.5, { color: new THREE.Color(body).multiplyScalar(1.15) }), 0, 1.85, d * 0.3, g);
   const pivot = new THREE.Group(); pivot.position.set(0, 1.8, -d / 2 + 0.4); g.add(pivot);
   const lh = d - 0.8;
   mesh(RB(w, lh, 0.7, 0.35), bmat, 0, lh / 2, -0.1, pivot);
   const sc = canvasTex(1024, 640, () => {});
-  const scr = front(w - 2.2, lh - 2.4, makeScreenMat(sc), 0, lh / 2 + 0.2, 0.26, pivot);
-  mesh(BOX(w - 1.4, lh - 1.6, 0.05), M.glassDark, 0, lh / 2 + 0.2, 0.23, pivot, false);
+  const scr = front(w - 2.2, lh - 2.4, makeScreenMat(sc), 0, lh / 2 + 0.2, 0.36, pivot);
+  mesh(BOX(w - 1.4, lh - 1.6, 0.05), M.glassDark, 0, lh / 2 + 0.2, 0.29, pivot, false);
   pivot.rotation.x = -0.24;
   if (rugged) {
     for (const [x, z] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) mesh(RB(3.2, 2.4, 3.2, 0.5), M.orangeRub, x * (w / 2 - 1.2), 1.0, z * (d / 2 - 1.2), g);
@@ -520,11 +662,11 @@ const srvFront = canvasTex(400, 880, (g, w, h) => {
 function makeServer() {
   const g = new THREE.Group();
   mesh(RB(20, 44, 46, 0.8), M.darkMetal, 0, 22, 0, g);
-  front(19, 41.8, std(0xffffff, 0.5, 0.4, { map: srvFront.tex }), 0, 22, 23.02, g);
-  mesh(new THREE.TorusGeometry(0.9, 0.18, 12, 32), M.chrome, 6.5, 41, 23.1, g);
+  front(19, 41.8, std(0xffffff, 0.5, 0.4, { map: srvFront.tex, roughnessMap: grain.tex }), 0, 22, 23.08, g);
+  mesh(new THREE.TorusGeometry(0.9, 0.18, 12, 32), M.chrome, 6.5, 41, 23.16, g);
   const glow = (c) => new THREE.MeshBasicMaterial({ color: new THREE.Color(c).multiplyScalar(3), toneMapped: false });
-  const pwr = mesh(new THREE.CircleGeometry(0.35, 20), glow(0x32ff7a), 6.5, 41, 23.12, g, false);
-  const disk = mesh(new THREE.CircleGeometry(0.3, 20), glow(0xffa31a), 4.0, 41, 23.12, g, false);
+  const pwr = mesh(new THREE.CircleGeometry(0.35, 20), glow(0x32ff7a), 6.5, 41, 23.2, g, false);
+  const disk = mesh(new THREE.CircleGeometry(0.3, 20), glow(0xffa31a), 4.0, 41, 23.2, g, false);
   for (const [x, z] of [[-8, -20], [8, -20], [-8, 20], [8, 20]]) mesh(new THREE.CylinderGeometry(1.2, 1.2, 0.8, 16), M.rubber, x, -0.4 + 0.4, z, g);
   g.userData = { pwr, disk };
   return g;
@@ -550,11 +692,11 @@ const portLEDs = [];
 function makeSwitch() {
   const g = new THREE.Group();
   mesh(RB(SW.w, SW.h, SW.d, 0.25), M.plGray, 0, SW.h / 2, 0, g);
-  front(SW.w, SW.h, std(0xffffff, 0.45, 0.5, { map: swFront.tex }), 0, SW.h / 2, SW.d / 2 + 0.01, g);
+  front(SW.w, SW.h, std(0xffffff, 0.45, 0.5, { map: swFront.tex }), 0, SW.h / 2, SW.d / 2 + 0.05, g);
   for (let i = 0; i < 24; i++) {
     const p = portPx(i);
     const m = new THREE.MeshBasicMaterial({ color: new THREE.Color(0x2bff6a).multiplyScalar(0.15), toneMapped: false });
-    const led = mesh(new THREE.PlaneGeometry(0.16, 0.16), m, (p.x - 35) / 1760 * SW.w - SW.w / 2, SW.h - (p.y - 15) / 176 * SW.h, SW.d / 2 + 0.03, g, false);
+    const led = mesh(new THREE.PlaneGeometry(0.16, 0.16), m, (p.x - 35) / 1760 * SW.w - SW.w / 2, SW.h - (p.y - 15) / 176 * SW.h, SW.d / 2 + 0.09, g, false);
     portLEDs.push({ m, last: -9, used: false });
   }
   for (const x of [-20, 20]) for (const z of [-10, 10]) mesh(new THREE.CylinderGeometry(0.8, 0.8, 0.3, 12), M.rubber, x, 0.15, z, g);
@@ -568,7 +710,7 @@ function makeAP() {
   for (const x of [-6, 6]) {
     const a = mesh(RB(1.2, 15, 0.7, 0.3), M.plBlack, x, 9, -6.6, g); a.rotation.z = x < 0 ? 0.12 : -0.12;
   }
-  const led = mesh(new THREE.CircleGeometry(0.3, 16), new THREE.MeshBasicMaterial({ color: new THREE.Color(0x3d9bff).multiplyScalar(3), toneMapped: false }), 0, 1.4, 7.01, g, false);
+  const led = mesh(new THREE.CircleGeometry(0.3, 16), new THREE.MeshBasicMaterial({ color: new THREE.Color(0x3d9bff).multiplyScalar(3), toneMapped: false }), 0, 1.4, 7.06, g, false);
   return g;
 }
 
@@ -576,7 +718,7 @@ function makePhone() {
   const g = new THREE.Group();
   mesh(RB(7.5, 0.8, 15.6, 0.38, 4), std(0x0e0f11, 0.3, 0.6), 0, 0.4, 0, g);
   const sc = canvasTex(360, 750, () => {});
-  flat(7.0, 15.0, makeScreenMat(sc), 0, 0.81, 0, g);
+  flat(7.0, 15.0, makeScreenMat(sc), 0, 0.85, 0, g);
   return { g, screen: sc };
 }
 
@@ -587,7 +729,7 @@ function makeMonitor() {
   const panel = new THREE.Group(); panel.position.set(0, 26, -1.5); panel.rotation.x = -0.06; g.add(panel);
   mesh(RB(56, 33.5, 2.4, 0.6), std(0x16181b, 0.4, 0.4), 0, 0, 0, panel);
   const sc = canvasTex(1280, 740, () => {});
-  front(54, 31.2, makeScreenMat(sc), 0, 0.3, 1.22, panel);
+  front(54, 31.2, makeScreenMat(sc), 0, 0.3, 1.28, panel);
   return { g, screen: sc };
 }
 
@@ -595,8 +737,8 @@ function makeSFF() {
   const g = new THREE.Group();
   mesh(RB(9, 30, 28, 0.6), std(0x202327, 0.45, 0.6), 0, 15, 0, g);
   const glow = new THREE.MeshBasicMaterial({ color: new THREE.Color(0x4fc3ff).multiplyScalar(3), toneMapped: false });
-  mesh(new THREE.CircleGeometry(0.4, 16), glow, 0, 27, 14.02, g, false);
-  for (const y of [21, 19]) mesh(BOX(1.4, 0.6, 0.1), M.plBlack, 0, y, 14.02, g, false);
+  mesh(new THREE.CircleGeometry(0.4, 16), glow, 0, 27, 14.06, g, false);
+  for (const y of [21, 19]) mesh(BOX(1.4, 0.6, 0.1), M.plBlack, 0, y, 14.06, g, false);
   return g;
 }
 
@@ -633,7 +775,7 @@ const sw = makeSwitch(); sw.position.set(-32, 0, -50); scene.add(sw);
 const ap = makeAP(); ap.position.set(10, 0, -54); ap.rotation.y = -0.15; scene.add(ap);
 const mon = makeMonitor(); mon.g.position.set(62, 0, -46); mon.g.rotation.y = -0.12; scene.add(mon.g);
 const sff = makeSFF(); sff.position.set(100, 0, -46); sff.rotation.y = -0.12; scene.add(sff);
-const refPC = makeLaptop({ body: 0x9aa1a9 }); refPC.g.position.set(-82, 0, 16); refPC.g.rotation.y = 0.32; scene.add(refPC.g);
+const refPC = makeLaptop({ body: 0xa4a9b0 }); refPC.g.position.set(-82, 0, 16); refPC.g.rotation.y = 0.32; scene.add(refPC.g);
 const lap = makeLaptop({ body: 0x34383e, rugged: true }); const LAP_HOME = new THREE.Vector3(-26, 0, 14); lap.g.position.copy(LAP_HOME); scene.add(lap.g);
 const phone = makePhone(); phone.g.position.set(4, 0, 27); phone.g.rotation.y = -0.35; scene.add(phone.g);
 const mast = makeMast(); mast.position.set(-330, -76, -520); scene.add(mast);
@@ -730,6 +872,34 @@ const owCable = cable([W(banc, V(-0.2, 2.1, 0)), W(banc, V(0.6, 2.0, 0.6)), W(ba
 /* câble USB banc → PC du lycée (données série) */
 const usbA = W(esp2, V(-2.75, 0.22, 0));
 const usbBanc = cable([usbA, usbA.clone().add(V(-1.5, -0.6, 0)), V(usbA.x - 4, 0.25, usbA.z - 6), V(96, 0.25, -12), V(99, 0.25, -24), W(sff, V(0, 20, 14.3))], M.cableBlack, 0.22);
+
+/* ---- Petits objets du quotidien : ils donnent l'échelle et rendent la scène crédible ---- */
+{
+  /* tasse (profil tourné) */
+  const mug = new THREE.Group(); mug.position.set(-110, 0, 40); scene.add(mug);
+  const prof = [[0, 0], [3.6, 0], [3.9, 0.4], [4.0, 9], [3.7, 9], [3.6, 0.9], [0, 0.9]].map(([x, y]) => new THREE.Vector2(x, y));
+  const cer = new THREE.MeshPhysicalMaterial({ color: 0xece7de, roughness: 0.25, clearcoat: 0.6 });
+  mesh(new THREE.LatheGeometry(prof, 40), cer, 0, 0, 0, mug);
+  mesh(new THREE.CylinderGeometry(3.62, 3.62, 0.1, 32), std(0x3a2116, 0.2), 0, 6.8, 0, mug, false);
+  const handle = mesh(new THREE.TorusGeometry(2.3, 0.45, 12, 24, Math.PI), cer, 4.0, 4.5, 0, mug); handle.rotation.z = -Math.PI / 2;
+  mesh(new THREE.CylinderGeometry(4.02, 4.02, 1.4, 40, 1, true), std(0x2d4a47, 0.5), 0, 6.2, 0, mug, false);
+  /* cahier et stylo */
+  const nb = new THREE.Group(); nb.position.set(-52, 0, 40); nb.rotation.y = 0.22; scene.add(nb);
+  mesh(RB(15, 0.9, 21, 0.25, 2), std(0xf2efe6, 0.8), 0, 0.45, 0, nb);
+  mesh(RB(15.2, 0.12, 21.2, 0.2, 2), grained(0x2f5d62, 0.7, 0, 0.02), 0, 0.96, 0, nb);
+  mesh(BOX(0.6, 0.14, 21.3), std(0x1e3c40, 0.6), -7.3, 0.98, 0, nb);
+  const pen = mesh(new THREE.CylinderGeometry(0.42, 0.42, 14, 16), std(0x1b1d22, 0.35, 0.5), 9.5, 0.45, 2, nb); pen.rotation.x = Math.PI / 2; pen.rotation.z = 0.15;
+  /* plante (coin arrière droit) */
+  const pl = new THREE.Group(); pl.position.set(112, 0, -62); scene.add(pl);
+  mesh(new THREE.CylinderGeometry(5.5, 4.2, 11, 32), grained(0xe7e2d8, 0.5, 0, 0.01), 0, 5.5, 0, pl);
+  mesh(new THREE.CylinderGeometry(5.1, 5.1, 0.3, 32), std(0x2a1d14, 1), 0, 10.4, 0, pl, false);
+  const leafMat = std(0x3f7a4c, 0.55, 0, { side: THREE.DoubleSide });
+  const leafGeo = new THREE.SphereGeometry(1, 16, 8); leafGeo.scale(2.2, 0.25, 7.5); leafGeo.translate(0, 0, 7);
+  for (let i = 0; i < 14; i++) {
+    const l = mesh(leafGeo, i % 3 ? leafMat : std(0x4d8c58, 0.55, 0), 0, 10.5, 0, pl);
+    l.rotation.order = 'YXZ'; l.rotation.y = i * 2.4; l.rotation.x = -0.5 - (i % 4) * 0.25; l.scale.setScalar(0.8 + (i % 5) * 0.1);
+  }
+}
 
 /* ---- Câbles Ethernet (vers les ports du switch) ---- */
 const P_SRV = 0, P_REF = 2, P_AP = 4, P_LAB = 6;
@@ -1323,6 +1493,22 @@ $('#mMaq').onclick = () => setTerrain(false);
 $('#mTer').onclick = () => setTerrain(true);
 $('#bLab').onclick = e => { showLabels = !showLabels; e.currentTarget.setAttribute('aria-pressed', showLabels); refreshLabels(); if (cur === 7) readDS.visible = readSHT.visible = showLabels; };
 $('#bSnd').onclick = e => { soundOn = !soundOn; e.currentTarget.setAttribute('aria-pressed', soundOn); };
+/* ambiance nuit / jour (mémorisée dans le navigateur si possible) */
+let amb = 'nuit';
+function setAmbiance(name) {
+  amb = PAL[name] ? name : 'nuit'; const p = PAL[amb];
+  scene.background.set(p.bg); scene.fog.color.set(p.bg); scene.fog.near = p.fog[0]; scene.fog.far = p.fog[1];
+  wallMat.color.set(p.wall); floorMat.color.set(p.floor);
+  key.color.set(p.key); key.intensity = p.keyI; rim.color.set(p.win); rim.intensity = p.winI;
+  hemi.color.set(p.hemiS); hemi.groundColor.set(p.hemiG); hemi.intensity = p.hemiI;
+  renderer.toneMappingExposure = p.exp; skyMat.color.setScalar(p.sky); drawSky(p);
+  document.documentElement.dataset.amb = amb;
+  $('#bAmb').textContent = 'Ambiance : ' + amb;
+  try { localStorage.setItem('maquette3d-amb', amb); } catch (e) { /* stockage indisponible */ }
+}
+$('#bAmb').onclick = () => setAmbiance(amb === 'nuit' ? 'jour' : 'nuit');
+{ let saved = null; try { saved = localStorage.getItem('maquette3d-amb'); } catch (e) { /* rien */ }
+  setAmbiance(new URLSearchParams(location.search).get('amb') || saved || 'nuit'); }
 addEventListener('keydown', e => {
   if (e.key === 'ArrowRight') goStep(cur + 1);
   else if (e.key === 'ArrowLeft') goStep(cur - 1);
