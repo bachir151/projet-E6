@@ -84,11 +84,11 @@ def save(name, content):
 # ---------------------------------------------------------------- synoptique
 def synoptique():
     b = [text(30, 34, "Synoptique de la maquette au lycée (réseau de laboratoire isolé, aucune donnée réelle)", 16, "bold", anchor="start")]
-    b.append(box(30, 60, 300, 160, "Boîtier de présence", ["radar 24 GHz (LD2410)", "ESP32 + lumière tricolore", "chaque message signé (HMAC)", "sous le bureau, face au siège"], hl=True))
-    b.append(box(420, 60, 330, 200, "Poste Windows 11 (VM)", ["service de présence (SYSTÈME)", "journal « PostePresence »", "tâche « Verrou » (session agent)", "tâche « Maintenance » (V2)", "script d’installation à paliers"]))
+    b.append(box(30, 60, 300, 160, "Boîtier de présence", ["radar 24 GHz (LD2410)", "ESP32 + lumière tricolore", "chaque message signé (HMAC)", "sur le bureau, branché en USB"], hl=True))
+    b.append(box(420, 60, 330, 200, "Poste Windows 11 (VM)", ["service de présence (SYSTÈME)", "verrou local dans la session agent", "agent PowerShell : états du poste", "redémarrage en attente, version", "maintenance à la prochaine absence (V2)"]))
     b.append(arrow(330, 140, 418, 140, "USB série", ly=132, both=True))
-    b.append(box(840, 60, 290, 150, "Serveur Ubuntu", ["API Python (FastAPI), SQLite", "liste des installations", "tableau de bord du parc", "partage des paquets (SMB)"], hl=True))
-    b.append(arrow(750, 130, 838, 130, "HTTPS + jeton", ly=122))
+    b.append(box(840, 60, 290, 150, "Serveur Ubuntu", ["API Python (FastAPI), SQLite", "états et événements des postes", "tableau de bord du parc", "partage des paquets (SMB)"], hl=True))
+    b.append(arrow(750, 130, 838, 130, "HTTPS : états, événements", ly=122))
     b.append(arrow(750, 190, 838, 190, "SMB (paquets)", ly=182))
     b.append(box(420, 330, 330, 110, "Contrôleur de domaine commun", ["AD DS, DNS, DHCP, NTP", "GPO : blocage après 10 min (filet)", "préparé par l’enseignant"]))
     b.append(arrow(585, 328, 585, 262, "Kerberos, LDAP, DNS, SMB", lx=595, ly=300, both=True, anchor="start"))
@@ -98,7 +98,7 @@ def synoptique():
     b.append(arrow(985, 248, 985, 212, "HTTPS", lx=995, ly=235, anchor="start"))
     b.append(box(30, 300, 300, 100, "Outil de déploiement réel", ["en entreprise : il garde la liste", "des logiciels (extension)"], dashed=True))
     b.append(arrow(330, 340, 418, 245, "« quand » l’agent est absent", lx=250, ly=285, dashed=True, anchor="start"))
-    b.append(text(30, 480, "En bleu : réalisé par l’apprenti (boîtier, serveur). La présence ne quitte jamais le poste : le serveur ne reçoit ni heures ni durées d’absence.", 13, fill=GREY, anchor="start"))
+    b.append(text(30, 480, "En bleu : réalisé par l’apprenti (boîtier, serveur). Le verrouillage reste local (il marche sans serveur) ; le serveur ne reçoit ni heures ni durées d’absence.", 13, fill=GREY, anchor="start"))
     save("0_synoptique", svg(1160, 500, "".join(b)))
 
 
@@ -130,9 +130,9 @@ def exigences():
         ("E3 – Agent seul", ["Le collègue voisin ou le", "passant n’est pas compté :", "agent parti, écran bloqué"], "R2, R3, T04"),
         ("E4 – Vrai boîtier", ["Chaque message signé ;", "un faux boîtier est", "démasqué"], "T06, T19, T20"),
         ("E5 – Filet", ["Boîtier débranché ou", "masqué : le blocage", "après 10 min reste actif"], "T05"),
-        ("E6 – Bon moment", ["Aucune installation devant", "l’agent ; retour au milieu", "sans perte (V2)"], "T07–T11, R6"),
+        ("E6 – Bon moment", ["Après 2 reports, maintenance", "à la prochaine absence,", "jamais devant l’agent (V2)"], "T07–T11, R6"),
         ("E7 – Vie privée", ["Aucune heure ni durée", "d’absence envoyée", "au serveur"], "T23"),
-        ("E8 – Données du parc", ["Tableau de bord : réussites,", "reports et raisons, postes", "en retard (V2)"], "démonstration"),
+        ("E8 – Données du parc", ["Tableau de bord : verrous,", "reports, redémarrages en", "attente (V2)"], "démonstration"),
     ]
     xs = [30, 300, 570, 840]
     ys = [205, 395]
@@ -199,9 +199,9 @@ def cas():
         (420, 185, "Être averti puis bloqué", "au départ"),
         (700, 185, "Vérifier le boîtier", "(message signé)"),
         (420, 265, "Retrouver son poste", "au retour"),
-        (700, 345, "Installer pendant", "une absence (V2)"),
+        (700, 345, "Maintenance à la prochaine", "absence (V2)"),
         (420, 345, "Programmer une", "installation (V2)"),
-        (420, 425, "Installer un poste neuf", "(simulation puis réel)"),
+        (420, 425, "Superviser l’état", "des postes (V2)"),
         (420, 505, "Enrôler le boîtier", "(appui physique)"),
         (420, 585, "Consulter le tableau", "de bord du parc (V2)"),
     ]
@@ -223,7 +223,7 @@ def cas():
 
 # ---------------------------------------------------------------- séquence
 def sequence():
-    b = [text(30, 30, "Diagramme de séquence (sd) – l’agent part, l’écran se bloque, une installation profite de l’absence", 16, "bold", anchor="start")]
+    b = [text(30, 30, "Diagramme de séquence (sd) – l’agent part, l’écran se bloque localement, la maintenance en attente profite de l’absence", 16, "bold", anchor="start")]
     L = {"agt": 110, "brt": 360, "pst": 640, "srv": 930}
     names = {"agt": "Agent", "brt": ":Boîtier", "pst": ":Poste (service)", "srv": ":Serveur"}
     top, bottom = 60, 700
@@ -258,11 +258,12 @@ def sequence():
     b.append(msg("brt", "pst", y + 95, "3. « personne » + preuve"))
     b.append(self_("pst", y + 107, "4. 5 s confirmées → événement 110"))
     b.append(msg("pst", "brt", y + 160, "5. lumière orange (3 s)", ret=True))
-    b.append(self_("pst", y + 172, "6. événement 120 → tâche « Verrou » :", "session bloquée (événement 4800)"))
+    b.append(self_("pst", y + 172, "6. programme local dans la session :", "session verrouillée (événement 4800)"))
     b.append(msg("pst", "brt", y + 235, "7. lumière rouge", ret=True))
+    b.append(msg("pst", "srv", y + 255, "7b. POST événement « verrou » (sans heure d’absence)"))
     b.append(text(125, y + 275, "20 minutes d’absence (V2)", 12.5, BLUE, anchor="start", italic=True))
-    b.append(msg("pst", "srv", y + 298, "8. GET liste des installations (HTTPS)"))
-    b.append(self_("pst", y + 310, "9. empreinte vérifiée, logiciel fermé ?", "→ msiexec /qn /norestart"))
+    b.append(msg("pst", "srv", y + 298, "8. GET maintenance en attente (2 reports faits)"))
+    b.append(self_("pst", y + 310, "9. logiciel ouvert ? sinon installation", "ou redémarrage en attente"))
     b.append(msg("pst", "srv", y + 372, "10. POST résultat : jour, sans heure (jeton)"))
     b.append(text(125, y + 412, "L’agent revient", 12.5, BLUE, anchor="start", italic=True))
     b.append(msg("brt", "pst", y + 435, "11. « présent » → événement 100, lumière verte"))
@@ -287,15 +288,15 @@ def gantt():
         ("Boîtier : montage, firmware, lumière", (D(2027, 1, 18), D(2027, 2, 12)), "c8"),
         ("Physique R1–R3 : seuils et zone", (D(2027, 2, 1), D(2027, 2, 26)), "phy"),
         ("Message signé + enrôlement du boîtier", (D(2027, 2, 8), D(2027, 2, 26)), "c8"),
-        ("Service de présence + blocage", (D(2027, 2, 15), D(2027, 3, 12)), "c8"),
+        ("Service de présence + verrou local", (D(2027, 2, 15), D(2027, 3, 12)), "c8"),
         ("Physique R4–R5 : délai, fausses alertes", (D(2027, 3, 1), D(2027, 3, 19)), "phy"),
         ("Captures réseau : DHCP, DNS, Kerberos, SMB, HTTPS", (D(2027, 2, 22), D(2027, 4, 2)), "c10"),
         ("Recette V1", (D(2027, 3, 8), D(2027, 3, 19)), "c10"),
         ("Poste Windows 11 réinstallé (fin des 90 jours)", (D(2027, 4, 5), D(2027, 4, 9)), "c10"),
         ("V2 – installer au bon moment", None),
-        ("Installation pendant les absences", (D(2027, 3, 22), D(2027, 4, 23)), "c8"),
-        ("Serveur + tableau de bord du parc", (D(2027, 3, 29), D(2027, 4, 30)), "c8"),
-        ("Poste neuf : script à paliers", (D(2027, 4, 19), D(2027, 4, 30)), "c8"),
+        ("Maintenance à la prochaine absence (2 reports)", (D(2027, 3, 22), D(2027, 4, 23)), "c8"),
+        ("Agent PowerShell, API, tableau de bord", (D(2027, 3, 29), D(2027, 4, 30)), "c8"),
+        ("États : redémarrage en attente, version", (D(2027, 4, 19), D(2027, 4, 30)), "c8"),
         ("Essai R6 : apport mesuré", (D(2027, 4, 26), D(2027, 5, 7)), "c10"),
         ("Dossier et préparation de l’oral", (D(2027, 5, 3), D(2027, 5, 14)), "c1"),
         ("Journal de bord, suivi IA, réunions (tout le long)", (D(2027, 1, 4), D(2027, 5, 14)), "c3"),

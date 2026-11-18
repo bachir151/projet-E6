@@ -254,40 +254,49 @@ R = Redac(P[38])
 R.titre("Contexte")
 R.texte("Lorenzo est apprenti dans une administration qui traite des données couvertes par le secret "
         "professionnel. Il intervient surtout sur les postes des ", ("employés de bureau", "g"), " (bureaux "
-        "partagés, plateaux ouverts), et aussi sur quelques postes d’accueil qui reçoivent du public. Il installe "
-        "les logiciels des nouveaux agents et s’occupe des postes, des comptes et des stratégies de groupe. Le service est déjà bien équipé : image toute prête "
-        "pour chaque poste neuf, règles imposées par l’annuaire, outils qui distribuent logiciels et mises à jour.")
+        "partagés, plateaux ouverts), et aussi sur quelques postes d’accueil qui reçoivent du public. Il prépare "
+        "les postes à partir de l’image Windows 11 de l’administration, ouvre les premières sessions des nouveaux agents et "
+        "installe écrans et imprimantes avec ses collègues, sans droits d’administrateur. Le parc est fait de portables, posés "
+        "sur une station d’accueil au bureau et parfois emportés à domicile. L’annuaire (AD) et les stratégies de groupe sont "
+        "gérés au niveau national, hors du site.")
 R.titre("Le problème")
 R.texte(("Quand l’agent quitte son poste, l’ordinateur ne le sait pas.", "g"), " Il voit seulement si l’on touche "
         "le clavier. Première conséquence : ", ("la session reste ouverte", "g"), " jusqu’au blocage automatique, "
         "après environ 10 minutes. Pendant ce temps, un collègue non habilité, un visiteur ou un prestataire peut "
         "lire un dossier, ou agir au nom de l’agent. Aux postes d’accueil, c’est le public qui voit l’écran. "
-        "Deuxième conséquence : ", ("les installations tombent mal", "g"), ", pendant que l’agent travaille, alors "
-        "que ses vraies absences (réunion, déjeuner) restent inutilisées. Inactif ne veut pas dire absent.")
+        "Deuxième conséquence : ", ("les mises à jour dérangent", "g"), " : une fenêtre demande « installer "
+        "maintenant ? oui / non » ; après 2 ou 3 refus, l’installation est imposée, souvent devant l’agent. Ses vraies "
+        "absences (réunion, déjeuner) restent inutilisées. Inactif ne veut pas dire absent.")
 R.titre("Principe de la solution")
-R.texte("Un ", ("boîtier de présence", "g"), " (radar 24 GHz, ESP32, lumière tricolore), fixé sous le bureau et "
-        "branché en USB, dit chaque seconde si quelqu’un est assis, même immobile : le radar voit la respiration, "
-        "sans aucune image. Un ", ("service Windows", "g"), " transforme cette information en deux actions : "
-        "bloquer l’écran quelques secondes après le départ (avec un avertissement orange), et lancer les "
-        "installations prévues ", ("pendant les absences", "g"), ", jamais devant l’agent. Le boîtier complète "
-        "les outils de déploiement de l’administration : ils savent quoi installer, il dit quand.")
+R.texte("Trois parties, chacune avec son rôle. ", ("L’ESP32 s’occupe du monde physique", "g"), " : un boîtier "
+        "(radar 24 GHz, lumière tricolore) posé sur le bureau et branché en USB dit chaque seconde si quelqu’un est assis, "
+        "même immobile (le radar voit la respiration, sans aucune image) ; chaque message est signé. ",
+        ("PowerShell s’occupe de Windows", "g"), " : un service local verrouille la session quelques secondes après le "
+        "départ, avec un avertissement orange, ", ("sans dépendre du serveur ni du réseau", "g"), " ; un agent relève "
+        "l’état du poste (redémarrage en attente, version de Windows). ", ("Le serveur Ubuntu centralise", "g"),
+        " : une API Python reçoit les états et les événements, un tableau de bord les affiche. En V2, la maintenance "
+        "imposée après 2 reports se fait ", ("à la prochaine absence", "g"), ", jamais devant l’agent.")
 R.image(IMG("0_synoptique"), 17.6, "Synoptique de l’architecture (maquette de démonstration).")
 R.titre("Progression du projet")
-R.puce(("V1 (obligatoire, ≈ 108 h) : ", "g"), "boîtier, service de présence, blocage avec avertissement, "
-       "messages signés (faux boîtier refusé), filet de sécurité GPO, essais de physique R1 à R5, exploitation du réseau.")
-R.puce(("V2 (visée, ≈ 40 h) : ", "g"), "installations pendant les absences, retour de l’agent sans perte, serveur, "
-       "tableau de bord du parc, mesure de l’apport (essai R6), installation d’un poste neuf à paliers.")
-R.puce(("Extensions : ", "g"), "assistant de réglage, détection d’un radar masqué, veille du soir, fiche de "
-       "contrôle d’un poste neuf, lien avec l’outil de déploiement réel.")
+R.puce(("V1 (obligatoire, ≈ 108 h) : ", "g"), "boîtier, messages signés (faux boîtier refusé), service de présence, "
+       "verrou local avec avertissement, filet de sécurité GPO, événements envoyés à l’API, essais de physique R1 à R5, "
+       "exploitation du réseau.")
+R.puce(("V2 (visée, ≈ 40 h) : ", "g"), "maintenance en attente faite à la prochaine absence (règle des 2 reports), "
+       "retour de l’agent sans perte, agent PowerShell (redémarrage en attente, version de Windows), tableau de bord "
+       "du parc, mesure de l’apport (essai R6).")
+R.puce(("Extensions : ", "g"), "assistant de réglage, détection d’un radar masqué, mode « hors bureau » complet, "
+       "réveil du week-end, autres informations de supervision.")
 R.titre("Limites de l’étude")
-R.puce("Maquette sur un réseau de laboratoire isolé : aucun accès au système d’information de l’entreprise, "
-       "aucune donnée réelle ; Windows Update n’est pas testable (paquets MSI de test à la place).")
+R.puce("Maquette sur un réseau de laboratoire isolé : aucun accès au système d’information ni à l’annuaire national, "
+       "aucune donnée réelle ; Windows Update n’est pas piloté (paquets MSI de test à la place).")
+R.puce("Les mises à jour ne contournent pas les règles de l’administration : le projet choisit seulement le moment, "
+       "dans les limites fixées par les administrateurs.")
 R.puce("La sécurité ne dépend jamais du boîtier seul : débranché ou masqué, le blocage après inactivité reste actif.")
 R.puce("Aucune caméra. La présence ne quitte jamais le poste : le serveur ne reçoit ni heures ni durées d’absence.")
 R.puce("La maintenance ne ferme aucun logiciel et ne redémarre jamais une session ouverte.")
 R.titre("Attentes du client")
 R.puce("Un écran protégé en quelques secondes quand l’agent s’éloigne, sans le gêner quand il lit.")
-R.puce("Des installations faites pendant les absences, qui ne dérangent plus les agents dans leur travail.")
+R.puce("Garder la règle « 2 ou 3 refus puis installation imposée », mais l’imposer pendant une absence, plus devant l’agent.")
 R.puce("Une vue claire de l’état du parc, sans surveiller les personnes.")
 
 # ================================================================== 1.3 DOMAINE
@@ -319,13 +328,13 @@ R = Redac(P[47])
 R.titre("Besoins exprimés par le tuteur")
 R.puce(("Besoin 1 – ", "g"), "ne plus laisser de session ouverte quand l’agent quitte son bureau (collègues, visiteurs, "
        "prestataires ; public aux postes d’accueil).")
-R.puce(("Besoin 2 – ", "g"), "installer les logiciels et maintenances sans déranger les agents.")
+R.puce(("Besoin 2 – ", "g"), "faire les mises à jour et maintenances sans déranger les agents, en gardant la règle des refus limités.")
 R.titre("Hypothèses chiffrées (fictives, à valider par le tuteur)")
-R.puce("40 postes : 32 postes de bureau, souvent en bureau partagé, et 8 postes d’accueil ; 6 à 10 départs du "
-       "poste par agent et par jour, dont 1 à 2 absences de plus de 20 minutes (réunion, déjeuner).")
-R.puce("Blocage actuel après 10 minutes d’inactivité ; 4 installations par poste et par mois ; 15 % de postes en "
-       "retard faute d’être disponibles.")
-R.puce("Agents non administrateurs de leur poste ; périphérique USB de type port série autorisé (à confirmer).")
+R.puce("40 portables sur station d’accueil, souvent en bureau partagé, dont quelques postes d’accueil ; 6 à 10 départs "
+       "du poste par agent et par jour, dont 1 à 2 absences de plus de 20 minutes (réunion, déjeuner).")
+R.puce("Blocage actuel après 10 minutes d’inactivité (à confirmer) ; 4 maintenances par poste et par mois ; "
+       "2 reports permis, puis installation imposée (règle confirmée par le tuteur : 2 ou 3).")
+R.puce("Agents non administrateurs de leur poste (confirmé) ; périphérique USB de type port série autorisé (à confirmer).")
 R.titre("Exigences et indicateurs mesurés sur la maquette")
 R.tableau(
     ["Exigence", "Indicateur mesuré", "Vérification", "Étape"],
@@ -335,15 +344,16 @@ R.tableau(
         ["E3 – Agent seul", "Le collègue du bureau voisin ou une personne qui passe n’est pas compté : agent parti, écran bloqué", "R2, R3, T04", "V1"],
         ["E4 – Vrai boîtier", "Chaque message signé ; faux boîtier démasqué ; enrôlement seulement avec appui physique", "T06, T19, T20", "V1"],
         ["E5 – Filet de sécurité", "Boîtier débranché ou radar masqué : alerte, blocage GPO toujours actif", "T05", "V1"],
-        ["E6 – Installer au bon moment", "Aucune installation devant l’agent ; retour au milieu sans perte ; nombre d’installations évitées devant l’agent, mesuré", "T07–T11, R6", "V2"],
+        ["E6 – Maintenir au bon moment", "Après 2 reports, maintenance faite à la prochaine absence, jamais devant l’agent ; retour au milieu sans perte ; nombre d’installations évitées, mesuré", "T07–T11, R6", "V2"],
         ["E7 – Vie privée", "Aucune heure ni durée d’absence dans la base du serveur", "T23", "V1–V2"],
-        ["E8 – Données du parc", "Tableau de bord : installations réussies, reports et raisons, postes en retard", "démonstration", "V2"],
+        ["E8 – Données du parc", "Tableau de bord : verrouillages et reports par poste, redémarrages en attente, version de Windows", "démonstration", "V2"],
+        ["E9 – Verrou autonome", "Serveur arrêté ou câble réseau débranché : la session se verrouille quand même", "T12", "V1"],
     ],
     [3.6, 10.0, 3.1, 1.4])
 R.titre("Niveaux de sécurité")
 R.texte("Tout ce qui agit sur un poste suit trois paliers : ", ("simulation", "g"), " (journalise ce qui serait fait), ",
         ("confirmation", "g"), " humaine, puis ", ("automatique", "g"), " après recette. Cela vaut pour les "
-        "installations et pour le script d’installation d’un poste neuf.")
+        "maintenances imposées à la prochaine absence.")
 
 # ================================================================== 2.1 SYSML
 R = Redac(P[52])
@@ -363,8 +373,11 @@ R = Redac(P[60])
 R.puce(("Poste : ", "g"), "Windows 11 Entreprise en évaluation (90 jours), en machine virtuelle VirtualBox sur un PC "
        "Ubuntu, membre du domaine ; radar transmis par USB à la machine virtuelle ; réinstallation prévue "
        "début avril (fin des 90 jours), après export des journaux et des mesures ; service PowerShell au compte "
-       "SYSTÈME, journal dédié, tâches planifiées « sur événement », stratégie AllSigned.")
-R.puce(("Serveur : ", "g"), "Ubuntu Server, API Python FastAPI, base SQLite, partage Samba des paquets MSI de test.")
+       "SYSTÈME (présence, états du poste) ; le verrou est fait par un petit programme lancé dans la session de l’agent "
+       "(tâche planifiée à l’ouverture de session), car un service ne peut pas verrouiller une session lui-même ; "
+       "journal dédié, stratégie AllSigned ; déploiement avec PSAppDeployToolkit.")
+R.puce(("Serveur : ", "g"), "Ubuntu Server, API Python FastAPI (états et événements des postes), base SQLite, tableau de bord web, "
+       "partage Samba des paquets MSI de test.")
 R.puce(("Boîtier : ", "g"), "ESP32 programmé en C++ (Arduino) ; radar LD2410 en liaison série à 256 000 bauds ; "
        "messages signés en HMAC-SHA256.")
 R.puce(("Réseau : ", "g"), "réseau de laboratoire isolé (switchs HP ProCurve, routeur Cisco ISR 4331), exploité "
@@ -411,11 +424,11 @@ c1 = t.cell(1, 1)
 lst = [
     "Projet individuel : toutes les fonctions.",
     "F1 Détecter la présence (radar)",
-    "F2 Avertir puis bloquer l’écran",
+    "F2 Avertir puis verrouiller (local, sans serveur)",
     "F3 Prouver que le boîtier est le vrai",
     "F4 Garder le filet de sécurité",
-    "F5 Installer pendant une absence (V2)",
-    "F6 Installer un poste neuf à paliers (V2)",
+    "F5 Remonter événements et états à l’API",
+    "F6 Maintenance à la prochaine absence (V2)",
     "F7 Tableau de bord du parc (V2)",
     "F8 Protéger la vie privée",
 ]
@@ -428,13 +441,13 @@ for i, s in enumerate(lst):
 textes = {
     "Installation": "serveur Ubuntu (FastAPI, SQLite, Samba), poste Windows 11 de test, paquets MSI de test, "
                     "outils de développement et de capture.",
-    "Mise en œuvre": "boîtier de présence (radar LD2410, ESP32, LED RVB) placé sous le bureau, face au siège ; "
+    "Mise en œuvre": "boîtier de présence (radar LD2410, ESP32, LED RVB) posé sur le bureau, face au siège, branché sur la station d’accueil ; "
                      "réglage de la zone de détection à partir des mesures.",
     "Configuration": "journal dédié protégé, tâches « sur événement », stratégie AllSigned, jetons et TLS de "
                      "l’API ; vérification des GPO du domaine commun (inactivité, audit 4800/4801) ; exploitation "
                      "du réseau en place.",
     "Réalisation": "firmware du boîtier, service de présence (machine à états), messages signés et enrôlement, "
-                   "orchestrateur d’installation, serveur et tableau de bord du parc, essais R1 à R6, recette T01 à T24.",
+                   "programme de verrou dans la session, agent PowerShell (états), API et tableau de bord du parc, maintenance à la prochaine absence, essais R1 à R6, recette T01 à T24.",
     "Documentation": "dossier technique, procédure d’enrôlement, protocoles et résultats des essais, procès-verbal "
                      "de recette, journal de bord et journal IA, support d’oral.",
 }
@@ -460,7 +473,7 @@ R.puce(("C01 Communiquer : ", "g"), "revues de projet, échanges avec le tuteur 
 R.puce(("C03 Gérer un projet : ", "g"), "planning, journal de bord, passage V1 → V2 décidé en revue, suivi des "
        "risques (vie privée, USB, fausses détections) et du budget.")
 R.puce(("C08 Coder : ", "g"), "C++ sur ESP32 (lecture des trames radar, HMAC), PowerShell (service, tâches, "
-       "orchestrateur, script à paliers), Python FastAPI et SQL (serveur, tableau de bord).")
+       "verrou dans la session, agent d’état, PSAppDeployToolkit), Python FastAPI et SQL (API, tableau de bord).")
 R.puce(("C10 Exploiter un réseau : ", "g"), "jonction au domaine (DHCP, DNS SRV, Kerberos, LDAP, SMB), NTP et "
        "échec Kerberos avec une horloge décalée, HTTPS vers l’API, téléchargement SMB d’un paquet : débit mesuré "
        "comparé au débit du lien ; captures Wireshark commentées.")
@@ -471,8 +484,8 @@ R.puce(("Physique : ", "g"), "radar FMCW (λ, ΔR = c/2B, micro-mouvements, Dopp
 dates = {
     94: "lundi 4 janvier 2027",
     95: "vendredi 29 janvier 2027 – besoin chiffré validé, maquette prête, le radar détecte (premiers essais R1)",
-    96: "vendredi 19 mars 2027 – V1 complète : blocage avec avertissement, faux boîtier refusé, essais R1 à R5",
-    97: "vendredi 14 mai 2027 – V2 : installations pendant les absences, tableau de bord du parc, apport mesuré (R6)",
+    96: "vendredi 19 mars 2027 – V1 complète : verrou local avec avertissement, faux boîtier refusé, événements sur le serveur, essais R1 à R5",
+    97: "vendredi 14 mai 2027 – V2 : maintenance à la prochaine absence, tableau de bord du parc, apport mesuré (R6)",
     98: "vendredi 14 mai 2027, avec la revue 3",
     99: "juin 2027, date fixée par l’académie",
 }
@@ -502,10 +515,11 @@ R.puce("L’agent se lève : lumière orange, puis ", ("écran bloqué en quelqu
        " (délai mesuré, comparé aux 10 minutes actuelles) ; un collègue au bureau voisin ou qui passe "
        "derrière ne change rien.")
 R.puce("Un faux boîtier qui dit toujours « présent » est ", ("démasqué", "g"), " ; boîtier débranché : le filet GPO reste actif.")
-R.puce("Pendant une absence, un logiciel ", ("s’installe sans déranger", "g"), " ; si l’agent revient, son travail n’est pas touché.")
+R.puce("On arrête le serveur : ", ("la session se verrouille quand même", "g"), ".")
+R.puce("Après 2 reports, la maintenance ", ("se fait à la prochaine absence", "g"), " ; si l’agent revient, son travail n’est pas touché.")
 R.puce("Sur une journée jouée, ", ("aucune installation devant l’agent", "g"), ", contre N avec l’outil classique (essai R6).")
-R.puce("Le technicien voit sur le tableau de bord les installations, les reports et leurs raisons ; la base ne "
-       "contient aucune heure d’absence.")
+R.puce("Le technicien voit sur le tableau de bord les verrouillages, les reports et les redémarrages en attente ; "
+       "la base ne contient aucune heure d’absence.")
 R.puce("Le tuteur confirme que la solution répond aux deux besoins du service.")
 
 # ================================================================== MISE EN PAGE
