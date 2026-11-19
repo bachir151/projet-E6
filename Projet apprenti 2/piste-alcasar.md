@@ -2,6 +2,13 @@
 
 > **Fait nouveau** : c'est **le tuteur** qui a cité ALCASAR (plaquette 3.6.1 transmise par l'enseignant). Cette piste passe donc devant « carte + imprimante » (`nouveau-projet-carte.md`) et « borne USB ». **Ébauche à valider**, heures en ordres de grandeur.
 
+## ALCASAR est **envisagé** (réponse du tuteur, 19/11)
+Il n'est pas encore en place. Le projet devient donc un **pilote avant déploiement** : Yaksan monte ALCASAR sur la maquette du lycée, le teste, le mesure et remet au tuteur une **recommandation chiffrée** (on déploie ou pas, comment, avec quels réglages). C'est la meilleure justification possible de la réalisation au lycée : on ne teste pas un outil nouveau sur la production.
+
+Ce que l'entreprise récupère : la grille de recette, le rapport de recommandation (dimensionnement, emplacement de la borne Wi-Fi, réglages des journaux), les outils (visiteur robot, diagnostic, vérification des traces) et les fiches réflexes du support.
+
+Hypothèse à confirmer : ALCASAR servirait à un réseau d'accès à Internet séparé du réseau métier (visiteurs, arrivants, formation…). « Pour qui » et « pourquoi » restent à demander.
+
 ## ALCASAR en bref (d'après la plaquette)
 Logiciel libre (GPLv3) installé sur un petit PC ou une machine virtuelle à deux cartes réseau, placé en coupure entre Internet et un réseau local : portail captif, authentification (RADIUS, connecteur LDAP/AD), filtrage par utilisateur ou groupe, DHCP/DNS/NTP, pare-feu, antimalware, statistiques de flux (nfdump/nfsen), journaux conformes aux obligations de conservation (art. L34-1 du CPCE, décret 2021-1362).
 
@@ -18,9 +25,16 @@ Yaksan reproduit au lycée la chaîne d'accès du service (poste ou téléphone 
 | Tableau de bord | disponibilité du portail, temps de connexion par étape, causes des pannes | donnée |
 | **Physique** | couverture Wi-Fi de la zone : puissance reçue (RSSI) selon distance, murs, orientation ; modèle d'affaiblissement en log(distance) ; incertitudes ; décide de la place et de la puissance de la borne | physique |
 
-## Découpage (à chiffrer)
-- **V1 (≈ 110 h)** : ALCASAR sur maquette, visiteur robot, traces chaînées, physique Wi-Fi, captures (redirection du portail, DHCP, DNS, RADIUS).
-- **V2 (≈ 35 h)** : outil de diagnostic du poste avec remèdes à paliers, injecteur de pannes, tableau de bord.
+## Découpage du pilote (à chiffrer)
+- **V1 (≈ 110 h)** : ALCASAR sur maquette relié à l'AD commun ; grille de recette ; visiteur robot ; traces chaînées ; physique Wi-Fi (couverture) ; captures (redirection du portail, DHCP, DNS, RADIUS) ; rapport de recommandation.
+- **V2 (≈ 35 h)** : **test de charge** (plusieurs ESP32 et un script sur PC jouent N visiteurs : temps de réponse du portail selon N) ; outil de diagnostic du poste avec remèdes à paliers ; injecteur de pannes ; tableau de bord.
+
+## Indicateurs mesurés sur la maquette (proposition)
+- Temps de connexion d'un visiteur, étape par étape (médiane et pire cas sur 100 parcours).
+- Disponibilité du portail mesurée par le visiteur robot sur une semaine.
+- Couverture : part de la zone avec une puissance reçue suffisante (seuil à fixer, de l'ordre de −67 dBm).
+- Traces : altérations détectées sur N essais (objectif 100 %).
+- Charge (V2) : temps de réponse du portail de 1 à N visiteurs simultanés.
 - **Extensions** : comptes temporaires pour les arrivants (si le tuteur le souhaite), visiteur robot sur plusieurs emplacements.
 
 ## Points d'attention
@@ -32,6 +46,6 @@ Yaksan reproduit au lycée la chaîne d'accès du service (poste ou téléphone 
 - **Matériel en plus** : une borne Wi-Fi (environ 30 à 60 €, à confirmer).
 
 ## Ce qu'il faut savoir du tuteur
-1. ALCASAR est-il **déjà en place** dans le service, ou **envisagé** ?
+1. ~~En place ou envisagé ?~~ → **envisagé** (19/11).
 2. **Pour qui** : visiteurs, nouveaux arrivants, salle de formation, agents ?
 3. **Quel problème** rencontre le support avec (ou sans) lui ?
