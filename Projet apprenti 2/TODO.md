@@ -1,5 +1,13 @@
 # Yaksan (apprenti 2) – suivi (au 11 novembre 2026)
 
+> **19/11/2026 : changement de projet.** Tout ce qui suit concerne l'ancien projet « Boîte noire du poste », abandonné. Nouveau projet : `nouveau-projet-carte.md` (carte agent : PC + imprimante).
+>
+> Prochaines étapes du nouveau projet :
+> - [ ] Valider l'ébauche (V1/V2, heures détaillées)
+> - [ ] Banc d'essai avant le lancement : carte hybride PIV + DESFire, lecture par Windows, DESFire AES sur ESP32
+> - [ ] Les trois livrables à refaire : page HTML, formulaire académique (remplace celui envoyé le 12/11), présentation 3Blue1Brown
+> - [ ] Valider la physique (sans-contact) avec le collègue de physique
+
 ## ⏳ En attente : réponses du tuteur (visite)
 Rien ne bouge sur le projet tant que ces réponses ne sont pas arrivées. Les donner à Claude telles quelles, même partielles.
 

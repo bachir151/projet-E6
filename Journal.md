@@ -125,3 +125,17 @@
 - Mesure du partage de connexion 4G sur place (débit, latence, pertes), pour régler netem.
 - Valider le volet physique avec le collègue de physique avant janvier.
 - Demande de validation de la réalisation au lycée à l'académie.
+
+## Session du 19 novembre 2026 : Yaksan (apprenti 2), nouveau projet
+
+### Décidé (enseignant)
+- On repart de zéro pour Yaksan, sans attendre les réponses du tuteur. Trois pistes comparées (boîte noire recentrée, guichet de la carte agent, sonde de lenteur) : **guichet de la carte agent** retenu.
+- Extension « carte passe-partout » discutée (PC, imprimante, porte) : l'enseignant garde **PC + imprimante**, sans porte.
+- Frontière avec Wassim : disponibilité de l'imprimante (Wassim) / confidentialité des documents imprimés (Yaksan).
+
+### Fait
+- Ébauche du projet : `Projet apprenti 2/nouveau-projet-carte.md`. `docs/apprentis.md` et `Projet apprenti 2/TODO.md` mis à jour.
+
+### À vérifier
+- Type réel de la carte agent du ministère ; disponibilité des cartes hybrides PIV + DESFire ; bibliothèque DESFire AES pour ESP32 (banc d'essai).
+- Le formulaire envoyé le 12/11 (boîte noire) doit être remplacé : prévenir l'inspection.
