@@ -49,6 +49,7 @@
 - Mettre de côté : E1–E3 (wattmètre, bilan énergétique), sauf E1 court si la sobriété revient.
 
 ## À faire
+- [x] Maquette 3D animée (19/11) : `livrables/animation-3d/maquette-3d.html` (Three.js, 10 étapes, captures dans `captures/`). Bureau de Martine, boîtier ouvert (LD2410, ESP32, LED RVB), Windows 11 en VM, switch/routeur/serveur, oscilloscope. Vérifiée dans Brave avec le GPU (Iris Xe) : 0 erreur JavaScript, ≈ 50 images/s. Valeurs de l'oscilloscope et des seuils = exemples, à remplacer par les mesures R1 à R4.
 - [x] Récit refait pour des **postes de bureau** (12/11) : formulaire, présentation, page HTML (https://claude.ai/artifact/3Bhga5UmEr3r67mo6Wus3j)
 - [x] Poste Windows 11 (12/11) : **Windows 11 Entreprise en évaluation (90 j) en VM VirtualBox** sur le PC Ubuntu (le PC du commerce de l'enseignant est en édition Famille, qui ne rejoint pas un domaine). Installation ≈ 11/01, **réinstallation 5–9 avril** (dans le Gantt), après export des journaux et mesures ; couvre la soutenance de juin.
 - [ ] Choisir le titre définitif (propositions du 12/11) et le reporter partout
