@@ -2,6 +2,8 @@
 
 > **19/11/2026 : changement de projet.** Tout ce qui suit concerne l'ancien projet « Boîte noire du poste », abandonné. Nouveau projet : `nouveau-projet-carte.md` (carte agent : PC + imprimante).
 >
+> **19/11 (suite)** : le tuteur a cité ALCASAR → piste prioritaire `piste-alcasar.md`. Pistes de secours : carte + imprimante, borne USB.
+>
 > Prochaines étapes du nouveau projet :
 > - [ ] Valider l'ébauche (V1/V2, heures détaillées)
 > - [ ] Banc d'essai avant le lancement : carte hybride PIV + DESFire, lecture par Windows, DESFire AES sur ESP32

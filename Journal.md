@@ -139,3 +139,4 @@
 ### À vérifier
 - Type réel de la carte agent du ministère ; disponibilité des cartes hybrides PIV + DESFire ; bibliothèque DESFire AES pour ESP32 (banc d'essai).
 - Le formulaire envoyé le 12/11 (boîte noire) doit être remplacé : prévenir l'inspection.
+- **Suite** : l'enseignant transmet la plaquette ALCASAR 3.6.1, **citée par le tuteur**. Autres pistes étudiées dans la session : borne d'entrée USB (contrôle électrique + antivirus hors ligne), heure du réseau isolé, onduleur. ALCASAR devient la piste prioritaire : `Projet apprenti 2/piste-alcasar.md`. Contradiction à lever : service « coupé d'Internet » (ancienne synthèse) contre ALCASAR (accès Internet).
