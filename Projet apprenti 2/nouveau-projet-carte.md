@@ -8,6 +8,12 @@
 - Service carrière et paye : on imprime des **documents sensibles** (bulletins, dossiers de carrière). Un document oublié dans le bac peut être lu par n'importe qui. *(Hypothèse à faire confirmer par le tuteur.)*
 - Missions de Yaksan : support et accueil des nouveaux agents.
 
+## 1 bis. Justification de la maquette (idée de l'enseignant, 19/11)
+- Idée : Yaksan reproduit au lycée une copie simplifiée de la chaîne de son service (carte → poste → réseau → portail ; poste → serveur d'impression → imprimante) pour comprendre chaque maillon et diagnostiquer plus vite.
+- Ça tient **comme justification de la démarche** (pourquoi une maquette : on ne fait pas d'essais sur la production ; c'est la pratique d'un environnement de test). Ça **ne suffit pas comme objectif** : le jury demandera « qu'est-ce que l'entreprise y gagne ? ».
+- Formulation retenue : *le besoin* = réduire le temps de diagnostic des incidents de carte et d'impression ; *la maquette* = banc de reproduction des pannes ; *ce qui repart vers l'entreprise* = l'outil de diagnostic, le catalogue de pannes reproductibles et les fiches réflexes ; *la preuve* = temps de diagnostic et taux de bonne cause mesurés sur pannes injectées.
+- Condition : la chaîne reproduite doit ressembler à la vraie → le tuteur décrit les maillons réels (sans données confidentielles).
+
 ## 2. Frontière avec Wassim (apprenti 1)
 | | Wassim | Yaksan |
 |---|---|---|
