@@ -1,0 +1,829 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Architecture pas à pas</title>
+<meta name="description" content="Projet d'Aziza : l'architecture de la maquette en vue 2,5D et le trajet des messages, étape par étape.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="../../../../theme.css">
+<style>
+/* Architecture 2,5D du projet d'Aziza. Couleurs : variables de theme.css uniquement
+   (les teintes de matériel sont des mélanges color-mix() de ces variables). */
+.tete{padding-top:clamp(18px,3vw,30px);display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:14px 24px}
+.tete h1{margin:0}
+.tete .lead{color:var(--encre-2);margin:8px 0 0;max-width:62ch}
+.liens{display:flex;gap:10px;flex-wrap:wrap}
+.wrap.large{max-width:1560px}
+.grille{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:28px;align-items:start;padding-block:22px 40px}
+
+/* cadre de la scène */
+.scene-cadre{margin:0;position:relative;border:3px solid var(--encre);border-radius:6px;background:var(--papier);box-shadow:8px 8px 0 var(--encre);overflow:hidden}
+.defile{overflow-x:auto;overscroll-behavior-x:contain}
+#scene{display:block;width:100%;height:auto;min-width:0}
+.outils{position:absolute;right:10px;top:10px;display:flex;gap:8px}
+.outils .btn{min-height:34px;padding:4px 14px;font-size:.8rem;text-transform:none;letter-spacing:0}
+.glisse{display:none;font-size:.8rem;font-weight:700;color:var(--encre-3);padding:6px 12px;border-top:2px solid var(--encre)}
+
+/* teintes de matériel (dessus / face gauche / face droite) */
+#scene{
+  --m-noir-t:color-mix(in srgb,var(--encre) 68%,var(--blanc));--m-noir-l:color-mix(in srgb,var(--encre) 84%,var(--blanc));--m-noir-r:var(--encre);
+  --m-gris-t:var(--blanc);--m-gris-l:var(--papier-2);--m-gris-r:var(--contour-2);
+  --m-alu-t:color-mix(in srgb,var(--contour-2) 35%,var(--blanc));--m-alu-l:color-mix(in srgb,var(--contour-2) 75%,var(--blanc));--m-alu-r:var(--contour);
+  --m-bois-t:color-mix(in srgb,var(--jaune) 42%,var(--papier));--m-bois-l:color-mix(in srgb,var(--jaune-fonce) 42%,var(--papier));--m-bois-r:color-mix(in srgb,var(--jaune-fonce) 62%,var(--encre-2));
+  --m-blanc-t:var(--blanc);--m-blanc-l:color-mix(in srgb,var(--papier-2) 55%,var(--blanc));--m-blanc-r:var(--papier-2);
+  --m-pcb-t:color-mix(in srgb,var(--focus) 72%,var(--blanc));--m-pcb-l:var(--focus);--m-pcb-r:color-mix(in srgb,var(--focus) 65%,var(--encre));
+  --m-tapis-t:color-mix(in srgb,var(--vert) 72%,var(--blanc));--m-tapis-l:var(--vert);--m-tapis-r:color-mix(in srgb,var(--vert) 65%,var(--encre));
+  --m-orange-t:var(--jaune-fonce);--m-orange-l:color-mix(in srgb,var(--jaune-fonce) 80%,var(--encre));--m-orange-r:color-mix(in srgb,var(--jaune-fonce) 58%,var(--encre));
+  --m-jaune-t:var(--jaune);--m-jaune-l:var(--jaune-fonce);--m-jaune-r:color-mix(in srgb,var(--jaune-fonce) 70%,var(--encre));
+  --m-mur-t:var(--blanc);--m-mur-l:color-mix(in srgb,var(--papier) 45%,var(--blanc));--m-mur-r:var(--papier);
+  --m-sol-t:var(--papier-2);--m-sol-l:var(--contour-2);--m-sol-r:var(--contour);
+  --ecran-sombre:color-mix(in srgb,var(--encre) 82%,var(--focus));
+  --led-off:color-mix(in srgb,var(--encre) 55%,var(--blanc));
+}
+#scene polygon,#scene .tr{stroke:var(--encre);stroke-width:1.3;stroke-linejoin:round}
+#scene .ns{stroke:none}
+#scene text{font-family:var(--police);fill:var(--encre)}
+#scene .sol-grille{stroke:var(--contour-2);stroke-width:.6;fill:none}
+#scene .cable{fill:none;stroke:var(--encre-2);stroke-width:2.2;stroke-linejoin:round;stroke-linecap:round}
+#scene .cable.usb{stroke:var(--encre-3);stroke-width:1.8}
+#scene .fil{fill:none;stroke-width:1.4;stroke-linecap:round}
+#scene .onde{fill:none;stroke:var(--focus);stroke-width:1.6;stroke-dasharray:3 6;opacity:.55}
+#scene .onde.t{stroke:var(--encre-3);opacity:.6}
+
+/* appareils : mise en avant de ceux qui jouent un rôle dans l'étape */
+#scene .dev{transition:opacity .45s}
+#scene.focus .dev:not(.on){opacity:.28}
+#scene .dev.off{filter:grayscale(1)}
+#scene .led{fill:var(--led-off)}
+#scene .led.v.on{fill:var(--vert)}
+#scene .led.r.on{fill:var(--rouge)}
+#scene .halo{opacity:0;transition:opacity .2s}
+#scene .halo.on{opacity:.35}
+#scene .led.v.alt,#scene .halo.v.alt{animation:clignoV 1s steps(1) infinite}
+#scene .led.r.alt,#scene .halo.r.alt{animation:clignoR 1s steps(1) infinite}
+#scene .halo.alt{opacity:.35}
+@keyframes clignoV{0%{fill:var(--vert)}50%{fill:var(--led-off)}}
+@keyframes clignoR{0%{fill:var(--led-off)}50%{fill:var(--rouge)}}
+#scene .bip{opacity:0}
+#scene .bip.on{animation:bip .9s ease-out}
+@keyframes bip{0%{opacity:1;transform:scale(.6)}100%{opacity:0;transform:scale(1.4)}}
+#scene .netem{transition:opacity .3s}
+#scene .netem.inactif{opacity:.3}
+#scene .netem .panneau{fill:var(--jaune)}
+#scene .netem.coupe .panneau{fill:var(--rouge)}
+#scene .netem.coupe text{fill:var(--blanc)}
+#scene .arrete{display:none}
+#scene .dev.off .arrete{display:inline}
+#scene .ligne-dash{transition:fill .3s}
+#scene .flash{animation:flash .5s ease-in-out 3}
+@keyframes flash{50%{fill:var(--jaune)}}
+
+/* étiquettes, bulles, messages */
+#scene .pill rect.fond{fill:var(--blanc);stroke:var(--encre);stroke-width:2}
+#scene .pill rect.ombre{fill:var(--encre)}
+#scene .pill .p1{font-weight:900;font-size:14.5px}
+#scene .pill .p2{font-weight:600;font-size:11.5px;fill:var(--encre-2)}
+#scene .attache{stroke:var(--encre);stroke-width:1.5}
+#scene .lab-dot{fill:var(--encre)}
+#scene.sans-lab .etiq{display:none}
+#scene [data-lab]{transition:opacity .45s}
+#scene.focus [data-lab]:not(.on){opacity:.3}
+#scene [data-lab].cache{display:none}
+#scene .bulle rect.fond{fill:var(--jaune-pale);stroke:var(--encre);stroke-width:2}
+#scene .bulle.alerte rect.fond{fill:var(--rouge-pale)}
+#scene .bulle.ok rect.fond{fill:var(--vert-pale)}
+#scene .bulle text{font-size:12.5px;font-weight:700}
+#scene .bulle text.mono{font-family:var(--police-mono);font-size:11.5px;font-weight:600}
+#scene .bulle text.titre{font-weight:900;font-size:13px}
+#scene .bulle{animation:surgit .3s cubic-bezier(.2,.9,.3,1.3) both}
+@keyframes surgit{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+#scene .tok circle{stroke:var(--encre);stroke-width:2}
+#scene .tok rect{stroke:var(--encre);stroke-width:1.8}
+#scene .tok text{font-size:11.5px;font-weight:800}
+#scene .tok.perdu{animation:perdu .7s ease-out forwards}
+@keyframes perdu{to{opacity:0;transform:scale(1.8)}}
+#scene .trace{fill:none;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;opacity:.6;transition:opacity .6s}
+#scene .trace.fin{opacity:0}
+.k-req circle,.k-req .fond-tok{fill:var(--bleu)} .k-req.trace{stroke:var(--focus)}
+.k-kit circle{fill:var(--vert)} .k-kit .fond-tok{fill:var(--vert-pale)} .k-kit.trace{stroke:var(--vert)}
+.k-rep circle,.k-rep .fond-tok{fill:var(--jaune)} .k-rep.trace{stroke:var(--jaune-fonce)}
+.k-err circle{fill:var(--rouge)} .k-err .fond-tok{fill:var(--rouge-pale)} .k-err.trace{stroke:var(--rouge)}
+.k-err text{fill:var(--rouge-texte)!important}
+.k-capt circle,.k-capt .fond-tok{fill:var(--blanc)} .k-capt.trace{stroke:var(--encre-3)}
+
+/* carte de l'étape */
+.carte-etape{position:sticky;top:16px;background:var(--blanc);border:3px solid var(--encre);border-radius:6px;box-shadow:8px 8px 0 var(--jaune),8px 8px 0 3px var(--encre);padding:18px 20px 16px}
+#eTitre{font-size:1.38rem;font-weight:900;line-height:1.15;letter-spacing:-.01em;margin:4px 0 10px;text-transform:none}
+#eTexte{min-height:9.5em}
+#eTexte p{margin:0 0 .6em;font-size:.98rem}
+#eTexte code{font-family:var(--police-mono);font-size:.86em;background:var(--papier-2);padding:0 4px;border-radius:4px}
+.commandes{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.commandes .btn{min-height:42px;padding:6px 15px;font-size:.9rem;text-transform:none;letter-spacing:0}
+#bNext{flex:1;justify-content:center}
+#points{display:flex;gap:6px;margin-top:14px;flex-wrap:wrap}
+#points button{width:26px;height:26px;border-radius:50%;border:2px solid var(--encre);background:var(--blanc);font-size:.72rem;font-weight:900;color:var(--encre);padding:0;cursor:pointer}
+#points button.vu{background:var(--papier-2)}
+#points button[aria-current="step"]{background:var(--jaune);box-shadow:2px 2px 0 var(--encre)}
+.legende{list-style:none;padding:12px 0 0;margin:14px 0 0;border-top:2px dashed var(--contour-2);display:grid;grid-template-columns:1fr 1fr;gap:4px 10px;font-size:.82rem;color:var(--encre-2)}
+.legende i{display:inline-block;width:12px;height:12px;border-radius:50%;border:2px solid var(--encre);margin-right:6px;vertical-align:-1px}
+.aide{font-size:.8rem;color:var(--encre-3);margin:10px 0 0}
+.aide kbd{font-size:.72rem}
+
+.regles ol{margin:10px 0 0;padding-left:1.3em}
+.regles li{margin:.35em 0}
+
+@media (max-width:1060px){.grille{grid-template-columns:1fr}.carte-etape{position:static}}
+@media (max-width:720px){#scene{min-width:760px}.glisse{display:block}.legende{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:reduce){#scene .bulle{animation:none}}
+@media print{.outils,.commandes,#points,.aide,.liens,.glisse{display:none!important}.scene-cadre,.carte-etape{box-shadow:none;position:static}}
+</style>
+</head>
+<body>
+<header class="wrap large tete">
+  <div>
+    <span class="label">Projet 4 · Aziza · le kit de maintenance</span>
+    <h1>L'architecture pas à pas</h1>
+    <p class="lead">La maquette du lycée vue de biais. Chaque point qui circule est un message. Clique sur <b>Suivant</b> pour suivre le trajet des messages, étape par étape.</p>
+  </div>
+  <nav class="liens" aria-label="Autres pages du projet">
+    <a class="btn petit" href="vue-ensemble.html">Vue d'ensemble</a>
+    <a class="btn petit" href="../animation-3d/maquette-3d.html">Maquette 3D ↗</a>
+  </nav>
+</header>
+
+<main class="wrap large grille">
+  <figure class="scene-cadre">
+    <div class="defile"><svg id="scene" class="focus" role="img" aria-label="Vue 2,5D de la maquette : serveur, switch, borne Wi-Fi, PC du lycée, poste du référent, PC de maintenance et téléphone, borne de sortie ESP32 avec lecteur RFID, banc de physique"></svg></div>
+    <div class="outils"><button class="btn petit" id="bLab" type="button" aria-pressed="true">Étiquettes</button></div>
+    <figcaption class="glisse">← Glisse pour voir toute la maquette →</figcaption>
+  </figure>
+
+  <aside class="carte-etape" aria-live="polite">
+    <div class="label" id="eNum"></div>
+    <h2 id="eTitre"></h2>
+    <div id="eTexte"></div>
+    <div class="commandes">
+      <button class="btn" id="bPrev" type="button" aria-label="Étape précédente">◀</button>
+      <button class="btn" id="bReplay" type="button">↻ Rejouer</button>
+      <button class="btn principal" id="bNext" type="button">Suivant ▶</button>
+    </div>
+    <div id="points" role="group" aria-label="Aller à une étape"></div>
+    <p class="aide"><kbd>←</kbd> <kbd>→</kbd> étapes · <kbd>R</kbd> rejouer · <kbd>E</kbd> étiquettes</p>
+    <ul class="legende" aria-label="Légende des messages">
+      <li><i style="background:var(--bleu)"></i>demande</li>
+      <li><i style="background:var(--vert)"></i>kit, fichier, réponse</li>
+      <li><i style="background:var(--jaune)"></i>rapport, enregistrement</li>
+      <li><i style="background:var(--rouge)"></i>refus, panne</li>
+      <li><i style="background:var(--blanc)"></i>capteur, bus SPI</li>
+      <li><i style="background:transparent;border-style:dashed"></i>Wi-Fi</li>
+    </ul>
+  </aside>
+</main>
+
+<section class="section-finale regles">
+  <div class="wrap">
+    <span class="label">Le fil de la soutenance</span>
+    <h2>Les 5 règles du projet</h2>
+    <ol>
+      <li><b>Avoir un fichier ne prouve pas qu'il est le bon</b> : l'empreinte SHA-256 est comparée au catalogue.</li>
+      <li><b>Le réseau n'est pas de confiance</b> (4G, Internet) : seul le catalogue signé fait foi.</li>
+      <li><b>Un PC éteint ne peut rien affirmer</b> : la borne lit le dernier rapport. Serveur muet = « vérification impossible », jamais « à jour ».</li>
+      <li><b>Sur le terrain, le réseau manque</b> : seuls les fichiers modifiés voyagent, BITS reprend après une coupure.</li>
+      <li><b>Chaque version a une valeur</b> : rien n'est écrasé, l'historique sert d'archive.</li>
+    </ol>
+  </div>
+</section>
+
+<script>
+(function () {
+'use strict';
+var NS = 'http://www.w3.org/2000/svg', svg = document.getElementById('scene');
+var C = Math.cos(Math.PI / 6), S = 0.5;
+var REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
+var CANCEL = { cancel: true };
+
+/* ---------- petits outils de dessin isométrique ---------- */
+function P(x, y, z) { return [(x - y) * C, (x + y) * S - (z || 0)]; }
+function r1(n) { return Math.round(n * 10) / 10; }
+function pts(a) { return a.map(function (p) { var q = P(p[0], p[1], p[2]); return r1(q[0]) + ',' + r1(q[1]); }).join(' '); }
+function dPath(a) { return a.map(function (p, i) { var q = P(p[0], p[1], p[2]); return (i ? 'L' : 'M') + r1(q[0]) + ' ' + r1(q[1]); }).join(''); }
+function el(tag, attrs, parent, text) {
+  var e = document.createElementNS(NS, tag);
+  if (attrs) for (var k in attrs) if (attrs[k] != null) e.setAttribute(k, attrs[k]);
+  if (text != null) e.textContent = text;
+  if (parent) parent.appendChild(e);
+  return e;
+}
+function poly(g, a, fill, cls) { return el('polygon', { points: pts(a), style: 'fill:' + fill, 'class': cls }, g); }
+function m(name, f) { return 'var(--m-' + name + '-' + f + ')'; }
+/* boîte : dessus, face avant gauche (y max), face avant droite (x max) */
+function box(g, x, y, z, w, d, h, mat, cls) {
+  var gg = el('g', { 'class': cls }, g);
+  var o = {
+    g: gg,
+    r: poly(gg, [[x + w, y, z], [x + w, y + d, z], [x + w, y + d, z + h], [x + w, y, z + h]], m(mat, 'r')),
+    l: poly(gg, [[x, y + d, z], [x + w, y + d, z], [x + w, y + d, z + h], [x, y + d, z + h]], m(mat, 'l')),
+    t: poly(gg, [[x, y, z + h], [x + w, y, z + h], [x + w, y + d, z + h], [x, y + d, z + h]], m(mat, 't'))
+  };
+  return o;
+}
+/* repères plats posés sur une face : on dessine en 2D, la matrice donne la perspective */
+function faceL(g, x0, Y, ztop) { var o = P(x0, Y, ztop); return el('g', { transform: 'matrix(' + C + ' ' + S + ' 0 1 ' + r1(o[0]) + ' ' + r1(o[1]) + ')' }, g); }
+function faceR(g, X, y0, ztop) { var o = P(X, y0, ztop); return el('g', { transform: 'matrix(' + C + ' ' + (-S) + ' 0 1 ' + r1(o[0]) + ' ' + r1(o[1]) + ')' }, g); }
+function faceT(g, x0, y0, Z) { var o = P(x0, y0, Z); return el('g', { transform: 'matrix(' + C + ' ' + S + ' ' + (-C) + ' ' + S + ' ' + r1(o[0]) + ' ' + r1(o[1]) + ')' }, g); }
+function desk(g, x, y, w, d, h) {
+  [[x + 3, y + 3], [x + w - 7, y + 3], [x + 3, y + d - 7], [x + w - 7, y + d - 7]].forEach(function (p) { box(g, p[0], p[1], 0, 4, 4, h - 4, 'noir'); });
+  return box(g, x, y, h - 4, w, d, 4, 'bois');
+}
+
+/* ---------- calques ---------- */
+var world = el('g', { id: 'monde' }, svg);
+var layRoom = el('g', {}, world), layCable = el('g', {}, world), layDev = el('g', {}, world);
+var layTrace = el('g', {}, svg), layTok = el('g', {}, svg), layLab = el('g', { 'class': 'etiq' }, svg), layBul = el('g', {}, svg);
+var DEV = {};
+function dev(key) { var g = el('g', { 'class': 'dev', 'data-dev': key }, layDev); DEV[key] = g; return g; }
+
+/* ---------- la pièce ---------- */
+var FX = 640, FY = 470;
+box(layRoom, 0, 0, -14, FX, FY, 14, 'sol');
+var grid = '';
+for (var gx = 40; gx < FX; gx += 40) grid += dPath([[gx, 0, 0], [gx, FY, 0]]);
+for (var gy = 40; gy < FY; gy += 40) grid += dPath([[0, gy, 0], [FX, gy, 0]]);
+el('path', { d: grid, 'class': 'sol-grille' }, layRoom);
+// murs du fond
+poly(layRoom, [[0, 0, 0], [0, FY, 0], [0, FY, 175], [0, 0, 175]], m('mur', 'r'));   // mur gauche (x = 0)
+poly(layRoom, [[0, 0, 0], [FX, 0, 0], [FX, 0, 175], [0, 0, 175]], m('mur', 'l'));   // mur droit (y = 0)
+// fenêtre sur le mur gauche
+var fen = faceR(layRoom, 0.5, 440, 150);
+el('rect', { x: 10, y: 10, width: 70, height: 80, rx: 2, 'class': 'tr', style: 'fill:var(--bleu-pale)' }, fen);
+el('path', { d: 'M45 10v80M10 50h70', 'class': 'tr', style: 'fill:none' }, fen);
+/* ---------- les câbles (chemins utilisés aussi par les messages) ---------- */
+function swEnd(px, lane) { return [[px, lane, 0], [px, 66, 0], [px, 64, 0], [px, 64, 62], [px, 60, 68]]; }
+var SEG = {
+  srv: [[65, 76, 10], [65, 80, 0], [65, 90, 0]].concat(swEnd(160, 90)),
+  ref: [[92, 230, 38], [102, 230, 32], [104, 230, 0], [104, 122, 0]].concat(swEnd(174, 122)),
+  lap: [[262, 284, 41], [228, 284, 36], [221, 284, 30], [219, 284, 0], [219, 140, 0]].concat(swEnd(190, 140)),
+  lyc: [[563, 86, 6], [563, 92, 0], [563, 110, 0]].concat(swEnd(205, 110)),
+  ap:  [[320, 11, 128], [320, 4, 122], [320, 4, 2], [320, 8, 0], [320, 100, 0]].concat(swEnd(216, 100))
+};
+var WIFI = (function () { var a = [462, 205, 64], b = [320, 12, 132], out = []; for (var i = 0; i <= 24; i++) { var t = i / 24; out.push([a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t + 60 * Math.sin(Math.PI * t)]); } return out; })();
+var USB = [[438, 362, 41], [414, 362, 36], [402, 362, 33], [399, 362, 0], [366, 362, 0], [366, 300, 0], [362, 300, 0], [361, 300, 35], [336, 300, 40]];
+var SPI = [[506, 212, 40], [498, 212, 39], [493, 212, 44], [475, 205, 62]];
+var OW = [[498, 412, 77], [496, 400, 84], [484, 386, 60], [470, 374, 43], [462, 366, 42]];
+var I2C = [[520, 354, 38], [500, 358, 40], [482, 362, 42]];
+['srv', 'ref', 'lap', 'lyc', 'ap'].forEach(function (k) { el('path', { d: dPath(SEG[k]), 'class': 'cable' }, layCable); });
+el('path', { d: dPath(USB), 'class': 'cable usb' }, layCable);
+function rev(a) { return a.slice().reverse(); }
+function R(a, b) { return SEG[a].concat(rev(SEG[b])); }
+var BORNE_UP = WIFI.concat(R('ap', 'srv')), BORNE_DOWN = rev(BORNE_UP);
+var BANC_UP = USB.concat(R('lap', 'srv'));
+
+/* ---------- borne Wi-Fi (au mur) ---------- */
+(function () {
+  var g = dev('ap');
+  box(g, 300, 0, 120, 40, 10, 14, 'blanc');
+  el('path', { d: dPath([[306, 6, 134], [302, 6, 160]]) + dPath([[334, 6, 134], [338, 6, 160]]), 'class': 'tr', style: 'fill:none;stroke-width:3' }, g);
+  var f = faceL(g, 300, 10, 134);
+  el('circle', { cx: 8, cy: 7, r: 2.2, 'class': 'ns', style: 'fill:var(--vert)' }, f);
+  el('path', { d: 'M18 7h16', 'class': 'tr', style: 'fill:none;stroke-width:1' }, f);
+  el('path', { d: dPath(WIFI), 'class': 'onde' }, layCable);
+})();
+
+/* ---------- serveur Ubuntu ---------- */
+var srvLed;
+(function () {
+  var g = dev('srv');
+  box(g, 40, 20, 0, 50, 55, 100, 'noir');
+  var f = faceL(g, 40, 75, 100);
+  [8, 20, 32].forEach(function (y) { el('rect', { x: 6, y: y, width: 38, height: 8, rx: 1, 'class': 'tr', style: 'fill:var(--m-noir-t);stroke-width:.8' }, f); el('rect', { x: 34, y: y + 3, width: 6, height: 2, 'class': 'ns', style: 'fill:var(--contour-2)' }, f); });
+  for (var i = 0; i < 6; i++) el('rect', { x: 8, y: 52 + i * 6, width: 34, height: 2.2, 'class': 'ns', style: 'fill:var(--m-noir-t)' }, f);
+  srvLed = el('circle', { cx: 25, cy: 92, r: 2.6, 'class': 'ns', style: 'fill:var(--vert)' }, f);
+  var st = el('g', { 'class': 'arrete' }, g); var q = P(65, 47, 70);
+  el('rect', { x: q[0] - 36, y: q[1] - 11, width: 72, height: 22, rx: 4, transform: 'rotate(-12 ' + q[0] + ' ' + q[1] + ')', style: 'fill:var(--rouge);stroke:var(--encre);stroke-width:2' }, st);
+  el('text', { x: q[0], y: q[1] + 4.5, 'text-anchor': 'middle', transform: 'rotate(-12 ' + q[0] + ' ' + q[1] + ')', style: 'fill:var(--blanc);font-weight:1000;font-size:12px' }, st, 'ARRÊTÉ');
+})();
+
+/* ---------- baie + switch ---------- */
+(function () {
+  var g = dev('sw');
+  box(g, 140, 20, 0, 92, 42, 62, 'gris');
+  var fb = faceL(g, 140, 62, 62);
+  el('path', { d: 'M8 10h76M8 20h76M8 30h76M8 40h76M8 50h76', 'class': 'tr', style: 'fill:none;stroke:var(--contour-2);stroke-width:1' }, fb);
+  box(g, 144, 23, 62, 84, 37, 11, 'alu');
+  var f = faceL(g, 144, 60, 73);
+  for (var i = 0; i < 12; i++) {
+    el('rect', { x: 6 + i * 5.6, y: 3, width: 4, height: 4.4, 'class': 'ns', style: 'fill:var(--encre)' }, f);
+    el('rect', { x: 6.8 + i * 5.6, y: 8.4, width: 2.4, height: 1.3, 'class': 'ns', style: 'fill:' + (i < 6 ? 'var(--vert)' : 'var(--jaune-fonce)') }, f);
+  }
+  el('text', { x: 76, y: 8, style: 'font-size:4px;font-weight:900' }, f, 'HP');
+})();
+
+/* ---------- ralentisseur tc netem ---------- */
+var netem;
+(function () {
+  netem = dev('netem'); netem.classList.add('netem', 'inactif');
+  box(netem, 112, 82, 0, 12, 16, 3.5, 'jaune');
+  el('path', { d: dPath([[128, 78, 0], [128, 78, 46]]), 'class': 'tr', style: 'fill:none;stroke-width:2.5' }, netem);
+  var f = faceL(netem, 112, 78, 58);
+  el('rect', { x: 0, y: 0, width: 36, height: 16, rx: 3, 'class': 'tr panneau' }, f);
+  el('text', { x: 18, y: 11, 'text-anchor': 'middle', style: 'font-size:7px;font-weight:1000' }, f, 'netem');
+})();
+
+/* ---------- PC du lycée + tableau de bord ---------- */
+var dashDots = [], dashSortie, dashBg;
+(function () {
+  var g = dev('lyc');
+  desk(g, 360, 20, 180, 80, 38);
+  box(g, 548, 30, 0, 30, 55, 70, 'noir');
+  var ft = faceL(g, 548, 85, 70);
+  el('circle', { cx: 15, cy: 10, r: 2.4, 'class': 'ns', style: 'fill:var(--bleu)' }, ft);
+  el('rect', { x: 6, y: 18, width: 18, height: 3, 'class': 'ns', style: 'fill:var(--m-noir-t)' }, ft);
+  box(g, 420, 50, 38, 40, 20, 2, 'noir');
+  box(g, 436, 55, 40, 8, 6, 14, 'noir');
+  box(g, 380, 48, 52, 120, 7, 72, 'noir');
+  var f = faceL(g, 380, 55, 124);
+  dashBg = el('rect', { x: 4, y: 4, width: 112, height: 64, 'class': 'ns', style: 'fill:var(--blanc)' }, f);
+  el('rect', { x: 4, y: 4, width: 112, height: 9, 'class': 'ns', style: 'fill:var(--encre)' }, f);
+  el('text', { x: 8, y: 11, style: 'font-size:6px;font-weight:900;fill:var(--blanc)' }, f, 'Parc des PC de maintenance');
+  ['PC-01', 'PC-02', 'PC-04', 'PC-07', 'PC-09'].forEach(function (n, i) {
+    var y = 18 + i * 8.6;
+    el('text', { x: 8, y: y + 2.4, style: 'font-size:5.5px;font-weight:800' }, f, n);
+    el('rect', { x: 28, y: y - 1.6, width: 52, height: 4, rx: 2, 'class': 'ns ligne-dash', style: 'fill:var(--papier-2)' }, f);
+    dashDots.push(el('circle', { cx: 104, cy: y + .4, r: 2.8, 'class': 'tr', style: 'stroke-width:.7;fill:var(--vert)' }, f));
+  });
+  dashSortie = el('rect', { x: 8, y: 61, width: 104, height: 4.5, rx: 2, 'class': 'ns', style: 'fill:var(--jaune);opacity:0' }, f);
+  box(g, 400, 72, 38, 80, 16, 2, 'gris');
+  box(g, 488, 76, 38, 9, 12, 2, 'gris');
+})();
+
+/* ---------- poste du référent ---------- */
+var refLines = [];
+(function () {
+  var g = dev('ref');
+  desk(g, 15, 160, 85, 150, 38);
+  box(g, 22, 215, 38, 20, 40, 2, 'noir');
+  box(g, 30, 232, 40, 6, 8, 14, 'noir');
+  box(g, 40, 185, 52, 7, 100, 68, 'noir');
+  var f = faceR(g, 47, 285, 120);
+  el('rect', { x: 4, y: 4, width: 92, height: 60, 'class': 'ns', style: 'fill:var(--ecran-sombre)' }, f);
+  el('rect', { x: 4, y: 4, width: 92, height: 7, 'class': 'ns', style: 'fill:var(--encre-2)' }, f);
+  el('text', { x: 8, y: 9.6, style: 'font-size:5px;font-weight:800;fill:var(--blanc)' }, f, 'PowerShell');
+  var cols = ['var(--bleu)', 'var(--blanc)', 'var(--jaune)', 'var(--blanc)', 'var(--m-tapis-t)', 'var(--jaune)'];
+  [56, 70, 44, 62, 50, 36].forEach(function (w, i) { refLines.push(el('rect', { x: 8, y: 16 + i * 7.5, width: w, height: 3.2, rx: 1, 'class': 'ns', style: 'fill:' + cols[i] + ';opacity:.15' }, f)); });
+  box(g, 60, 200, 38, 18, 70, 2, 'gris');
+  box(g, 64, 280, 38, 10, 7, 2.5, 'gris');
+})();
+
+/* ---------- PC de maintenance (portable durci) + téléphone ---------- */
+var lapLog = [], lapProg, lapProgBar, lapChart, lapCurve, lapLogG;
+(function () {
+  var g = dev('lap');
+  desk(g, 220, 240, 140, 100, 36);
+  // téléphone
+  box(g, 230, 292, 36, 16, 32, 2.5, 'noir');
+  var fp = faceT(g, 231.5, 293.5, 38.5);
+  el('rect', { x: 0, y: 0, width: 13, height: 29, rx: 1.5, 'class': 'ns', style: 'fill:var(--ecran-sombre)' }, fp);
+  el('text', { x: 6.5, y: 12, 'text-anchor': 'middle', style: 'font-size:5.5px;font-weight:1000;fill:var(--blanc)' }, fp, '4G');
+  // base + clavier
+  box(g, 255, 278, 36, 80, 47, 6, 'noir');
+  var fk = faceT(g, 262, 282, 42);
+  for (var r = 0; r < 4; r++) for (var c = 0; c < 11; c++) el('rect', { x: c * 6, y: r * 6, width: 4.6, height: 4.6, rx: .8, 'class': 'ns', style: 'fill:var(--m-noir-t)' }, fk);
+  el('rect', { x: 22, y: 27, width: 22, height: 12, rx: 1.5, 'class': 'ns', style: 'fill:var(--m-noir-t)' }, fk);
+  [[253, 276], [331, 276], [253, 321], [331, 321]].forEach(function (p) { box(g, p[0], p[1], 35, 6, 6, 8, 'orange'); });
+  // écran
+  box(g, 255, 272, 42, 80, 6, 58, 'noir');
+  [[253, 270, 92], [331, 270, 92]].forEach(function (p) { box(g, p[0], p[1], p[2], 6, 8, 8, 'orange'); });
+  var f = faceL(g, 255, 278, 100);
+  el('rect', { x: 5, y: 5, width: 70, height: 48, 'class': 'ns', style: 'fill:var(--blanc)' }, f);
+  el('rect', { x: 5, y: 5, width: 70, height: 7, 'class': 'ns', style: 'fill:var(--jaune-fonce)' }, f);
+  el('text', { x: 8, y: 10.4, style: 'font-size:4.6px;font-weight:900' }, f, 'Agent du kit · PC-04');
+  lapLogG = el('g', {}, f);
+  [50, 40, 56, 34, 46].forEach(function (w, i) {
+    var row = el('g', { style: 'opacity:.12' }, lapLogG);
+    el('circle', { cx: 10, cy: 17.5 + i * 7, r: 2, 'class': 'ns', style: 'fill:var(--vert)' }, row);
+    el('rect', { x: 15, y: 16 + i * 7, width: w, height: 3, rx: 1, 'class': 'ns', style: 'fill:var(--encre-3)' }, row);
+    lapLog.push(row);
+  });
+  lapProg = el('g', { style: 'display:none' }, f);
+  el('text', { x: 10, y: 24, style: 'font-size:5px;font-weight:800' }, lapProg, 'BITS · dossier « préparation »');
+  el('rect', { x: 10, y: 29, width: 60, height: 7, rx: 3.5, 'class': 'tr', style: 'fill:var(--papier-2);stroke-width:.7' }, lapProg);
+  lapProgBar = el('rect', { x: 10, y: 29, width: 0, height: 7, rx: 3.5, 'class': 'ns', style: 'fill:var(--vert)' }, lapProg);
+  lapChart = el('g', { style: 'display:none' }, f);
+  el('path', { d: 'M12 16v32h58', 'class': 'tr', style: 'fill:none;stroke-width:.8' }, lapChart);
+  el('path', { d: 'M12 33.1h58', style: 'fill:none;stroke:var(--rouge);stroke-width:.8;stroke-dasharray:2 1.5' }, lapChart);
+  el('text', { x: 14, y: 31.5, style: 'font-size:3.6px;font-weight:800;fill:var(--rouge-texte)' }, lapChart, 'rosée 9,3 °C');
+  lapCurve = el('polyline', { points: '', style: 'fill:none;stroke:var(--focus);stroke-width:1.3;stroke-linejoin:round' }, lapChart);
+})();
+
+/* ---------- borne de sortie : ESP32 + RC522 + LED + buzzer ---------- */
+var ledV, ledR, haloV, haloR, bipG, CARDS = {};
+(function () {
+  var g = dev('borne');
+  desk(g, 420, 175, 140, 90, 38);
+  // boîtier
+  box(g, 432, 190, 38, 60, 45, 24, 'blanc');
+  var ft = faceT(g, 432, 190, 62);
+  el('rect', { x: 8, y: 8, width: 30, height: 15, rx: 1, 'class': 'tr', style: 'fill:var(--m-noir-r);stroke-width:.8' }, ft);
+  el('rect', { x: 10, y: 10, width: 12, height: 11, rx: .8, 'class': 'ns', style: 'fill:var(--m-alu-t)' }, ft);
+  el('text', { x: 24, y: 17.5, style: 'font-size:3.6px;font-weight:900;fill:var(--blanc)' }, ft, 'ESP32');
+  el('circle', { cx: 48, cy: 30, r: 7, 'class': 'tr', style: 'fill:var(--encre);stroke-width:.8' }, ft);
+  el('circle', { cx: 48, cy: 30, r: 1.6, 'class': 'ns', style: 'fill:var(--encre-3)' }, ft);
+  var f = faceL(g, 432, 235, 62);
+  haloV = el('circle', { cx: 16, cy: 11, r: 8, 'class': 'ns halo v', style: 'fill:var(--vert)' }, f);
+  haloR = el('circle', { cx: 32, cy: 11, r: 8, 'class': 'ns halo r', style: 'fill:var(--rouge)' }, f);
+  ledV = el('circle', { cx: 16, cy: 11, r: 4, 'class': 'tr led v', style: 'stroke-width:1' }, f);
+  ledR = el('circle', { cx: 32, cy: 11, r: 4, 'class': 'tr led r', style: 'stroke-width:1' }, f);
+  el('text', { x: 46, y: 13.5, style: 'font-size:6px;font-weight:900' }, f, 'BIP');
+  var bq = P(462, 222, 66);
+  bipG = el('g', { 'class': 'bip', style: 'transform-origin:' + bq[0] + 'px ' + bq[1] + 'px' }, g);
+  el('path', { d: 'M' + (bq[0] - 14) + ' ' + (bq[1] - 18) + 'q14 -10 28 0M' + (bq[0] - 22) + ' ' + (bq[1] - 26) + 'q22 -14 44 0', style: 'fill:none;stroke:var(--encre);stroke-width:2;stroke-linecap:round' }, bipG);
+  // fils SPI (nappe)
+  ['var(--rouge)', 'var(--jaune-fonce)', 'var(--focus)', 'var(--vert)'].forEach(function (c, i) {
+    el('path', { d: dPath([[506, 204 + i * 4, 40], [497, 204 + i * 4, 39], [492, 204 + i * 4, 44]]), 'class': 'fil', style: 'stroke:' + c }, g);
+  });
+  // lecteur RC522
+  box(g, 506, 188, 38, 42, 48, 2.5, 'pcb');
+  var fr = faceT(g, 506, 188, 40.5);
+  [3, 7, 11].forEach(function (k) { el('rect', { x: 4 + k, y: 4 + k, width: 34 - 2 * k, height: 40 - 2 * k, rx: 3, style: 'fill:none;stroke:var(--bleu-pale);stroke-width:1.2' }, fr); });
+  el('rect', { x: 17, y: 18, width: 8, height: 8, 'class': 'ns', style: 'fill:var(--encre)' }, fr);
+  el('text', { x: 21, y: 42, 'text-anchor': 'middle', style: 'font-size:4px;font-weight:900;fill:var(--blanc)' }, fr, 'RC522');
+  // badge de l'agent et étiquettes RFID des PC (elles se déplacent vers le lecteur)
+  function carte(key, x, y, w, d, mat, txt, txtCol) {
+    var cg = el('g', { 'class': 'carte-rfid' }, g);
+    box(cg, x, y, 38, w, d, 1.2, mat);
+    var fc = faceT(cg, x, y, 39.2);
+    if (key === 'badge') el('rect', { x: 0, y: 2, width: w, height: 3.5, 'class': 'ns', style: 'fill:var(--jaune-fonce)' }, fc);
+    el('text', { x: w / 2, y: d / 2 + 3, 'text-anchor': 'middle', style: 'font-size:5.5px;font-weight:1000;fill:' + txtCol }, fc, txt);
+    CARDS[key] = { g: cg, home: [x + w / 2, y + d / 2, 38] };
+  }
+  carte('badge', 510, 241, 32, 20, 'blanc', 'A-12', 'var(--encre)');
+  carte('t04', 440, 243, 18, 18, 'noir', 'PC-04', 'var(--blanc)');
+  carte('t07', 464, 243, 18, 18, 'noir', 'PC-07', 'var(--blanc)');
+})();
+var READER = [527, 212, 44];
+
+/* ---------- banc de physique ---------- */
+var blockFaces, frostG, chips;
+(function () {
+  var g = dev('banc');
+  desk(g, 400, 320, 200, 140, 34);
+  box(g, 410, 330, 34, 180, 120, 1, 'tapis');
+  // plaque d'essai + ESP32
+  box(g, 420, 345, 35, 82, 42, 4, 'blanc');
+  var fb = faceT(g, 420, 345, 39);
+  for (var i = 0; i < 26; i++) for (var j = 0; j < 2; j++) { el('circle', { cx: 4 + i * 3, cy: 3 + j * 3, r: .6, 'class': 'ns', style: 'fill:var(--contour)' }, fb); el('circle', { cx: 4 + i * 3, cy: 36 + j * 3, r: .6, 'class': 'ns', style: 'fill:var(--contour)' }, fb); }
+  box(g, 436, 352, 39, 46, 22, 2.5, 'noir');
+  var fe = faceT(g, 436, 352, 41.5);
+  el('rect', { x: 3, y: 4, width: 14, height: 14, rx: .8, 'class': 'ns', style: 'fill:var(--m-alu-t)' }, fe);
+  el('text', { x: 20, y: 13, style: 'font-size:4.4px;font-weight:900;fill:var(--blanc)' }, fe, 'ESP32');
+  // résistance 4,7 kΩ
+  el('path', { d: dPath([[486, 350, 39.5], [496, 350, 39.5]]), style: 'stroke:var(--jaune-fonce);stroke-width:3;stroke-linecap:round' }, g);
+  // capteur SHT40
+  box(g, 514, 345, 35, 18, 18, 2.2, 'pcb');
+  var fs = faceT(g, 514, 345, 37.2);
+  el('rect', { x: 6, y: 6, width: 6, height: 6, 'class': 'ns', style: 'fill:var(--m-alu-t)' }, fs);
+  ['var(--rouge)', 'var(--encre)', 'var(--focus)', 'var(--jaune-fonce)'].forEach(function (c, i) {
+    el('path', { d: dPath([[514, 349 + i * 3, 37], [500, 352 + i * 3, 39.5], [484, 356 + i * 2, 42]]), 'class': 'fil', style: 'stroke:' + c }, g);
+  });
+  // bloc d'aluminium + sonde DS18B20
+  blockFaces = box(g, 460, 398, 35, 70, 42, 26, 'alu');
+  frostG = el('g', { style: 'opacity:0' }, g);
+  var ff = faceL(frostG, 460, 440, 61), fr2 = faceR(frostG, 530, 440, 61);
+  for (var k = 0; k < 40; k++) { el('circle', { cx: (k * 37) % 68 + 1, cy: (k * 23) % 24 + 1, r: 1.3, 'class': 'ns', style: 'fill:var(--blanc)' }, ff); if (k < 22) el('circle', { cx: (k * 17) % 40 + 1, cy: (k * 13) % 24 + 1, r: 1.3, 'class': 'ns', style: 'fill:var(--blanc)' }, fr2); }
+  el('path', { d: dPath([[498, 412, 61], [498, 412, 77]]), style: 'stroke:var(--contour);stroke-width:5;stroke-linecap:round' }, g);
+  el('path', { d: dPath(OW), style: 'fill:none;stroke:var(--encre);stroke-width:2;stroke-linejoin:round' }, g);
+  // thermomètre de référence posé à côté
+  el('path', { d: dPath([[560, 360, 35.5], [580, 420, 35.5]]), style: 'stroke:var(--blanc);stroke-width:5;stroke-linecap:round' }, g);
+  el('path', { d: dPath([[560, 360, 35.5], [575, 405, 35.5]]), style: 'stroke:var(--rouge);stroke-width:1.6;stroke-linecap:round' }, g);
+})();
+
+/* ---------- étiquettes des appareils ---------- */
+function pill(parent, x, y, lines, cls) {
+  var g = el('g', { 'class': 'pill ' + (cls || '') }, parent);
+  var sh = el('rect', { 'class': 'ombre' }, g), bg = el('rect', { 'class': 'fond' }, g), tg = el('g', {}, g);
+  el('text', { x: 0, y: 0, 'class': 'p1', 'text-anchor': 'middle' }, tg, lines[0]);
+  if (lines[1]) el('text', { x: 0, y: 14.5, 'class': 'p2', 'text-anchor': 'middle' }, tg, lines[1]);
+  var b = tg.getBBox(), h = b.height + 9, w = b.width + 18, rx = lines[1] ? 9 : h / 2;
+  [[sh, 3], [bg, 0]].forEach(function (p) { p[0].setAttribute('x', b.x - 9 + p[1]); p[0].setAttribute('y', b.y - 4.5 + p[1]); p[0].setAttribute('width', w); p[0].setAttribute('height', h); p[0].setAttribute('rx', rx); });
+  g.setAttribute('transform', 'translate(' + r1(x) + ' ' + r1(y - (b.y + b.height + 4.5)) + ')');
+  return g;
+}
+var LABELS = [
+  ['srv', [65, 47, 100], 0, -26, 'Serveur Ubuntu', 'nginx · Flask · SQLite'],
+  ['sw', [186, 41, 74], 18, -16, 'Switch du lycée', 'réseau en place'],
+  ['ap', [320, 5, 160], 0, -8, 'Borne Wi-Fi', 'Wi-Fi du bureau'],
+  ['lyc', [440, 52, 124], 0, -12, 'PC du lycée', 'tableau de bord'],
+  ['ref', [44, 235, 120], -10, -14, 'Poste du référent', 'Windows 11 · signe le kit'],
+  ['lap', [295, 275, 100], 0, -34, 'PC de maintenance', 'agent PowerShell · BITS'],
+  ['phone', [238, 308, 39], -60, 20, 'Téléphone', '4G sur le terrain'],
+  ['borne', [462, 212, 62], -8, -40, 'Borne de sortie', 'ESP32 + lecteur RC522'],
+  ['banc', [495, 420, 80], 30, -36, 'Banc de physique', 'ESP32 + DS18B20 + SHT40'],
+  ['netem', [128, 78, 58], -58, 4, 'tc netem', '4G simulée']
+];
+LABELS.forEach(function (L) {
+  var a = P(L[1][0], L[1][1], L[1][2]), x = a[0] + L[2], y = a[1] + L[3];
+  var g = el('g', { 'data-lab': L[0] }, layLab);
+  el('line', { x1: r1(x), y1: r1(y), x2: r1(a[0]), y2: r1(a[1]), 'class': 'attache' }, g);
+  el('circle', { cx: r1(a[0]), cy: r1(a[1]), r: 2.6, 'class': 'lab-dot' }, g);
+  pill(g, x, y, [L[4], L[5]]);
+});
+
+/* cadrage : la vue s'adapte au dessin */
+(function () { var b = world.getBBox(), l = layLab.getBBox(); var x0 = Math.min(b.x, l.x) - 16, y0 = Math.min(b.y, l.y) - 16, x1 = Math.max(b.x + b.width, l.x + l.width) + 16, y1 = Math.max(b.y + b.height, l.y + l.height) + 16; svg.setAttribute('viewBox', [r1(x0), r1(y0), r1(x1 - x0), r1(y1 - y0)].join(' ')); })();
+
+/* ---------- bulles d'explication ---------- */
+var BUL = {};
+function bubble(key, anchor, lines, opt) {
+  opt = opt || {}; unbubble(key);
+  var lab = layLab.querySelector('[data-lab="' + key + '"]'); if (lab) lab.classList.add('cache');
+  var a = P(anchor[0], anchor[1], anchor[2]), x = a[0] + (opt.dx || 0), y = a[1] + (opt.dy || -40);
+  var g = el('g', { 'class': 'bulle ' + (opt.cls || '') }, layBul);
+  el('line', { x1: r1(a[0]), y1: r1(a[1]), x2: r1(x), y2: r1(y), 'class': 'attache' }, g);
+  el('circle', { cx: r1(a[0]), cy: r1(a[1]), r: 3, 'class': 'lab-dot' }, g);
+  var box2 = el('g', {}, g), sh = el('rect', { style: 'fill:var(--encre)' }, box2), bg = el('rect', { 'class': 'fond' }, box2), tg = el('g', {}, box2);
+  lines.forEach(function (t, i) {
+    var mono = t.charAt(0) === '>', titre = t.charAt(0) === '#';
+    el('text', { x: 0, y: i * 16, 'class': mono ? 'mono' : titre ? 'titre' : '' }, tg, mono || titre ? t.slice(1) : t);
+  });
+  var b = tg.getBBox(), w = b.width + 20, h = b.height + 12;
+  [[sh, 3], [bg, 0]].forEach(function (p) { p[0].setAttribute('x', b.x - 10 + p[1]); p[0].setAttribute('y', b.y - 6 + p[1]); p[0].setAttribute('width', w); p[0].setAttribute('height', h); p[0].setAttribute('rx', 8); });
+  var left = opt.align === 'right' ? x - w + 14 : opt.align === 'left' ? x - 14 : x - w / 2, by = y - (b.y + b.height + 6);
+  if (opt.below) by = y - b.y + 6;
+  box2.setAttribute('transform', 'translate(' + r1(left - b.x + 10) + ' ' + r1(by) + ')');
+  BUL[key] = g; return g;
+}
+function showLab(key) { var lab = layLab.querySelector('[data-lab="' + key + '"]'); if (lab) lab.classList.remove('cache'); }
+function unbubble(key) { if (BUL[key]) { BUL[key].remove(); delete BUL[key]; showLab(key); } }
+function clearBubbles() { for (var k in BUL) { BUL[k].remove(); showLab(k); } BUL = {}; }
+
+/* ---------- messages qui circulent ---------- */
+var RUN = 0;
+function sleep(ms) { var id = RUN; return new Promise(function (res, rej) { setTimeout(function () { id === RUN ? res() : rej(CANCEL); }, REDUCED ? Math.min(ms, 400) : ms); }); }
+function bg(p) { p.catch(function () {}); return p; }
+function go(path3, o) {
+  o = o || {}; var id = RUN, kind = o.kind || 'req';
+  return new Promise(function (res, rej) {
+    var tr = el('path', { d: dPath(path3), 'class': 'trace k-' + kind }, layTrace), L = tr.getTotalLength();
+    if (o.noTrace) tr.style.display = 'none';
+    tr.style.strokeDasharray = L; tr.style.strokeDashoffset = L;
+    var tok = el('g', { 'class': 'tok k-' + kind }, layTok);
+    el('circle', { r: o.size || 6.5 }, tok);
+    if (o.label) {
+      var lg = el('g', {}, tok), rb = el('rect', { 'class': 'fond-tok', rx: 9 }, lg), t = el('text', { x: 0, y: -15, 'text-anchor': 'middle' }, lg, o.label), b = t.getBBox();
+      rb.setAttribute('x', b.x - 8); rb.setAttribute('y', b.y - 3); rb.setAttribute('width', b.width + 16); rb.setAttribute('height', b.height + 6);
+    }
+    var dur = REDUCED ? 300 : Math.max(600, L / (o.speed || 190) * 1000), stopAt = o.dropAt == null ? 1 : o.dropAt, t0 = null;
+    function frame(t) {
+      if (id !== RUN) { tr.remove(); tok.remove(); return rej(CANCEL); }
+      if (t0 == null) t0 = t;
+      var k = Math.min(1, (t - t0) / dur), e = 0.5 - Math.cos(Math.PI * k) / 2, kk = Math.min(e, stopAt);
+      var pt = tr.getPointAtLength(kk * L);
+      tok.setAttribute('transform', 'translate(' + r1(pt.x) + ' ' + r1(pt.y) + ')');
+      tr.style.strokeDashoffset = L * (1 - kk);
+      if (e >= stopAt) {
+        if (o.dropAt != null) tok.classList.add('perdu');
+        setTimeout(function () { tr.classList.add('fin'); setTimeout(function () { tr.remove(); }, 650); if (o.dropAt == null) tok.remove(); else setTimeout(function () { tok.remove(); }, 700); }, 150);
+        return res();
+      }
+      requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+  });
+}
+function anim(ms, fn) {
+  var id = RUN;
+  return new Promise(function (res, rej) {
+    var t0 = null, dur = REDUCED ? 1 : ms;
+    function f(t) { if (id !== RUN) return rej(CANCEL); if (t0 == null) t0 = t; var k = Math.min(1, (t - t0) / dur); fn(0.5 - Math.cos(Math.PI * k) / 2); if (k < 1) requestAnimationFrame(f); else res(); }
+    requestAnimationFrame(f);
+  });
+}
+function cardOffset(key, where) { var c = CARDS[key], a = P(c.home[0], c.home[1], c.home[2]), b = where === 'reader' ? P(READER[0], READER[1], READER[2] + (key === 'badge' ? 0 : 2)) : a; return [b[0] - a[0], b[1] - a[1]]; }
+function moveCard(key, where) {
+  var c = CARDS[key], from = c.pos || [0, 0], to = cardOffset(key, where);
+  return anim(900, function (k) { var x = from[0] + (to[0] - from[0]) * k, y = from[1] + (to[1] - from[1]) * k - 34 * Math.sin(Math.PI * k); c.g.setAttribute('transform', 'translate(' + r1(x) + ' ' + r1(y) + ')'); }).then(function () { c.pos = to; });
+}
+
+/* ---------- état de la maquette ---------- */
+var ST;
+function stateFor(i) {
+  var s = { srvOn: true, netem: 'off', led: 'off', refN: 0, lapMode: 'log', lapN: 0, prog: 0, block: 20, frost: 0, chart: [], sortie: false,
+    rows: ['ok', 'ok', 'ok', 'old', 'ok'], cards: { badge: 'home', t04: 'home', t07: 'home' } };
+  if (i >= 2) { s.rows = ['warn', 'warn', 'warn', 'old', 'warn']; s.refN = 6; }
+  if (i === 2 || i === 3) s.netem = 'on';
+  if (i >= 4) { s.rows[2] = 'ok'; s.lapN = 5; }
+  if (i >= 6) s.sortie = true;
+  if (i === 7) { s.lapMode = 'chart'; s.block = 0; s.frost = 1; }
+  if (i === 1) s.refN = 0;
+  return s;
+}
+var ROWCOL = { ok: 'var(--vert)', warn: 'var(--jaune-fonce)', old: 'var(--rouge)' };
+function render() {
+  var s = ST;
+  DEV.srv.classList.toggle('off', !s.srvOn); srvLed.style.fill = s.srvOn ? 'var(--vert)' : 'var(--led-off)';
+  netem.classList.toggle('inactif', s.netem === 'off'); netem.classList.toggle('coupe', s.netem === 'cut');
+  [ledV, haloV].forEach(function (e) { e.classList.toggle('on', s.led === 'vert'); e.classList.toggle('alt', s.led === 'alt'); });
+  [ledR, haloR].forEach(function (e) { e.classList.toggle('on', s.led === 'rouge'); e.classList.toggle('alt', s.led === 'alt'); });
+  refLines.forEach(function (r, i) { r.style.opacity = i < s.refN ? 1 : .15; });
+  lapLogG.style.display = s.lapMode === 'log' ? '' : 'none'; lapProg.style.display = s.lapMode === 'prog' ? '' : 'none'; lapChart.style.display = s.lapMode === 'chart' ? '' : 'none';
+  lapLog.forEach(function (r, i) { r.style.opacity = i < s.lapN ? 1 : .12; });
+  lapProgBar.setAttribute('width', 60 * s.prog);
+  lapCurve.setAttribute('points', s.chart.map(function (p) { return r1(12 + p[0] / 3 * 58) + ',' + r1(48 - p[1] / 20 * 30); }).join(' '));
+  dashDots.forEach(function (d, i) { d.style.fill = ROWCOL[s.rows[i]]; });
+  dashSortie.style.opacity = s.sortie ? 1 : 0;
+  var p = Math.round((1 - s.block / 20) * 70);
+  ['t', 'l', 'r'].forEach(function (f) { blockFaces[f].style.fill = 'color-mix(in srgb,var(--bleu) ' + p + '%,var(--m-alu-' + f + '))'; });
+  frostG.style.opacity = s.frost;
+  Object.keys(CARDS).forEach(function (k) { var o = cardOffset(k, s.cards[k]); CARDS[k].pos = o; CARDS[k].g.setAttribute('transform', 'translate(' + r1(o[0]) + ' ' + r1(o[1]) + ')'); });
+}
+function set(o) { for (var k in o) ST[k] = o[k]; render(); }
+function bip() { bipG.classList.remove('on'); void bipG.getBBox(); bipG.classList.add('on'); }
+function flashRow(i) { var d = dashDots[i]; d.classList.remove('flash'); void d.getBBox(); d.classList.add('flash'); }
+
+/* ---------- les étapes ---------- */
+var A = { srv: [65, 47, 100], ref: [44, 235, 120], lap: [295, 275, 100], lyc: [440, 52, 124], borne: [462, 212, 62], banc: [495, 420, 62], ap: [320, 5, 140] };
+var STEPS = [
+{ t: 'Vue d\'ensemble', all: true, loop: true,
+  x: '<p>La maquette du lycée, vue de biais. Au fond, le <b>réseau en place</b> : serveur Ubuntu, switch, borne Wi-Fi et PC du lycée (tableau de bord).</p><p>Devant : le <b>poste du référent</b>, le <b>PC de maintenance</b> et son téléphone, la <b>borne de sortie</b> (ESP32 + lecteur RFID) et le <b>banc de physique</b>.</p><p>Les points qui circulent sont des <b>messages</b>. Clique sur <b>Suivant</b>.</p>',
+  run: async function () {
+    for (;;) {
+      var r = Math.random();
+      if (r < 0.4) bg(go(R('lap', 'srv'), { kind: 'rep', size: 5 }));
+      else if (r < 0.7) bg(go(BORNE_UP, { kind: 'req', size: 5 }));
+      else bg(go(R('srv', 'lap'), { kind: 'kit', size: 5 }));
+      await sleep(1500);
+    }
+  } },
+{ t: '1. Le référent signe et publie le kit', on: ['ref', 'sw', 'srv', 'lyc'],
+  x: '<p>Le référent prépare la <b>version 13</b> du kit (fichiers, paramètres, documents).</p><p>PowerShell calcule l\'<b>empreinte SHA-256</b> de chaque fichier : c\'est comme une empreinte digitale. Si un seul octet change, l\'empreinte change.</p><p>Il <b>signe</b> le catalogue avec son certificat, puis l\'envoie au serveur par <b>SFTP</b>.</p>',
+  run: async function () {
+    var L = ['#Poste du référent', '>New-FileCatalog -Version 2', '>  → empreintes SHA-256', '>Set-AuthenticodeSignature', '>  → catalogue signé ✔'];
+    for (var i = 1; i <= 6; i++) { set({ refN: i }); if (i <= 5) bubble('ref', A.ref, L.slice(0, i), { dx: 30, dy: -40, align: 'left' }); await sleep(550); }
+    await sleep(500);
+    await go(R('ref', 'srv'), { kind: 'kit', label: 'SFTP · kit v13 signé', speed: 150 });
+    bubble('srv', A.srv, ['#Serveur', 'kit v13 publié', 'v12 gardée dans l\'historique'], { dx: 70, dy: -10, align: 'left', cls: 'ok' });
+    await sleep(500);
+    set({ rows: ['warn', 'warn', 'warn', 'old', 'warn'] });
+    bubble('lyc', A.lyc, ['#Tableau de bord', 'les PC en v12 passent en retard'], { dx: 20, dy: -40, align: 'left' });
+  } },
+{ t: '2. Le PC demande s\'il y a du nouveau', on: ['lap', 'sw', 'srv', 'netem'],
+  x: '<p>C\'est <b>toujours le PC qui demande</b> : au démarrage, à l\'ouverture de session et toutes les 30 min. Le serveur ne peut pas joindre un PC en 4G.</p><p>Au lycée, <code>tc netem</code> ralentit le serveur pour <b>imiter la 4G</b> du téléphone.</p><p>Le PC vérifie la <b>signature</b> (c\'est bien le référent) et le <b>numéro de version</b> (13 &gt; 12). Un ancien kit, même bien signé, est refusé.</p>',
+  run: async function () {
+    bubble('netem', [128, 78, 58], ['#tc netem', 'retard · débit limité · pertes'], { dx: -20, dy: 70, below: true, align: 'right' });
+    await sleep(600);
+    await go(R('lap', 'srv'), { kind: 'req', label: 'GET /kit/catalogue (HTTPS)', speed: 110 });
+    await sleep(300);
+    await go(R('srv', 'lap'), { kind: 'kit', label: 'catalogue v13 + signature', speed: 110 });
+    set({ lapN: 1 }); bubble('lap', A.lap, ['#Agent du PC-04', '✔ signé par le référent'], { dx: 30, dy: -46, align: 'left' });
+    await sleep(900);
+    set({ lapN: 2 }); bubble('lap', A.lap, ['#Agent du PC-04', '✔ signé par le référent', '✔ version 13 > 12 installée'], { dx: 30, dy: -46, align: 'left', cls: 'ok' });
+  } },
+{ t: '3. Seuls les fichiers modifiés arrivent', on: ['lap', 'sw', 'srv', 'netem'],
+  x: '<p>Le PC télécharge <b>seulement les 3 fichiers modifiés</b>, avec <b>BITS</b> (outil de Windows). Ils arrivent dans un dossier « préparation ».</p><p>La 4G coupe ? BITS <b>attend, puis reprend</b> là où il s\'était arrêté.</p><p>Ensuite <code>Test-FileCatalog</code> revérifie chaque empreinte, puis le PC bascule : l\'ancien kit devient « précédent » (retour arrière en moins de 2 min).</p>',
+  run: async function () {
+    set({ lapMode: 'prog', prog: 0 });
+    await go(R('srv', 'lap'), { kind: 'kit', label: 'fichier 1/3 · 2,1 Mo', speed: 120 }); set({ prog: 0.33 });
+    await go(R('srv', 'lap'), { kind: 'kit', label: 'fichier 2/3', speed: 120, dropAt: 0.45 });
+    set({ netem: 'cut' }); bubble('lap', A.lap, ['#Coupure 4G !', 'BITS attend, sans rien perdre'], { dx: 30, dy: -46, align: 'left', cls: 'alerte' });
+    await sleep(2300);
+    set({ netem: 'on' }); unbubble('lap');
+    await go(R('srv', 'lap'), { kind: 'kit', label: 'reprise · fichier 2/3', speed: 120 }); set({ prog: 0.66 });
+    await go(R('srv', 'lap'), { kind: 'kit', label: 'fichier 3/3 · 0,4 Mo', speed: 120 }); set({ prog: 1 });
+    await sleep(500);
+    set({ lapMode: 'log', lapN: 4 });
+    bubble('lap', A.lap, ['#Agent du PC-04', '>Test-FileCatalog : 3/3 ✔', '>actif     = v13', '>précédent = v12'], { dx: 30, dy: -46, align: 'left', cls: 'ok' });
+  } },
+{ t: '4. Le PC envoie son rapport', on: ['lap', 'sw', 'srv', 'lyc', 'ap'],
+  x: '<p>Le PC envoie un <b>rapport</b> : « PC-04, kit v13, vérifié à 08:42 ». Il joint son <b>jeton</b>, une clé propre à ce PC.</p><p>Le tableau de bord passe PC-04 au vert.</p><p>Un faux rapport <b>sans jeton</b> est refusé : personne ne peut faire croire qu\'un PC est à jour (test T15).</p>',
+  run: async function () {
+    set({ rows: ['warn', 'warn', 'warn', 'old', 'warn'], lapN: 4 });
+    await go(R('lap', 'srv'), { kind: 'rep', label: 'POST /pc/04/rapport · jeton 🔑' });
+    set({ lapN: 5 });
+    await go(R('srv', 'lyc'), { kind: 'rep', label: 'tableau de bord', size: 5 });
+    set({ rows: ['warn', 'warn', 'ok', 'old', 'warn'] }); flashRow(2);
+    bubble('lyc', A.lyc, ['#Tableau de bord', 'PC-04 · kit v13 · 08:42 ✔'], { dx: 20, dy: -40, align: 'left', cls: 'ok' });
+    await sleep(1600);
+    await go(R('ap', 'srv'), { kind: 'err', label: 'faux rapport « à jour » · sans jeton' });
+    bubble('srv', A.srv, ['#Serveur', 'pas de jeton → 401 refusé'], { dx: 70, dy: -10, align: 'left', cls: 'alerte' });
+    await go(R('srv', 'ap'), { kind: 'err', label: '✖ 401 refusé' });
+  } },
+{ t: '5. Départ en intervention : la borne', on: ['borne', 'ap', 'sw', 'srv', 'lyc'],
+  x: '<p>L\'agent passe son <b>badge</b> (« qui part »), puis l\'<b>étiquette RFID</b> collée sur le PC (« quel PC part »). Le lecteur RC522 transmet les numéros à l\'ESP32 par le <b>bus SPI</b>.</p><p>L\'ESP32 demande au serveur, en Wi-Fi et HTTPS : « PC-04 est-il à jour ? ». Oui → <b>LED verte</b> et bip. La sortie est enregistrée.</p><p>Le badge <b>identifie</b>, il ne prouve pas : il trace une sortie, il ne contrôle pas un accès.</p>',
+  run: async function () {
+    await sleep(300);
+    await moveCard('badge', 'reader');
+    await go(SPI, { kind: 'capt', label: 'SPI · badge → agent A-12', speed: 50, size: 4.5 });
+    await moveCard('badge', 'home');
+    await moveCard('t04', 'reader');
+    await go(SPI, { kind: 'capt', label: 'SPI · étiquette → PC-04', speed: 50, size: 4.5 });
+    await go(BORNE_UP, { kind: 'req', label: 'GET /pc/04/etat · jeton 🔑' });
+    await sleep(200);
+    await go(BORNE_DOWN, { kind: 'kit', label: 'à jour · v13 · rapport 08:42' });
+    set({ led: 'vert' }); bip();
+    bubble('borne', A.borne, ['#Borne', 'LED verte + bip : on peut partir'], { dx: 70, dy: -50, cls: 'ok', align: 'left' });
+    await sleep(1000);
+    await go(BORNE_UP, { kind: 'rep', label: 'POST /sorties (A-12, PC-04, v13, 08:47)' });
+    await go(R('srv', 'lyc'), { kind: 'rep', size: 5 });
+    set({ sortie: true });
+    bubble('lyc', A.lyc, ['#Tableau de bord', 'dernière sortie : PC-04 · A-12 · 08:47'], { dx: 20, dy: -40, align: 'left' });
+    await moveCard('t04', 'home');
+    await sleep(800); set({ led: 'off' });
+  } },
+{ t: '6. Et si quelque chose ne va pas ?', on: ['borne', 'ap', 'sw', 'srv'],
+  x: '<p><b>PC-07</b> n\'a pas envoyé de rapport depuis 3 jours : le serveur répond « rapport ancien » → <b>LED rouge</b> et long bip.</p><p>Ensuite, on <b>arrête le serveur</b>. La borne n\'a pas de réponse : les LED <b>clignotent en alternance</b> = « vérification impossible ». La sortie est gardée en mémoire.</p><p>Règle d\'or : un serveur muet ne veut <b>jamais</b> dire « à jour ».</p>',
+  run: async function () {
+    await sleep(300);
+    await moveCard('t07', 'reader');
+    await go(SPI, { kind: 'capt', label: 'SPI · étiquette → PC-07', speed: 50, size: 4.5 });
+    await go(BORNE_UP, { kind: 'req', label: 'GET /pc/07/etat · jeton 🔑' });
+    await go(BORNE_DOWN, { kind: 'err', label: 'rapport ancien (3 jours)' });
+    set({ led: 'rouge' }); bip();
+    bubble('borne', A.borne, ['#Borne', 'LED rouge : PC-07 pas à jour'], { dx: 70, dy: -50, cls: 'alerte', align: 'left' });
+    await sleep(2000);
+    set({ led: 'off' }); unbubble('borne'); await moveCard('t07', 'home');
+    set({ srvOn: false });
+    bubble('srv', A.srv, ['#On arrête le serveur'], { dx: 70, dy: -10, align: 'left', cls: 'alerte' });
+    await sleep(1200);
+    await moveCard('t07', 'reader');
+    await go(BORNE_UP, { kind: 'req', label: 'GET /pc/07/etat', dropAt: 0.94 });
+    await sleep(900);
+    set({ led: 'alt' });
+    bubble('borne', A.borne, ['#Vérification impossible', 'jamais « à jour » par défaut', 'sortie gardée en mémoire'], { dx: 70, dy: -50, cls: 'alerte', align: 'left' });
+  } },
+{ t: '7. Le banc de physique', on: ['banc', 'lap'],
+  x: '<p>Question : un PC qui sort du froid, combien de temps attendre avant de l\'allumer, pour éviter la <b>buée</b> à l\'intérieur ?</p><p>Un bloc d\'aluminium refroidi à 0 °C imite le PC. Le <b>DS18B20</b> (fil 1-Wire) mesure le bloc, le <b>SHT40</b> (bus I²C) mesure l\'air : 20 °C et 50 % d\'humidité, donc un point de rosée d\'environ 9,3 °C.</p><p>Tant que le bloc est sous 9,3 °C, la buée se forme. Le modèle prévoit une attente d\'environ <b>0,62 τ</b>. On le compare aux mesures.</p>',
+  run: async function () {
+    set({ chart: [], block: 0, frost: 1 });
+    var N = 22, chart = [];
+    for (var i = 0; i <= N; i++) {
+      var t = i / N * 3, T = 20 - 20 * Math.exp(-t) + (Math.sin(i * 7.3) * 0.15);
+      set({ block: Math.max(0, T), frost: T < 9.3 ? 1 - T / 9.3 * 0.6 : 0 });
+      bubble('banc', A.banc, ['#Banc de physique', '>DS18B20 (bloc) : ' + T.toFixed(1).replace('.', ',') + ' °C', '>SHT40 (air) : 20,0 °C · 50 %HR', '>rosée ≈ 9,3 °C → ' + (T < 9.3 ? 'buée !' : 'plus de buée')], { dx: 40, dy: -30, align: 'left', cls: T < 9.3 ? 'alerte' : 'ok' });
+      bg(go(OW, { kind: 'capt', size: 3.5, speed: 120, noTrace: true }));
+      bg(go(I2C, { kind: 'capt', size: 3.5, speed: 90, noTrace: true }));
+      await go(USB, { kind: 'capt', size: 4.5, speed: 260, label: i % 5 === 0 ? 'USB · T = ' + T.toFixed(1).replace('.', ',') + ' °C' : null });
+      chart.push([t, T]); set({ chart: chart.slice() });
+      await sleep(220);
+    }
+    bubble('lap', A.lap, ['#Résultat', 'attendre ≈ 0,62 τ avant d\'allumer', 'à comparer aux mesures'], { dx: -40, dy: -40, align: 'right', cls: 'ok' });
+  } },
+{ t: '8. Le tableau de bord, et tout ensemble', all: true, loop: true,
+  x: '<p>Le tableau de bord montre l\'état de chaque PC : kit installé, dernier rapport, dernière sortie. Un bouton <b>exporte un fichier CSV</b> pour les tableaux Excel du service.</p><p>Pour finir, tout fonctionne en même temps : les PC demandent, le serveur répond, la borne vérifie, le banc mesure.</p>',
+  run: async function () {
+    await go(R('lyc', 'srv'), { kind: 'req', label: 'GET /export.csv' });
+    await go(R('srv', 'lyc'), { kind: 'kit', label: 'parc.csv → Excel' });
+    bubble('lyc', A.lyc, ['#Tableau de bord', 'export CSV pour Excel ✔'], { dx: 20, dy: -40, align: 'left', cls: 'ok' });
+    for (;;) {
+      var r = Math.random();
+      if (r < 0.3) bg(go(R('lap', 'srv'), { kind: 'req', size: 5 }).then(function () { return go(R('srv', 'lap'), { kind: 'kit', size: 5 }); }));
+      else if (r < 0.55) bg(go(BORNE_UP, { kind: 'req', size: 5 }).then(function () { return go(BORNE_DOWN, { kind: 'kit', size: 5 }); }).then(function () { set({ led: 'vert' }); return sleep(600); }).then(function () { set({ led: 'off' }); }));
+      else if (r < 0.8) bg(go(USB, { kind: 'capt', size: 4 }));
+      else bg(go(R('ref', 'srv'), { kind: 'kit', size: 5 }));
+      await sleep(1200);
+    }
+  } }
+];
+
+/* ---------- navigation ---------- */
+var cur = 0, vus = {};
+var eNum = document.getElementById('eNum'), eTitre = document.getElementById('eTitre'), eTexte = document.getElementById('eTexte');
+var pointsBox = document.getElementById('points'), bNext = document.getElementById('bNext'), bPrev = document.getElementById('bPrev');
+STEPS.forEach(function (s, i) {
+  var b = document.createElement('button'); b.type = 'button'; b.textContent = i; b.setAttribute('aria-label', 'Étape ' + i + ' : ' + s.t);
+  b.addEventListener('click', function () { show(i); }); pointsBox.appendChild(b);
+});
+function show(i) {
+  cur = Math.max(0, Math.min(STEPS.length - 1, i)); var s = STEPS[cur]; vus[cur] = true;
+  RUN++; layTok.innerHTML = ''; layTrace.innerHTML = ''; clearBubbles();
+  ST = stateFor(cur); render();
+  eNum.textContent = 'Étape ' + cur + ' sur ' + (STEPS.length - 1);
+  eTitre.textContent = s.t; eTexte.innerHTML = s.x;
+  Object.keys(DEV).forEach(function (k) { DEV[k].classList.toggle('on', !!s.all || (s.on || []).indexOf(k) >= 0); });
+  Array.prototype.forEach.call(layLab.children, function (g) { var k = g.getAttribute('data-lab'); if (k === 'phone') k = 'lap'; g.classList.toggle('on', !!s.all || (s.on || []).indexOf(k) >= 0); });
+  svg.classList.toggle('focus', !s.all);
+  bPrev.disabled = cur === 0;
+  bNext.textContent = cur === STEPS.length - 1 ? 'Recommencer ↺' : 'Suivant ▶';
+  Array.prototype.forEach.call(pointsBox.children, function (b, j) { if (j === cur) b.setAttribute('aria-current', 'step'); else b.removeAttribute('aria-current'); b.classList.toggle('vu', !!vus[j]); });
+  try { history.replaceState(null, '', '#etape-' + cur); } catch (e) {}
+  s.run().catch(function (e) { if (e !== CANCEL) console.error(e); });
+}
+bNext.addEventListener('click', function () { show(cur === STEPS.length - 1 ? 0 : cur + 1); });
+bPrev.addEventListener('click', function () { show(cur - 1); });
+document.getElementById('bReplay').addEventListener('click', function () { show(cur); });
+var bLab = document.getElementById('bLab');
+function toggleLab() { var on = bLab.getAttribute('aria-pressed') !== 'true'; bLab.setAttribute('aria-pressed', String(on)); svg.classList.toggle('sans-lab', !on); }
+bLab.addEventListener('click', toggleLab);
+addEventListener('keydown', function (e) {
+  if (e.ctrlKey || e.metaKey || e.altKey) return;
+  if (e.key === 'ArrowRight') { e.preventDefault(); if (cur < STEPS.length - 1) show(cur + 1); }
+  else if (e.key === 'ArrowLeft') { e.preventDefault(); if (cur > 0) show(cur - 1); }
+  else if (e.key === 'r' || e.key === 'R') show(cur);
+  else if (e.key === 'e' || e.key === 'E') toggleLab();
+});
+var h = /#etape-(\d+)/.exec(location.hash);
+show(h ? +h[1] : 0);
+})();
+</script>
+</body>
+</html>
