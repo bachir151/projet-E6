@@ -1,6 +1,6 @@
 # Projets E6 – BTS CIEL option A (session 2027)
 
-Ce dépôt sert à concevoir et documenter les projets individuels E6 de 4 apprentis de BTS CIEL option A (Informatique et réseaux). L'utilisateur est leur enseignant (Elbashir). Il conçoit les projets à partir du besoin exprimé par chaque tuteur d'entreprise, puis produit fiches, dossiers techniques, synthèses et supports de soutenance.
+Ce dépôt sert à concevoir et documenter les projets individuels E6 de 4 apprentis de BTS CIEL option A (Informatique et réseaux). L'utilisateur est leur enseignant (Elbashir). Il conçoit les projets à partir d'un besoin métier ou d'une proposition de valeur pour un service informatique, puis produit fiches, dossiers techniques, synthèses et supports de soutenance. Le besoin proposé par un apprenti ne doit pas être présenté comme déjà validé par l'entreprise.
 
 ## Langue et style
 - Tout est rédigé **en français**, avec des **mots simples** et des phrases courtes.
@@ -17,7 +17,7 @@ Ce dépôt sert à concevoir et documenter les projets individuels E6 de 4 appre
 - Besoin **chiffré** : hypothèses écrites et validées par le tuteur, indicateurs mesurés sur la maquette.
 
 ## Règles non négociables
-- **Besoin issu de l'entreprise, réalisation au lycée** sur maquette. Aucune donnée réelle, aucun accès à la production, contexte anonymisé (pas de nom d'entreprise dans les dossiers).
+- **Besoin réel, ou amélioration proposée au service et à faire valider ; réalisation envisagée au lycée** sur maquette. Aucune donnée réelle, aucun accès à la production, contexte anonymisé (pas de nom d'entreprise dans les dossiers).
 - **Point réglementaire** : l'arrêté du 25 janvier 2023 indique « Pour les apprentis les projets doivent impérativement être développés dans l'entreprise ». La réalisation au lycée doit être **validée par l'académie** ; chaque dossier le dit.
 - Matériel du lycée : PC Ubuntu, switchs HP ProCurve, routeurs Cisco ISR 4331, ESP32 et capteurs. **Pas de câblage 230 V. Pas de caméra filmant des personnes.**
 - Les projets des 4 apprentis doivent rester **distincts** (voir `docs/apprentis.md`).
@@ -27,10 +27,18 @@ Ce dépôt sert à concevoir et documenter les projets individuels E6 de 4 appre
 - `docs/` : cadre E6, état des 4 projets, charte IA, sources vérifiées.
 - `Projet apprenti 1/` : projet « Le service informatique augmenté » (décision du 16/11) ; `fiche-academique/`, `projet-v4/` (document de travail), `questions-jury/`, notes d'entretien ; anciennes versions (chariots, dossier V3) dans `archives/`.
 - `Projet apprenti 2/` : synthèse de 3 pages (PDF), source du projet ; `fiche-academique/` ; `TODO.md`.
-- `Projet apprenti 3/` : dossier V2 de Lorenzo (PDF, 33 p.), source du projet ; `fiche-academique/` ; `livrables/page-html/` ; `TODO.md`.
+- `Projet apprenti 3/` : **CyberSentinel** (décision du 20/11) ; source actuelle : `projet-cybersentinel.md`, `TODO.md`, `livrables/animation-3d/maquette-3d.html`, `livrables/page-html/poste-attentif.html`. Les anciens DOCX/PDF/PPTX et dossiers V2 sont historiques/obsolètes.
 - `Projet apprenti 4/` : fiche technique d'Aziza (PDF) et `apprentie4-aziza/` (spécification `projet.md`, décisions, questions de visite, TODO).
 - `Projet apprenti 4/apprentie4-aziza/livrables/` : fichiers déjà produits (fiche signable, PowerPoint, présentation animée, scripts de génération).
 - `.claude/commands/` : commandes réutilisables (revue critique d'un projet, contrôle d'un dossier).
+
+## Mise en garde spécifique — Lorenzo (décision 20/11/2026)
+- **Ne pas réintroduire** l’orchestration de mises à jour ou de logiciels dans CyberSentinel.
+- Le radar LD2410/ESP32 protège une session Windows ; un **deuxième ESP32 + W5500** héberge un leurre HTTP faible interaction (imprimante fictive) sur LAN isolé.
+- Une connexion au leurre **ne prouve pas** une intrusion. La supervision ne doit pas attribuer un événement réseau à une absence ou à un agent.
+- Le verrouillage doit rester local même si le serveur Ubuntu tombe en panne.
+- La maquette et la page HTML sont refaites ; **les anciens formulaires et PowerPoint de Lorenzo restent obsolètes**.
+- Appliquer la charte « encre sur papier » (#F4F2EC, #ECE9E0, #16150F, #F6D77A ; Nunito) aux nouveaux supports. Aucun déploiement en production DGFiP.
 
 ## Livrables : les trois documents par apprenti (décision du 11/11/2026)
 Pour **chaque** apprenti, il faut ces trois documents, et seulement eux :
