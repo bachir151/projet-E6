@@ -1,0 +1,234 @@
+/* =====================================================================
+   theme.css — identité visuelle « encre sur papier » (inspirée de lastbook.org)
+   Source de vérité unique des couleurs, polices, ombres et composants.
+   Les pages ne contiennent AUCUNE couleur, police ou ombre en dur :
+   elles utilisent les variables et les composants ci-dessous.
+
+   Lier depuis une page :  <link rel="stylesheet" href="(chemin relatif)/theme.css">
+   La police Nunito est chargée ici (@import) : rien d'autre à ajouter.
+   ===================================================================== */
+@import url("https://fonts.googleapis.com/css2?family=Nunito:wght@200..1000&display=swap");
+
+:root {
+  /* ---- palette ---- */
+  --papier: #F4F2EC;
+  --papier-2: #ECE9E0;
+  --encre: #16150F;
+  --encre-2: #4A4840;
+  --encre-3: #6E6B62;
+  --contour: #8C8980;
+  --contour-2: #B7B4AB;      /* contour plus léger (séparateurs, cartes « à venir ») */
+  --jaune: #F6D77A;          /* jaune lanterne : mise en avant */
+  --jaune-fonce: #D9A21B;
+  --jaune-pale: #FBEFC4;     /* fond de note */
+  --bleu: #9CC3E6;           /* bleu eau : information */
+  --bleu-pale: #E3EEF8;
+  --rouge: #C8372D;          /* erreur, danger */
+  --rouge-pale: #F6E1DE;
+  --rouge-texte: #A82E25;    /* rouge foncé pour du TEXTE rouge sur fond clair (le rouge pur n'atteint pas AA sur fond pâle) */
+  --vert: #2F6B4F;           /* succès, validé */
+  --vert-pale: #E0ECE5;
+  --blanc: #FFFFFF;
+  --focus: #1F5FD1;
+
+  /* ---- typographie ---- */
+  --police: "Nunito", ui-rounded, "SF Pro Rounded", "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif;
+  --police-mono: ui-monospace, "SF Mono", Consolas, "Liberation Mono", monospace;
+  --taille-texte: 1.0625rem;   /* 17 px */
+  --interligne: 1.6;
+
+  /* ---- formes et ombres ---- */
+  --r-carte: 22px 26px 20px 24px / 26px 20px 24px 22px;   /* coins « faits main », légèrement irréguliers */
+  --r-bouton: 26px 32px 24px 30px / 32px 24px 30px 26px;
+  --r-note: 15px 19px 14px 17px / 18px 14px 17px 15px;
+  --r-petit: 10px;
+  --ombre-douce: 0 22px 34px -22px rgba(22, 21, 15, .32), 0 3px 10px -4px rgba(22, 21, 15, .08);
+  --ombre-decalee: 3px 3px 0 var(--encre);
+  --ombre-decalee-forte: 4px 5px 0 var(--encre);
+  --trait: 1.5px;              /* épaisseur des dessins au trait (SVG) */
+
+  /* ---- mise en page ---- */
+  --largeur: 1120px;
+  --gouttiere: clamp(16px, 4vw, 28px);
+
+  color-scheme: light;
+}
+
+/* =====================================================================
+   Base
+   ===================================================================== */
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--papier);
+  color: var(--encre);
+  font-family: var(--police);
+  font-size: var(--taille-texte);
+  line-height: var(--interligne);
+  font-weight: 500;
+}
+img, svg { max-width: 100%; }
+a { color: inherit; text-underline-offset: 3px; text-decoration-thickness: 1.5px; }
+a:hover { text-decoration-color: var(--jaune-fonce); }
+button, input, select, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; border-radius: 4px; }
+::selection { background: var(--jaune); color: var(--encre); }
+
+h1, h2, h3, h4 { font-family: var(--police); color: var(--encre); margin: 0 0 .45em; text-wrap: balance; }
+h1, h2 { font-weight: 1000; text-transform: uppercase; }
+h1 { font-size: clamp(2.1rem, 1.4rem + 3vw, 3.6rem); line-height: 1; letter-spacing: .005em; }
+h2 { font-size: clamp(1.6rem, 1.2rem + 1.6vw, 2.35rem); line-height: 1.05; letter-spacing: .01em; }
+h3 { font-size: 1.3rem; line-height: 1.2; font-weight: 900; letter-spacing: -.005em; }
+h4 { font-size: 1.06rem; line-height: 1.25; font-weight: 900; }
+p { margin: 0 0 .85em; }
+strong, b { font-weight: 800; }
+small { font-size: .88rem; }
+code, kbd, samp, pre { font-family: var(--police-mono); font-size: .92em; }
+code { background: var(--papier-2); border: 1px solid var(--contour-2); border-radius: 5px; padding: 0 .3em; }
+kbd { background: var(--blanc); border: 1.5px solid var(--encre-2); border-bottom-width: 3px; border-radius: 6px; padding: 0 .35em; font-weight: 700; }
+hr { border: 0; border-top: 1.5px solid var(--contour-2); margin: 2em 0; }
+mark, .surligne { background: linear-gradient(transparent 58%, var(--jaune) 58%); color: inherit; padding: 0 .08em; }
+
+table { width: 100%; border-collapse: collapse; }
+th, td { border-bottom: 1px solid var(--contour-2); padding: 10px 12px; text-align: left; vertical-align: top; }
+th { font-weight: 900; background: var(--papier-2); }
+caption { caption-side: bottom; font-size: .88rem; color: var(--encre-3); padding-top: 8px; text-align: left; }
+
+/* =====================================================================
+   Mise en page
+   ===================================================================== */
+.conteneur, .wrap { max-width: var(--largeur); margin-inline: auto; padding-inline: var(--gouttiere); }
+.zone-2 { background: var(--papier-2); }              /* zone secondaire */
+.grille { display: grid; gap: 18px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); }
+
+/* =====================================================================
+   Composants (réutiliser ces classes, ne pas les recréer)
+   ===================================================================== */
+
+/* -- étiquette : petit texte gris, gras, majuscules espacées -- */
+/* sur papier-2 ou fond pâle, le gris --encre-3 tombe sous 4,5:1 : on passe à --encre-2 */
+.zone-2 :is(.label, .eyebrow, .kicker), .encadre :is(.label, .eyebrow, .kicker), .callout :is(.label, .eyebrow, .kicker), .note :is(.label, .eyebrow, .kicker) { color: var(--encre-2); }
+.label, .eyebrow, .kicker {
+  display: block; font-weight: 800; font-size: .78rem; line-height: 1.3;
+  letter-spacing: .14em; text-transform: uppercase; color: var(--encre-3); margin: 0 0 8px;
+}
+
+/* -- carte : fond blanc, coins arrondis, contour gris fin, ombre douce -- */
+.carte, .card {
+  position: relative; background: var(--blanc); color: var(--encre);
+  border: 1.5px solid var(--contour); border-radius: var(--r-carte);
+  box-shadow: var(--ombre-douce); padding: 22px 24px;
+}
+.carte h3, .card h3 { font-weight: 900; }
+.carte > :last-child, .card > :last-child { margin-bottom: 0; }
+.carte.plate { box-shadow: none; }
+.carte.a-venir { background: transparent; box-shadow: none; border-style: dashed; border-color: var(--contour-2); }
+
+/* -- note : petit papier jaune pâle -- */
+.note { background: var(--jaune-pale); border-radius: var(--r-note); box-shadow: var(--ombre-douce); padding: 14px 18px; }
+
+/* -- encadré : bande de couleur à gauche (sens selon la classe sémantique) -- */
+.encadre, .callout {
+  background: var(--papier-2); border-left: 6px solid var(--jaune); border-radius: 0 var(--r-petit) var(--r-petit) 0;
+  padding: 12px 18px; margin: 18px 0;
+}
+.encadre > :last-child, .callout > :last-child { margin-bottom: 0; }
+
+/* -- tag : arrondi, contour encre, fond transparent ou papier -- */
+.tag, .pill {
+  display: inline-flex; align-items: center; gap: 6px; vertical-align: middle;
+  border: 1.5px solid var(--encre); border-radius: 999px; background: transparent; color: var(--encre);
+  padding: 3px 12px 4px; font-weight: 800; font-size: .82rem; line-height: 1.3; white-space: nowrap;
+}
+.tag.papier { background: var(--papier); }
+
+/* -- bouton : pilule, contour encre, ombre décalée, se déplace au survol / à l'appui -- */
+.bouton, .btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 9px;
+  min-height: 46px; padding: 10px 22px; border: 2.5px solid var(--encre); border-radius: var(--r-bouton);
+  background: var(--blanc); color: var(--encre); text-decoration: none; white-space: nowrap;
+  font: 900 1rem/1.1 var(--police); letter-spacing: .03em; text-transform: uppercase;
+  box-shadow: var(--ombre-decalee); transition: transform .12s ease, box-shadow .12s ease, background-color .12s;
+  cursor: pointer;
+}
+.bouton:hover, .btn:hover { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--encre); background: var(--jaune); color: var(--encre); }
+.bouton:active, .btn:active { transform: translate(3px, 3px); box-shadow: 0 0 0 var(--encre); }
+.bouton:focus-visible, .btn:focus-visible { outline-offset: 6px; }
+.bouton:disabled, .btn:disabled, .bouton[aria-disabled="true"] { opacity: .5; cursor: not-allowed; transform: none; box-shadow: var(--ombre-decalee); }
+.bouton.principal, .btn.principal, .btn.primary { background: var(--encre); color: var(--papier); }
+.bouton.principal:hover, .btn.principal:hover, .btn.primary:hover { background: var(--encre-2); color: var(--papier); }
+.bouton.jaune, .btn.jaune { background: var(--jaune); }
+.bouton.petit, .btn.petit, .btn-sm { min-height: 36px; padding: 6px 15px; font-size: .86rem; box-shadow: 2px 2px 0 var(--encre); }
+/* bouton bascule (onglets, choix) : appuyé = jaune */
+.bouton[aria-pressed="true"], .btn[aria-pressed="true"], .bouton[aria-selected="true"], .btn[aria-selected="true"] { background: var(--jaune); }
+
+/* -- bandeau de sous-titres : fond noir, texte clair, mots-clés en jaune -- */
+.bandeau {
+  background: var(--encre); color: var(--papier); border-radius: var(--r-petit);
+  padding: 14px 20px; font-weight: 700; font-size: 1.08rem; line-height: 1.5;
+}
+.bandeau b, .bandeau strong, .bandeau em, .bandeau .cle { color: var(--jaune); font-style: normal; font-weight: 900; }
+.bandeau a { color: var(--jaune); }
+
+/* -- section finale (conclusion, appel à l'action) : fond jaune -- */
+.section-finale { background: var(--jaune); color: var(--encre); padding-block: clamp(36px, 6vw, 64px); }
+.section-finale .label, .section-finale .eyebrow { color: var(--encre-2); }
+.section-finale .carte, .section-finale .card { border-color: var(--encre); }
+
+/* -- terminal / bloc de code sombre -- */
+.terminal { background: var(--encre); color: var(--papier); border-radius: var(--r-petit); padding: 16px 18px; font: .86rem/1.7 var(--police-mono); white-space: pre-wrap; overflow: auto; }
+
+/* -- dessin au trait (SVG décoratif) -- */
+.trait { fill: none; stroke: var(--encre); stroke-width: var(--trait); stroke-linecap: round; stroke-linejoin: round; }
+.dessin { display: block; color: var(--encre); }
+
+/* =====================================================================
+   Couleurs sémantiques (rouge = danger, vert = validé, bleu = info, jaune = mise en avant)
+   S'appliquent aux encadrés, tags, cartes et textes.
+   ===================================================================== */
+.danger  { --sens: var(--rouge); --sens-pale: var(--rouge-pale); }
+.succes  { --sens: var(--vert);  --sens-pale: var(--vert-pale); }
+.info    { --sens: var(--bleu);  --sens-pale: var(--bleu-pale); }
+.accent  { --sens: var(--jaune-fonce); --sens-pale: var(--jaune-pale); }
+.encadre:is(.danger, .succes, .info, .accent), .callout:is(.danger, .succes, .info, .accent) { border-left-color: var(--sens); background: var(--sens-pale); }
+.tag:is(.danger, .succes), .pill:is(.danger, .succes) { border-color: var(--sens); color: var(--sens); background: var(--sens-pale); }
+.tag.danger, .pill.danger { color: var(--rouge-texte); }
+.tag.info, .pill.info { background: var(--bleu); border-color: var(--encre); }
+.tag.accent, .pill.accent, .tag.jaune, .pill.jaune { background: var(--jaune); border-color: var(--encre); }
+.carte:is(.danger, .succes, .info, .accent), .card:is(.danger, .succes, .info, .accent) { border-top: 6px solid var(--sens); }
+.texte-danger { color: var(--rouge-texte); }
+.texte-succes { color: var(--vert); }
+.texte-discret { color: var(--encre-3); }
+
+/* =====================================================================
+   Accessibilité, mouvement réduit
+   ===================================================================== */
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+}
+
+/* =====================================================================
+   Vidéoprojecteur (grand écran) : texte un peu plus grand
+   ===================================================================== */
+@media (min-width: 1600px) {
+  :root { --taille-texte: 1.15rem; --largeur: 1280px; }
+}
+
+/* =====================================================================
+   Impression / PDF : fond papier conservé, pas de coupure dans une carte
+   ===================================================================== */
+@media print {
+  @page { margin: 14mm 12mm; }
+  html, body { background: var(--papier); -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body { font-size: 11pt; line-height: 1.45; }
+  .carte, .card, .note, .encadre, .callout, .bandeau, figure, table, tr, pre, svg { break-inside: avoid; page-break-inside: avoid; }
+  h1, h2, h3, h4 { break-after: avoid; page-break-after: avoid; }
+  .carte, .card, .note { box-shadow: none; }
+  .bouton, .btn { box-shadow: none; }
+  a { text-decoration: none; }
+  nav, .pas-impression, .no-print { display: none !important; }
+}
