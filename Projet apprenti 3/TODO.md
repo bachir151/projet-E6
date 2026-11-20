@@ -1,71 +1,109 @@
-# Lorenzo (apprenti 3) – suivi (au 18 novembre 2026)
+# Lorenzo — plan de travail CyberSentinel
+> **Décision du 20 novembre 2026 :** refonte du projet E6. La gestion des mises à jour et le déploiement de logiciels sont **retirés**. Deux fonctions complémentaires sont retenues : prévention par radar et détection par leurre réseau. Ce document remplace les anciens plans « Poste attentif » (conservés dans l’historique Git).
 
-## Décidé le 18/11 : la partie AD passe en extension
-- Le poste Windows 11 de la maquette **n'est plus dans un domaine** en V1 (groupe de travail). Le filet de sécurité (blocage après 10 min) vient d'une **stratégie locale**.
-- **En extension, si le temps le permet** : jonction à un domaine AD de maquette, filet par GPO, LAPS, captures Kerberos et LDAP.
-- C10 en V1 : DHCP, DNS, NTP (dérive mesurée), HTTPS (TLS), SMB (débit mesuré), captures Wireshark. Plus de machine virtuelle Windows Server.
-- Reporté dans le formulaire (13 p.), les schémas, la page HTML et la présentation 3Blue1Brown.
+## 1. Cap fixé
 
-## Entretien avec le tuteur (16/11) : voir `entretien-tuteur-2026-11-16.md`
-- Besoins **confirmés par des faits** : agents qui ne font pas Windows + L ; fenêtre « installer ? oui/non », refus répétés, mise à jour forcée après 2 ou 3 refus.
-- Parc de **portables** (veille prolongée, réveil le week-end pour les mises à jour, certains emportés à domicile). AD nationale hors site ; Lorenzo n'a pas de code admin.
-- Propositions à valider : P1 règle de report réelle (forcée à la prochaine absence), P2 mode « hors bureau », P3 réveil du week-end (extension), P4 « socle de maquette » (clé Rufus), P5 contexte corrigé, P6 compteur de reports par poste.
-- [ ] Valider P1 à P6 (enseignant)
-- [ ] **Formulaire non envoyé** : corriger le contexte et les hypothèses avant envoi, puis régénérer DOCX + PDF
-- [ ] Mettre à jour la page HTML et la présentation 3Blue1Brown
+**Nom provisoire :** CyberSentinel — sécurisation d'une session Windows et détection d'interactions avec un leurre réseau embarqué.
 
-## Décidé (11/11)
-- [x] Répartition de la sécurité entre apprentis (voir `docs/apprentis.md`) : Lorenzo **garde** le défi-réponse HMAC et la démonstration du faux boîtier.
-- [x] Lorenzo **laisse** la vérification d'authenticité des paquets à Aziza : son catalogue devient une simple liste de paquets en attente. Sa question = **quand installer sans déranger l'agent**.
+**Problématique :** dans quelle mesure un démonstrateur ESP32 peut-il réduire le délai d’exposition d'une session laissée ouverte et fournir un signal d’alerte supplémentaire lors d’un accès à un faux service interne ?
 
-- [x] **Ajouts en V2 (décidés le 11/11)**, pour renforcer la « valorisation de la donnée » :
-  - tableau de bord du parc, sans aucune donnée sur les agents : installations réussies du premier coup, reports et leurs raisons, temps pour que le parc soit à jour, postes en retard (≈ 6 h) ;
-  - mesure de l'apport (essai R6 remis) : séance de travail jouée, nombre d'installations qui seraient tombées devant l'agent avec l'outil classique, puis avec le boîtier (≈ 3 h).
-  - Nouveau bilan : V1 ≈ 108 h, V2 ≈ 40 h, marge ≈ 2 h.
-- [x] Extensions ajoutées : assistant de réglage (seuils proposés par le poste), détection d'un radar masqué. Refusés : radar multi-cibles LD2450 (trop long), veille du soir (déjà en extension).
-- [x] Page de présentation : `livrables/page-html/poste-attentif.html` (https://claude.ai/artifact/UG9LExYjDUDHFMyMRyhCZ9), à jour.
+**Pourquoi proposer cela à un service DGFiP :**
+- le tuteur a confirmé des oublis de verrouillage de session (fait interne, ne pas publier avec des noms) ;
+- l'ANSSI a publié le 29/09/2026 un rapport sur des cyberattaques touchant la DGFiP et des lacunes de détection / corrélation : [source ANSSI](https://cyber.gouv.fr/actualites/lanssi-publie-le-rapport-dincident-sur-les-cyberattaques-ayant-touche-la-dgfip/) ;
+- les deux dispositifs sont complémentaires aux protections existantes ; **aucune affirmation** selon laquelle un leurre aurait empêché les attaques de 2026.
 
-## Recentrage de la revue du 11/11 : **validé par l'enseignant (11/11)**
-| Aujourd'hui | Proposition |
-|---|---|
-| Défi toutes les 10 min, messages « présent » non signés (faille : faux boîtier branché entre deux défis) | Chaque message signé (HMAC + compteur) ; nouveau défi dès que le boîtier est rebranché |
-| V1 sans défi-réponse | V1 = boîtier + service + verrou + filet GPO + défi-réponse + physique R1–R4 ; serveur et post-installation en V2 |
-| Lorenzo monte lui-même le domaine, les UO, les GPO, LAPS | Contrôleur de domaine commun préparé par l'enseignant ; Lorenzo vérifie et capture (C10 = exploiter) |
-| Sobriété (veille du soir) en V2 | Extension (la GPO de veille fait déjà presque la même chose) |
-| Fiche de conformité (BitLocker, Defender…) | Extension (proche du diagnostic de l'apprenti 1) |
-| 0 h pour le réseau | 8 h réservées à l'exploitation réseau |
-| Charge réaliste ≈ 178 h avec IA | V1 ≈ 108 h, V2 ≈ 40 h (avec les ajouts du 11/11), marge ≈ 2 h |
+**Lieu d'essai :** lycée, réseau isolé, machines fictives et autorisées ; aucune installation dans le SI DGFiP.
 
-## Installations : option B choisie (15/11)
-- Constat : les grandes organisations règlent déjà l'essentiel (nuit + réveil à distance, heures d'activité de Windows Update, mises à jour en arrière-plan, hotpatch, PSAppDeployToolkit). Le radar ne les remplace pas : il leur donne l'information « l'agent est-il là ? ».
-- Décision : l'orchestrateur maison est remplacé par **PSAppDeployToolkit** (PowerShell, libre). La présence devient une **condition** que l'outil interroge.
-- Lorenzo écrit : `Test-PosteAbsent` (lecture de l'état de présence), le déclenchement sur l'événement « absent », les scripts de déploiement par paquet, le report si un logiciel est ouvert, l'envoi des résultats au serveur.
-- Piège à vérifier : en mode silencieux, la fermeture des logiciels de PSADT peut les fermer sans demander → ne pas l'utiliser ; reporter à la place (règle « aucun logiciel fermé »).
-- Essai R6 : comparer à un outil **bien réglé** (nuit + heures d'activité + report si logiciel ouvert), pas seulement à « heure fixe 12 h 30 ».
-- [ ] Mettre à jour la page HTML, le formulaire et la présentation.
+## 2. Architecture retenue
 
-## Physique (validée par l'enseignant ; reste à valider avec le collègue de physique)
-- Garder : R1 seuils, R2 + R3 zone de détection, R4 délai de détection (indicateur clé), R5 court ; exposition en calcul seul.
-- Mettre de côté : E1–E3 (wattmètre, bilan énergétique), sauf E1 court si la sobriété revient.
+```mermaid
+flowchart LR
+  radar[LD2410] --> esp1[ESP32 n°1]
+  esp1 -->|USB série : présence + compteur + HMAC| pc[Windows 11 : service PowerShell]
+  pc -->|Verrouillage local| lock[Session verrouillée]
+  pc -->|HTTPS : événements techniques| ubuntu[Ubuntu : API + journal + tableau de bord]
+  test[PC de test] -->|HTTP sur réseau de maquette| decoy[ESP32 n°2 + W5500 : faux service imprimante]
+  decoy -->|Événement authentifié| ubuntu
+```
 
-## À faire
-- [x] Maquette 3D animée (19/11) : `livrables/animation-3d/maquette-3d.html` (Three.js, 10 étapes, captures dans `captures/`). Bureau de Martine, boîtier ouvert (LD2410, ESP32, LED RVB), Windows 11 en VM, switch/routeur/serveur, oscilloscope. Vérifiée dans Brave avec le GPU (Iris Xe) : 0 erreur JavaScript, ≈ 50 images/s. Valeurs de l'oscilloscope et des seuils = exemples, à remplacer par les mesures R1 à R4.
-- [x] Récit refait pour des **postes de bureau** (12/11) : formulaire, présentation, page HTML (https://claude.ai/artifact/3Bhga5UmEr3r67mo6Wus3j)
-- [x] Poste Windows 11 (12/11) : **Windows 11 Entreprise en évaluation (90 j) en VM VirtualBox** sur le PC Ubuntu (le PC du commerce de l'enseignant est en édition Famille, qui ne rejoint pas un domaine). Installation ≈ 11/01, **réinstallation 5–9 avril** (dans le Gantt), après export des journaux et mesures ; couvre la soutenance de juin.
-- [ ] Choisir le titre définitif (propositions du 12/11) et le reporter partout
-- [x] Présentation 3Blue1Brown : `livrables/powerpoint-3b1b/Projet_E6_Lorenzo_3b1b.pptx` (30 diapositives, animations au clic, notes) ; à relire dans PowerPoint
-- [x] Dossier V2 (PDF) : **pas de mise à jour** (décision du 11/11 : seuls la page HTML, le formulaire et la présentation sont demandés)
-- [x] Propositions ci-dessus validées (11/11)
-- [x] Formulaire académique rempli (version corrigée et enrichie) : `fiche-academique/Fiche_presentation_E6_Lorenzo.docx` et `.pdf` (13 p.). À compléter à la main : adresse, site, téléphone, mail de l'entreprise ; nom et fonction du tuteur
-- [x] Contrôle avant envoi (12/11) : formulaire prêt ; coordonnées entreprise et tuteur à écrire à la main
-- [ ] Validation de la réalisation au lycée par l'académie
+**Indépendance impérative :** une panne d’Ubuntu ne doit pas empêcher le verrouillage local. Le radar ne pilote **pas** la détection sur le leurre ; une interaction réseau ne doit pas servir à déverrouiller ni verrouiller un poste.
 
-## Questions pour la visite du tuteur (réponses du 16/11 : Q2 non, quasi sûr ; Q4 répondue ; Q1, Q3, Q5 à reposer)
-1. Les périphériques USB de type port série sont-ils autorisés ?
-2. Les agents sont-ils administrateurs de leur poste ?
-3. Délai actuel du verrouillage sur inactivité ?
-4. Comment les installations sont-elles lancées aujourd'hui (outil, horaires) ?
-5. Disposition des bureaux : bureaux partagés ou plateau ouvert, distance au bureau voisin ? (et, à l'accueil, distance à l'usager)
-6. Quel outil installe les logiciels aujourd'hui (SCCM, WAPT, Intune, autre) et à quelles heures ? Pourquoi les installations dérangent-elles quand même ? Les postes restent-ils allumés la nuit ?
-7. Les agents ont-ils une carte à puce ? Sert-elle aussi de badge pour les portes ?
-8. Durée moyenne d'une absence courte du poste (imprimante, collègue) ?
+**Périphérique leurre :** le W5500 fournit l’Ethernet à l’ESP32 ; le service HTTP factice affiche une page minimale **sans collecte d’identifiants ni fichiers**. La preuve de concept ne « détecte » que les connexions dirigées vers ce service.
+
+## 3. Périmètre et livrables
+
+### V1 : prototype minimal fonctionnel
+- [ ] LD2410 + ESP32 n°1, UART, réglage des zones et des seuils
+- [ ] Message de présence transmis au PC Windows de test et verrouillage local
+- [ ] ESP32 n°2 + W5500, IP sur LAN isolé, service HTTP factice
+- [ ] Enregistrement local d’un accès au leurre (date, IP source, chemin demandé)
+- [ ] API Ubuntu de réception et tableau de bord minimal
+- [ ] Captures Wireshark et démonstration de deux scénarios indépendants
+
+### V2 : robustesse et évaluation
+- [ ] HMAC-SHA256 + compteur pour les messages du radar ; rejet des relectures et faux boîtiers
+- [ ] Authentification et chiffrement des flux vers l'API Ubuntu ; horodatage cohérent (NTP)
+- [ ] File d’attente et reprise d’envoi après perte de réseau, sans perte du verrouillage local
+- [ ] Politique de qualification des événements du leurre (scan d'inventaire autorisé = faux positif potentiel)
+- [ ] Mesurer délais, erreurs, disponibilité et établir des résultats avec incertitudes
+- [ ] Limitation des journaux à la finalité sécurité, rétention courte et absence de suivi nominatif de présence
+
+### Extensions facultatives (uniquement après V1 et V2)
+- [ ] Deuxième leurre avec autre protocole **basse interaction** (pas de serveur vulnérable)
+- [ ] Tests de résistance à des événements répétitifs ; limitation de débit des remontées
+- [ ] Mise en boîtier / documentation de reproductibilité
+
+## 4. Tests de recette à exécuter
+
+| ID | Scénario | Résultat attendu |
+|---|---|---|
+| T01 | Martine part | Session Windows verrouillée après délai défini |
+| T02 | Martine lit sans toucher le clavier | Pas de faux verrouillage |
+| T03 | Collègue passe dans la zone extérieure | Pas de maintien abusif si la zone est réglable |
+| T04 | Message de boîtier falsifié ou rejoué | Refus et repli sur verrouillage d'inactivité Windows |
+| T05 | Ubuntu est indisponible | Verrouillage local toujours fonctionnel |
+| T06 | PC de laboratoire envoie `GET /` au leurre | Événement technique reçu et affiché |
+| T07 | PC envoie `GET /admin` au leurre | Événement à qualifier, **pas preuve automatique d'attaque** |
+| T08 | Inventaire réseau autorisé | Événement classable comme bénin, taux de faux positifs mesuré |
+| T09 | Câble Ethernet du leurre débranché | Signalement de l'indisponibilité si supervision prévue |
+| T10 | API Ubuntu momentanément coupée | Événements mis en attente et rejoués dans la limite prévue |
+
+**Indicateurs :** latence départ→verrouillage ; faux verrouillages / nombre d’essais ; requêtes observées / requêtes envoyées ; latence requête→alerte ; fausses alertes de scans autorisés ; événements perdus après panne. Toutes les valeurs restent à mesurer.
+
+## 5. Répartition prévisionnelle des ~150 h (à faire valider)
+
+| Travail | Heures estimées |
+|---|---:|
+| Analyse du besoin, état de l’art, critères | 12 |
+| Montage et étalonnage radar | 18 |
+| Service Windows et logique de verrouillage | 22 |
+| Leurre HTTP ESP32 + W5500 | 27 |
+| API Ubuntu, stockage, tableau de bord | 24 |
+| Authentification, repli et durcissement | 12 |
+| Mesures, protocoles d’essais, physique | 22 |
+| Documentation, soutenance, recette | 13 |
+| **Total prévisionnel** | **150** |
+
+## 6. Décisions ouvertes et risques
+
+- [ ] Confirmer avec le collègue de physique la faisabilité et l’évaluation des mesures R1–R4
+- [ ] Vérifier modèle de carte ESP32, câblage et pile réseau W5500
+- [ ] Vérifier autorisation USB série sur Windows de laboratoire, ou employer un PC de test dédié
+- [ ] Vérifier l’accès aux fonctions de verrouillage pour le compte/service Windows retenu
+- [ ] Préciser l'architecture réseau du labo et les éventuelles politiques de filtrage
+- [ ] Appliquer le principe de minimisation des données : aucun historique nominatif de présence
+- [ ] Faire valider les modalités de réalisation du projet au lycée par les responsables académiques
+
+## 7. Liens vers les fichiers du projet
+
+- [Maquette Three.js interactive](livrables/animation-3d/maquette-3d.html) — refonte du 20/11/2026, **animation simulée**, 12 étapes
+- [Présentation HTML interactive](livrables/page-html/poste-attentif.html) — nouvelle version CyberSentinel
+- [Compte rendu historique du tuteur](entretien-tuteur-2026-11-16.md) — élément de contexte à conserver, même si le périmètre change
+- [Cahier des charges](projet-cybersentinel.md)
+
+## 8. Fichiers historiques qui demandent encore une refonte
+- [ ] `fiche-academique/Fiche_presentation_E6_Lorenzo.docx` et `.pdf` : **ancienne version** ; ne pas envoyer sans réécriture
+- [ ] `livrables/powerpoint-3b1b/Projet_E6_Lorenzo_3b1b.pptx` et son générateur : **ancienne version** ; ne pas utiliser comme nouvelle soutenance
+- [ ] Toute archive ou capture d'écran montrant l'installation de mises à jour comme objectif du projet : **historique**, à régénérer
+- [ ] Mettre à jour les questions du jury (PDF) et les schémas liés au formulaire
+- [ ] Relire et tester les pages HTML dans un navigateur : **la validité syntaxique du JavaScript ne garantit pas le rendu WebGL**
