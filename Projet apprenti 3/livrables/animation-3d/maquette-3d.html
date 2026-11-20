@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Maquette 3D du poste attentif</title>
+<title>CyberSentinel — maquette 3D du projet E6 de Lorenzo</title>
 <link rel="icon" href="data:,">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -95,6 +95,20 @@ button{font:inherit;cursor:pointer}
   #legend{display:none}
   .lab{font-size:10.5px;padding:3px 6px}.lab b{font-size:13px}
 }
+
+/* Charte encre sur papier, conservant la scène 3D sombre pour la lisibilité */
+:root{--panel:#F4F2EC;--ink:#16150F;--muted:#4A4840;--line:#8C8980;--accent:#6E5719;--chip:#ECE9E0;
+--f-display:"Nunito","Atkinson Hyperlegible",sans-serif;--f-body:"Nunito","Atkinson Hyperlegible",sans-serif}
+#brand h1{font-weight:900;letter-spacing:-.03em}
+#brand .prototype{font-size:10px;letter-spacing:.08em;margin-top:7px;color:#F6D77A;font-weight:900}
+#panel{box-shadow:none;border:1.5px solid #8C8980;background:rgba(244,242,236,.97)}
+#stepno{font-weight:900;color:#6E5719}
+#title{font-weight:900}
+#ctrl button.main{background:#16150F;color:#F4F2EC;border-color:#16150F}
+#ctrl button{border-radius:999px}
+#dots button.on{background:#6E5719!important}
+.lab{border-color:#F6D77A}
+@media(max-width:720px){#brand .prototype{font-size:9px}}
 </style>
 <script type="importmap">
 {"imports":{
@@ -104,14 +118,14 @@ button{font:inherit;cursor:pointer}
 </script>
 </head>
 <body>
-<canvas id="scene" aria-label="Maquette 3D animée : bureau avec boîtier de présence radar, écran Windows 11, PC Ubuntu, switch, routeur, serveur et oscilloscope"></canvas>
+<canvas id="scene" aria-label="Maquette 3D CyberSentinel : radar ESP32 pour le verrouillage Windows, leurre ESP32 Ethernet imitant une imprimante, serveur Ubuntu pour les alertes"></canvas>
 <div id="scrim"></div>
 <div id="labels"></div>
 
 <div id="top">
   <div id="brand">
     <div class="eye">Projet E6 · apprenti 3</div>
-    <h1>Poste attentif<br>maquette en 3D</h1>
+    <h1>CYBERSENTINEL<br>maquette 3D</h1><div class="prototype">PROTOTYPE SIMULÉ · RÉSEAU DE LABORATOIRE</div>
   </div>
   <div id="tools">
     <button class="tbtn" id="bAmb" title="Changer l'ambiance lumineuse de la pièce">Ambiance : nuit</button>
@@ -132,9 +146,9 @@ button{font:inherit;cursor:pointer}
     <div id="dots"></div>
   </div>
   <div id="legend">
-    <span style="--c:var(--kit)">message signé accepté</span>
-    <span style="--c:var(--req)">requête</span>
-    <span style="--c:var(--rep)">événement au serveur</span>
+    <span style="--c:var(--kit)">présence / HMAC validé</span>
+    <span style="--c:var(--req)">requête réseau au leurre</span>
+    <span style="--c:var(--rep)">alerte transmise à Ubuntu</span>
     <span style="--c:var(--borne)">avertissement</span>
     <span style="--c:var(--capt)">radar / mesure</span>
     <span style="--c:var(--err)">refusé</span>
@@ -1037,6 +1051,34 @@ for (const x of [-2, 2]) {
 const sw = makeSwitch(); sw.position.set(62, 0, -52); scene.add(sw);
 const rtr = makeRouter(); rtr.position.set(62, SW.h + 0.2, -50); scene.add(rtr);
 const srv = makeServer(); srv.position.set(104, 0, -40); scene.add(srv);
+
+/* CYBERSENTINEL : deuxième équipement embarqué autonome. Il imite une
+   imprimante HTTP sur un réseau de laboratoire isolé.
+   L'ESP32 + W5500 de cette scène constitue une maquette visuelle. */
+const decoy = new THREE.Group();
+decoy.position.set(116, 0, 40); scene.add(decoy);
+const decoyPaper = std(0xf4f2ec, .85, .02);
+const decoyInk = std(0x16150f, .7, .12);
+const decoyYellow = std(0xf6d77a, .7, .03);
+const decoyBlue = std(0x2869a5, .55, .12);
+mesh(RB(26, 15, 20, 1.5), decoyPaper, 0, 7.5, 0, decoy);
+mesh(RB(23, 3, 15, .8), decoyInk, 0, 16.4, -1.5, decoy);
+mesh(BOX(15, .24, 11), decoyPaper, 0, 18.15, -1.5, decoy);
+mesh(RB(24, 2, 5, .5), decoyInk, 0, 6, 10.0, decoy);
+mesh(BOX(16, .24, 5), decoyPaper, 0, 4.6, 13.5, decoy);
+const decoyLed = mesh(new THREE.SphereGeometry(.8, 14, 10),
+  new THREE.MeshBasicMaterial({color:0x61bf84}), 10, 11, 10.2, decoy, false);
+mesh(RB(10, .5, 4, .2), decoyYellow, -4, 10.8, 10.1, decoy);
+const decoyBoard = makeESP32();
+decoyBoard.scale.setScalar(1.45); decoyBoard.position.set(15.2, 8.0, -5);
+decoyBoard.rotation.y=.3; decoy.add(decoyBoard);
+mesh(RB(5.8, .42, 4.8, .2), decoyBlue, 16.7, 5.3, 3, decoy);
+mesh(RB(2.9, 2.2, 3.0, .22), std(0x858e95,.45,.8), 16.7, 6.6, 4, decoy);
+const decoyCable = new THREE.CatmullRomCurve3([
+  V(67, 3, -43), V(83, 1.8, -38), V(97, 1.6, 1), V(116, 2.2, 29)
+]);
+scene.add(new THREE.Mesh(new THREE.TubeGeometry(decoyCable,40,.52,6,false), M.rubber));
+
 const dash = makeLaptop({ body: 0xa4a9b0 }); dash.g.position.set(80, 0, 14); dash.g.rotation.y = 0.3; scene.add(dash.g);
 const scope = makeScope(); scope.g.position.set(-92, 0, -28); scope.g.rotation.y = 0.35; scene.add(scope.g);
 
@@ -1164,6 +1206,7 @@ addPath('pcToSw', reverseCurve(cPC.curve), { port: P_PC, speed: 80 });
 addPath('swToSrv', cSrv.curve, { port: P_SRV, srv: 'end', speed: 80 });
 addPath('swToDash', cDash.curve, { port: P_DASH, speed: 80 });
 addPath('swToRtr', cRtr.curve, { port: P_RTR, speed: 50 });
+addPath('swToDecoy', new THREE.CatmullRomCurve3([V(67,4,-43),V(91,11,-17),V(116,10,40)]), {speed:68,size:.9});
 
 /* =====================================================================
    Cône du radar : portes de 0,75 m (calcul et mesures dans l'étape physique)
@@ -1199,7 +1242,7 @@ function pulse(from = 4, to = 110, dur = 1.3, hex = 0x7dffb0) {
 /* =====================================================================
    8. Étiquettes 3D
    ===================================================================== */
-const labelGroups = { overview: [], box: [], net: [], phys: [], fake: [] };
+const labelGroups = { overview: [], box: [], net: [], phys: [], fake: [], decoy: [] };
 function label(group, pos, title, sub, cls = '') {
   const d = document.createElement('div'); d.className = 'lab ' + cls;
   d.innerHTML = `<b>${title}</b>${sub ? `<span>${sub}</span>` : ''}`;
@@ -1214,6 +1257,12 @@ label('overview', V(-30, 58, -39), 'Windows 11', 'machine virtuelle sur le PC Ub
 label('overview', V(12, 34, -42), 'PC Ubuntu du lycée', 'hôte VirtualBox · USB', 'small');
 label('overview', V(62, 16, -52), 'Switch HP + routeur Cisco', 'réseau en place (C10)', 'small');
 label('overview', V(104, 48, -40), 'Serveur Ubuntu', 'API Python · SQLite');
+label('overview', V(116, 32, 40), 'Leurre imprimante HTTP', 'ESP32 + W5500 · simulateur', 'small');
+label('decoy', V(116, 32, 40), 'Fausse imprimante', 'service HTTP de démonstration', 'small');
+label('decoy', V(130, 15, 37), 'ESP32 + W5500', 'Ethernet · requêtes entrantes', 'small');
+label('decoy', V(62, 16, -52), 'Switch du laboratoire', 'liaison Ethernet isolée', 'small');
+label('decoy', V(104, 48, -40), 'Serveur Ubuntu', 'événements techniques', 'small');
+label('decoy', V(80, 40, 14), 'PC de test', 'interroge le service factice', 'small');
 label('overview', V(80, 40, 14), 'PC du technicien', 'tableau de bord', 'small');
 label('overview', V(-92, 22, -28), 'Oscilloscope', 'mesure du délai (R4)', 'small');
 label('overview', V(-30, 82, 72), 'Martine, gestionnaire', 'agente (personnage fictif)', 'small');
@@ -1274,7 +1323,7 @@ function drawMon() {
       g.textAlign = 'left'; taskbar(g, w, h, '08:47'); return;
     }
     taskbar(g, w, h);
-    const big = m === 'work' || m === 'warn' || m === 'ps' || m === 'update' || m === 'install';
+    const big = m === 'work' || m === 'warn' || m === 'ps';
     if (big) {
       const ww = m === 'ps' ? 700 : 860;
       winFrame(g, 70, 56, ww, 580, 'Dossier_agent_2026-0147.pdf — Lecteur', false);
@@ -1295,21 +1344,6 @@ function drawMon() {
       g.font = `26px ${FONT}`; g.fillText(`Verrouillage dans ${world.count} s…`, w - 536, 156);
       g.font = `22px ${FONT}`; g.fillText('Revenez devant le poste pour annuler.', w - 536, 190);
     }
-    if (m === 'update') {
-      g.fillStyle = 'rgba(0,0,0,.35)'; g.fillRect(0, 0, w, h - 56);
-      winFrame(g, 330, 160, 620, 340, 'Mises à jour du poste', false);
-      g.fillStyle = '#13222c'; g.font = `bold 30px ${FONT}`; g.fillText('Installer maintenant ?', 366, 252);
-      g.font = `24px ${FONT}`; g.fillStyle = '#56656f'; g.fillText(`Reports déjà faits : ${world.reports} sur 2`, 366, 296);
-      g.fillText(world.reports >= 2 ? 'Prochaine fois : à votre prochaine absence.' : 'Vous pouvez encore reporter.', 366, 334);
-      g.fillStyle = '#1d5a86'; rr(g, 366, 392, 230, 56, 10); g.fill(); g.fillStyle = '#fff'; g.font = `bold 24px ${FONT}`; g.fillText('Installer', 424, 428);
-      g.fillStyle = '#d3dde2'; rr(g, 626, 392, 280, 56, 10); g.fill(); g.fillStyle = '#13222c'; g.fillText('Plus tard (report)', 652, 428);
-    }
-    if (m === 'install') {
-      winFrame(g, 330, 160, 620, 300, 'Maintenance du poste (pendant l\'absence)', false);
-      g.fillStyle = '#13222c'; g.font = `bold 28px ${FONT}`; g.fillText(world.progressTxt || 'Installation en cours…', 366, 252);
-      g.fillStyle = '#d3dde2'; g.fillRect(366, 300, 548, 30); g.fillStyle = '#3ddc84'; g.fillRect(366, 300, 548 * world.progress, 30);
-      g.fillStyle = '#56656f'; g.font = `22px ${FONT}`; g.fillText(Math.round(world.progress * 100) + ' %   ·   aucun logiciel fermé', 366, 372);
-    }
     if (world.idleTxt && m !== 'lock') {
       g.fillStyle = 'rgba(20,26,34,.9)'; rr(g, w - 430, h - 150, 390, 76, 14); g.fill();
       g.fillStyle = '#e6edf3'; g.font = `bold 22px ${FONT}`; g.fillText('Windows seul', w - 408, h - 116);
@@ -1323,7 +1357,7 @@ function drawDash() {
     g.fillStyle = '#1d5a86'; g.fillRect(0, 0, w, 66);
     g.fillStyle = '#fff'; g.font = `bold 30px ${FONT}`;
     if (world.dash === 'log') {
-      g.fillText('Serveur Ubuntu — événements reçus', 24, 44);
+      g.fillText('CYBERSENTINEL — événements et alertes', 24, 44);
       g.font = `bold 25px ${MONO}`;
       world.events.slice(-9).forEach((e, i) => { g.fillStyle = e[1] === '#13222c' ? '#e6edf3' : (e[1] === '#c98a00' ? '#ffc247' : e[1]); g.fillText(e[0], 24, 118 + i * 52); });
       if (!world.events.length) { g.fillStyle = '#7f93a2'; g.fillText('en attente d\'un événement…', 24, 118); }
@@ -1336,21 +1370,7 @@ function drawDash() {
         g.fillStyle = '#f1f5f8'; g.font = `21px ${MONO}`;
         g.fillText(`${String(p[0]).padStart(2, ' ')}  ${p[1].padEnd(12)}  ${p[2].padEnd(12)}  ${p[3].padEnd(5)}  ${p[4]}`, 14, y);
       });
-    } else if (world.dash === 'parc') {
-      g.fillText('Parc des postes (V2) — aucune donnée sur les agents', 24, 44);
-      const D = world.parc || { rows: [] };
-      g.fillStyle = '#8fa3b2'; g.font = `bold 21px ${FONT}`;
-      ['Poste', 'Verrou.', 'Reports', 'Redémarr.', 'État'].forEach((t, i) => g.fillText(t, [24, 150, 285, 420, 570][i], 106));
-      D.rows.forEach((r, i) => {
-        const y = 154 + i * 62;
-        g.fillStyle = i % 2 ? '#162532' : '#1b2d3c'; g.fillRect(8, y - 36, w - 16, 56);
-        g.fillStyle = '#f1f5f8'; g.font = `bold 26px ${FONT}`; g.fillText(r[0], 24, y); g.font = `26px ${FONT}`;
-        g.fillText(String(r[1]), 176, y); g.fillText(String(r[2]), 312, y); g.fillText(r[3], 440, y);
-        const col = { ok: '#23824f', warn: '#b57a00', late: '#c2382e' }[r[5]];
-        g.fillStyle = col; rr(g, 568, y - 30, 440, 44, 22); g.fill(); g.fillStyle = '#fff'; g.font = `bold 23px ${FONT}`; g.fillText(r[4], 586, y);
-      });
-      g.fillStyle = '#c9d6df'; g.font = `22px ${FONT}`;
-      g.fillText(`Réussies du premier coup : ${D.first || '—'}   ·   postes en retard : ${D.late ?? '—'}`, 24, h - 22);
+
     }
   });
 }
@@ -1447,6 +1467,7 @@ let msgNo = 4820;
 function baseline(i) {
   Object.assign(world, { mon: 'work', dash: 'log', scope: 'off', psLines: [], events: [], pkts: [], idleTxt: null, count: 3, progress: 0, reports: 0, timingK: 0, netCut: false, usbOut: false, parc: null, progressTxt: null, scopeT: 0 });
   setSeated(i === 2 || i === 8 ? 'read' : 'type');
+  decoyLed.material.color.setHex(0x61bf84);
   Object.assign(stQ, { x: 280, z: 150, walk: 0 }); Q.root.visible = false;
   setLid(i === 1 ? 1 : 0);
   fan.visible = i === 2 || i === 4 || i === 8;
@@ -1458,10 +1479,7 @@ function baseline(i) {
   if (i === 3) { world.mon = 'ps'; world.psLines = [['PS> Start-PresenceService', '#8fa3b5'], ['  port COM3 · 256000 bauds', '#8fa3b5'], ['  secret chargé · compteur = 4820', '#8fa3b5']]; }
   if (i === 5) { world.dash = 'wire'; }
   if (i === 8) { world.scope = 'breath'; stM.breath = 0.034; }
-  if (i === 9) {
-    world.dash = 'parc';
-    world.parc = { first: '9 sur 10', late: 1, rows: [['PC-01', 3, 0, 'non', 'à jour', 'ok'], ['PC-02', 5, 1, 'non', 'à jour', 'ok'], ['PC-03', 2, 2, 'oui', 'en attente', 'warn'], ['PC-04', 4, 0, 'non', 'à jour', 'ok'], ['PC-05', 6, 0, 'non', 'à jour', 'ok'], ['PC-06', 1, 3, 'oui', 'en retard (6 h)', 'late']] };
-  }
+
   redrawAll();
 }
 
@@ -1471,16 +1489,17 @@ function baseline(i) {
 label('net', V(62, 16, -52), 'Switch + routeur', 'DHCP · DNS · NTP fournis par le routeur', 'small');
 label('net', V(12, 34, -42), 'PC Ubuntu du lycée', 'Windows 11 en machine virtuelle', 'small');
 label('net', V(104, 48, -40), 'Serveur Ubuntu', 'nginx HTTPS · API Python', 'small');
-label('net', V(80, 40, 14), 'PC du technicien', 'capture Wireshark', 'small');
-const IPS = { pc: '10.10.0.54', srv: '10.10.0.20', rtr: '10.10.0.1' };
+label('net', V(80, 40, 14), 'PC de test / technicien', 'capture Wireshark', 'small');
+label('net', V(116, 32, 40), 'Leurre réseau', 'HTTP fictif sur ESP32', 'small');
+const IPS = { pc: '10.10.0.54', srv: '10.10.0.20', rtr: '10.10.0.1', decoy: '10.10.0.80', test: '10.10.0.73' };
 const cap = (a, b, c, d, e, col = '#ffffff') => { world.pkts.push([world.pkts.length + 1, a, b, c, d, col]); drawDash(); };
 
 const steps = [
 {
   title: 'Vue d\'ensemble',
-  text: `<p>Le bureau de <b>Martine</b>, gestionnaire (personnage fictif), à l'échelle réelle. Sur le bureau : le <b>boîtier de présence</b> (radar 24 GHz, ESP32, lumière), l'<b>écran Windows 11</b> et le <b>PC Ubuntu du lycée</b> qui fait tourner Windows dans une machine virtuelle.</p>
-         <p>À droite : le <b>switch</b>, le <b>routeur</b> et le <b>serveur Ubuntu</b> (réseau en place), puis le PC du technicien. À gauche : l'<b>oscilloscope</b> pour les mesures.</p>
-         <p>Les points lumineux sont des <b>messages</b>. Tourne la scène à la souris, puis clique sur <b>Suivant</b>.</p>`,
+  text: `<p><b>CyberSentinel</b> est une maquette de sécurité en profondeur : un radar LD2410 et un ESP32 verrouillent le poste de Martine quand elle s'absente ; à droite, un <b>deuxième ESP32 Ethernet (W5500)</b> imite une imprimante réseau et enregistre les consultations de son faux service HTTP.</p>
+         <p>Le <b>serveur Ubuntu</b> centralise deux familles d'événements techniques : verrouillage Windows et interactions avec le leurre. Le dispositif ne surveille pas les déplacements des agents.</p>
+         <p><b>Scénario pédagogique simulé</b> : ni connexion au SI de la DGFiP, ni preuve de détection d'une intrusion réelle. Utilise Suivant pour explorer les deux défenses.</p>`,
   cam: [[165, 128, 262], [-6, 6, -4]], labels: 'overview', rotate: true,
   async run() {
     while (true) {
@@ -1573,8 +1592,8 @@ const steps = [
 },
 {
   title: '5. Le réseau en place (C10)',
-  text: `<p>Lorenzo n'installe pas le réseau : il l'<b>exploite</b>. Au démarrage, le poste demande son adresse (<b>DHCP</b>), cherche le serveur par son nom (<b>DNS</b>), règle son horloge (<b>NTP</b>), puis envoie ses événements en <b>HTTPS</b> (TLS) au serveur Ubuntu.</p>
-         <p>Le PC du technicien <b>capture</b> tout avec Wireshark. Il mesure aussi le débit (SMB) et la dérive de l'horloge.</p>`,
+  text: `<p>Lorenzo exploite le réseau isolé du laboratoire : <b>DHCP</b> pour l'adressage, <b>DNS</b> pour joindre Ubuntu, <b>NTP</b> pour dater les événements et <b>HTTPS/TLS</b> pour transmettre les journaux du poste.</p>
+         <p>Le leurre dispose d'une adresse IP propre et d'un <b>service HTTP factice</b> ; son événement peut être envoyé à Ubuntu par une API authentifiée. Wireshark sert à observer les échanges et à vérifier la cohérence des horodatages.</p>`,
   note: 'Adresses d\'exemple. Dans la maquette du lycée, le routeur fournit DHCP, DNS et NTP : aucun VLAN ni ACL à créer.',
   cam: [[88, 66, 66], [60, 6, -28]], labels: 'net',
   async run() {
@@ -1700,37 +1719,64 @@ const steps = [
     while (true) { await sleep(2500); }
   }
 },
+
 {
-  title: '9. Version 2 : maintenance à la prochaine absence',
-  text: `<p>Windows demande : « installer maintenant ? » Martine <b>reporte deux fois</b>. Ensuite la mise à jour est imposée, mais <b>pas devant elle</b> : à sa <b>prochaine absence</b>.</p>
-         <p>Elle part déjeuner : l'installation se fait. Si elle revient au milieu, <b>rien n'est fermé</b> et son travail n'est pas touché.</p>
-         <p>Le tableau de bord montre les reports et les redémarrages en attente, <b>sans aucune donnée sur les agents</b>.</p>`,
-  note: 'Version 2 (visée). Les paquets viennent d\'une liste de paquets en attente ; la vérification d\'authenticité est faite ailleurs dans le projet de l\'équipe.',
-  cam: [[130, 118, 240], [20, 5, 30]], labels: 'overview',
+  title: '9. Leurre réseau : une fausse imprimante',
+  text: `<p>Le second module ne pilote <b>aucune vraie imprimante</b>. Il expose un petit service HTTP en lecture seule, avec une page d'administration volontairement fictive et sans identifiants réels.</p>
+         <p>Un <b>ESP32 + W5500</b> reçoit les demandes sur Ethernet. Les tentatives sont journalisées pour produire un signal de sécurité complémentaire. Le réseau est strictement limité au laboratoire.</p>`,
+  cam: [[166, 75, 104], [115, 13, 40]], labels: 'decoy', rotate: true,
   async run() {
-    const row = () => world.parc.rows[3];
-    await sleep(600); flyTo([-26, 34, 58], [-30, 20, -38], 1.8); await sleep(1000);
-    world.mon = 'update'; world.reports = 0; drawMon(); await sleep(1700);
-    world.reports = 1; row()[2] = 1; drawMon(); drawDash(); await sleep(1500);
-    world.mon = 'work'; drawMon(); await sleep(1200);
-    world.mon = 'update'; world.reports = 1; drawMon(); await sleep(1500);
-    world.reports = 2; row()[2] = 2; row()[4] = 'imposée à l\'absence'; row()[5] = 'warn'; drawMon(); drawDash(); await sleep(1800);
-    world.mon = 'work'; drawMon(); await sleep(900); flyTo([130, 118, 240], [20, 5, 30], 1.8);
-    await leave(1.2);
-    world.mon = 'lock'; drawMon(); setRGB('off'); row()[1] = 5;
-    row()[4] = 'installation…'; drawDash();
-    await go('pcToSw', { kind: 'rep', label: 'absence confirmée' }); await go('swToSrv', { kind: 'rep', size: 0.9 }); flyTo([58, 40, 62], [80, 12, 12], 1.8);
-    await anim(4, k => { world.progress = k * 0.62; row()[4] = `installation ${Math.round(world.progress * 100)} %`; drawDash(); }, k => k);
-    const back = comeBack(); flyTo([130, 118, 240], [20, 5, 30], 1.8);
-    await sleep(1800);
-    row()[4] = 'pause : agent revenu'; row()[3] = 'oui'; row()[5] = 'warn'; drawDash();
-    await back;
-    world.mon = 'work'; drawMon(); setRGB('vert');
-    await sleep(1400);
-    row()[4] = 'à jour (reprise plus tard)'; drawDash();
-    while (true) { await sleep(2500); }
+    while (true) {
+      decoyLed.material.color.setHex(0x61bf84);
+      await sleep(950);
+      decoyLed.material.color.setHex(0xf6d77a);
+      await go('swToDecoy', {kind:'req',size:.55,label:'HTTP GET'});
+      await sleep(650);
+    }
   }
 },
+{
+  title: '10. Un PC interroge la fausse imprimante',
+  text: `<p>Le <b>PC de test</b> du laboratoire consulte l'adresse du leurre. L'ESP32 constate une connexion à son service fictif : il enregistre l'heure, l'adresse IP source et la ressource demandée.</p>
+         <p>Il ne collecte <b>ni mots de passe ni documents</b>. Une connexion ne prouve pas une attaque : il peut s'agir d'un inventaire réseau ou d'un outil de supervision autorisé.</p>`,
+  cam: [[145, 92, 140], [99, 13, 17]], labels: 'decoy',
+  async run() {
+    world.dash='wire'; drawDash();
+    await sleep(750);
+    while (true) {
+      await go('-swToDash',{kind:'req',label:'PC test → switch',size:.65});
+      await go('swToDecoy',{kind:'req',label:'GET /admin (fictif)',size:.7});
+      decoyLed.material.color.setHex(0xffa31a);
+      cap('10.10.0.73','10.10.0.80','HTTP','GET /admin','#fff4c2');
+      await sleep(700);
+      await go('-swToDecoy',{kind:'rep',label:'événement technique',size:.55});
+      await go('swToSrv',{kind:'rep',label:'POST /events',size:.62});
+      await sleep(1100);
+      decoyLed.material.color.setHex(0x61bf84);
+      await sleep(900);
+    }
+  }
+},
+{
+  title: '11. L’alerte Ubuntu et ses limites',
+  text: `<p>Ubuntu reçoit l'événement issu du leurre et l'affiche avec celui du <b>verrouillage Windows</b>. Les deux fonctions alimentent une même supervision, mais <b>l'absence physique ne prouve aucun lien</b> avec l'accès réseau.</p>
+         <p>La démonstration compare les délais d'alerte, les faux positifs lors des scans autorisés et le comportement si le serveur est indisponible. <b>Pas de détection magique</b> : seuls les accès dirigés vers le leurre sont observés.</p>`,
+  note: 'Données, adresses IP et événements fictifs. Le niveau d’alerte doit être évalué dans les tests ; aucun accès au réseau d’entreprise.',
+  cam: [[111, 73, 120], [88, 15, -5]], labels: 'overview',
+  async run() {
+    world.dash='log'; drawDash();
+    pushEv('PC-04   Session verrouillée / absence','#13222c');
+    await sleep(1100);
+    await route(['-swToDash','swToDecoy'], {kind:'req',label:'requête de test',size:.64});
+    decoyLed.material.color.setHex(0xffa31a);
+    await route(['-swToDecoy','swToSrv'], {kind:'rep',label:'alerte leurre',size:.65});
+    pushEv('10.10.0.73 -> 10.10.0.80 : GET /admin','#c98a00');
+    pushEv('ALERTE : accès au leurre — à qualifier','#ff5a4d');
+    flyTo([100,56,76],[80,13,13],1.6);
+    while (true) { await sleep(2400); }
+  }
+},
+
 ];
 
 /* =====================================================================
