@@ -44,22 +44,32 @@ button{font:inherit;cursor:pointer}
 #street.reveal{animation:streetPillReveal .5s var(--ease-out-expo) both}
 @keyframes streetPillReveal{from{opacity:0;transform:translate(-50%,-10px) scale(.96)}to{opacity:1;transform:translate(-50%,0) scale(1)}}
 
-/* panneau d'information (bas gauche) */
-#panel{position:fixed;left:max(16px,env(safe-area-inset-left));bottom:calc(max(16px,env(safe-area-inset-bottom)) + 64px);width:min(440px,calc(100vw - 32px));
-  border-radius:22px;padding:16px 20px 16px;overflow:hidden}
-#panel::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--c,#ff6b1a);box-shadow:0 0 14px var(--c,#ff6b1a)}
-#panel.reveal{animation:cardRevealLeft .42s var(--ease-out-expo) both}
-@keyframes cardRevealLeft{from{opacity:0;transform:translateX(-16px)}to{opacity:1;transform:none}}
-#pwho{font-family:var(--f-mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--c,#ff6b1a)}
-#ptitle{font-family:var(--f-display);font-size:24px;font-weight:800;line-height:1.1;margin:4px 0 7px;letter-spacing:-.005em}
-#ptext{font-size:14.5px;line-height:1.5;margin:0;color:var(--ink-2)}
-#pgo{margin-top:12px;display:flex;gap:8px;align-items:center}
+/* panneau d'information (bas gauche) : carte façon « bored » — crème, gros contour noir, ombre dure, vignette dessinée */
+#panel{--carte:#FFFBF2;--vignette:#FDEFD3;--trait:#16150F;--gris:#6E6B62;--texte:#3F3D36;
+  position:fixed;left:max(16px,env(safe-area-inset-left));bottom:calc(max(16px,env(safe-area-inset-bottom)) + 70px);width:min(540px,calc(100vw - 40px));
+  display:grid;grid-template-columns:128px 1fr;background:var(--carte);color:var(--trait);border:3px solid var(--trait);border-radius:4px;
+  box-shadow:8px 8px 0 var(--c,#ff6b1a),8px 8px 0 3px var(--trait);transition:box-shadow .3s}
+#panel.reveal{animation:cardPop .45s var(--ease-out-expo) both}
+@keyframes cardPop{0%{opacity:0;transform:translate(-10px,10px)}100%{opacity:1;transform:none}}
+#pimg{background:var(--vignette);border-right:3px solid var(--trait);display:grid;place-items:center;padding:10px}
+#pimg svg{width:100%;max-width:104px;height:auto;display:block;overflow:visible}
+#pimg svg .bob{animation:bob 3.2s ease-in-out infinite;transform-origin:50% 100%}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+#pbody{padding:14px 18px 16px;min-width:0}
+#pwho{font-size:13px;color:var(--gris);font-weight:600}
+#pwho b{color:var(--trait);font-weight:800}
+#ptitle{font-size:23px;font-weight:900;line-height:1.12;margin:3px 0 7px;letter-spacing:-.018em;text-wrap:balance}
+#ptext{font-size:14.5px;line-height:1.55;margin:0;color:var(--texte)}
+#pgo{margin-top:13px;display:flex;gap:10px;align-items:center}
 #pgo:empty{display:none}
-#pgo button{border:1px solid var(--border-glass);background:rgba(148,163,184,.12);color:var(--ink);border-radius:999px;padding:9px 16px;font-size:14px;font-weight:700}
-#pgo button.main{background:var(--c,#ff6b1a);border-color:transparent;color:#05070b;box-shadow:0 0 18px color-mix(in srgb,var(--c,#ff6b1a) 55%,transparent)}
-#pgo button.main:hover{filter:brightness(1.1)}
-#pgo button:disabled{opacity:.45;cursor:not-allowed;box-shadow:none}
-#pgo span{font-family:var(--f-mono);font-size:11px;color:var(--muted)}
+#pgo button{border:2.5px solid var(--trait);background:var(--carte);color:var(--trait);border-radius:999px;padding:8px 18px;font-size:14px;font-weight:900;
+  box-shadow:3px 3px 0 var(--trait);transition:transform .12s,box-shadow .12s}
+#pgo button.main{background:var(--c,#ff6b1a)}
+#pgo button:hover{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--trait)}
+#pgo button:active{transform:translate(3px,3px);box-shadow:0 0 0 var(--trait)}
+#pgo button:disabled{opacity:.5;cursor:not-allowed;transform:none;box-shadow:3px 3px 0 var(--trait)}
+#pgo span{font-size:12px;font-weight:800;color:var(--trait);border:1.5px solid var(--trait);border-bottom-width:3px;border-radius:6px;padding:1px 7px;background:var(--blanc,#fff)}
+#pgo span:empty{display:none}
 
 /* barre de navigation (bas centre) */
 #dock{position:fixed;left:50%;bottom:max(14px,env(safe-area-inset-bottom));transform:translateX(-50%);display:flex;gap:4px;padding:5px;
@@ -115,7 +125,16 @@ body.photo #photo{display:block;animation:cardReveal .35s var(--ease-out-expo) b
   #brand h1{font-size:18px}
   #brand .eye{display:none}
   #street{top:auto;bottom:calc(max(16px,env(safe-area-inset-bottom)) + 64px + 4px);display:none}
-  #ptitle{font-size:20px}
+  #ptitle{font-size:19px}
+  #panel{grid-template-columns:84px 1fr;bottom:calc(max(16px,env(safe-area-inset-bottom)) + 66px)}
+  #pimg{padding:6px}
+  #pbody{min-width:0}
+  #pgo button{white-space:nowrap;padding:7px 14px;font-size:13px}
+  #pgo span{display:none}
+  #dock{flex-wrap:nowrap;overflow-x:auto;justify-content:flex-start;scrollbar-width:none;border-radius:999px}
+  #dock::-webkit-scrollbar{display:none}
+  #dock button{flex:none}
+  #pbody{padding:11px 13px 12px}
   #ptext{font-size:13.5px}
   #hint{display:none}
   #dock button{padding:7px 10px;font-size:13px}
@@ -139,11 +158,14 @@ body.photo #photo{display:block;animation:cardReveal .35s var(--ease-out-expo) b
 </div>
 <div id="street" aria-hidden="true"><b id="stname">Carrefour des projets</b><span id="stsub">BTS CIEL · E6</span></div>
 
-<div id="panel" class="glass" role="region" aria-live="polite" style="--c:#ff6b1a">
+<div id="panel" role="region" aria-live="polite" style="--c:#ff6b1a">
+  <div id="pimg" aria-hidden="true"></div>
+  <div id="pbody">
   <div id="pwho"></div>
   <div id="ptitle"></div>
   <p id="ptext"></p>
   <div id="pgo"></div>
+  </div>
 </div>
 <div id="dock" class="glass" role="group" aria-label="Aller à une maison"></div>
 <div id="hint">Glisser : tourner · Molette : zoom · Clic sur une maison<br><kbd>←</kbd> <kbd>→</kbd> maison suivante · <kbd>Entrée</kbd> entrer · <kbd>Échap</kbd> carrefour<br><kbd>P</kbd> mode photo · <kbd>R</kbd> pluie</div>
@@ -707,6 +729,42 @@ const dockBtns = [];
     bt.innerHTML = `<i></i>${s.free ? 'Libre' : s.who}`; bt.onclick = () => goHouse(i); dock.appendChild(bt); dockBtns.push(bt);
   });
 }
+/* vignettes dessinées (trait noir épais, aplats, ombre dure décalée) */
+function illus(kind, col) {
+  const K = '#16150F', W = '#FFFBF2';
+  const sh = (d) => `<path d="${d}" fill="${K}" transform="translate(4 4)"/>`;
+  const head = '<svg viewBox="0 0 110 110" xmlns="http://www.w3.org/2000/svg"><g stroke="' + K + '" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">';
+  const foot = '</g></svg>';
+  if (kind === 'carrefour') return head +
+    `<path d="M52 100V22" fill="none"/><ellipse cx="52" cy="101" rx="16" ry="4" fill="${K}" stroke="none"/>
+     <g class="bob">${sh('M54 26h36l10 9-10 9H54z')}<path d="M54 26h36l10 9-10 9H54z" fill="#ffb020"/>
+     ${sh('M50 50H16L6 59l10 9h34z')}<path d="M50 50H16L6 59l10 9h34z" fill="#c18cff"/>
+     ${sh('M54 74h32l9 8-9 8H54z')}<path d="M54 74h32l9 8-9 8H54z" fill="#3ddc84"/></g>
+     <circle cx="52" cy="17" r="6" fill="${col}"/>` + foot;
+  if (kind === 'printer') return head +
+    `<ellipse cx="55" cy="96" rx="40" ry="5" fill="${K}" stroke="none"/>
+     <path d="M32 18h46v26H32z" fill="${W}"/><path d="M39 27h30M39 34h22" fill="none"/>
+     ${sh('M14 42h82v40H14z')}<path d="M14 42h82v40H14z" fill="${col}"/>
+     <path d="M28 82v12h54V82" fill="${W}"/><path d="M36 88h30" fill="none"/>
+     <circle cx="82" cy="54" r="5" fill="#3ddc84"/>
+     <g class="bob">${sh('M62 6h28v20H62z')}<path d="M62 6h28v20H62z" fill="#9CC3E6"/><circle cx="70" cy="16" r="3" fill="#C8372D" stroke="none"/><path d="M78 13h7M78 19h7" fill="none"/></g>` + foot;
+  if (kind === 'radar') return head +
+    `<ellipse cx="44" cy="98" rx="30" ry="5" fill="${K}" stroke="none"/>
+     <path d="M44 96V66" fill="none"/><path d="M30 96h28" fill="none"/>
+     ${sh('M18 36h52v32H18z')}<path d="M18 36h52v32H18z" fill="${col}"/>
+     <circle cx="44" cy="52" r="8" fill="${W}"/><circle cx="44" cy="52" r="2.5" fill="${K}" stroke="none"/>
+     <g class="bob" fill="none"><path d="M76 40c8 6 8 18 0 24"/><path d="M84 32c13 10 13 30 0 40"/><path d="M92 24c18 14 18 42 0 56"/></g>` + foot;
+  if (kind === 'kit') return head +
+    `<ellipse cx="55" cy="97" rx="40" ry="5" fill="${K}" stroke="none"/>
+     <path d="M40 32v-9h30v9" fill="none"/>
+     ${sh('M12 32h86v56H12z')}<path d="M12 32h86v56H12z" fill="${col}"/><path d="M12 52h86" fill="none"/>
+     <path d="M48 48h14v10H48z" fill="${W}"/>
+     <g class="bob">${sh('M74 58a14 14 0 1 0 0.1 0z')}<circle cx="74" cy="72" r="14" fill="${W}"/><path d="M67 72l5 5 9-10" fill="none"/></g>` + foot;
+  return head +   /* emplacement libre : maison en pointillés */
+    `<ellipse cx="55" cy="96" rx="38" ry="5" fill="${K}" stroke="none" opacity=".35"/>
+     <path d="M20 52 55 22l35 30v40H20z" fill="none" stroke-dasharray="7 6"/>
+     <text x="55" y="80" text-anchor="middle" font-size="30" font-weight="900" fill="${K}" stroke="none" font-family="Nunito,sans-serif">?</text>` + foot;
+}
 let lastShown = null;
 const replay = (el, cls) => { el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls); };
 function refreshUI() {
@@ -718,15 +776,16 @@ function refreshUI() {
     lastShown = key;
     $('#stname').textContent = s ? (s.free ? 'Allée libre' : `Allée ${s.who}`) : 'Carrefour des projets';
     $('#stsub').textContent = s ? (s.free ? 'emplacement réservé' : `projet ${s.n} · maquette 3D`) : 'BTS CIEL · E6 · 2027';
+    $('#pimg').innerHTML = illus(s ? (s.free ? 'libre' : s.prop) : 'carrefour', s ? s.color : '#ff6b1a');
     replay($('#street'), 'reveal'); replay(panel, 'reveal');
   }
   if (!s) {
-    $('#pwho').textContent = 'Carrefour';
+    $('#pwho').innerHTML = '<b>Carrefour</b> · point de départ';
     $('#ptitle').textContent = 'Bienvenue dans le quartier';
     $('#ptext').textContent = 'Chaque maison abrite la maquette 3D d’un projet. Clique sur une maison, ou utilise les flèches du clavier, pour t’en approcher.';
     $('#pgo').innerHTML = '';
   } else {
-    $('#pwho').textContent = s.free ? 'Emplacement libre' : `Projet ${s.n} · ${s.who}`;
+    $('#pwho').innerHTML = s.free ? '<b>Emplacement libre</b> · à venir' : `<b>Projet ${s.n} · ${s.who}</b> · maquette 3D`;
     $('#ptitle').textContent = s.title;
     $('#ptext').textContent = s.desc;
     const go = $('#pgo'); go.innerHTML = '';
