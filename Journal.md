@@ -1,5 +1,17 @@
 # Journal de travail – Projets E6
 
+## 20 novembre 2026 — Refonte de Lorenzo : CyberSentinel
+
+**Décision de l'enseignant :** suppression de la gestion des mises à jour. Projet désormais articulé autour de deux démonstrateurs : radar LD2410 + ESP32 pour le verrouillage Windows ; leurre réseau imitant une imprimante HTTP avec ESP32 + W5500, supervision Ubuntu.
+
+**Fait sur GitHub :** mise à jour de `Projet apprenti 3/livrables/animation-3d/maquette-3d.html` (scène Three.js conservée et enrichie d'un leurre visible, étapes animées), réécriture de `livrables/page-html/poste-attentif.html`, création de `projet-cybersentinel.md`, refonte de `TODO.md` et alignement du README/document d'état des apprentis.
+
+**Limites :** l'animation est une **simulation**. Le JavaScript de la maquette a passé une vérification de syntaxe mais **pas encore de contrôle visuel en navigateur**. La carte ESP32/W5500, la communication réelle et les mesures restent à développer. Le fichier de présentation PowerPoint et les fiches académiques DOCX/PDF doivent être **refaits**, pas seulement renommés.
+
+**Cadre :** proposition à un service DGFiP et essais sur maquette de lycée uniquement. Conditions réglementaires et académiques inchangées.
+
+---
+
 ## Session du 11 novembre 2026 (suite) : présentation 3Blue1Brown de Lorenzo
 
 ### Fait

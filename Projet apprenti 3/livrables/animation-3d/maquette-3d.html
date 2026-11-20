@@ -1,0 +1,1936 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>CyberSentinel — maquette 3D du projet E6 de Lorenzo</title>
+<link rel="icon" href="data:,">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&family=Atkinson+Hyperlegible:wght@400;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Scène 3D plein écran, toujours sur fond sombre (lumières et paquets lumineux).
+   Le panneau d'explication suit le thème clair / sombre. */
+:root{
+  --bg:#0b1016; --panel:rgba(255,255,255,.92); --ink:#13222c; --muted:#56656f; --line:#d3dde2;
+  --accent:#1d5a86; --chip:#eef3f6;
+  --kit:#3ddc84; --req:#9fd0ff; --rep:#4aa8ff; --borne:#ffb020; --capt:#c18cff; --err:#ff5a4d;
+  --f-display:"Barlow Condensed","Arial Narrow",Arial,sans-serif;
+  --f-body:"Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --panel:rgba(16,24,31,.88); --ink:#e4ecf0; --muted:#9aabb5; --line:#2a3a45; --accent:#6fb0de; --chip:#1c2a34; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --panel:rgba(16,24,31,.88); --ink:#e4ecf0; --muted:#9aabb5; --line:#2a3a45; --accent:#6fb0de; --chip:#1c2a34; color-scheme:dark}
+
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);font-family:var(--f-body);color:var(--ink)}
+canvas#scene{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none}
+#labels{position:fixed;inset:0;pointer-events:none}
+/* voile en haut de l'écran : le titre reste lisible même en gros plan */
+#scrim{position:fixed;left:0;right:0;top:0;height:130px;pointer-events:none;
+  background:linear-gradient(180deg,rgba(8,12,18,.72),rgba(8,12,18,0))}
+:root[data-amb="jour"] #scrim{background:linear-gradient(180deg,rgba(236,239,242,.85),rgba(236,239,242,0))}
+:root[data-amb="jour"] #brand{color:#13222c;text-shadow:none}
+:root[data-amb="jour"] #brand .eye{color:#1d5a86}
+:root[data-amb="jour"] #hint{color:#3c4a54;text-shadow:none}
+button{font:inherit;cursor:pointer}
+:focus-visible{outline:3px solid #f0b93a;outline-offset:2px}
+
+/* étiquettes 3D */
+.lab{font-family:var(--f-body);font-size:12px;line-height:1.25;color:#e9f1f5;background:rgba(10,16,22,.78);
+  border:1px solid rgba(255,255,255,.18);border-radius:7px;padding:4px 8px;white-space:nowrap;transform:translateY(-14px)}
+/* les étiquettes bougent à chaque image : une couche GPU chacune, sans ombre portée (moins de travail pour le navigateur) */
+#labels>div{will-change:transform}
+.lab b{font-family:var(--f-display);font-weight:600;font-size:15px;letter-spacing:.01em;display:block}
+.lab span{color:#a9bac4}
+.lab.small{font-size:11px;padding:2px 6px}
+.lab.small b{font-size:13px}
+.pkt{font-family:var(--f-mono);font-size:11.5px;color:#fff;background:rgba(8,12,16,.82);border:1px solid currentColor;
+  border-radius:999px;padding:2px 8px;white-space:nowrap;transform:translateY(-16px)}
+.pkt i{font-style:normal;color:#fff}
+.read{font-family:var(--f-mono);font-size:12px;color:#fff;background:rgba(8,12,16,.85);border-left:3px solid var(--capt);
+  border-radius:4px;padding:3px 8px;white-space:nowrap}
+
+/* barre du haut */
+#top{position:fixed;top:max(12px,env(safe-area-inset-top));left:max(16px,env(safe-area-inset-left));right:max(16px,env(safe-area-inset-right));
+  display:flex;justify-content:space-between;align-items:flex-start;gap:10px;pointer-events:none}
+#top>*{pointer-events:auto}
+#brand{color:#e4ecf0;text-shadow:0 1px 8px rgba(0,0,0,.6)}
+#brand .eye{font-family:var(--f-mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#6fb0de}
+#brand h1{font-family:var(--f-display);font-size:26px;line-height:1.05;margin:2px 0 0;font-weight:700}
+#tools{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.seg{display:flex;background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:3px;backdrop-filter:blur(8px)}
+.seg button{border:0;background:transparent;color:var(--muted);padding:6px 10px;border-radius:6px;font-size:13px;font-weight:700}
+.seg button[aria-pressed="true"]{background:var(--accent);color:#fff}
+.tbtn{background:var(--panel);border:1px solid var(--line);color:var(--ink);border-radius:9px;padding:7px 11px;font-size:13px;backdrop-filter:blur(8px)}
+.tbtn[aria-pressed="false"]{color:var(--muted);text-decoration:line-through}
+
+/* panneau d'explication */
+#panel{position:fixed;left:max(16px,env(safe-area-inset-left));bottom:max(16px,env(safe-area-inset-bottom));width:min(470px,calc(100vw - 32px));
+  background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 16px 12px;backdrop-filter:blur(10px);
+  box-shadow:0 8px 30px rgba(0,0,0,.35)}
+#stepno{font-family:var(--f-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent)}
+#title{font-family:var(--f-display);font-size:25px;font-weight:700;line-height:1.08;margin:3px 0 6px}
+#text{font-size:14.5px;line-height:1.5;margin:0;max-height:34vh;overflow:auto}
+#text p{margin:0 0 6px}
+#text code{font-family:var(--f-mono);font-size:.86em;background:var(--chip);padding:0 4px;border-radius:4px}
+#note{font-size:13px;color:var(--muted);margin-top:4px;border-left:3px solid #f0b93a;padding-left:8px;display:none}
+#ctrl{display:flex;align-items:center;gap:6px;margin-top:10px}
+#ctrl button{border:1px solid var(--line);background:var(--chip);color:var(--ink);border-radius:8px;padding:7px 11px;font-size:14px;font-weight:700}
+#ctrl button.main{background:var(--accent);border-color:var(--accent);color:#fff}
+#dots{display:flex;gap:5px;margin-left:auto}
+#dots button{width:10px;height:10px;padding:0!important;border-radius:50%!important;background:var(--line)!important;border:0!important}
+#dots button.on{background:var(--accent)!important;transform:scale(1.25)}
+#legend{display:flex;flex-wrap:wrap;gap:4px 12px;margin-top:9px;font-size:12px;color:var(--muted)}
+#legend span::before{content:"";display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px;background:var(--c);box-shadow:0 0 6px var(--c);vertical-align:-1px}
+#hint{position:fixed;right:max(16px,env(safe-area-inset-right));bottom:max(16px,env(safe-area-inset-bottom));font-size:12px;color:#8fa3ae;text-align:right;text-shadow:0 1px 4px #000}
+#err{position:fixed;inset:0;display:none;place-items:center;color:#e4ecf0;font-size:18px;padding:30px;text-align:center}
+@media (max-width:720px){
+  #brand h1{font-size:20px}
+  #title{font-size:21px}
+  #text{font-size:13.5px;max-height:24vh}
+  #hint{display:none}
+  #legend{display:none}
+  .lab{font-size:10.5px;padding:3px 6px}.lab b{font-size:13px}
+}
+
+/* Charte encre sur papier, conservant la scène 3D sombre pour la lisibilité */
+:root{--panel:#F4F2EC;--ink:#16150F;--muted:#4A4840;--line:#8C8980;--accent:#6E5719;--chip:#ECE9E0;
+--f-display:"Nunito","Atkinson Hyperlegible",sans-serif;--f-body:"Nunito","Atkinson Hyperlegible",sans-serif}
+#brand h1{font-weight:900;letter-spacing:-.03em}
+#brand .prototype{font-size:10px;letter-spacing:.08em;margin-top:7px;color:#F6D77A;font-weight:900}
+#panel{box-shadow:none;border:1.5px solid #8C8980;background:rgba(244,242,236,.97)}
+#stepno{font-weight:900;color:#6E5719}
+#title{font-weight:900}
+#ctrl button.main{background:#16150F;color:#F4F2EC;border-color:#16150F}
+#ctrl button{border-radius:999px}
+#dots button.on{background:#6E5719!important}
+.lab{border-color:#F6D77A}
+@media(max-width:720px){#brand .prototype{font-size:9px}}
+</style>
+<script type="importmap">
+{"imports":{
+  "three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+  "three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+}}
+</script>
+</head>
+<body>
+<canvas id="scene" aria-label="Maquette 3D CyberSentinel : radar ESP32 pour le verrouillage Windows, leurre ESP32 Ethernet imitant une imprimante, serveur Ubuntu pour les alertes"></canvas>
+<div id="scrim"></div>
+<div id="labels"></div>
+
+<div id="top">
+  <div id="brand">
+    <div class="eye">Projet E6 · apprenti 3</div>
+    <h1>CYBERSENTINEL<br>maquette 3D</h1><div class="prototype">PROTOTYPE SIMULÉ · RÉSEAU DE LABORATOIRE</div>
+  </div>
+  <div id="tools">
+    <button class="tbtn" id="bAmb" title="Changer l'ambiance lumineuse de la pièce">Ambiance : nuit</button>
+    <button class="tbtn" id="bLab" aria-pressed="true">Étiquettes</button>
+  </div>
+</div>
+
+<div id="panel" role="region" aria-live="polite">
+  <div id="stepno"></div>
+  <div id="title"></div>
+  <div id="text"></div>
+  <div id="note"></div>
+  <div id="ctrl">
+    <button id="bPrev" aria-label="Étape précédente">◀</button>
+    <button id="bReplay" aria-label="Rejouer l'étape">↻ Rejouer</button>
+    <button id="bNext" class="main" aria-label="Étape suivante">Suivant ▶</button>
+    <button id="bAuto" aria-pressed="false" title="Enchaîner les étapes">Auto</button>
+    <div id="dots"></div>
+  </div>
+  <div id="legend">
+    <span style="--c:var(--kit)">présence / HMAC validé</span>
+    <span style="--c:var(--req)">requête réseau au leurre</span>
+    <span style="--c:var(--rep)">alerte transmise à Ubuntu</span>
+    <span style="--c:var(--borne)">avertissement</span>
+    <span style="--c:var(--capt)">radar / mesure</span>
+    <span style="--c:var(--err)">refusé</span>
+  </div>
+</div>
+<div id="hint">Glisser : tourner · Molette : zoom · Clic droit : déplacer<br>Flèches ← → : étapes · R : rejouer</div>
+<div id="err">Cette animation a besoin de WebGL. Ouvre la page dans un navigateur récent (Chrome, Edge, Firefox, Brave).</div>
+
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
+import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+import { GTAOPass } from 'three/addons/postprocessing/GTAOPass.js';
+
+/* =====================================================================
+   1. Moteur : rendu, caméra, lumières, post-traitement
+   Unité : 1 = 1 cm. Le dessus du bureau est à y = 0.
+   ===================================================================== */
+const $ = s => document.querySelector(s);
+/* ?lite : mode léger pour les PC peu puissants (moins de pixels, ombres plus simples) */
+const LITE = new URLSearchParams(location.search).has('lite');
+const PR = LITE ? 1 : Math.min(devicePixelRatio, 2);
+let renderer;
+try {
+  renderer = new THREE.WebGLRenderer({ canvas: $('#scene'), antialias: !LITE, powerPreference: 'high-performance' });
+} catch (e) { $('#err').style.display = 'grid'; throw e; }
+renderer.setPixelRatio(PR);
+renderer.setSize(innerWidth, innerHeight);
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+/* ombres recalculées seulement quand quelque chose bouge (voir tick) : la caméra qui tourne ne les change pas */
+renderer.shadowMap.autoUpdate = false; renderer.shadowMap.needsUpdate = true;
+let shadowFrames = 3;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.0;
+
+/* Deux ambiances. Les couleurs des messages (légende) ne changent pas.
+   nuit = « heure bleue » : pièce bleu ardoise, lumière chaude au plafond, ciel du soir à la fenêtre.
+   jour = « atelier clair » : murs grège, lumière du jour. */
+const PAL = {
+  nuit: { bg: 0x0f151d, wall: 0x2b3644, floor: 0x3b3733, skyTop: '#0d1a36', skyMid: '#2b4778', skyLow: '#f29a58', sky: 1.0,
+          key: 0xffdfb6, keyI: 1.4, win: 0x7fa2ff, winI: 0.85, hemiS: 0x9cb6ff, hemiG: 0x2a1d12, hemiI: 0.3, exp: 0.9, fog: [650, 1500] },
+  jour: { bg: 0xd5dade, wall: 0xe2ded6, floor: 0x8f8a84, skyTop: '#8fbfee', skyMid: '#c9e1f5', skyLow: '#f4f1e4', sky: 1.2,
+          key: 0xfff3e2, keyI: 1.7, win: 0xe8f0ff, winI: 1.3, hemiS: 0xe0eaff, hemiG: 0x6b5a48, hemiI: 0.6, exp: 0.86, fog: [800, 1900] },
+};
+const scene = new THREE.Scene();
+const BG = PAL.nuit.bg;
+scene.background = new THREE.Color(BG);
+scene.fog = new THREE.Fog(BG, 650, 1500);
+
+/* near = 1 (et non 0,5) : plus de précision de profondeur, donc plus de grésillement sur les écrans vus de loin */
+const camera = new THREE.PerspectiveCamera(38, innerWidth / innerHeight, 1, 4000);
+camera.position.set(165, 128, 262);
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+controls.dampingFactor = 0.08;
+controls.target.set(-6, 6, -4);
+controls.maxPolarAngle = Math.PI * 0.495;
+controls.minDistance = 6;
+controls.maxDistance = 560;
+controls.autoRotateSpeed = 0.35;
+
+const pmrem = new THREE.PMREMGenerator(renderer);
+scene.environment = pmrem.fromScene(new RoomEnvironment(renderer), 0.04).texture;
+
+const hemi = new THREE.HemisphereLight(0x9cb6ff, 0x2a1d12, 0.32);
+scene.add(hemi);
+/* lumière principale : plafonnier, chaude, qui donne les ombres */
+const key = new THREE.DirectionalLight(0xffdfb6, 1.75);
+key.position.set(110, 280, 170);
+key.target.position.set(0, 0, -10);
+key.castShadow = true;
+key.shadow.mapSize.setScalar(LITE ? 1024 : 4096);
+Object.assign(key.shadow.camera, { left: -200, right: 200, top: 170, bottom: -170, near: 50, far: 700 });
+key.shadow.bias = -0.0004;
+key.shadow.normalBias = 0.04;
+key.shadow.radius = 3;
+scene.add(key, key.target);
+/* lumière de la fenêtre (mur de gauche) : froide, sans ombre */
+const rim = new THREE.DirectionalLight(0x7fa2ff, 0.85);
+rim.position.set(-420, 150, 20);
+scene.add(rim);
+
+const composer = new EffectComposer(renderer);
+composer.setPixelRatio(PR);
+composer.addPass(new RenderPass(scene, camera));
+/* Occlusion ambiante (GTAO) : assombrit les coins et le dessous des objets.
+   C'est ce qui « pose » les objets sur le bureau. Désactivée en mode ?lite. */
+let gtao = null;
+if (!LITE) {
+  gtao = new GTAOPass(scene, camera, innerWidth, innerHeight);
+  gtao.output = GTAOPass.OUTPUT.Default;
+  gtao.blendIntensity = 0.9;
+  gtao.updateGtaoMaterial({ radius: 5, distanceExponent: 1.4, thickness: 3, scale: 1.2, samples: 16 });
+  gtao.updatePdMaterial({ lumaPhi: 10, depthPhi: 2, normalPhi: 3, radius: 5, rings: 2, samples: 16 });
+  /* les objets transparents ou lumineux (paquets, anneaux, LED, manchon netem) ne font pas d'ombre douce */
+  gtao.overrideVisibility = function () {
+    const cache = this._visibilityCache;
+    this.scene.traverse(o => {
+      cache.set(o, o.visible);
+      if (o.isPoints || o.isLine || o.isSprite || (o.isMesh && (o.material.transparent || o.material.isMeshBasicMaterial))) o.visible = false;
+    });
+  };
+  composer.addPass(gtao);
+}
+const bloom = new UnrealBloomPass(new THREE.Vector2(innerWidth, innerHeight), 0.8, 0.45, 1.9);
+composer.addPass(bloom);
+composer.addPass(new OutputPass());
+
+const labelRenderer = new CSS2DRenderer({ element: $('#labels') });
+labelRenderer.setSize(innerWidth, innerHeight);
+
+/* =====================================================================
+   2. Petits outils : géométries, textures dessinées, matériaux
+   ===================================================================== */
+function RB(w, h, d, r = 0.3, seg = 3) {
+  const rr = Math.max(0.001, Math.min(r, w / 2 - 0.001, h / 2 - 0.001, d / 2 - 0.001));
+  return new RoundedBoxGeometry(w, h, d, seg, rr);
+}
+const BOX = (w, h, d) => new THREE.BoxGeometry(w, h, d);
+function mesh(geo, mat, x = 0, y = 0, z = 0, parent = scene, shadow = true) {
+  const m = new THREE.Mesh(geo, mat);
+  m.position.set(x, y, z);
+  m.castShadow = shadow; m.receiveShadow = true;
+  parent.add(m);
+  return m;
+}
+function canvasTex(w, h, draw) {
+  const c = document.createElement('canvas'); c.width = w; c.height = h;
+  const g = c.getContext('2d'); draw(g, w, h);
+  const t = new THREE.CanvasTexture(c);
+  t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8;
+  return { tex: t, canvas: c, ctx: g, redraw(fn) { fn(g, w, h); t.needsUpdate = true; } };
+}
+/* plan posé à plat (face vers le haut) */
+function flat(w, d, mat, x, y, z, parent) {
+  const m = new THREE.Mesh(new THREE.PlaneGeometry(w, d), mat);
+  m.rotation.x = -Math.PI / 2; m.position.set(x, y, z); m.receiveShadow = true;
+  parent.add(m); return m;
+}
+/* plan vertical (face vers +z) */
+function front(w, h, mat, x, y, z, parent) {
+  const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), mat);
+  m.position.set(x, y, z); m.receiveShadow = true; parent.add(m); return m;
+}
+const std = (color, roughness = 0.5, metalness = 0, extra = {}) =>
+  new THREE.MeshStandardMaterial({ color, roughness, metalness, ...extra });
+
+/* Grain fin (bruit) : sert de carte de rugosité et de relief. Sans lui, plastiques et métaux
+   ont l'air de pâte à modeler, parce que leur reflet est parfaitement uniforme. */
+const grain = canvasTex(512, 512, (g, w, h) => {
+  const img = g.createImageData(w, h);
+  for (let i = 0; i < img.data.length; i += 4) { const v = 200 + Math.random() * 55; img.data[i] = img.data[i + 1] = img.data[i + 2] = v; img.data[i + 3] = 255; }
+  g.putImageData(img, 0, 0);
+});
+grain.tex.colorSpace = THREE.NoColorSpace;
+grain.tex.wrapS = grain.tex.wrapT = THREE.RepeatWrapping; grain.tex.repeat.set(3, 3);
+const grained = (color, roughness, metalness, bump = 0.015) =>
+  std(color, roughness, metalness, { roughnessMap: grain.tex, bumpMap: grain.tex, bumpScale: bump });
+
+const M = {
+  pcbBlack: std(0x16191d, 0.5, 0.1),
+  pcbBlue: std(0x1f55ad, 0.45, 0.1),
+  modPCB: std(0x1d2733, 0.5, 0.1),
+  shield: std(0xd9dce1, 0.26, 1),
+  chrome: std(0xdfe2e6, 0.18, 1),
+  gold: std(0xd8aa4c, 0.28, 1),
+  chip: std(0x101114, 0.4, 0.05),
+  plBlack: grained(0x141518, 0.6, 0),
+  plWhite: grained(0xd9d5cc, 0.6, 0, 0.008),
+  plGray: grained(0x9aa1a7, 0.45, 0.6),
+  alu: grained(0xc4c9ce, 0.34, 1, 0.006),
+  steel: std(0xb8bcc2, 0.25, 1),
+  darkMetal: grained(0x262a30, 0.5, 0.7),
+  rubber: grained(0x1a1a1a, 0.9, 0, 0.03),
+  orangeRub: grained(0xd9682b, 0.75, 0, 0.03),
+  nylon: std(0xf3f0e6, 0.6, 0),
+  cork: std(0xa57a52, 0.95, 0),
+  acrylic: new THREE.MeshPhysicalMaterial({ color: 0x8fa6b4, roughness: 0.15, metalness: 0, transparent: true, opacity: 0.22, clearcoat: 0.6, envMapIntensity: 0.4 }),
+  cableBlue: std(0x2a6fd6, 0.45, 0),
+  cableYellow: std(0xe8c130, 0.45, 0),
+  cableGray: std(0x9aa1a8, 0.5, 0),
+  cableBlack: std(0x1b1c1e, 0.5, 0),
+  glassDark: std(0x050608, 0.15, 0),
+};
+const wireMats = {};
+const wireMat = c => wireMats[c] || (wireMats[c] = std(c, 0.45, 0));
+/* =====================================================================
+   3. La pièce : sol, deux murs (fenêtre, tableau blanc), bureau en chêne, tapis
+   Les murs sont des plans à une seule face : vus de derrière, ils
+   disparaissent (effet « maison de poupée »), la caméra n'est jamais bloquée.
+   ===================================================================== */
+const ROOM = { y: -76, back: -150, left: -270, h: 300 };
+/* sol : grandes dalles de 60 cm, légères différences de teinte (lino de salle de TP) */
+const floorTex = canvasTex(1024, 1024, (g, w, h) => {
+  const n = 4, s = w / n;
+  for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) { const v = 214 + Math.random() * 22; g.fillStyle = `rgb(${v},${v},${v})`; g.fillRect(i * s, j * s, s, s); }
+  for (let k = 0; k < 40000; k++) { g.fillStyle = Math.random() < .5 ? `rgba(0,0,0,${Math.random() * .07})` : `rgba(255,255,255,${Math.random() * .07})`; g.fillRect(Math.random() * w, Math.random() * h, 2, 2); }
+  g.strokeStyle = 'rgba(0,0,0,.28)'; g.lineWidth = 2;
+  for (let i = 0; i <= n; i++) { g.beginPath(); g.moveTo(i * s, 0); g.lineTo(i * s, h); g.stroke(); g.beginPath(); g.moveTo(0, i * s); g.lineTo(w, i * s); g.stroke(); }
+});
+floorTex.tex.wrapS = floorTex.tex.wrapT = THREE.RepeatWrapping; floorTex.tex.repeat.set(5, 5);
+const floorMat = std(PAL.nuit.floor, 0.62, 0, { map: floorTex.tex, roughnessMap: grain.tex });
+const floor = new THREE.Mesh(new THREE.PlaneGeometry(1200, 1200), floorMat);
+floor.rotation.x = -Math.PI / 2; floor.position.set(0, ROOM.y, 150); floor.receiveShadow = true; scene.add(floor);
+
+const wallMat = std(PAL.nuit.wall, 0.95, 0, { bumpMap: grain.tex, bumpScale: 0.04 });
+const backWall = new THREE.Mesh(new THREE.PlaneGeometry(720, ROOM.h), wallMat);
+backWall.position.set(90, ROOM.y + ROOM.h / 2, ROOM.back); backWall.receiveShadow = true; scene.add(backWall);
+const leftWall = new THREE.Mesh(new THREE.PlaneGeometry(600, ROOM.h), wallMat);
+leftWall.rotation.y = Math.PI / 2; leftWall.position.set(ROOM.left, ROOM.y + ROOM.h / 2, 150); leftWall.receiveShadow = true; scene.add(leftWall);
+/* plinthes */
+const plinthMat = std(0x1c2129, 0.6, 0);
+mesh(BOX(720, 8, 1.6), plinthMat, 90, ROOM.y + 4, ROOM.back + 0.8, scene, false);
+mesh(BOX(1.6, 8, 600), plinthMat, ROOM.left + 0.8, ROOM.y + 4, 150, scene, false);
+
+/* fenêtre (mur de gauche) : ciel dessiné, cadre, store vénitien relevé aux deux tiers */
+const sky = canvasTex(256, 512, () => {});
+function drawSky(p) {
+  sky.redraw((g, w, h) => {
+    const gr = g.createLinearGradient(0, 0, 0, h); gr.addColorStop(0, p.skyTop); gr.addColorStop(0.62, p.skyMid); gr.addColorStop(1, p.skyLow);
+    g.fillStyle = gr; g.fillRect(0, 0, w, h);
+    g.fillStyle = 'rgba(10,14,22,.55)';           /* silhouette des bâtiments d'en face */
+    for (let x = 0; x < w; x += 34) { const bh = 30 + Math.random() * 70; g.fillRect(x, h - bh, 30, bh); }
+  });
+}
+const skyMat = new THREE.MeshBasicMaterial({ map: sky.tex, toneMapped: false });
+const WIN = { z: 10, y: 95, w: 130, h: 150 };
+const win = new THREE.Group(); win.position.set(ROOM.left + 0.5, WIN.y, WIN.z); win.rotation.y = Math.PI / 2; scene.add(win);
+front(WIN.w, WIN.h, skyMat, 0, 0, 0, win);
+const frameMat = std(0xe8e6e1, 0.5, 0);
+for (const [x, y, w, h] of [[0, WIN.h / 2, WIN.w + 8, 6], [0, -WIN.h / 2, WIN.w + 12, 7], [-WIN.w / 2, 0, 6, WIN.h + 6], [WIN.w / 2, 0, 6, WIN.h + 6], [0, 0, 4, WIN.h]])
+  mesh(BOX(w, h, 4), frameMat, x, y, 2, win);
+mesh(BOX(WIN.w + 16, 2, 12), frameMat, 0, -WIN.h / 2 - 3, 6, win);      /* rebord */
+for (let i = 0; i < 22; i++) { const s = mesh(BOX(WIN.w - 4, 2.6, 0.3), std(0xe6e3dc, 0.6, 0), 0, WIN.h / 2 - 6 - i * 2.4, 5, win, false); s.rotation.x = 0.5; }
+mesh(BOX(WIN.w, 4, 4), frameMat, 0, WIN.h / 2 - 2, 5, win);
+
+/* bureau : plateau en chêne clair (stratifié), cadre en acier noir */
+const deskTex = canvasTex(2048, 1024, (g, w, h) => {
+  const gr = g.createLinearGradient(0, 0, w, h); gr.addColorStop(0, '#b78c5f'); gr.addColorStop(1, '#a87d52');
+  g.fillStyle = gr; g.fillRect(0, 0, w, h);
+  for (let i = 0; i < 260; i++) {                      /* fil du bois */
+    const y0 = Math.random() * h, amp = 4 + Math.random() * 14, f = 0.002 + Math.random() * 0.004, ph = Math.random() * 6;
+    g.strokeStyle = `rgba(${90 + Math.random() * 30},${52 + Math.random() * 20},${22},${0.04 + Math.random() * 0.12})`;
+    g.lineWidth = 0.8 + Math.random() * 2.6; g.beginPath();
+    for (let x = 0; x <= w; x += 16) { const y = y0 + Math.sin(x * f + ph) * amp + Math.sin(x * f * 3.1 + ph) * amp * 0.25; x ? g.lineTo(x, y) : g.moveTo(x, y); }
+    g.stroke();
+  }
+  for (let i = 0; i < 9000; i++) { g.fillStyle = `rgba(70,40,15,${Math.random() * 0.18})`; g.fillRect(Math.random() * w, Math.random() * h, 3 + Math.random() * 5, 1); }  /* pores */
+});
+const deskMat = new THREE.MeshPhysicalMaterial({ map: deskTex.tex, roughness: 0.48, roughnessMap: grain.tex, clearcoat: 0.28, clearcoatRoughness: 0.38 });
+const deskTop = mesh(RB(240, 3, 122, 0.9, 4), deskMat, 0, -1.5, -10);
+deskTop.castShadow = false;
+const frameBlack = grained(0x18191c, 0.55, 0.6);
+mesh(BOX(226, 6, 4), frameBlack, 0, -6, -66, scene);
+mesh(BOX(226, 6, 4), frameBlack, 0, -6, 46, scene);
+for (const x of [-114, 114]) {
+  mesh(BOX(5, 70, 5), frameBlack, x, -38, -66); mesh(BOX(5, 70, 5), frameBlack, x, -38, 46);
+  mesh(BOX(5, 5, 118), frameBlack, x, -6, -10);
+  mesh(RB(6, 1.6, 8, 0.6), M.rubber, x, -75.2, -66); mesh(RB(6, 1.6, 8, 0.6), M.rubber, x, -75.2, 46);
+}
+mesh(BOX(226, 3, 3), frameBlack, 0, -60, -66);
+/* =====================================================================
+   4. Composants électroniques (cartes, capteurs, LED, fils)
+   ===================================================================== */
+const pinGeo = BOX(0.064, 0.62, 0.064);
+const dotGeo = BOX(0.12, 0.06, 0.12);
+
+const espSilk = canvasTex(520, 285, (g, w, h) => {
+  g.clearRect(0, 0, w, h); g.fillStyle = '#f2f2f2'; g.font = 'bold 15px Arial';
+  g.fillText('ESP32 DEVKIT V1', 150, 148);
+  g.font = '10px Arial';
+  const A = ['EN', 'VP', 'VN', 'D34', 'D35', 'D32', 'D33', 'D25', 'D26', 'D27', 'D14', 'D12', 'D13', 'GND', 'VIN'];
+  const B = ['D23', 'D22', 'TX0', 'RX0', 'D21', 'D19', 'D18', 'D5', 'TX2', 'RX2', 'D4', 'D2', 'D15', 'GND', '3V3'];
+  for (let i = 0; i < 15; i++) {
+    const x = (2.6 - 0.35 + 1.778 - i * 0.254) / 5.2 * w;
+    g.save(); g.translate(x + 3, 46); g.rotate(-Math.PI / 2); g.fillText(A[i], -18, 0); g.restore();
+    g.save(); g.translate(x + 3, h - 30); g.rotate(-Math.PI / 2); g.fillText(B[i], -18, 0); g.restore();
+  }
+  g.strokeStyle = '#f2f2f2'; g.lineWidth = 2; g.strokeRect(20, 105, 70, 75);
+  g.fillText('EN', 16, 30); g.fillText('BOOT', 16, h - 12);
+});
+const espSilkMat = new THREE.MeshStandardMaterial({ map: espSilk.tex, transparent: true, roughness: 0.6 });
+const modMark = canvasTex(256, 256, (g, w, h) => {
+  g.clearRect(0, 0, w, h); g.fillStyle = 'rgba(40,44,50,.85)';
+  g.font = 'bold 26px Arial'; g.fillText('ESP32-WROOM-32', 14, 92);
+  g.font = '18px Arial'; g.fillText('Wi-Fi + Bluetooth', 14, 128); g.fillText('2,4 GHz', 14, 156);
+  g.strokeStyle = 'rgba(40,44,50,.6)'; g.lineWidth = 3; g.strokeRect(10, 50, 236, 130);
+});
+const modMarkMat = new THREE.MeshStandardMaterial({ map: modMark.tex, transparent: true, roughness: 0.3, metalness: 1, color: 0xdddddd });
+const antTex = canvasTex(140, 360, (g, w, h) => {
+  g.fillStyle = '#1d2733'; g.fillRect(0, 0, w, h);
+  g.strokeStyle = '#c99a45'; g.lineWidth = 12; g.beginPath();
+  let y = 20; g.moveTo(20, h - 10); g.lineTo(20, y);
+  for (let i = 0; i < 4; i++) { g.lineTo(115, y); y += 40; g.lineTo(115, y); g.lineTo(45, y); y += 40; g.lineTo(45, y); }
+  g.stroke();
+});
+const antMat = std(0xffffff, 0.4, 0.2, { map: antTex.tex });
+
+/** Carte ESP32 DevKit (30 broches). Antenne vers +x, USB vers -x. Origine = centre du circuit imprimé. */
+function makeESP32() {
+  const g = new THREE.Group();
+  mesh(BOX(5.2, 0.16, 2.85), M.pcbBlack, 0, 0, 0, g);
+  flat(5.2, 2.85, espSilkMat, 0, 0.09, 0, g);
+  mesh(BOX(2.55, 0.08, 1.8), M.modPCB, 1.3, 0.12, 0, g);
+  mesh(RB(1.76, 0.3, 1.72, 0.04, 2), M.shield, 0.92, 0.31, 0, g);
+  flat(1.6, 1.6, modMarkMat, 0.92, 0.462, 0, g);
+  flat(0.72, 1.8, antMat, 2.21, 0.161, 0, g);
+  mesh(RB(0.6, 0.28, 0.76, 0.06, 2), M.chrome, -2.42, 0.22, 0, g);
+  mesh(BOX(0.5, 0.1, 0.5), M.chip, -1.15, 0.13, 0.35, g);
+  mesh(BOX(0.35, 0.12, 0.25), M.chip, -1.7, 0.14, -0.55, g);
+  mesh(BOX(0.25, 0.1, 0.18), M.chip, -0.4, 0.13, -0.6, g);
+  for (const z of [-1.0, 1.0]) {
+    mesh(BOX(0.6, 0.12, 0.38), M.chrome, -1.95, 0.14, z, g);
+    mesh(new THREE.CylinderGeometry(0.1, 0.1, 0.1, 16), M.plBlack, -1.95, 0.24, z, g);
+  }
+  const pled = mesh(BOX(0.12, 0.06, 0.08), new THREE.MeshBasicMaterial({ color: new THREE.Color(0xff2a1a).multiplyScalar(4), toneMapped: false }), -0.95, 0.11, -1.05, g, false);
+  for (const z of [-1.27, 1.27]) mesh(BOX(3.81, 0.25, 0.25), M.plBlack, -0.35, -0.205, z, g);
+  const legs = new THREE.InstancedMesh(pinGeo, M.gold, 30);
+  const dots = new THREE.InstancedMesh(dotGeo, M.gold, 30);
+  const mtx = new THREE.Matrix4(); let k = 0;
+  for (const z of [-1.27, 1.27]) for (let i = 0; i < 15; i++) {
+    const x = -0.35 + 1.778 - i * 0.254;
+    mtx.makeTranslation(x, -0.48, z); legs.setMatrixAt(k, mtx);
+    mtx.makeTranslation(x, 0.09, z); dots.setMatrixAt(k, mtx); k++;
+  }
+  g.add(legs, dots);
+  g.userData.pled = pled;
+  return g;
+}
+/** Position locale (dans la carte) du trou de la plaque à essais à côté d'une broche. côté A = -z (EN…VIN), côté B = +z (D23…3V3). i = 0 près de l'antenne. */
+function espHole(side, i, out = 0.55) {
+  return new THREE.Vector3(-0.35 + 1.778 - i * 0.254, -0.3, side === 'A' ? -1.27 - out : 1.27 + out);
+}
+const ESP_B = { D23: 0, D22: 1, D21: 4, D19: 5, D18: 6, D5: 7, D4: 10, GND: 13, '3V3': 14 };
+const ESP_A = { D25: 7, D26: 8, D27: 9, GND: 13 };
+
+function bbTex(w, h) {
+  return canvasTex(Math.round(w * 100), Math.round(h * 100), (g, W, H) => {
+    g.fillStyle = '#f1efe8'; g.fillRect(0, 0, W, H);
+    g.fillStyle = '#d9d6cc'; g.fillRect(0, H / 2 - 9, W, 18);
+    const p = 25.4;
+    for (let x = p / 2; x < W; x += p) {
+      for (let r = 0; r < 5; r++) {
+        g.fillStyle = '#4c4c48';
+        g.fillRect(x - 4, H / 2 - 22 - r * p - 4, 8, 8);
+        g.fillRect(x - 4, H / 2 + 22 + r * p - 4, 8, 8);
+      }
+      if (H > 400) { g.fillRect(x - 4, 22, 8, 8); g.fillRect(x - 4, H - 30, 8, 8); }
+    }
+    if (H > 400) { g.fillStyle = '#c0392b'; g.fillRect(0, 40, W, 3); g.fillStyle = '#2a5db0'; g.fillRect(0, H - 42, W, 3); }
+  });
+}
+/** Plaque à essais blanche. Origine = centre du dessus. */
+function makeBreadboard(w = 8.2, d = 5.5) {
+  const g = new THREE.Group();
+  mesh(RB(w, 0.85, d, 0.08, 2), M.plWhite, 0, -0.425, 0, g);
+  flat(w, d, std(0xe9e5dc, 0.6, 0, { map: bbTex(w, d).tex }), 0, 0.012, 0, g);
+  return g;
+}
+
+function rr(g, x, y, w, h, r) { g.beginPath(); g.moveTo(x + r, y); g.arcTo(x + w, y, x + w, y + h, r); g.arcTo(x + w, y + h, x, y + h, r); g.arcTo(x, y + h, x, y, r); g.arcTo(x, y, x + w, y, r); g.closePath(); }
+/** LED 5 mm. Origine = point d'entrée dans la plaque. */
+const ledLights = {};
+function makeLED(name, color) {
+  const g = new THREE.Group();
+  const mat = new THREE.MeshPhysicalMaterial({ color, roughness: 0.12, transparent: true, opacity: 0.82, emissive: color, emissiveIntensity: 0.05, clearcoat: 1 });
+  for (const x of [-0.127, 0.127]) mesh(new THREE.CylinderGeometry(0.025, 0.025, 0.5, 6), M.steel, x, 0.25, 0, g, false);
+  mesh(new THREE.CylinderGeometry(0.29, 0.29, 0.08, 24), mat, 0, 0.54, 0, g);
+  mesh(new THREE.CylinderGeometry(0.25, 0.25, 0.5, 24), mat, 0, 0.8, 0, g);
+  mesh(new THREE.SphereGeometry(0.25, 24, 12, 0, Math.PI * 2, 0, Math.PI / 2), mat, 0, 1.05, 0, g);
+  const pl = new THREE.PointLight(color, 0, 30, 2); pl.position.set(0, 1.0, 0.2); g.add(pl);
+  ledLights[name] = { mat, pl };
+  return g;
+}
+function setLED(name, on) {
+  const L = ledLights[name]; if (!L) return;
+  L.mat.emissiveIntensity = on ? 14 : 0.05; L.pl.intensity = on ? 40 : 0;
+}
+function makeResistor(bands) {
+  const g = new THREE.Group();
+  const body = mesh(new THREE.CylinderGeometry(0.1, 0.1, 0.62, 16), std(0xd9c49a, 0.6), 0, 0.55, 0, g);
+  body.rotation.z = Math.PI / 2;
+  bands.forEach((c, i) => { const b = mesh(new THREE.CylinderGeometry(0.105, 0.105, 0.06, 16), std(c, 0.5), -0.18 + i * 0.12, 0.55, 0, g, false); b.rotation.z = Math.PI / 2; });
+  for (const s of [-1, 1]) {
+    const h = mesh(new THREE.CylinderGeometry(0.02, 0.02, 0.2, 6), M.steel, s * 0.41, 0.55, 0, g, false); h.rotation.z = Math.PI / 2;
+    mesh(new THREE.CylinderGeometry(0.02, 0.02, 0.55, 6), M.steel, s * 0.51, 0.28, 0, g, false);
+  }
+  return g;
+}
+/** Fil de liaison (« dupont ») entre deux points du monde. Renvoie la courbe. */
+function wire(a, b, color, lift = 1.6, r = 0.045) {
+  const mid = a.clone().lerp(b, 0.5); mid.y = Math.max(a.y, b.y) + lift;
+  const c = new THREE.CatmullRomCurve3([a, a.clone().add(new THREE.Vector3(0, lift * 0.55, 0)), mid, b.clone().add(new THREE.Vector3(0, lift * 0.55, 0)), b]);
+  const t = new THREE.Mesh(new THREE.TubeGeometry(c, 40, r, 8, false), wireMat(color));
+  t.castShadow = true; scene.add(t);
+  for (const p of [a, b]) mesh(BOX(0.24, 0.55, 0.24), M.plBlack, p.x, p.y + 0.27, p.z);
+  return c;
+}
+/* =====================================================================
+   5. Gros appareils : serveur, switch, borne Wi-Fi, PC, téléphone, écran
+   ===================================================================== */
+function drawScreenBg(g, w, h, top = '#173a5c', bot = '#0d1e30') {
+  const gr = g.createLinearGradient(0, 0, w, h); gr.addColorStop(0, top); gr.addColorStop(1, bot);
+  g.fillStyle = gr; g.fillRect(0, 0, w, h);
+}
+function makeScreenMat(ct) {
+  return new THREE.MeshStandardMaterial({ color: 0x000000, emissive: 0xffffff, emissiveMap: ct.tex, emissiveIntensity: 0.9, roughness: 0.18, metalness: 0 });
+}
+const keyTex = canvasTex(1024, 420, (g, w, h) => {
+  g.fillStyle = '#1b1d20'; g.fillRect(0, 0, w, h);
+  const rows = [14, 14, 13, 12, 9]; const kh = 70, gap = 12;
+  rows.forEach((n, r) => {
+    const kw = (w - gap * (n + 1)) / n;
+    for (let i = 0; i < n; i++) {
+      let ww = kw; if (r === 4 && i === 4) ww = kw * 3;
+      if (r === 4 && i > 4) continue;
+      g.fillStyle = '#2b2e33'; rr(g, gap + i * (kw + gap), gap + r * (kh + gap / 1.5), ww, kh, 8); g.fill();
+    }
+  });
+});
+/** Ordinateur portable. Origine = centre du dessous. Écran animé (canvas). */
+function makeLaptop({ body = 0x3a3f46, rugged = false, w = 32, d = 22 } = {}) {
+  const g = new THREE.Group();
+  const bmat = grained(body, 0.42, 0.65, 0.006);
+  mesh(RB(w, 1.8, d, 0.7), bmat, 0, 0.9, 0, g);
+  flat(w - 4, d * 0.42, std(0xffffff, 0.7, 0, { map: keyTex.tex }), 0, 1.84, -d * 0.12, g);
+  flat(10, 6, std(body, 0.3, 0.5, { color: new THREE.Color(body).multiplyScalar(1.15) }), 0, 1.85, d * 0.3, g);
+  const pivot = new THREE.Group(); pivot.position.set(0, 1.8, -d / 2 + 0.4); g.add(pivot);
+  const lh = d - 0.8;
+  mesh(RB(w, lh, 0.7, 0.35), bmat, 0, lh / 2, -0.1, pivot);
+  const sc = canvasTex(1024, 640, () => {});
+  const scr = front(w - 2.2, lh - 2.4, makeScreenMat(sc), 0, lh / 2 + 0.2, 0.36, pivot);
+  mesh(BOX(w - 1.4, lh - 1.6, 0.05), M.glassDark, 0, lh / 2 + 0.2, 0.29, pivot, false);
+  pivot.rotation.x = -0.24;
+  if (rugged) {
+    for (const [x, z] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) mesh(RB(3.2, 2.4, 3.2, 0.5), M.orangeRub, x * (w / 2 - 1.2), 1.0, z * (d / 2 - 1.2), g);
+    for (const x of [-1, 1]) mesh(RB(3.2, 3.2, 1.2, 0.4), M.orangeRub, x * (w / 2 - 1.2), lh - 1.3, -0.1, pivot);
+    mesh(RB(w * 0.5, 0.35, 2.6, 0.15), M.rubber, 0, 1.0, d / 2 + 0.3, g);
+  }
+  return { g, pivot, screen: sc, lh };
+}
+
+/** Serveur tour Ubuntu. */
+const srvFront = canvasTex(400, 880, (g, w, h) => {
+  g.fillStyle = '#1b1e22'; g.fillRect(0, 0, w, h);
+  g.fillStyle = '#25292e'; for (let i = 0; i < 2; i++) g.fillRect(30, 40 + i * 90, w - 60, 72);
+  g.strokeStyle = '#3a3f46'; g.lineWidth = 3; for (let i = 0; i < 2; i++) g.strokeRect(30, 40 + i * 90, w - 60, 72);
+  g.fillStyle = '#0d0f11';
+  for (let y = 260; y < h - 70; y += 22) for (let x = 40 + ((y / 22) % 2) * 11; x < w - 40; x += 22) { g.beginPath(); g.arc(x, y, 7, 0, 7); g.fill(); }
+  g.fillStyle = '#c8d0d6'; g.font = 'bold 26px Arial'; g.fillText('SERVEUR', 30, h - 30);
+  g.font = '18px Arial'; g.fillStyle = '#8a96a0'; g.fillText('Ubuntu Server 24.04', 170, h - 32);
+});
+function makeServer() {
+  const g = new THREE.Group();
+  mesh(RB(20, 44, 46, 0.8), M.darkMetal, 0, 22, 0, g);
+  front(19, 41.8, std(0xffffff, 0.5, 0.4, { map: srvFront.tex, roughnessMap: grain.tex }), 0, 22, 23.08, g);
+  mesh(new THREE.TorusGeometry(0.9, 0.18, 12, 32), M.chrome, 6.5, 41, 23.16, g);
+  const glow = (c) => new THREE.MeshBasicMaterial({ color: new THREE.Color(c).multiplyScalar(3), toneMapped: false });
+  const pwr = mesh(new THREE.CircleGeometry(0.35, 20), glow(0x32ff7a), 6.5, 41, 23.2, g, false);
+  const disk = mesh(new THREE.CircleGeometry(0.3, 20), glow(0xffa31a), 4.0, 41, 23.2, g, false);
+  for (const [x, z] of [[-8, -20], [8, -20], [-8, 20], [8, 20]]) mesh(new THREE.CylinderGeometry(1.2, 1.2, 0.8, 16), M.rubber, x, -0.4 + 0.4, z, g);
+  g.userData = { pwr, disk };
+  return g;
+}
+
+/** Switch 24 ports du lycée. */
+const SW = { w: 44, h: 4.4, d: 24 };
+const portPx = i => ({ x: 760 + Math.floor(i / 2) * 80 + 30, y: i % 2 ? 123 : 63 });
+const swFront = canvasTex(1760, 176, (g, w, h) => {
+  const gr = g.createLinearGradient(0, 0, 0, h); gr.addColorStop(0, '#a3aab0'); gr.addColorStop(1, '#868d93');
+  g.fillStyle = gr; g.fillRect(0, 0, w, h);
+  g.fillStyle = '#20262c'; g.font = 'bold 34px Arial'; g.fillText('SWITCH 24 PORTS', 60, 80);
+  g.font = '24px Arial'; g.fillText('réseau du lycée (en place)', 60, 120);
+  for (let i = 0; i < 24; i++) {
+    const p = portPx(i);
+    g.fillStyle = '#111417'; g.fillRect(p.x - 28, p.y - 22, 56, 44);
+    g.fillStyle = '#2a2f35'; g.fillRect(p.x - 12, p.y + 14, 24, 8);
+    g.fillStyle = '#b8902f'; for (let k = 0; k < 8; k++) g.fillRect(p.x - 20 + k * 5.5, p.y - 20, 2.4, 8);
+    g.fillStyle = '#3a3f45'; g.fillRect(p.x - 38, p.y - 18, 6, 6);
+  }
+});
+const portLEDs = [];
+function makeSwitch() {
+  const g = new THREE.Group();
+  mesh(RB(SW.w, SW.h, SW.d, 0.25), M.plGray, 0, SW.h / 2, 0, g);
+  front(SW.w, SW.h, std(0xffffff, 0.45, 0.5, { map: swFront.tex }), 0, SW.h / 2, SW.d / 2 + 0.05, g);
+  for (let i = 0; i < 24; i++) {
+    const p = portPx(i);
+    const m = new THREE.MeshBasicMaterial({ color: new THREE.Color(0x2bff6a).multiplyScalar(0.15), toneMapped: false });
+    const led = mesh(new THREE.PlaneGeometry(0.16, 0.16), m, (p.x - 35) / 1760 * SW.w - SW.w / 2, SW.h - (p.y - 15) / 176 * SW.h, SW.d / 2 + 0.09, g, false);
+    portLEDs.push({ m, last: -9, used: false });
+  }
+  for (const x of [-20, 20]) for (const z of [-10, 10]) mesh(new THREE.CylinderGeometry(0.8, 0.8, 0.3, 12), M.rubber, x, 0.15, z, g);
+  return g;
+}
+function swPortLocal(i) { const p = portPx(i); return new THREE.Vector3(p.x / 1760 * SW.w - SW.w / 2, SW.h - p.y / 176 * SW.h, SW.d / 2); }
+
+function makeAP() {
+  const g = new THREE.Group();
+  mesh(RB(18, 3.4, 14, 1.4, 4), M.plWhite, 0, 1.7, 0, g);
+  for (const x of [-6, 6]) {
+    const a = mesh(RB(1.2, 15, 0.7, 0.3), M.plBlack, x, 9, -6.6, g); a.rotation.z = x < 0 ? 0.12 : -0.12;
+  }
+  const led = mesh(new THREE.CircleGeometry(0.3, 16), new THREE.MeshBasicMaterial({ color: new THREE.Color(0x3d9bff).multiplyScalar(3), toneMapped: false }), 0, 1.4, 7.06, g, false);
+  return g;
+}
+
+function makePhone() {
+  const g = new THREE.Group();
+  mesh(RB(7.5, 0.8, 15.6, 0.38, 4), std(0x0e0f11, 0.3, 0.6), 0, 0.4, 0, g);
+  const sc = canvasTex(360, 750, () => {});
+  flat(7.0, 15.0, makeScreenMat(sc), 0, 0.85, 0, g);
+  return { g, screen: sc };
+}
+
+function makeMonitor() {
+  const g = new THREE.Group();
+  mesh(RB(22, 1.2, 16, 0.5), M.darkMetal, 0, 0.6, 0, g);
+  mesh(RB(4, 18, 2.4, 0.6), M.darkMetal, 0, 9, -3, g);
+  const panel = new THREE.Group(); panel.position.set(0, 26, -1.5); panel.rotation.x = -0.06; g.add(panel);
+  mesh(RB(56, 33.5, 2.4, 0.6), std(0x16181b, 0.4, 0.4), 0, 0, 0, panel);
+  const sc = canvasTex(1280, 740, () => {});
+  front(54, 31.2, makeScreenMat(sc), 0, 0.3, 1.28, panel);
+  return { g, screen: sc };
+}
+
+function makeSFF() {
+  const g = new THREE.Group();
+  mesh(RB(9, 30, 28, 0.6), std(0x202327, 0.45, 0.6), 0, 15, 0, g);
+  const glow = new THREE.MeshBasicMaterial({ color: new THREE.Color(0x4fc3ff).multiplyScalar(3), toneMapped: false });
+  mesh(new THREE.CircleGeometry(0.4, 16), glow, 0, 27, 14.06, g, false);
+  for (const y of [21, 19]) mesh(BOX(1.4, 0.6, 0.1), M.plBlack, 0, y, 14.06, g, false);
+  return g;
+}
+/* =====================================================================
+   TABLEAU BLANC (mur du fond) : le schéma du projet, au feutre
+   ===================================================================== */
+const wbTex = canvasTex(1800, 1000, (g, w, h) => {
+  g.fillStyle = '#f6f6f3'; g.fillRect(0, 0, w, h);
+  const gr = g.createLinearGradient(0, 0, w, h); gr.addColorStop(0, 'rgba(255,255,255,0)'); gr.addColorStop(.5, 'rgba(255,255,255,.6)'); gr.addColorStop(1, 'rgba(0,0,0,.04)');
+  g.fillStyle = gr; g.fillRect(0, 0, w, h);
+  g.lineCap = 'round'; g.lineJoin = 'round';
+  const pen = (c, lw) => { g.strokeStyle = c; g.fillStyle = c; g.lineWidth = lw; };
+  const wob = (x1, y1, x2, y2) => { g.beginPath(); g.moveTo(x1, y1); g.quadraticCurveTo((x1 + x2) / 2 + (Math.random() - .5) * 14, (y1 + y2) / 2 + (Math.random() - .5) * 14, x2, y2); g.stroke(); };
+  const box = (x, y, bw, bh, t) => { wob(x, y, x + bw, y); wob(x + bw, y, x + bw, y + bh); wob(x + bw, y + bh, x, y + bh); wob(x, y + bh, x, y); g.font = 'italic 46px "Segoe Print","Comic Sans MS",cursive'; g.fillText(t, x + 22, y + bh / 2 + 16); };
+  pen('#1d3f8a', 7); box(100, 150, 330, 130, 'boîtier'); box(720, 150, 330, 130, 'poste'); box(1340, 150, 340, 130, 'serveur');
+  wob(430, 215, 720, 215); wob(1050, 215, 1340, 215);
+  g.font = 'italic 38px "Segoe Print","Comic Sans MS",cursive'; g.fillText('USB', 540, 190); g.fillText('HTTPS', 1130, 190);
+  pen('#b3261e', 7); g.font = 'italic 50px "Segoe Print","Comic Sans MS",cursive'; g.fillText('message signé : HMAC + compteur', 140, 400);
+  wob(130, 420, 1000, 428);
+  pen('#1f6b3a', 7); g.font = 'italic 44px "Segoe Print","Comic Sans MS",cursive';
+  g.fillText('λ = c / f = 12,5 mm', 140, 590); g.fillText('ΔR = c / 2B = 0,6 m', 140, 670); g.fillText('Δφ = 4π·Δd / λ', 140, 750);
+  pen('#222', 5); g.font = 'italic 40px "Segoe Print","Comic Sans MS",cursive';
+  g.fillText('porte 0   porte 1   porte 2', 1000, 590);
+  for (let i = 0; i < 3; i++) { g.beginPath(); g.arc(1180, 900, 120 + i * 90, Math.PI * 1.17, Math.PI * 1.83); g.stroke(); }
+  g.fillStyle = '#222'; g.beginPath(); g.arc(1180, 900, 10, 0, 7); g.fill();
+});
+const wb = new THREE.Group(); wb.position.set(-20, 105, ROOM.back + 1.2); scene.add(wb);
+front(176, 98, std(0xffffff, 0.22, 0, { map: wbTex.tex }), 0, 0, 0.6, wb);
+const wbFrame = std(0xbfc4c9, 0.35, 1);
+for (const [x, y, w, h] of [[0, 50, 182, 3], [0, -50, 182, 3], [-89.5, 0, 3, 100], [89.5, 0, 3, 100]]) mesh(BOX(w, h, 2), wbFrame, x, y, 0.4, wb);
+mesh(BOX(150, 1.6, 6), wbFrame, 0, -52, 3, wb);
+for (const [x, c] of [[-40, 0x1d3f8a], [-30, 0xb3261e], [-20, 0x1f6b3a]]) { const f = mesh(new THREE.CylinderGeometry(0.8, 0.8, 12, 12), std(c, 0.5), x, -50.4, 3, wb); f.rotation.z = Math.PI / 2; }
+
+/* =====================================================================
+   COMPOSANTS DU BOÎTIER : radar LD2410, LED RVB, boîtier plastique
+   ===================================================================== */
+const V = (x, y, z) => new THREE.Vector3(x, y, z);
+const W = (obj, v) => obj.localToWorld(v.clone());
+
+/* Radar HLK-LD2410 : circuit 22 × 16 mm. Face avant = deux réseaux d'antennes « patch » (émission, réception). */
+const ldFront = canvasTex(440, 320, (g, w, h) => {
+  g.fillStyle = '#0d1a2b'; g.fillRect(0, 0, w, h);
+  for (let i = 0; i < 2200; i++) { g.fillStyle = `rgba(255,255,255,${Math.random() * 0.03})`; g.fillRect(Math.random() * w, Math.random() * h, 2, 2); }
+  g.fillStyle = '#c9a24b';
+  for (const x0 of [34, 250]) {
+    for (let r = 0; r < 4; r++) for (let c = 0; c < 2; c++) g.fillRect(x0 + c * 78, 28 + r * 56, 56, 38);
+    g.fillRect(x0 + 56, 44 + 0 * 56, 22, 6);
+    for (let r = 0; r < 4; r++) g.fillRect(x0 + 56, 44 + r * 56, 22, 6);
+    g.fillRect(x0 + 66, 40, 6, 3 * 56 + 8);
+  }
+  g.fillStyle = '#e6e9ee'; g.font = 'bold 22px Arial'; g.fillText('HLK-LD2410', 150, 292);
+  g.font = '15px Arial'; g.fillText('24 GHz', 22, 292);
+});
+function makeLD2410() {
+  const g = new THREE.Group();
+  mesh(BOX(2.2, 1.6, 0.16), M.pcbBlack, 0, 0, 0, g);
+  front(2.2, 1.6, std(0xffffff, 0.35, 0.25, { map: ldFront.tex }), 0, 0, 0.09, g);
+  mesh(BOX(1.0, 0.8, 0.14), M.shield, 0, 0.1, -0.15, g);
+  mesh(BOX(1.3, 0.25, 0.25), M.plBlack, 0, -0.95, 0, g);
+  for (let k = 0; k < 5; k++) mesh(pinGeo, M.gold, (k - 2) * 0.254, -1.15, 0, g, false);
+  return g;
+}
+const LDPIN = { V5: 0, GND: 1, TX: 2, RX: 3, OUT: 4 };
+const ldPin = k => V((k - 2) * 0.254, -1.4, 0);
+
+/* LED RVB 5 mm : 4 pattes, dôme diffusant. La couleur se règle avec setRGB(). */
+const rgbMat = new THREE.MeshPhysicalMaterial({ color: 0xf2f2ee, roughness: 0.38, transparent: true, opacity: 0.88, emissive: 0x000000, emissiveIntensity: 0, clearcoat: 0.6 });
+const diffMat = new THREE.MeshPhysicalMaterial({ color: 0xf2f2ee, roughness: 0.55, transparent: true, opacity: 0.92, emissive: 0x000000, emissiveIntensity: 0, clearcoat: 0.2 });
+const rgbLight = new THREE.PointLight(0xffffff, 0, 55, 1.8);
+function makeRGB() {
+  const g = new THREE.Group();
+  for (const x of [-0.19, -0.063, 0.063, 0.19]) mesh(new THREE.CylinderGeometry(0.025, 0.025, 0.55 + (x === -0.063 ? 0.1 : 0), 6), M.steel, x, 0.27, 0, g, false);
+  mesh(new THREE.CylinderGeometry(0.29, 0.29, 0.08, 24), rgbMat, 0, 0.58, 0, g);
+  mesh(new THREE.CylinderGeometry(0.25, 0.25, 0.5, 24), rgbMat, 0, 0.84, 0, g);
+  mesh(new THREE.SphereGeometry(0.25, 24, 12, 0, Math.PI * 2, 0, Math.PI / 2), rgbMat, 0, 1.09, 0, g);
+  return g;
+}
+const RGB_COL = { vert: 0x16ff5a, orange: 0xff8a00, off: null };
+function setRGB(name) {
+  const c = RGB_COL[name];
+  world.led = name || 'off'; if (typeof updateGlow === 'function') updateGlow();
+  if (c === null || c === undefined) { rgbMat.emissive.set(0); rgbMat.emissiveIntensity = 0; diffMat.emissive.set(0); diffMat.emissiveIntensity = 0; rgbMat.color.set(0xf2f2ee); diffMat.color.set(0xf2f2ee); rgbLight.intensity = 0; return; }
+  rgbMat.color.set(c).lerp(new THREE.Color(0xffffff), 0.15); diffMat.color.set(c).lerp(new THREE.Color(0xffffff), 0.3); rgbMat.emissive.set(c); rgbMat.emissiveIntensity = 3.2; diffMat.emissive.set(c); diffMat.emissiveIntensity = 2.2; rgbLight.color.set(c); rgbLight.intensity = 9;
+}
+
+/* Boîtier plastique (ABS blanc) : 7,6 × 3,6 × 9,2 cm. Face avant (+z) = fenêtre pour le radar. Couvercle amovible. */
+const BX = { w: 7.6, h: 3.6, d: 9.2, t: 0.25 };
+function makeBox(fake = false) {
+  const g = new THREE.Group();
+  const shell = fake ? grained(0x1b1c1f, 0.55, 0, 0.02) : grained(0xe6e3dc, 0.52, 0, 0.012);
+  const { w, h, d, t } = BX;
+  mesh(RB(w, 0.3, d, 0.12, 2), shell, 0, 0.15, 0, g);
+  mesh(RB(t, h, d, 0.08, 2), shell, -w / 2 + t / 2, h / 2, 0, g);
+  mesh(RB(t, h, d, 0.08, 2), shell, w / 2 - t / 2, h / 2, 0, g);
+  mesh(RB(w, h, t, 0.08, 2), shell, 0, h / 2, -d / 2 + t / 2, g);
+  /* face avant : cadre autour d'une fenêtre en plastique fumé (le radar voit au travers) */
+  const fz = d / 2 - t / 2;
+  mesh(RB(w, 0.7, t, 0.06, 2), shell, 0, 0.35, fz, g);
+  mesh(RB(w, 0.8, t, 0.06, 2), shell, 0, h - 0.4, fz, g);
+  mesh(RB(2.0, h - 1.5, t, 0.06, 2), shell, -w / 2 + 1.0, h / 2, fz, g);
+  mesh(RB(2.0, h - 1.5, t, 0.06, 2), shell, w / 2 - 1.0, h / 2, fz, g);
+  const smoke = new THREE.MeshPhysicalMaterial({ color: 0x1a1d22, roughness: 0.12, transparent: true, opacity: 0.55, clearcoat: 1 });
+  mesh(BOX(w - 4, h - 1.5, 0.12), smoke, 0, h / 2, fz + 0.02, g, false);
+  /* trou du câble USB, à l'arrière */
+  const hole = mesh(new THREE.CylinderGeometry(0.45, 0.45, 0.3, 20), M.rubber, 0, 1.1, -d / 2 - 0.02, g, false); hole.rotation.x = Math.PI / 2;
+  /* couvercle : plaque + bouton diffuseur au-dessus de la LED */
+  const lid = new THREE.Group(); lid.position.set(0, h, 0); g.add(lid);
+  mesh(RB(w + 0.1, 0.25, d + 0.1, 0.1, 2), shell, 0, 0.125, 0, lid);
+  const dif = mesh(new THREE.CylinderGeometry(0.55, 0.6, 0.34, 28), fake ? std(0x3a3d42, 0.5) : diffMat, 2.2, 0.38, 1.7, lid, false);
+  return { g, lid, dif };
+}
+
+/* Mini carte de prototypage sous le radar et la LED (perforée, verte) */
+function makePerf(w, d) {
+  const g = new THREE.Group();
+  mesh(BOX(w, 0.16, d), std(0x2d7a4a, 0.5, 0.1), 0, 0, 0, g);
+  const holes = new THREE.InstancedMesh(new THREE.CylinderGeometry(0.06, 0.06, 0.02, 8), M.gold, Math.floor(w / 0.254) * Math.floor(d / 0.254));
+  const m = new THREE.Matrix4(); let k = 0;
+  for (let x = -w / 2 + 0.25; x < w / 2 - 0.1; x += 0.254) for (let z = -d / 2 + 0.25; z < d / 2 - 0.1; z += 0.254) { if (k >= holes.count) break; m.makeTranslation(x, 0.09, z); holes.setMatrixAt(k++, m); }
+  holes.count = k; g.add(holes);
+  return g;
+}
+
+/* =====================================================================
+   OSCILLOSCOPE (mesure R4 : combien de secondes avant le blocage)
+   ===================================================================== */
+const FONT = '"Atkinson Hyperlegible", Arial, sans-serif', MONO = '"IBM Plex Mono", Consolas, monospace';
+function makeScope() {
+  const g = new THREE.Group();
+  const body = grained(0x3b4047, 0.5, 0.5, 0.01);
+  mesh(RB(36, 17, 32, 1.2), body, 0, 8.5, 0, g);
+  mesh(RB(36.2, 3.2, 31, 0.8), grained(0x20242a, 0.55, 0.4), 0, 1.7, 0, g);
+  const sc = canvasTex(800, 520, () => {});
+  mesh(BOX(22.4, 14.8, 0.2), M.glassDark, -5.4, 9.2, 15.95, g, false);
+  front(21, 13.6, makeScreenMat(sc), -5.4, 9.2, 16.1, g);
+  for (let r = 0; r < 2; r++) for (let c = 0; c < 3; c++) {
+    const k = mesh(new THREE.CylinderGeometry(1.35, 1.5, 1.4, 24), M.darkMetal, 10 + c * 4.4 - 3, 13 - r * 4.6, 16.7, g); k.rotation.x = Math.PI / 2;
+    mesh(BOX(0.15, 0.1, 1.2), M.chrome, 10 + c * 4.4 - 3, 13 - r * 4.6, 17.45, g, false);
+  }
+  for (const x of [10, 14.5]) { const b = mesh(new THREE.CylinderGeometry(1.0, 1.0, 1.6, 20), M.chrome, x - 3, 3.0, 16.7, g); b.rotation.x = Math.PI / 2; }
+  mesh(RB(10, 1.2, 1.6, 0.3), M.plBlack, 0, 17.4, 0, g);          /* poignée */
+  for (const [x, z] of [[-14, -11], [14, -11], [-14, 11], [14, 11]]) mesh(RB(3.2, 1.0, 3.2, 0.3), M.rubber, x, 0.2, z, g);
+  return { g, screen: sc };
+}
+
+/* =====================================================================
+   CHAISE DE BUREAU (origine = dessus de l'assise, avant = +z local)
+   ===================================================================== */
+function makeChair() {
+  const g = new THREE.Group();
+  const fab = grained(0x34414f, 0.9, 0, 0.04), pl = M.plBlack;
+  mesh(RB(44, 6, 42, 2.6, 3), fab, 0, -3, 0, g);
+  mesh(RB(42, 40, 5.5, 2.6, 3), fab, 0, 26, -21, g).rotation.x = -0.1;
+  mesh(RB(10, 12, 3), pl, 0, 8, -20, g).rotation.x = -0.1;
+  mesh(new THREE.CylinderGeometry(2.4, 2.4, 36, 18), M.chrome, 0, -24, 0, g);
+  mesh(new THREE.CylinderGeometry(4.2, 4.2, 6, 20), pl, 0, -8, 0, g);
+  for (let i = 0; i < 5; i++) {
+    const a = i / 5 * Math.PI * 2, arm = new THREE.Group(); arm.rotation.y = a; g.add(arm);
+    mesh(RB(26, 2.6, 4.4, 1.1), pl, 13, -40, 0, arm);
+    const c = mesh(new THREE.SphereGeometry(2.6, 14, 10), M.rubber, 25, -43.2, 0, arm);
+    mesh(new THREE.CylinderGeometry(0.7, 0.7, 4, 8), M.steel, 25, -40, 0, arm, false);
+  }
+  for (const s of [-1, 1]) {
+    mesh(RB(4.4, 14, 3, 1), pl, s * 23.5, 4, -3, g);
+    mesh(RB(6.4, 2.6, 28, 1.1), pl, s * 23.5, 11.5, 3, g);
+  }
+  return g;
+}
+
+/* =====================================================================
+   PERSONNAGE ARTICULÉ (mannequin réaliste)
+   Origine = hanche. Avant = +z local. Jambes et bras : cinématique inverse
+   dans le plan vertical qui passe par la personne. Unité : cm.
+   ===================================================================== */
+const PL = { thigh: 43, shin: 44, uarm: 28, farm: 26, shoulderY: 47, shoulderX: 17.5, hipX: 9 };
+function ik(l1, l2, dy, dz, sign) {
+  let d = Math.hypot(dy, dz);
+  d = Math.min(d, l1 + l2 - 0.05); d = Math.max(d, Math.abs(l1 - l2) + 0.05);
+  const phi = Math.atan2(dz, -dy);
+  const a = Math.acos(THREE.MathUtils.clamp((l1 * l1 + d * d - l2 * l2) / (2 * l1 * d), -1, 1));
+  const t1 = phi + sign * a;
+  const ez = l1 * Math.sin(t1), ey = -l1 * Math.cos(t1);
+  const t2 = Math.atan2(dz - ez, -(dy - ey));
+  return [t1, t2];
+}
+function makePerson({ top = 0x2f6fb5, bottom = 0x252830, hair = 0x2a1a12, skin = 0xd2a07f } = {}) {
+  const root = new THREE.Group();
+  const skinM = new THREE.MeshPhysicalMaterial({ color: skin, roughness: 0.55, clearcoat: 0.1, sheen: 0.4 });
+  const topM = grained(top, 0.88, 0, 0.04), botM = grained(bottom, 0.82, 0, 0.04), hairM = std(hair, 0.5, 0.1);
+  const shoeM = grained(0x17181c, 0.45, 0.15, 0.01);
+  const st = { pelvisMesh: null };
+  mesh(RB(33, 14, 21, 6, 4), botM, 0, 0, 0, root);
+  const torso = new THREE.Group(); root.add(torso);
+  const chest = mesh(new THREE.CapsuleGeometry(1, 2.0, 8, 24), topM, 0, 26, 0, torso); chest.scale.set(16, 12.6, 10.5);
+  const waist = mesh(new THREE.CapsuleGeometry(1, 0.6, 8, 20), topM, 0, 8, 0, torso); waist.scale.set(15, 10, 9.6);
+  for (const s of [-1, 1]) mesh(new THREE.SphereGeometry(4.7, 20, 14), topM, s * PL.shoulderX, PL.shoulderY - 1.6, 0, torso);
+  mesh(new THREE.CylinderGeometry(4.3, 4.8, 9, 18), skinM, 0, 54.5, 0, torso);
+  const head = new THREE.Group(); head.position.set(0, 58, 0.4); torso.add(head);
+  const skull = mesh(new THREE.SphereGeometry(1, 28, 20), skinM, 0, 8, 0, head); skull.scale.set(9.6, 11.6, 10.6);
+  const hairCap = mesh(new THREE.SphereGeometry(1.06, 28, 18, 0, Math.PI * 2, 0, Math.PI * 0.62), hairM, 0, 8.4, -0.5, head); hairCap.scale.set(9.7, 11.9, 10.9); hairCap.rotation.x = -0.28;
+  mesh(new THREE.SphereGeometry(1.5, 12, 8), skinM, 0, 6.2, 10.3, head);                      /* nez */
+  for (const s of [-1, 1]) {
+    mesh(new THREE.SphereGeometry(0.85, 10, 8), std(0x15110f, 0.3), s * 3.5, 9.4, 9.5, head, false);   /* yeux */
+    const ear = mesh(new THREE.SphereGeometry(1.7, 10, 8), skinM, s * 9.5, 7.6, -0.4, head); ear.scale.set(0.5, 1, 0.8);
+  }
+  const mkArm = s => {
+    const sh = new THREE.Group(); sh.position.set(s * PL.shoulderX, PL.shoulderY, 0); torso.add(sh);
+    mesh(new THREE.CapsuleGeometry(3.7, PL.uarm - 7.4, 8, 16), topM, 0, -PL.uarm / 2, 0, sh);
+    const el = new THREE.Group(); el.position.y = -PL.uarm; sh.add(el);
+    mesh(new THREE.SphereGeometry(3.5, 14, 10), topM, 0, 0, 0, el);
+    mesh(new THREE.CapsuleGeometry(3.1, PL.farm - 6.2, 8, 16), topM, 0, -PL.farm / 2, 0, el);
+    const hand = mesh(RB(7.4, 9.4, 3.4, 1.4, 3), skinM, 0, -PL.farm - 3.6, 0.2, el);
+    return { sh, el };
+  };
+  const armL = mkArm(-1), armR = mkArm(1);
+  const mkLeg = s => {
+    const hp = new THREE.Group(); hp.position.set(s * PL.hipX, -2, 0); root.add(hp);
+    mesh(new THREE.CapsuleGeometry(7.2, PL.thigh - 14.4, 8, 18), botM, 0, -PL.thigh / 2, 0, hp);
+    const kn = new THREE.Group(); kn.position.y = -PL.thigh; hp.add(kn);
+    mesh(new THREE.SphereGeometry(6.2, 14, 10), botM, 0, 0, 0, kn);
+    mesh(new THREE.CapsuleGeometry(5.2, PL.shin - 10.4, 8, 16), botM, 0, -PL.shin / 2, 0, kn);
+    const an = new THREE.Group(); an.position.y = -PL.shin; kn.add(an);
+    mesh(RB(9.2, 7.6, 25, 3.2, 3), shoeM, 0, -3.6, 6.4, an);
+    mesh(RB(9.4, 1.4, 25.4, 0.6, 2), std(0xe8e6e0, 0.7), 0, -7.0, 6.4, an);
+    return { hp, kn, an };
+  };
+  const legL = mkLeg(-1), legR = mkLeg(1);
+  const folder = new THREE.Group(); folder.visible = false; root.add(folder);
+  mesh(BOX(32, 0.5, 22), std(0xd9b46a, 0.8), 0, 0, 0, folder);
+  mesh(BOX(30.5, 0.3, 21), std(0xf4f2ec, 0.9), 0, 0.4, 0, folder);
+  const pr = canvasTex(256, 160, (g, w, h) => { g.fillStyle = '#f6f4ee'; g.fillRect(0, 0, w, h); g.fillStyle = '#9aa3aa'; for (let i = 0; i < 12; i++) g.fillRect(14, 14 + i * 11, 100 + Math.random() * 120, 3); });
+  flat(29, 19, std(0xffffff, 0.9, 0, { map: pr.tex }), 0, 0.56, 0, folder);
+  folder.position.set(0, 38, 33); folder.rotation.x = Math.PI / 2 - 0.42;
+  return { root, torso, head, chest, armL, armR, legL, legR, folder };
+}
+/* Applique une pose (objet st) au personnage */
+function applyPose(P, st, t) {
+  const r = P.root;
+  let { hL, hR, fL, fR, y } = st;
+  if (st.walk > 0) {
+    const f = st.phase, k = st.walk;
+    const gl = [-84 + 6.5 * Math.max(0, Math.cos(f)), 24 * Math.sin(f)], gr = [-84 + 6.5 * Math.max(0, -Math.cos(f)), -24 * Math.sin(f)];
+    const al = [-8, 3 + 13 * Math.sin(f + Math.PI)], ar = [-8, 3 - 13 * Math.sin(f + Math.PI)];
+    const mx = (a, b) => [a[0] + (b[0] - a[0]) * k, a[1] + (b[1] - a[1]) * k];
+    fL = mx(fL, gl); fR = mx(fR, gr); hL = mx(hL, al); hR = mx(hR, ar);
+    y = y + k * (0.9 * Math.abs(Math.cos(f)) - 0.4);
+  }
+  r.position.set(st.x, y, st.z); r.rotation.y = st.yaw;
+  P.torso.rotation.x = st.lean;
+  const br = 1 + st.breath * Math.sin(t * 2 * Math.PI * 0.27);
+  P.chest.scale.set(16.5, 12.6, 10.5 * br); P.chest.position.z = (br - 1) * 10.5 * 0.6;
+  P.head.rotation.x = st.headP - st.lean; P.head.rotation.y = st.headY;
+  /* bras : épaule exprimée dans le repère de la hanche */
+  const shY = PL.shoulderY * Math.cos(st.lean), shZ = PL.shoulderY * Math.sin(st.lean);
+  for (const [arm, h, s] of [[P.armL, hL, -1], [P.armR, hR, 1]]) {
+    const [t1, t2] = ik(PL.uarm, PL.farm, h[0] - shY, h[1] - shZ, -1);
+    arm.sh.rotation.x = -t1 - st.lean; arm.sh.rotation.z = s * 0.1; arm.el.rotation.x = -(t2 - t1);
+  }
+  for (const [leg, f] of [[P.legL, fL], [P.legR, fR]]) {
+    const [t1, t2] = ik(PL.thigh, PL.shin, f[0] + 2, f[1], 1);
+    leg.hp.rotation.x = -t1; leg.kn.rotation.x = -(t2 - t1); leg.an.rotation.x = t2;
+  }
+}
+const mixV = (a, b, k) => Array.isArray(a) ? a.map((v, i) => v + (b[i] - v) * k) : a + (b - a) * k;
+function tweenSt(st, to, dur, ease) {
+  const from = JSON.parse(JSON.stringify(st));
+  return anim(dur, k => { for (const key in to) st[key] = mixV(from[key], to[key], k); }, ease);
+}
+
+/* =====================================================================
+   9. Animations : paquets, effets, attentes annulables
+   ===================================================================== */
+class Cancel extends Error {}
+let runId = 0;
+const packets = [], tweens = [], fx = [];
+const sphereGeo = new THREE.SphereGeometry(1, 20, 12);
+const glowMat = (hex, k = 3) => new THREE.MeshBasicMaterial({ color: new THREE.Color(hex).multiplyScalar(k), toneMapped: false, transparent: true });
+const COL = { kit: 0x3ddc84, req: 0x9fd0ff, rep: 0x4aa8ff, borne: 0xffb020, capt: 0xc18cff, err: 0xff5a4d, spi: 0xf4d03f };
+const CSS = { kit: '#3ddc84', req: '#9fd0ff', rep: '#4aa8ff', borne: '#ffb020', capt: '#c18cff', err: '#ff5a4d' };
+
+function tag(text, col) {
+  const d = document.createElement('div'); d.className = 'pkt'; d.style.color = col; d.innerHTML = `<i>${text}</i>`;
+  return new CSS2DObject(d);
+}
+/** Envoie un paquet lumineux sur un chemin. Renvoie 'ok' ou 'lost'. */
+function go(name, o = {}) {
+  const P = paths[name.replace(/^-/, '')];
+  const reverse = name.startsWith('-') !== !!o.reverse;
+  const id = runId;
+  return new Promise((res, rej) => {
+    const kind = o.kind || 'req';
+    const m = new THREE.Mesh(sphereGeo, glowMat(COL[kind] ?? kind, o.glow ?? 7));
+    m.scale.setScalar(o.size ?? P.size); scene.add(m);
+    const trail = [];
+    if (!o.noTrail) for (let i = 0; i < 6; i++) { const t = new THREE.Mesh(sphereGeo, glowMat(COL[kind] ?? kind, 3)); t.scale.setScalar((o.size ?? P.size) * (0.8 - i * 0.11)); t.material.opacity = 0.5 - i * 0.07; t.visible = false; scene.add(t); trail.push(t); }
+    let lab = null;
+    if (o.label && showLabels) { lab = tag(o.label, CSS[kind] || '#fff'); lab.position.set(0, 1.2, 0); m.add(lab); }
+    packets.push({ m, trail, hist: [], lab, P, t: reverse ? 1 : 0, dir: reverse ? -1 : 1, speed: o.speed ?? P.speed, dropAt: o.dropAt, res, rej, id, seed: Math.random() * 10, falling: false });
+    if (P.wifi) rings(reverse ? P.curve.getPoint(1) : P.curve.getPoint(0), COL[kind] ?? kind, 6);
+  });
+}
+function killPacket(p) {
+  if (p.lab) { p.m.remove(p.lab); p.lab.element.remove(); }
+  scene.remove(p.m); p.m.material.dispose();
+  for (const t of p.trail) { scene.remove(t); t.material.dispose(); }
+}
+/** Enchaîne plusieurs chemins (préfixe « - » = sens inverse). */
+async function route(list, o = {}) {
+  for (const n of list) { const r = await go(n, o); if (r === 'lost') return 'lost'; }
+  return 'ok';
+}
+function anim(dur, fn, ease = easeIO) {
+  const id = runId;
+  return new Promise((res, rej) => tweens.push({ t: 0, dur, fn, ease, res, rej, id }));
+}
+function sleep(ms) {
+  const id = runId;
+  return new Promise((res, rej) => setTimeout(() => (id === runId ? res() : rej(new Cancel())), ms));
+}
+const easeIO = k => k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2;
+const lerp = (a, b, k) => a + (b - a) * k;
+
+const ringGeo = new THREE.RingGeometry(0.92, 1, 64);
+function rings(pos, hex, r = 6, n = 3, axis = 'y', dur = 1.1) {
+  for (let i = 0; i < n; i++) {
+    const m = new THREE.Mesh(ringGeo, new THREE.MeshBasicMaterial({ color: new THREE.Color(hex).multiplyScalar(2.5), transparent: true, opacity: 0.9, side: THREE.DoubleSide, depthWrite: false, toneMapped: false, blending: THREE.AdditiveBlending }));
+    if (axis === 'y') m.rotation.x = -Math.PI / 2; else m.lookAt(camera.position);
+    m.position.copy(pos); m.scale.setScalar(0.01); scene.add(m);
+    fx.push({ m, t: -i * 0.22, dur, r });
+  }
+}
+/* =====================================================================
+   6. Mise en place sur le bureau
+   ===================================================================== */
+const world = { led: 'off', mon: 'work', dash: 'log', scope: 'off', netCut: false, usbOut: false, fakeOn: false, srvAct: -9, lockT: 0, readout: null };
+
+/* routeur Cisco ISR 4331 (façade dessinée) */
+const rtFront = canvasTex(1760, 176, (g, w, h) => {
+  const gr = g.createLinearGradient(0, 0, 0, h); gr.addColorStop(0, '#2b3036'); gr.addColorStop(1, '#1b1f24');
+  g.fillStyle = gr; g.fillRect(0, 0, w, h);
+  g.fillStyle = '#d7dde2'; g.font = 'bold 34px Arial'; g.fillText('ISR 4331', 60, 80);
+  g.font = '24px Arial'; g.fillStyle = '#9aa7b0'; g.fillText('routeur du lycée (en place)', 60, 120);
+  for (let i = 0; i < 24; i++) {
+    const p = portPx(i); if (i > 11 && i < 22) continue;
+    g.fillStyle = '#0a0c0e'; g.fillRect(p.x - 28, p.y - 22, 56, 44);
+    g.fillStyle = '#b8902f'; for (let k = 0; k < 8; k++) g.fillRect(p.x - 20 + k * 5.5, p.y - 20, 2.4, 8);
+  }
+});
+function makeRouter() {
+  const g = new THREE.Group();
+  mesh(RB(SW.w, SW.h, 30, 0.25), grained(0x30353b, 0.5, 0.5, 0.01), 0, SW.h / 2, 0, g);
+  front(SW.w, SW.h, std(0xffffff, 0.45, 0.5, { map: rtFront.tex }), 0, SW.h / 2, 15.05, g);
+  return g;
+}
+
+const mon = makeMonitor(); mon.g.position.set(-30, 0, -39); scene.add(mon.g);
+const sff = makeSFF(); sff.position.set(12, 0, -42); scene.add(sff);
+for (const x of [-2, 2]) {
+  mesh(BOX(1.5, 0.7, 0.12), M.plBlack, x, 5, 14.04, sff, false);
+  mesh(BOX(1.1, 0.12, 0.1), M.steel, x, 4.9, 14.1, sff, false);
+}
+const sw = makeSwitch(); sw.position.set(62, 0, -52); scene.add(sw);
+const rtr = makeRouter(); rtr.position.set(62, SW.h + 0.2, -50); scene.add(rtr);
+const srv = makeServer(); srv.position.set(104, 0, -40); scene.add(srv);
+
+/* CYBERSENTINEL : deuxième équipement embarqué autonome. Il imite une
+   imprimante HTTP sur un réseau de laboratoire isolé.
+   L'ESP32 + W5500 de cette scène constitue une maquette visuelle. */
+const decoy = new THREE.Group();
+decoy.position.set(116, 0, 40); scene.add(decoy);
+const decoyPaper = std(0xf4f2ec, .85, .02);
+const decoyInk = std(0x16150f, .7, .12);
+const decoyYellow = std(0xf6d77a, .7, .03);
+const decoyBlue = std(0x2869a5, .55, .12);
+mesh(RB(26, 15, 20, 1.5), decoyPaper, 0, 7.5, 0, decoy);
+mesh(RB(23, 3, 15, .8), decoyInk, 0, 16.4, -1.5, decoy);
+mesh(BOX(15, .24, 11), decoyPaper, 0, 18.15, -1.5, decoy);
+mesh(RB(24, 2, 5, .5), decoyInk, 0, 6, 10.0, decoy);
+mesh(BOX(16, .24, 5), decoyPaper, 0, 4.6, 13.5, decoy);
+const decoyLed = mesh(new THREE.SphereGeometry(.8, 14, 10),
+  new THREE.MeshBasicMaterial({color:0x61bf84}), 10, 11, 10.2, decoy, false);
+mesh(RB(10, .5, 4, .2), decoyYellow, -4, 10.8, 10.1, decoy);
+const decoyBoard = makeESP32();
+decoyBoard.scale.setScalar(1.45); decoyBoard.position.set(15.2, 8.0, -5);
+decoyBoard.rotation.y=.3; decoy.add(decoyBoard);
+mesh(RB(5.8, .42, 4.8, .2), decoyBlue, 16.7, 5.3, 3, decoy);
+mesh(RB(2.9, 2.2, 3.0, .22), std(0x858e95,.45,.8), 16.7, 6.6, 4, decoy);
+const decoyCable = new THREE.CatmullRomCurve3([
+  V(67, 3, -43), V(83, 1.8, -38), V(97, 1.6, 1), V(116, 2.2, 29)
+]);
+scene.add(new THREE.Mesh(new THREE.TubeGeometry(decoyCable,40,.52,6,false), M.rubber));
+
+const dash = makeLaptop({ body: 0xa4a9b0 }); dash.g.position.set(80, 0, 14); dash.g.rotation.y = 0.3; scene.add(dash.g);
+const scope = makeScope(); scope.g.position.set(-92, 0, -28); scope.g.rotation.y = 0.35; scene.add(scope.g);
+
+/* clavier et souris */
+const kbd = new THREE.Group(); kbd.position.set(-30, 0, 27); scene.add(kbd);
+mesh(RB(43, 1.7, 15, 0.7), grained(0x23262b, 0.6, 0.1, 0.01), 0, 0.85, 0, kbd);
+flat(40.6, 12.4, std(0xffffff, 0.7, 0, { map: keyTex.tex }), 0, 1.72, 0, kbd);
+const mouse = mesh(RB(6, 3, 10, 1.4, 4), grained(0x23262b, 0.45, 0.2, 0.01), 4, 1.5, 28, scene);
+
+/* le boîtier de présence, devant l'écran, face à la chaise */
+const BOXPOS = V(-30, 0, -9);
+const bx = makeBox(false); bx.g.position.copy(BOXPOS); scene.add(bx.g);
+const perf1 = makePerf(6.2, 1.7); perf1.position.set(0, 0.38, 3.45); bx.g.add(perf1);
+const perf2 = makePerf(3.6, 1.7); perf2.position.set(1.7, 0.38, 1.5); bx.g.add(perf2);
+const esp = makeESP32(); esp.position.set(-1.5, 1.09, -1.0); esp.rotation.y = -Math.PI / 2; bx.g.add(esp);
+const radar = makeLD2410(); radar.position.set(-1.2, 1.92, 3.9); bx.g.add(radar);
+const rgb = makeRGB(); rgb.position.set(2.2, 0.46, 1.5); bx.g.add(rgb);
+rgbLight.position.set(2.2, 4.4, 1.7); bx.g.add(rgbLight);
+const resMats = [[0xc0392b, 0xc0392b, 0x6b3a1e, 0xd4af37], [0xc0392b, 0xc0392b, 0x6b3a1e, 0xd4af37], [0xc0392b, 0xc0392b, 0x6b3a1e, 0xd4af37]];
+const resis = resMats.map((b, i) => { const r = makeResistor(b); r.position.set(0.55 + i * 0.7, 0.46, 0.85); r.rotation.y = Math.PI / 2; bx.g.add(r); return r; });
+scene.updateMatrixWorld(true);
+/* halo coloré de la LED (au-dessus du diffuseur si le couvercle est posé, sur la LED s'il est levé) */
+const glowTex = canvasTex(128, 128, (g, w, h) => { const r = g.createRadialGradient(64, 64, 2, 64, 64, 62); r.addColorStop(0, 'rgba(255,255,255,1)'); r.addColorStop(0.25, 'rgba(255,255,255,.55)'); r.addColorStop(1, 'rgba(255,255,255,0)'); g.fillStyle = r; g.fillRect(0, 0, w, h); });
+const ledGlow = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex.tex, color: 0xff8a00, transparent: true, opacity: 0.8, depthWrite: false, toneMapped: false }));
+scene.add(ledGlow); ledGlow.visible = false;
+function updateGlow() {
+  const c = RGB_COL[world.led];
+  ledGlow.visible = c !== null && c !== undefined;
+  if (!ledGlow.visible) return;
+  ledGlow.material.color.set(c);
+  const open = (world.lidK || 0) > 0.5;
+  ledGlow.position.copy(W(bx.g, open ? V(2.2, 1.5, 1.5) : V(2.2, BX.h + 0.9, 1.7)));
+  ledGlow.scale.setScalar(open ? 4.5 : 9);
+}
+
+/* fils du boîtier : radar → ESP32 (liaison série 256 000 bauds, alimentation), ESP32 → LED */
+const bw = {};
+const espA = (i, o = 0.55) => W(esp, espHole('A', i, o)), espB = (i, o = 0.55) => W(esp, espHole('B', i, o));
+const ESPX = { VIN: 14, GND_A: 13, TX2: 8, RX2: 9, D25: 7, D26: 8, D27: 9 };
+bw.tx = wire(W(radar, ldPin(LDPIN.TX)), espB(ESPX.RX2), 0xf4d03f, 0.9);
+bw.rx = wire(W(radar, ldPin(LDPIN.RX)), espB(ESPX.TX2), 0x3498db, 1.0);
+bw.v5 = wire(W(radar, ldPin(LDPIN.V5)), espA(ESPX.VIN, 0.8), 0xe74c3c, 1.2);
+bw.gnd = wire(W(radar, ldPin(LDPIN.GND)), espA(ESPX.GND_A, 0.8), 0x222222, 1.1);
+bw.r = wire(espA(ESPX.D25), W(resis[0], V(0.51, 0, 0)), 0xe74c3c, 0.9);
+bw.g = wire(espA(ESPX.D26), W(resis[1], V(0.51, 0, 0)), 0x2ecc71, 1.0);
+bw.b = wire(espA(ESPX.D27), W(resis[2], V(0.51, 0, 0)), 0x3498db, 1.1);
+
+/* câble USB : ESP32 → trou à l'arrière du boîtier → face avant du PC */
+function cable(points, mat, r = 0.3, seg = 120) {
+  const c = new THREE.CatmullRomCurve3(points, false, 'catmullrom', 0.5);
+  const t = new THREE.Mesh(new THREE.TubeGeometry(c, seg, r, 10, false), mat); t.castShadow = true; t.receiveShadow = true; scene.add(t);
+  return { curve: c, mesh: t };
+}
+const usbA = W(esp, V(-2.75, 0.22, 0));
+const portPC = (i) => W(sff, V(i ? 2 : -2, 5, 14.5));
+const usbReal = cable([usbA, usbA.clone().add(V(0.2, 0.1, -0.9)), W(bx.g, V(0, 1.15, -4.9)), V(-29, 0.35, -18), V(-20, 0.2, -23), V(-4, 0.2, -27), portPC(0).add(V(-1, 0.0, 2.5)), portPC(0)], M.cableBlack, 0.17);
+mesh(BOX(1.3, 0.55, 1.7), M.steel, portPC(0).x, portPC(0).y, portPC(0).z + 0.9, scene, false);
+
+/* faux boîtier (étape « tricherie ») : posé à droite, relié au deuxième port USB */
+const fk = makeBox(true); fk.g.position.set(30, 0, -8); fk.g.rotation.y = 0.12; scene.add(fk.g);
+mesh(BOX(2.4, 0.2, 2.0), std(0xd8d8d8, 0.4, 0.2), 0, 1.0, 0, fk.g, false).visible = false;
+const usbFake = cable([W(fk.g, V(0, 1.15, -4.9)), V(29, 0.3, -18), V(22, 0.2, -23), V(14, 0.2, -27), portPC(1).add(V(0, 0, 2.5)), portPC(1)], M.cableBlack, 0.17);
+mesh(BOX(1.3, 0.55, 1.7), M.steel, portPC(1).x, portPC(1).y, portPC(1).z + 0.9, scene, false);
+fk.g.visible = false; usbFake.mesh.visible = false;
+fk.g.traverse(o => { if (o.isMesh) o.userData.fake = true; });
+
+/* petits objets du bureau */
+{
+  const mug = new THREE.Group(); mug.position.set(-112, 0, 22); scene.add(mug);
+  const prof = [[0, 0], [3.6, 0], [3.9, 0.4], [4.0, 9], [3.7, 9], [3.6, 0.9], [0, 0.9]].map(([x, y]) => new THREE.Vector2(x, y));
+  const cer = new THREE.MeshPhysicalMaterial({ color: 0xece7de, roughness: 0.25, clearcoat: 0.6 });
+  mesh(new THREE.LatheGeometry(prof, 40), cer, 0, 0, 0, mug);
+  mesh(new THREE.CylinderGeometry(3.62, 3.62, 0.1, 32), std(0x3a2116, 0.2), 0, 6.8, 0, mug, false);
+  const handle = mesh(new THREE.TorusGeometry(2.3, 0.45, 12, 24, Math.PI), cer, 4.0, 4.5, 0, mug); handle.rotation.z = -Math.PI / 2;
+  const nb = new THREE.Group(); nb.position.set(-78, 0, 40); nb.rotation.y = 0.22; scene.add(nb);
+  mesh(RB(15, 0.9, 21, 0.25, 2), std(0xf2efe6, 0.8), 0, 0.45, 0, nb);
+  mesh(RB(15.2, 0.12, 21.2, 0.2, 2), grained(0x6a3d2f, 0.7, 0, 0.02), 0, 0.96, 0, nb);
+  const pen = mesh(new THREE.CylinderGeometry(0.42, 0.42, 14, 16), std(0x1b1d22, 0.35, 0.5), 9.5, 0.45, 2, nb); pen.rotation.x = Math.PI / 2; pen.rotation.z = 0.15;
+  const pl = new THREE.Group(); pl.position.set(-125, 0, -92); scene.add(pl);
+  mesh(new THREE.CylinderGeometry(7.5, 5.8, 16, 32), grained(0xe7e2d8, 0.5, 0, 0.01), 0, 8 - 76, 0, pl);
+  mesh(new THREE.CylinderGeometry(7.1, 7.1, 0.3, 32), std(0x2a1d14, 1), 0, 15.6 - 76, 0, pl, false);
+  const leafMat = std(0x3f7a4c, 0.55, 0, { side: THREE.DoubleSide });
+  const leafGeo = new THREE.SphereGeometry(1, 16, 8); leafGeo.scale(2.6, 0.3, 11); leafGeo.translate(0, 0, 10);
+  for (let i = 0; i < 16; i++) {
+    const l = mesh(leafGeo, i % 3 ? leafMat : std(0x4d8c58, 0.55, 0), 0, 16 - 76, 0, pl);
+    l.rotation.order = 'YXZ'; l.rotation.y = i * 2.4; l.rotation.x = -0.45 - (i % 4) * 0.22; l.scale.setScalar(0.9 + (i % 5) * 0.1);
+  }
+}
+
+/* la chaise et les deux personnages */
+const chair = makeChair(); chair.position.set(-30, -30, 72); chair.rotation.y = Math.PI; scene.add(chair);
+const P = makePerson({ top: 0x2f6fb5, bottom: 0x252830, hair: 0x2a1a12, skin: 0xd2a07f }); scene.add(P.root);
+const Q = makePerson({ top: 0xd9822b, bottom: 0x3b4a63, hair: 0x5d5851, skin: 0xb98963 }); scene.add(Q.root); Q.root.visible = false;
+const SIT = { x: -30, y: -21, z: 72, yaw: Math.PI, lean: 0.08, headP: 0.1, headY: 0, hL: [24, 44], hR: [24, 44], fL: [-47, 30], fR: [-47, 30], walk: 0, phase: 0, breath: 0.018 };
+const stM = JSON.parse(JSON.stringify(SIT));
+const stQ = { ...JSON.parse(JSON.stringify(SIT)), x: 260, y: 16, z: 150, yaw: -Math.PI / 2, lean: 0, headP: 0, hL: [-8, 3], hR: [-8, 3], fL: [-84, 2], fR: [-84, 2], breath: 0.01 };
+
+/* ---- Câbles Ethernet ---- */
+const swP = i => W(sw, swPortLocal(i));
+const out = (p, dz = 1.4, dy = 0) => p.clone().add(V(0, dy, dz));
+function plug(p) { mesh(BOX(1.3, 1.1, 1.8), new THREE.MeshPhysicalMaterial({ color: 0xdfe8ee, transparent: true, opacity: 0.6, roughness: 0.1 }), p.x, p.y, p.z + 0.9); }
+const P_PC = 0, P_SRV = 2, P_DASH = 4, P_RTR = 22;
+const cPC = cable([swP(P_PC), out(swP(P_PC), 2.5), V(46, 0.3, -33), V(26, 0.3, -35), V(23, 0.3, -52), V(20, 0.3, -61), V(12, 0.3, -61), V(12, 3, -58), V(12, 5.2, -56.4)], M.cableBlue);
+const cSrv = cable([swP(P_SRV), out(swP(P_SRV), 3), V(76, 0.3, -33), V(89, 0.3, -37), V(89.4, 0.3, -64), V(98, 0.3, -67), V(104, 5, -64), V(104, 6, -63.2)], M.cableYellow);
+const cDash = cable([swP(P_DASH), out(swP(P_DASH), 3), V(70, 0.3, -24), V(74, 0.3, -6), V(88, 0.3, 4), W(dash.g, V(16.4, 1.0, 0))], M.cableGray);
+const rtrPort = W(rtr, V(portPx(P_RTR).x / 1760 * SW.w - SW.w / 2, SW.h - portPx(P_RTR).y / 176 * SW.h, 15));
+const cRtr = cable([swP(P_RTR), out(swP(P_RTR), 2, -0.3), V(85.5, 4.6, -35.5), V(84, 7.5, -34.2), rtrPort.clone().add(V(0, 0, 1.6)), rtrPort], M.cableBlue, 0.22, 60);
+for (const i of [P_PC, P_SRV, P_DASH, P_RTR]) { plug(swP(i)); portLEDs[i].used = true; }
+plug(rtrPort);
+
+/* =====================================================================
+   7. Chemins des messages
+   ===================================================================== */
+const paths = {};
+function addPath(name, curve, o = {}) { paths[name] = { curve, len: curve.getLength(), size: 1.1, speed: 70, ...o }; }
+function arc(a, b, h) { const m = a.clone().lerp(b, 0.5); m.y += h; return new THREE.QuadraticBezierCurve3(a, m, b); }
+function reverseCurve(c) { return new THREE.CatmullRomCurve3(c.points.slice().reverse(), false, 'catmullrom', 0.5); }
+addPath('usbReal', usbReal.curve, { speed: 42, size: 0.5 });
+addPath('usbFake', usbFake.curve, { speed: 42, size: 0.5 });
+addPath('uart', reverseCurve(bw.tx), { speed: 7, size: 0.12 });
+addPath('uartBack', bw.rx, { speed: 7, size: 0.12 });
+addPath('ledR', bw.r, { speed: 7, size: 0.12 });
+addPath('ledG', bw.g, { speed: 7, size: 0.12 });
+addPath('pcToSw', reverseCurve(cPC.curve), { port: P_PC, speed: 80 });
+addPath('swToSrv', cSrv.curve, { port: P_SRV, srv: 'end', speed: 80 });
+addPath('swToDash', cDash.curve, { port: P_DASH, speed: 80 });
+addPath('swToRtr', cRtr.curve, { port: P_RTR, speed: 50 });
+addPath('swToDecoy', new THREE.CatmullRomCurve3([V(67,4,-43),V(91,11,-17),V(116,10,40)]), {speed:68,size:.9});
+
+/* =====================================================================
+   Cône du radar : portes de 0,75 m (calcul et mesures dans l'étape physique)
+   ===================================================================== */
+const radarPos = W(bx.g, V(-1.2, 1.9, 4.4));
+const fan = new THREE.Group(); fan.position.set(radarPos.x, 7, radarPos.z); fan.visible = false; scene.add(fan);
+const FAN_A = -5 * Math.PI / 6, FAN_L = 2 * Math.PI / 3;
+const GATE = 75;
+function fanMat(hex, op, k = 2) { return new THREE.MeshBasicMaterial({ color: new THREE.Color(hex).multiplyScalar(k), transparent: true, opacity: op, side: THREE.DoubleSide, depthWrite: false, toneMapped: false }); }
+const gateFill = [];
+for (let i = 0; i < 3; i++) {
+  const m = new THREE.Mesh(new THREE.RingGeometry(i * GATE + 0.4, (i + 1) * GATE - 0.4, 72, 1, FAN_A, FAN_L), fanMat([0x3ddc84, 0x4aa8ff, 0x4aa8ff][i], [0.11, 0.06, 0.035][i], 1.3));
+  m.rotation.x = -Math.PI / 2; fan.add(m); gateFill.push(m);
+  const e = new THREE.Mesh(new THREE.RingGeometry((i + 1) * GATE - 0.5, (i + 1) * GATE + 0.5, 72, 1, FAN_A, FAN_L), fanMat(0xffffff, 0.5, 1.6));
+  e.rotation.x = -Math.PI / 2; fan.add(e);
+}
+for (const s of [-1, 1]) {
+  const a = Math.PI / 2 - s * FAN_L / 2;
+  const l = new THREE.Mesh(new THREE.PlaneGeometry(3 * GATE, 0.8), fanMat(0xffffff, 0.35, 1.5));
+  l.rotation.x = -Math.PI / 2; l.rotation.z = -a; l.position.set(Math.cos(a) * 1.5 * GATE, 0, Math.sin(a) * 1.5 * GATE); fan.add(l);
+}
+/* zone retenue (exemple de réglage : 1,0 m) : trait orange */
+const zoneRing = new THREE.Mesh(new THREE.RingGeometry(99, 101, 72, 1, FAN_A, FAN_L), fanMat(0xffa31a, 0.9, 2.2));
+zoneRing.rotation.x = -Math.PI / 2; fan.add(zoneRing);
+const pulseGeo = new THREE.RingGeometry(0.97, 1, 72, 1, FAN_A, FAN_L);
+function pulse(from = 4, to = 110, dur = 1.3, hex = 0x7dffb0) {
+  const m = new THREE.Mesh(pulseGeo, new THREE.MeshBasicMaterial({ color: new THREE.Color(hex).multiplyScalar(2.2), transparent: true, opacity: 0.8, side: THREE.DoubleSide, depthWrite: false, toneMapped: false, blending: THREE.AdditiveBlending }));
+  m.rotation.x = -Math.PI / 2; m.position.set(radarPos.x, 7.2, radarPos.z); scene.add(m);
+  return anim(dur, k => { const r = lerp(from, to, k); m.scale.set(r, r, 1); m.material.opacity = 0.8 * (1 - k * k); }, k => k)
+    .finally(() => { scene.remove(m); m.material.dispose(); });
+}
+
+/* =====================================================================
+   8. Étiquettes 3D
+   ===================================================================== */
+const labelGroups = { overview: [], box: [], net: [], phys: [], fake: [], decoy: [] };
+function label(group, pos, title, sub, cls = '') {
+  const d = document.createElement('div'); d.className = 'lab ' + cls;
+  d.innerHTML = `<b>${title}</b>${sub ? `<span>${sub}</span>` : ''}`;
+  const o = new CSS2DObject(d); o.position.copy(pos); scene.add(o); labelGroups[group].push(o); return o;
+}
+function mkRead(pos) { const d = document.createElement('div'); d.className = 'read'; const o = new CSS2DObject(d); o.position.copy(pos); o.visible = false; scene.add(o); return o; }
+label('overview', V(-30, 12, 9), 'Boîtier de présence', 'radar + ESP32 + lumière', '');
+label('fake', V(-30, 9, 4), 'Vrai boîtier', 'connaît le code secret', 'small');
+label('fake', V(30, 9, 4), 'Faux boîtier', 'ne le connaît pas', 'small');
+label('fake', V(12, 34, -42), 'PC Ubuntu du lycée', 'ports USB', 'small');
+label('overview', V(-30, 58, -39), 'Windows 11', 'machine virtuelle sur le PC Ubuntu');
+label('overview', V(12, 34, -42), 'PC Ubuntu du lycée', 'hôte VirtualBox · USB', 'small');
+label('overview', V(62, 16, -52), 'Switch HP + routeur Cisco', 'réseau en place (C10)', 'small');
+label('overview', V(104, 48, -40), 'Serveur Ubuntu', 'API Python · SQLite');
+label('overview', V(116, 32, 40), 'Leurre imprimante HTTP', 'ESP32 + W5500 · simulateur', 'small');
+label('decoy', V(116, 32, 40), 'Fausse imprimante', 'service HTTP de démonstration', 'small');
+label('decoy', V(130, 15, 37), 'ESP32 + W5500', 'Ethernet · requêtes entrantes', 'small');
+label('decoy', V(62, 16, -52), 'Switch du laboratoire', 'liaison Ethernet isolée', 'small');
+label('decoy', V(104, 48, -40), 'Serveur Ubuntu', 'événements techniques', 'small');
+label('decoy', V(80, 40, 14), 'PC de test', 'interroge le service factice', 'small');
+label('overview', V(80, 40, 14), 'PC du technicien', 'tableau de bord', 'small');
+label('overview', V(-92, 22, -28), 'Oscilloscope', 'mesure du délai (R4)', 'small');
+label('overview', V(-30, 82, 72), 'Martine, gestionnaire', 'agente (personnage fictif)', 'small');
+label('box', V(-30, 8, -13), 'ESP32-WROOM-32', 'lit le radar, signe, commande la LED', 'small');
+label('box', V(-38, 5, 0), 'Radar LD2410', '24 GHz · série 256 000 bauds', 'small');
+label('box', V(-22, 7, -2), 'LED RVB + 3 résistances', 'orange = départ détecté', 'small');
+label('box', V(-20, 3.5, -19), 'Câble USB', 'alimentation 5 V + messages', 'small');
+label('phys', radarPos.clone().add(V(0, 5, 0)), 'Radar', '', 'small');
+label('phys', V(radarPos.x - 12, 9, radarPos.z + 0.75 * GATE * 0.5), 'Porte 0', '0 à 0,75 m', 'small');
+label('phys', V(radarPos.x - 22, 9, radarPos.z + 1.5 * GATE * 0.98), 'Porte 1', '0,75 à 1,5 m', 'small');
+label('phys', V(radarPos.x - 22, 9, radarPos.z + 2.5 * GATE * 0.95), 'Porte 2', '1,5 à 2,25 m', 'small');
+label('phys', V(radarPos.x + 36, 9, radarPos.z + 100 * 0.9), 'Zone retenue', 'exemple : 1,0 m', 'small');
+label('phys', V(-92, 22, -28), 'Oscilloscope', 'délai départ → blocage', 'small');
+const readM = mkRead(V(-30, 84, 66)), readRadar = mkRead(radarPos.clone().add(V(12, 14, 0)));
+let showLabels = true, labelMode = 'overview';
+function refreshLabels() {
+  for (const g in labelGroups) for (const o of labelGroups[g]) o.visible = showLabels && (g === labelMode || (g === 'overview' && labelMode === 'net' && false));
+}
+
+/* =====================================================================
+   10. Écrans : Windows 11 (VM), tableau de bord, oscilloscope
+   ===================================================================== */
+Object.assign(world, { psLines: [], count: 3, progress: 0, reports: 0, idleTxt: null, events: [], pkts: [], parc: null, scopeT: 0, capIdx: 0 });
+
+function wallpaper(g, w, h) {
+  const gr = g.createLinearGradient(0, 0, w, h); gr.addColorStop(0, '#0a3d86'); gr.addColorStop(0.55, '#1d6fd1'); gr.addColorStop(1, '#0a2a5c');
+  g.fillStyle = gr; g.fillRect(0, 0, w, h);
+  const r = g.createRadialGradient(w * 0.55, h * 0.45, 10, w * 0.55, h * 0.45, w * 0.5); r.addColorStop(0, 'rgba(120,200,255,.55)'); r.addColorStop(1, 'rgba(120,200,255,0)');
+  g.fillStyle = r; g.fillRect(0, 0, w, h);
+  g.save(); g.translate(w * 0.5, h * 0.45); g.rotate(-0.5);
+  for (let i = 0; i < 4; i++) { g.fillStyle = `rgba(255,255,255,${0.08 + i * 0.03})`; g.beginPath(); g.ellipse(0, 0, 230 - i * 38, 90 - i * 14, 0, 0, 7); g.fill(); }
+  g.restore();
+}
+function taskbar(g, w, h, time = '08:42') {
+  g.fillStyle = 'rgba(24,30,40,.92)'; g.fillRect(0, h - 56, w, 56);
+  const cx = w / 2 - 110; g.fillStyle = '#4cc2ff';
+  for (const [dx, dy] of [[0, 0], [1, 0], [0, 1], [1, 1]]) g.fillRect(cx + dx * 17, h - 42 + dy * 17, 15, 15);
+  ['#f2c94c', '#3ddc84', '#ff7a59', '#9b8cff'].forEach((c, i) => { g.fillStyle = c; rr(g, cx + 60 + i * 52, h - 44, 34, 34, 8); g.fill(); });
+  g.fillStyle = '#e6edf3'; g.font = `22px ${FONT}`; g.fillText(time, w - 96, h - 22);
+}
+function winFrame(g, x, y, ww, hh, title, dark) {
+  g.fillStyle = 'rgba(0,0,0,.4)'; g.fillRect(x + 8, y + 10, ww, hh);
+  g.fillStyle = dark ? '#0c1f3d' : '#f6f8fa'; g.fillRect(x, y, ww, hh);
+  g.fillStyle = dark ? '#16325f' : '#e4e9ee'; g.fillRect(x, y, ww, 42);
+  g.fillStyle = dark ? '#fff' : '#13222c'; g.font = `bold 21px ${FONT}`; g.fillText(title, x + 16, y + 28);
+  g.fillStyle = dark ? '#8fa8c8' : '#7d8a94'; g.fillText('–   ▢   ✕', x + ww - 110, y + 28);
+}
+function drawMon() {
+  mon.screen.redraw((g, w, h) => {
+    const m = world.mon;
+    wallpaper(g, w, h);
+    if (m === 'lock') {
+      g.fillStyle = 'rgba(8,20,40,.55)'; g.fillRect(0, 0, w, h);
+      g.fillStyle = '#fff'; g.textAlign = 'center'; g.font = `bold 150px ${FONT}`; g.fillText('08:47', w / 2, h / 2 - 20);
+      g.font = `34px ${FONT}`; g.fillText('mercredi 20 janvier', w / 2, h / 2 + 30);
+      g.fillStyle = 'rgba(255,255,255,.16)'; rr(g, w / 2 - 270, h / 2 + 90, 540, 90, 16); g.fill();
+      g.fillStyle = '#fff'; g.font = `bold 30px ${FONT}`; g.fillText('🔒  Session verrouillée', w / 2, h / 2 + 148);
+      g.textAlign = 'left'; taskbar(g, w, h, '08:47'); return;
+    }
+    taskbar(g, w, h);
+    const big = m === 'work' || m === 'warn' || m === 'ps';
+    if (big) {
+      const ww = m === 'ps' ? 700 : 860;
+      winFrame(g, 70, 56, ww, 580, 'Dossier_agent_2026-0147.pdf — Lecteur', false);
+      g.fillStyle = '#c2382e'; g.font = `bold 22px ${FONT}`; g.fillText('CONFIDENTIEL (document fictif)', 100, 128);
+      g.fillStyle = '#c4ced6';
+      for (let i = 0; i < 11; i++) g.fillRect(100, 196 + i * 36, 320 + ((i * 97) % 380), 12);
+      g.fillStyle = '#1d5a86'; g.font = `bold 26px ${FONT}`; g.fillText('Dossier n° 2026-0147', 100, 164);
+    }
+    if (m === 'ps') {
+      winFrame(g, 700, 140, 540, 440, 'PowerShell — service de présence', true);
+      g.font = `20px ${MONO}`;
+      world.psLines.slice(-10).forEach((l, i) => { g.fillStyle = l[1] || '#e6edf3'; g.fillText(l[0], 716, 196 + i * 33); });
+    }
+    if (m === 'warn') {
+      g.fillStyle = 'rgba(0,0,0,.35)'; rr(g, w - 560, 70, 520, 150, 18); g.fill();
+      g.fillStyle = '#ff9a1f'; rr(g, w - 566, 62, 520, 150, 18); g.fill();
+      g.fillStyle = '#2b1500'; g.font = `bold 30px ${FONT}`; g.fillText('Départ détecté', w - 536, 112);
+      g.font = `26px ${FONT}`; g.fillText(`Verrouillage dans ${world.count} s…`, w - 536, 156);
+      g.font = `22px ${FONT}`; g.fillText('Revenez devant le poste pour annuler.', w - 536, 190);
+    }
+    if (world.idleTxt && m !== 'lock') {
+      g.fillStyle = 'rgba(20,26,34,.9)'; rr(g, w - 430, h - 150, 390, 76, 14); g.fill();
+      g.fillStyle = '#e6edf3'; g.font = `bold 22px ${FONT}`; g.fillText('Windows seul', w - 408, h - 116);
+      g.font = `21px ${FONT}`; g.fillStyle = '#c9d3da'; g.fillText(world.idleTxt, w - 408, h - 88);
+    }
+  });
+}
+function drawDash() {
+  dash.screen.redraw((g, w, h) => {
+    g.fillStyle = '#0e1822'; g.fillRect(0, 0, w, h);
+    g.fillStyle = '#1d5a86'; g.fillRect(0, 0, w, 66);
+    g.fillStyle = '#fff'; g.font = `bold 30px ${FONT}`;
+    if (world.dash === 'log') {
+      g.fillText('CYBERSENTINEL — événements et alertes', 24, 44);
+      g.font = `bold 25px ${MONO}`;
+      world.events.slice(-9).forEach((e, i) => { g.fillStyle = e[1] === '#13222c' ? '#e6edf3' : (e[1] === '#c98a00' ? '#ffc247' : e[1]); g.fillText(e[0], 24, 118 + i * 52); });
+      if (!world.events.length) { g.fillStyle = '#7f93a2'; g.fillText('en attente d\'un événement…', 24, 118); }
+    } else if (world.dash === 'wire') {
+      g.fillStyle = '#26323d'; g.fillRect(0, 0, w, 66); g.fillStyle = '#fff'; g.font = `bold 28px ${FONT}`; g.fillText('Wireshark — capture sur le PC Ubuntu', 24, 44);
+      g.font = `bold 21px ${MONO}`; g.fillStyle = '#8fa3b2'; g.fillText('N°  source        destination   proto  info', 14, 102);
+      const dark = { '#fff4c2': '#4d4521', '#e3f2ff': '#1d3a55', '#e8f7e8': '#1e4a2e', '#eadcff': '#3d2d63', '#ffffff': '#2b3640' };
+      world.pkts.slice(-11).forEach((p, i) => {
+        const y = 146 + i * 44; g.fillStyle = dark[p[5]] || '#2b3640'; g.fillRect(6, y - 28, w - 12, 40);
+        g.fillStyle = '#f1f5f8'; g.font = `21px ${MONO}`;
+        g.fillText(`${String(p[0]).padStart(2, ' ')}  ${p[1].padEnd(12)}  ${p[2].padEnd(12)}  ${p[3].padEnd(5)}  ${p[4]}`, 14, y);
+      });
+
+    }
+  });
+}
+function drawScope() {
+  const t = world.scopeT;
+  scope.screen.redraw((g, w, h) => {
+    g.fillStyle = '#07110c'; g.fillRect(0, 0, w, h);
+    if (world.scope === 'off') { g.fillStyle = '#1c3226'; g.font = `24px ${MONO}`; g.fillText('STOP', 20, 40); return; }
+    const X0 = 30, Y0 = 30, GW = w - 60, GH = h - 130;
+    g.strokeStyle = 'rgba(80,200,120,.28)'; g.lineWidth = 1;
+    for (let i = 0; i <= 10; i++) { g.beginPath(); g.moveTo(X0 + i * GW / 10, Y0); g.lineTo(X0 + i * GW / 10, Y0 + GH); g.stroke(); }
+    for (let j = 0; j <= 8; j++) { g.beginPath(); g.moveTo(X0, Y0 + j * GH / 8); g.lineTo(X0 + GW, Y0 + j * GH / 8); g.stroke(); }
+    g.lineWidth = 3;
+    if (world.scope === 'breath') {
+      g.strokeStyle = '#ffd84a'; g.beginPath();
+      for (let i = 0; i <= 200; i++) { const x = X0 + i / 200 * GW, tt = t - (1 - i / 200) * 6; const y = Y0 + GH / 2 - Math.sin(tt * 2 * Math.PI * 0.27) * GH * 0.22 - Math.sin(tt * 7.1) * 6; i ? g.lineTo(x, y) : g.moveTo(x, y); }
+      g.stroke();
+      g.fillStyle = '#ffd84a'; g.font = `20px ${MONO}`; g.fillText('CH1  phase de l\'écho (la respiration)', X0, h - 78);
+      g.fillStyle = '#9ad7ac'; g.fillText('période ≈ 3,7 s  ·  amplitude ≈ 1 mm (exemple)', X0, h - 48);
+    } else if (world.scope === 'timing') {
+      const k = world.timingK;                         /* 0..1 : avancement du balayage */
+      const xs = X0 + GW * 0.18, xe = xs + GW * 0.41;   /* départ puis blocage : 4,1 s sur 10 s */
+      const y1 = [Y0 + GH * 0.26, Y0 + GH * 0.46], y2 = [Y0 + GH * 0.62, Y0 + GH * 0.82];
+      const sweep = X0 + GW * k;
+      const trace = (xc, ya, yb, col) => {
+        g.strokeStyle = col; g.beginPath(); g.moveTo(X0, ya);
+        const xe2 = Math.min(sweep, xc); g.lineTo(xe2, ya);
+        if (sweep > xc) { g.lineTo(xc, yb); g.lineTo(sweep, yb); }
+        g.stroke();
+      };
+      trace(xs, y1[0], y1[1], '#ffd84a');
+      trace(xe, y2[0], y2[1], '#59c8ff');
+      if (sweep > xe) {
+        g.strokeStyle = '#ffffff'; g.lineWidth = 1.5; g.setLineDash([6, 6]);
+        for (const x of [xs, xe]) { g.beginPath(); g.moveTo(x, Y0); g.lineTo(x, Y0 + GH); g.stroke(); }
+        g.setLineDash([]); g.lineWidth = 3;
+        g.fillStyle = '#fff'; g.font = `bold 26px ${MONO}`; g.fillText('Δt ≈ 4,1 s  (exemple)', xs + 12, Y0 + 40);
+      }
+      g.fillStyle = '#ffd84a'; g.font = `19px ${MONO}`; g.fillText('CH1  boîtier : « absent »', X0, h - 60);
+      g.fillStyle = '#59c8ff'; g.fillText('CH2  poste : session verrouillée', X0, h - 34);
+    }
+  });
+}
+function redrawAll() { drawMon(); drawDash(); drawScope(); }
+const pushPS = (txt, col) => { world.psLines.push([txt, col]); if (world.mon === 'ps') drawMon(); };
+const pushEv = (txt, col) => { world.events.push([txt, col]); drawDash(); };
+
+/* =====================================================================
+   11. Mouvements du personnage et du boîtier
+   ===================================================================== */
+const clone = o => JSON.parse(JSON.stringify(o));
+const POSE_TYPE = { lean: 0.08, headP: 0.12, hL: [24, 44], hR: [24, 44] };
+const POSE_READ = { lean: 0.14, headP: 0.42, hL: [28, 29], hR: [28, 29] };
+function setSeated(kind) {
+  Object.assign(stM, clone(SIT), kind === 'read' ? POSE_READ : POSE_TYPE);
+  P.folder.visible = kind === 'read'; chair.position.set(-30, -30, 72);
+}
+function setLid(k) { bx.lid.position.set(0, BX.h + 11 * k, -7 * k); bx.lid.rotation.x = -0.32 * k; world.lidK = k; updateGlow(); }
+const WALK_Z = 67;
+async function turnTo(st, yaw, dur = 0.5) {
+  const y0 = st.yaw; let d = yaw - y0; d = Math.atan2(Math.sin(d), Math.cos(d));
+  await anim(dur, k => { st.yaw = y0 + d * k; });
+}
+async function walkTo(st, x, z, speed = 66) {
+  const x0 = st.x, z0 = st.z, d = Math.hypot(x - x0, z - z0); if (d < 1) return;
+  await turnTo(st, Math.atan2(x - x0, z - z0), 0.45);
+  const ph0 = st.phase; st.walk = 1;
+  await anim(d / speed, k => { st.x = lerp(x0, x, k); st.z = lerp(z0, z, k); st.phase = ph0 + k * d / 112 * 2 * Math.PI; }, k => k);
+  await anim(0.2, k => { st.walk = 1 - k; });
+}
+async function standUp(f = 1) {
+  P.folder.visible = false;
+  await Promise.all([
+    tweenSt(stM, { lean: 0.4, headP: 0.2, hL: [16, 24], hR: [16, 24], fL: [-47, 15], fR: [-47, 15] }, 0.7 / f),
+    anim(0.7 / f, k => { chair.position.z = lerp(72, 104, k); }),
+  ]);
+  await tweenSt(stM, { y: 16, z: 68, lean: 0.04, headP: 0, hL: [-8, 3], hR: [-8, 3], fL: [-84, 3], fR: [-84, 3] }, 0.9 / f);
+}
+async function leave(f = 1) { await standUp(f); await walkTo(stM, 175, WALK_Z, 70 * f); }
+async function comeBack() {
+  stM.x = 175; stM.z = WALK_Z; stM.y = 16; stM.yaw = -Math.PI / 2; stM.hL = [-8, 3]; stM.hR = [-8, 3]; stM.fL = [-84, 3]; stM.fR = [-84, 3]; stM.lean = 0.04; stM.headP = 0;
+  await walkTo(stM, -30, WALK_Z, 72);
+  await turnTo(stM, Math.PI, 0.5);
+  await tweenSt(stM, { y: -21, z: 72, lean: 0.25, hL: [16, 26], hR: [16, 26], fL: [-47, 20], fR: [-47, 20] }, 0.8);
+  await Promise.all([tweenSt(stM, { lean: 0.08, headP: 0.12, hL: [24, 44], hR: [24, 44], fL: [-47, 30], fR: [-47, 30] }, 0.6), anim(0.6, k => { chair.position.z = lerp(104, 72, k); })]);
+}
+function setRead(o, txt, col = '#c18cff') { if (!txt) { o.visible = false; return; } o.element.textContent = txt; o.element.style.borderLeftColor = col; o.visible = showLabels; }
+const sendPkt = (n, kind, label, o = {}) => go(n, { kind, label, size: 0.55, ...o });
+let msgNo = 4820;
+
+/* =====================================================================
+   12. État de départ de chaque étape
+   ===================================================================== */
+function baseline(i) {
+  Object.assign(world, { mon: 'work', dash: 'log', scope: 'off', psLines: [], events: [], pkts: [], idleTxt: null, count: 3, progress: 0, reports: 0, timingK: 0, netCut: false, usbOut: false, parc: null, progressTxt: null, scopeT: 0 });
+  setSeated(i === 2 || i === 8 ? 'read' : 'type');
+  decoyLed.material.color.setHex(0x61bf84);
+  Object.assign(stQ, { x: 280, z: 150, walk: 0 }); Q.root.visible = false;
+  setLid(i === 1 ? 1 : 0);
+  fan.visible = i === 2 || i === 4 || i === 8;
+  fk.g.visible = false; usbFake.mesh.visible = false;
+  usbReal.mesh.visible = true; cPC.mesh.visible = true; portLEDs[P_PC].used = true;
+  setRGB(i === 1 ? 'off' : 'vert');
+  setRead(readM); setRead(readRadar);
+  if (i === 2) { world.scope = 'breath'; world.idleTxt = 'inactif depuis 04:12 : il ne voit rien'; stM.breath = 0.034; }
+  if (i === 3) { world.mon = 'ps'; world.psLines = [['PS> Start-PresenceService', '#8fa3b5'], ['  port COM3 · 256000 bauds', '#8fa3b5'], ['  secret chargé · compteur = 4820', '#8fa3b5']]; }
+  if (i === 5) { world.dash = 'wire'; }
+  if (i === 8) { world.scope = 'breath'; stM.breath = 0.034; }
+
+  redrawAll();
+}
+
+/* =====================================================================
+   13. Les étapes
+   ===================================================================== */
+label('net', V(62, 16, -52), 'Switch + routeur', 'DHCP · DNS · NTP fournis par le routeur', 'small');
+label('net', V(12, 34, -42), 'PC Ubuntu du lycée', 'Windows 11 en machine virtuelle', 'small');
+label('net', V(104, 48, -40), 'Serveur Ubuntu', 'nginx HTTPS · API Python', 'small');
+label('net', V(80, 40, 14), 'PC de test / technicien', 'capture Wireshark', 'small');
+label('net', V(116, 32, 40), 'Leurre réseau', 'HTTP fictif sur ESP32', 'small');
+const IPS = { pc: '10.10.0.54', srv: '10.10.0.20', rtr: '10.10.0.1', decoy: '10.10.0.80', test: '10.10.0.73' };
+const cap = (a, b, c, d, e, col = '#ffffff') => { world.pkts.push([world.pkts.length + 1, a, b, c, d, col]); drawDash(); };
+
+const steps = [
+{
+  title: 'Vue d\'ensemble',
+  text: `<p><b>CyberSentinel</b> est une maquette de sécurité en profondeur : un radar LD2410 et un ESP32 verrouillent le poste de Martine quand elle s'absente ; à droite, un <b>deuxième ESP32 Ethernet (W5500)</b> imite une imprimante réseau et enregistre les consultations de son faux service HTTP.</p>
+         <p>Le <b>serveur Ubuntu</b> centralise deux familles d'événements techniques : verrouillage Windows et interactions avec le leurre. Le dispositif ne surveille pas les déplacements des agents.</p>
+         <p><b>Scénario pédagogique simulé</b> : ni connexion au SI de la DGFiP, ni preuve de détection d'une intrusion réelle. Utilise Suivant pour explorer les deux défenses.</p>`,
+  cam: [[165, 128, 262], [-6, 6, -4]], labels: 'overview', rotate: true,
+  async run() {
+    while (true) {
+      await sleep(1500);
+      msgNo++;
+      sendPkt('usbReal', 'kit', null).catch(() => {});
+      if (Math.random() < 0.4) { await sleep(900); go('pcToSw', { kind: 'rep', size: 0.8 }).then(() => go('swToSrv', { kind: 'rep', size: 0.8 })).catch(() => {}); }
+    }
+  }
+},
+{
+  title: '1. Le boîtier, pièce par pièce',
+  text: `<p>Le couvercle est levé. Le <b>radar LD2410</b> (24 GHz) regarde à travers la fenêtre de la face avant. Il envoie ses mesures à l'<b>ESP32</b> par une liaison série à 256 000 bauds.</p>
+         <p>L'ESP32 décide, <b>signe chaque message</b> et commande la <b>LED RVB</b> (trois résistances). Tout est alimenté par le câble <b>USB 5 V</b> : pas de 230 V.</p>
+         <p>Aucune caméra : le radar ne fait <b>aucune image</b>.</p>`,
+  cam: [[-30, 31, 11], [-30, 1.5, -9]], labels: 'box', rotate: true,
+  async run() {
+    while (true) {
+      setRGB('vert'); await go('uart', { kind: 'capt', size: 0.14, noTrail: true });
+      await go('ledG', { kind: 'kit', size: 0.13, noTrail: true }).catch(() => {});
+      await sleep(900);
+      go('uart', { kind: 'capt', size: 0.14, noTrail: true }).catch(() => {});
+      await sleep(900); setRGB('orange'); await go('ledR', { kind: 'borne', size: 0.13, noTrail: true }).catch(() => {});
+      await sleep(1000);
+      sendPkt('usbReal', 'kit', null).catch(() => {});
+      await sleep(1100); setRGB('off'); await sleep(900);
+    }
+  }
+},
+{
+  title: '2. Le radar voit la respiration',
+  text: `<p>Martine <b>lit un dossier papier</b>, sans toucher au clavier. Windows se croit seul : « inactif depuis 4 minutes ».</p>
+         <p>Le radar envoie une onde (λ = 12,5 mm) et écoute l'écho. En respirant, la poitrine bouge de quelques millimètres : l'écho change, et la <b>porte 0</b> (0 à 0,75 m) garde de l'énergie. Résultat : <b>présent</b>.</p>
+         <p><b>Inactif ne veut pas dire absent.</b></p>`,
+  note: 'La respiration est amplifiée sur l\'image pour qu\'on la voie. L\'oscilloscope montre la phase de l\'écho (valeurs d\'exemple).',
+  cam: [[118, 96, -2], [-30, 8, 36]], labels: 'phys',
+  async run() {
+    setRead(readRadar, 'porte 0 : énergie 74 (seuil 40) → présent', '#3ddc84');
+    while (true) {
+      pulse(4, 105, 1.2, 0x7dffb0).catch(() => {});
+      await sleep(850);
+      pulse(66, 4, 0.9, 0xc18cff).catch(() => {});
+      await sleep(1000);
+    }
+  }
+},
+{
+  title: '3. Chaque message est signé',
+  text: `<p>Chaque seconde, le boîtier envoie « présent » ou « absent ». Il ajoute un <b>compteur</b> et une <b>preuve calculée avec un code secret</b> (HMAC-SHA256).</p>
+         <p>Le service PowerShell du poste vérifie la preuve et que le compteur a bien avancé. Un message modifié ou rejoué est <b>refusé</b>.</p>`,
+  cam: [[-6, 44, 56], [-18, 14, -26]], labels: 'overview',
+  async run() {
+    let n = 4820;
+    while (true) {
+      n++;
+      await sleep(1100);
+      const lab = `présent #${n} + HMAC`;
+      await sendPkt('usbReal', 'kit', lab);
+      pushPS(`[08:42:${String(10 + (n % 50)).padStart(2, '0')}] #${n} présent`, '#e6edf3');
+      pushPS('   HMAC ✔   compteur ✔   → accepté', '#3ddc84');
+    }
+  }
+},
+{
+  title: '4. Martine part : orange, puis blocage',
+  text: `<p>Martine se lève. Dès que le radar ne la voit plus : message signé « absent », <b>lumière orange</b> et avertissement pendant 3 secondes. Si elle revient pendant l'orange, <b>rien ne se passe</b>.</p>
+         <p>Sinon, un petit programme du poste <b>verrouille la session</b>. Ensuite seulement, le poste prévient le serveur.</p>
+         <p><b>Le verrou ne dépend ni du serveur ni du réseau.</b></p>`,
+  cam: [[130, 118, 240], [20, 5, 30]], labels: 'overview',
+  async run() {
+    await sleep(1400);
+    setRead(readRadar, 'porte 0 : présent', '#3ddc84');
+    const leaving = leave();
+    await sleep(1900);
+    setRead(readRadar, 'porte 0 : plus personne → absent', '#ffa31a');
+    sendPkt('usbReal', 'borne', 'absent + HMAC').catch(() => {});
+    await sleep(900);
+    setRGB('orange'); world.mon = 'warn'; flyTo([-16, 30, 52], [-30, 14, -26], 1.6);
+    for (let c = 3; c >= 1; c--) { world.count = c; drawMon(); await sleep(1000); }
+    world.mon = 'lock'; drawMon(); setRGB('off');
+    setRead(readRadar, 'session verrouillée', '#ff5a4d');
+    await sleep(900); flyTo([125, 72, 135], [72, 10, -18], 1.8);
+    await go('pcToSw', { kind: 'rep', label: 'événement : verrouillage' });
+    await go('swToSrv', { kind: 'rep', size: 0.9 });
+    pushEv('08:47:12  PC-04  verrouillage (absence)', '#13222c'); flyTo([58, 40, 62], [80, 12, 12], 1.8);
+    await leaving;
+    await sleep(2500); setRead(readRadar);
+    while (true) { await sleep(2500); }
+  }
+},
+{
+  title: '5. Le réseau en place (C10)',
+  text: `<p>Lorenzo exploite le réseau isolé du laboratoire : <b>DHCP</b> pour l'adressage, <b>DNS</b> pour joindre Ubuntu, <b>NTP</b> pour dater les événements et <b>HTTPS/TLS</b> pour transmettre les journaux du poste.</p>
+         <p>Le leurre dispose d'une adresse IP propre et d'un <b>service HTTP factice</b> ; son événement peut être envoyé à Ubuntu par une API authentifiée. Wireshark sert à observer les échanges et à vérifier la cohérence des horodatages.</p>`,
+  note: 'Adresses d\'exemple. Dans la maquette du lycée, le routeur fournit DHCP, DNS et NTP : aucun VLAN ni ACL à créer.',
+  cam: [[88, 66, 66], [60, 6, -28]], labels: 'net',
+  async run() {
+    const toRtr = ['pcToSw', 'swToRtr'], fromRtr = ['-swToRtr', '-pcToSw'];
+    const seq = async () => {
+      world.pkts = []; drawDash();
+      await route(toRtr, { kind: 'req', size: 0.6, label: 'DHCP Discover' }); cap('0.0.0.0', '255.255.255.255', 'DHCP', 'Discover', '#fff4c2');
+      await route(fromRtr, { kind: 'kit', size: 0.6, label: 'DHCP Offer' }); cap(IPS.rtr, IPS.pc, 'DHCP', 'Offer : ' + IPS.pc, '#fff4c2');
+      await route(toRtr, { kind: 'req', size: 0.6, label: 'DNS ?' }); cap(IPS.pc, IPS.rtr, 'DNS', 'A serveur.maquette.lan ?', '#e3f2ff');
+      await route(fromRtr, { kind: 'kit', size: 0.6, label: 'DNS : ' + IPS.srv }); cap(IPS.rtr, IPS.pc, 'DNS', 'serveur.maquette.lan = ' + IPS.srv, '#e3f2ff');
+      await route(toRtr, { kind: 'req', size: 0.6, label: 'NTP' }); cap(IPS.pc, IPS.rtr, 'NTP', 'requête d\'heure', '#e8f7e8');
+      await route(fromRtr, { kind: 'kit', size: 0.6, label: 'NTP : heure' }); cap(IPS.rtr, IPS.pc, 'NTP', 'réponse (décalage 0,012 s)', '#e8f7e8');
+      await route(['pcToSw', 'swToSrv'], { kind: 'rep', size: 0.7, label: 'HTTPS (TLS)' }); cap(IPS.pc, IPS.srv, 'TLS', 'POST /evenements', '#eadcff');
+      await route(['-swToSrv', '-pcToSw'], { kind: 'kit', size: 0.6, label: '201 Created' }); cap(IPS.srv, IPS.pc, 'TLS', 'réponse 201', '#eadcff');
+    };
+    while (true) { await seq(); await sleep(2200); }
+  }
+},
+{
+  title: '6. Quand ça tombe en panne',
+  text: `<p><b>Le réseau est coupé</b> : Martine part, le poste se verrouille quand même et garde l'événement en attente. Quand le réseau revient, il l'envoie.</p>
+         <p>Puis le <b>boîtier est débranché</b> : plus aucun message. Le <b>filet de sécurité</b> de Windows (blocage après 10 minutes sans clavier ni souris, réglé par une stratégie locale) continue de protéger.</p>
+         <p>Une panne ne laisse <b>jamais</b> le poste ouvert.</p>`,
+  cam: [[130, 118, 240], [20, 5, 30]], labels: 'overview',
+  async run() {
+    await sleep(900);
+    cPC.mesh.visible = false; portLEDs[P_PC].used = false; world.netCut = true;
+    const tagNet = label('overview', V(36, 14, -34), 'Réseau coupé', 'câble débranché', 'small'); tagNet.element.style.borderColor = '#ff5a4d';
+    labelGroups.overview.pop();
+    await sleep(900);
+    setRead(readRadar, 'événement mis en file d\'attente', '#ffa31a');
+    const lv = leave(1.15);
+    await sleep(2300); sendPkt('usbReal', 'borne', 'absent + HMAC').catch(() => {});
+    await sleep(700); setRGB('orange'); world.mon = 'warn'; flyTo([-16, 30, 52], [-30, 14, -26], 1.6);
+    for (let c = 3; c >= 1; c--) { world.count = c; drawMon(); await sleep(900); }
+    world.mon = 'lock'; drawMon(); setRGB('off');
+    setRead(readRadar, 'verrouillé malgré la panne ✔', '#3ddc84');
+    await lv;
+    cPC.mesh.visible = true; portLEDs[P_PC].used = true; world.netCut = false; scene.remove(tagNet); tagNet.element.remove();
+    await sleep(500);
+    await go('pcToSw', { kind: 'rep', label: 'événement en retard' }); await go('swToSrv', { kind: 'rep', size: 0.9 });
+    pushEv('08:47:12  PC-04  verrouillage (reçu en retard)', '#c98a00'); setRead(readRadar); flyTo([58, 40, 62], [80, 12, 12], 1.8);
+    await sleep(2600); flyTo([130, 118, 240], [20, 5, 30], 1.8);
+    await sleep(900);
+    /* deuxième panne : le boîtier est débranché */
+    world.mon = 'work'; drawMon();
+    await comeBack();
+    setRGB('vert'); world.idleTxt = 'inactif depuis 00:00'; drawMon(); flyTo([-16, 30, 52], [-30, 14, -26], 1.6);
+    await sleep(900);
+    usbReal.mesh.visible = false; setRGB('off');
+    setRead(readRadar, 'boîtier débranché : plus de message', '#ff5a4d');
+    const t0 = performance.now(); const id = runId;
+    while (performance.now() - t0 < 5200 && id === runId) {
+      const k = (performance.now() - t0) / 5200, sec = Math.floor(k * 600);
+      world.idleTxt = `inactif depuis ${String(Math.floor(sec / 60)).padStart(2, '0')}:${String(sec % 60).padStart(2, '0')}`; drawMon(); await sleep(250);
+    }
+    world.idleTxt = 'inactif depuis 10:00 → blocage'; world.mon = 'lock'; drawMon();
+    setRead(readRadar, 'filet de sécurité : Windows verrouille', '#3ddc84');
+    while (true) { await sleep(2500); }
+  }
+},
+{
+  title: '7. Le faux boîtier',
+  text: `<p>Quelqu'un branche un <b>faux boîtier</b> qui dit toujours « Martine est là ». Mais il ne connaît pas le <b>code secret</b> : ses messages n'ont pas de preuve valable.</p>
+         <p>Le poste lui envoie un <b>défi</b> (un nombre au hasard). Seul le vrai boîtier sait calculer la bonne réponse. Le faux est <b>refusé</b>, et le blocage normal continue de jouer son rôle.</p>`,
+  cam: [[38, 56, 46], [2, 4, -20]], labels: 'fake',
+  async run() {
+    world.mon = 'ps'; world.psLines = []; drawMon();
+    pushPS('PS> Get-PresenceLog -Tail 6', '#8fa3b5');
+    await sleep(900);
+    await anim(1.0, k => { fk.g.visible = true; fk.g.position.y = (1 - k) * 22; });
+    usbFake.mesh.visible = true;
+    await sleep(500);
+    while (true) {
+      msgNo++;
+      await sendPkt('usbReal', 'kit', `présent #${msgNo} + HMAC`);
+      pushPS(`boîtier B1 : #${msgNo} HMAC ✔ → accepté`, '#3ddc84');
+      await sleep(600);
+      await sendPkt('usbFake', 'err', 'présent (sans HMAC)');
+      pushPS('boîtier ?  : présent, HMAC ✘ → REFUSÉ', '#ff5a4d');
+      await sleep(600);
+      await Promise.all([sendPkt('-usbReal', 'req', 'défi : nonce 7f3a'), sendPkt('-usbFake', 'req', 'défi : nonce 91c2')]);
+      await Promise.all([sendPkt('usbReal', 'kit', 'réponse HMAC ✔'), sendPkt('usbFake', 'err', 'réponse ✘')]);
+      pushPS('défi B1 ✔   défi ? ✘ : non authentifié', '#ff5a4d');
+      pushPS('filet de sécurité : blocage à 10 min', '#ffa31a');
+      await sleep(2600);
+      world.psLines = []; pushPS('PS> Get-PresenceLog -Tail 6', '#8fa3b5');
+    }
+  }
+},
+{
+  title: '8. La physique : régler le radar avec des mesures',
+  text: `<p>Le radar découpe l'espace en <b>portes</b> de 0,75 m. Martine est dans la porte 0. Un collègue qui passe dans l'allée est dans la porte 2 : le seuil de la <b>zone retenue</b> l'ignore.</p>
+         <p>Lorenzo mesure les seuils et la zone (R1 à R3), puis le <b>délai</b> entre le départ et le blocage (R4, à l'oscilloscope), avec des incertitudes.</p>
+         <p>λ = c/f = 12,5 mm · ΔR = c/2B = 0,6 m (B = 250 MHz) · Δφ = 4π·Δd/λ ≈ 1 rad pour 1 mm.</p>`,
+  note: 'Valeurs d\'exemple : les vraies viendront des essais R1 à R4. Le balayage de l\'oscilloscope est accéléré à l\'écran.',
+  cam: [[40, 300, 250], [-30, 0, 70]], labels: 'phys',
+  async run() {
+    setRead(readRadar, 'porte 0 : agent détecté → compté', '#3ddc84');
+    (async () => { while (true) { pulse(4, 110, 1.2, 0x7dffb0).catch(() => {}); await sleep(900); pulse(66, 4, 0.9, 0xc18cff).catch(() => {}); await sleep(900); } })().catch(() => {});
+    await sleep(2200);
+    /* le collègue passe dans l'allée */
+    stQ.x = 280; stQ.z = 150; Q.root.visible = true;
+    const walk = walkTo(stQ, -260, 150, 60);
+    const t0 = performance.now(); const id = runId;
+    (async () => {
+      while (id === runId && Q.root.visible) {
+        const dist = Math.hypot(stQ.x - radarPos.x, stQ.z - radarPos.z), gate = Math.floor(dist / GATE);
+        if (dist > 100) setRead(readRadar, `porte ${gate} : un collègue passe → ignoré (au-delà de 1,0 m)`, '#ffa31a');
+        await sleep(200);
+      }
+    })().catch(() => {});
+    await walk; Q.root.visible = false;
+    setRead(readRadar, 'porte 0 : agent détecté → compté', '#3ddc84');
+    await sleep(1200);
+    /* mesure R4 : Martine part, l'oscilloscope chronomètre */
+    world.scope = 'timing'; world.timingK = 0; drawScope(); flyTo([-62, 30, 40], [-92, 9, -28], 2);
+    stM.breath = 0.018;
+    const lv = leave(1.1);
+    await anim(6.5, k => { world.timingK = k; drawScope(); }, k => k);
+    await lv;
+    setRead(readRadar, 'R4 : délai départ → blocage ≈ 4,1 s (exemple)', '#c18cff');
+    while (true) { await sleep(2500); }
+  }
+},
+
+{
+  title: '9. Leurre réseau : une fausse imprimante',
+  text: `<p>Le second module ne pilote <b>aucune vraie imprimante</b>. Il expose un petit service HTTP en lecture seule, avec une page d'administration volontairement fictive et sans identifiants réels.</p>
+         <p>Un <b>ESP32 + W5500</b> reçoit les demandes sur Ethernet. Les tentatives sont journalisées pour produire un signal de sécurité complémentaire. Le réseau est strictement limité au laboratoire.</p>`,
+  cam: [[166, 75, 104], [115, 13, 40]], labels: 'decoy', rotate: true,
+  async run() {
+    while (true) {
+      decoyLed.material.color.setHex(0x61bf84);
+      await sleep(950);
+      decoyLed.material.color.setHex(0xf6d77a);
+      await go('swToDecoy', {kind:'req',size:.55,label:'HTTP GET'});
+      await sleep(650);
+    }
+  }
+},
+{
+  title: '10. Un PC interroge la fausse imprimante',
+  text: `<p>Le <b>PC de test</b> du laboratoire consulte l'adresse du leurre. L'ESP32 constate une connexion à son service fictif : il enregistre l'heure, l'adresse IP source et la ressource demandée.</p>
+         <p>Il ne collecte <b>ni mots de passe ni documents</b>. Une connexion ne prouve pas une attaque : il peut s'agir d'un inventaire réseau ou d'un outil de supervision autorisé.</p>`,
+  cam: [[145, 92, 140], [99, 13, 17]], labels: 'decoy',
+  async run() {
+    world.dash='wire'; drawDash();
+    await sleep(750);
+    while (true) {
+      await go('-swToDash',{kind:'req',label:'PC test → switch',size:.65});
+      await go('swToDecoy',{kind:'req',label:'GET /admin (fictif)',size:.7});
+      decoyLed.material.color.setHex(0xffa31a);
+      cap('10.10.0.73','10.10.0.80','HTTP','GET /admin','#fff4c2');
+      await sleep(700);
+      await go('-swToDecoy',{kind:'rep',label:'événement technique',size:.55});
+      await go('swToSrv',{kind:'rep',label:'POST /events',size:.62});
+      await sleep(1100);
+      decoyLed.material.color.setHex(0x61bf84);
+      await sleep(900);
+    }
+  }
+},
+{
+  title: '11. L’alerte Ubuntu et ses limites',
+  text: `<p>Ubuntu reçoit l'événement issu du leurre et l'affiche avec celui du <b>verrouillage Windows</b>. Les deux fonctions alimentent une même supervision, mais <b>l'absence physique ne prouve aucun lien</b> avec l'accès réseau.</p>
+         <p>La démonstration compare les délais d'alerte, les faux positifs lors des scans autorisés et le comportement si le serveur est indisponible. <b>Pas de détection magique</b> : seuls les accès dirigés vers le leurre sont observés.</p>`,
+  note: 'Données, adresses IP et événements fictifs. Le niveau d’alerte doit être évalué dans les tests ; aucun accès au réseau d’entreprise.',
+  cam: [[111, 73, 120], [88, 15, -5]], labels: 'overview',
+  async run() {
+    world.dash='log'; drawDash();
+    pushEv('PC-04   Session verrouillée / absence','#13222c');
+    await sleep(1100);
+    await route(['-swToDash','swToDecoy'], {kind:'req',label:'requête de test',size:.64});
+    decoyLed.material.color.setHex(0xffa31a);
+    await route(['-swToDecoy','swToSrv'], {kind:'rep',label:'alerte leurre',size:.65});
+    pushEv('10.10.0.73 -> 10.10.0.80 : GET /admin','#c98a00');
+    pushEv('ALERTE : accès au leurre — à qualifier','#ff5a4d');
+    flyTo([100,56,76],[80,13,13],1.6);
+    while (true) { await sleep(2400); }
+  }
+},
+
+];
+
+/* =====================================================================
+   14. Caméra, interface : étapes, boutons, clavier
+   ===================================================================== */
+const cam = { k: 1, dur: 1 };
+function flyTo(pos, target, dur = 1.8) {
+  const asp = camera.aspect, p = V(...pos), t = V(...target);
+  if (asp < 1) { p.sub(t).multiplyScalar(1.15 / asp).add(t); }
+  cam.from = { p: camera.position.clone(), t: controls.target.clone() }; cam.to = { p, t }; cam.k = 0; cam.dur = dur;
+}
+let cur = 0, auto = false;
+const dots = $('#dots');
+steps.forEach((s, i) => { const b = document.createElement('button'); b.setAttribute('aria-label', 'Étape ' + i + ' : ' + s.title); b.onclick = () => goStep(i); dots.appendChild(b); });
+
+function clearAnims() {
+  for (const p of packets) { killPacket(p); p.rej(new Cancel()); }
+  packets.length = 0;
+  for (const t of tweens) t.rej(new Cancel());
+  tweens.length = 0;
+}
+async function goStep(i) {
+  i = Math.max(0, Math.min(steps.length - 1, i));
+  runId++; const id = runId; clearAnims(); cur = i; shadowFrames = 3;
+  const s = steps[i];
+  baseline(i);
+  labelMode = s.labels; refreshLabels();
+  $('#stepno').textContent = i === 0 ? 'Introduction' : `Étape ${i} / ${steps.length - 1}`;
+  $('#title').textContent = s.title;
+  $('#text').innerHTML = s.text;
+  const note = $('#note');
+  if (s.note) { note.style.display = 'block'; note.innerHTML = s.note; } else note.style.display = 'none';
+  [...dots.children].forEach((d, k) => d.classList.toggle('on', k === i));
+  $('#bNext').disabled = i === steps.length - 1;
+  flyTo(...s.cam);
+  controls.autoRotate = false;
+  try {
+    await s.run();
+    if (auto && id === runId && i < steps.length - 1) { await sleep(2500); goStep(i + 1); }
+  } catch (e) { if (!(e instanceof Cancel)) console.error(e); }
+}
+$('#bPrev').onclick = () => goStep(cur - 1);
+$('#bNext').onclick = () => goStep(cur + 1);
+$('#bReplay').onclick = () => goStep(cur);
+$('#bAuto').onclick = e => { auto = !auto; e.currentTarget.setAttribute('aria-pressed', auto); e.currentTarget.classList.toggle('main', auto); if (auto) goStep(cur + 1 < steps.length ? cur : 0); };
+$('#bLab').onclick = e => { showLabels = !showLabels; e.currentTarget.setAttribute('aria-pressed', showLabels); refreshLabels(); };
+/* ambiance nuit / jour (mémorisée dans le navigateur si possible) */
+let amb = 'nuit';
+function setAmbiance(name) {
+  shadowFrames = 3; amb = PAL[name] ? name : 'nuit'; const p = PAL[amb];
+  scene.background.set(p.bg); scene.fog.color.set(p.bg); scene.fog.near = p.fog[0]; scene.fog.far = p.fog[1];
+  wallMat.color.set(p.wall); floorMat.color.set(p.floor);
+  key.color.set(p.key); key.intensity = p.keyI; rim.color.set(p.win); rim.intensity = p.winI;
+  hemi.color.set(p.hemiS); hemi.groundColor.set(p.hemiG); hemi.intensity = p.hemiI;
+  renderer.toneMappingExposure = p.exp; skyMat.color.setScalar(p.sky); drawSky(p);
+  document.documentElement.dataset.amb = amb;
+  $('#bAmb').textContent = 'Ambiance : ' + amb;
+  try { localStorage.setItem('maquette3d-lorenzo-amb', amb); } catch (e) { /* stockage indisponible */ }
+}
+$('#bAmb').onclick = () => setAmbiance(amb === 'nuit' ? 'jour' : 'nuit');
+{ let saved = null; try { saved = localStorage.getItem('maquette3d-lorenzo-amb'); } catch (e) { /* rien */ }
+  setAmbiance(new URLSearchParams(location.search).get('amb') || saved || 'nuit'); }
+addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') goStep(cur + 1);
+  else if (e.key === 'ArrowLeft') goStep(cur - 1);
+  else if (e.key === 'r' || e.key === 'R') goStep(cur);
+});
+controls.addEventListener('start', () => { cam.k = 1; });
+
+/* =====================================================================
+   15. Boucle d'animation
+   ===================================================================== */
+const clock = new THREE.Clock();
+let lastScope = 0;
+function tick() {
+  const dt = Math.min(clock.getDelta(), 0.05), now = clock.elapsedTime;
+
+  if (cam.k < 1) {
+    cam.k = Math.min(1, cam.k + dt / cam.dur); const e = easeIO(cam.k);
+    camera.position.lerpVectors(cam.from.p, cam.to.p, e); controls.target.lerpVectors(cam.from.t, cam.to.t, e);
+    if (cam.k >= 1 && steps[cur].rotate) controls.autoRotate = true;
+  }
+  controls.update();
+
+  for (let i = tweens.length - 1; i >= 0; i--) {
+    const t = tweens[i]; t.t += dt; const k = Math.min(1, t.t / t.dur); t.fn(t.ease(k));
+    if (k >= 1) { tweens.splice(i, 1); t.res(); }
+  }
+
+  for (let i = packets.length - 1; i >= 0; i--) {
+    const p = packets[i];
+    let sp = p.speed;
+    p.t += p.dir * sp * dt / p.P.len;
+    const done = p.dir > 0 ? p.t >= 1 : p.t <= 0;
+    const tt = Math.max(0, Math.min(1, p.t));
+    p.P.curve.getPointAt(tt, p.m.position);
+    p.hist.unshift(p.m.position.clone()); if (p.hist.length > 18) p.hist.pop();
+    p.trail.forEach((t, k) => { const h = p.hist[(k + 1) * 3]; if (h) { t.position.copy(h); t.visible = true; } });
+    if (p.P.port !== undefined) portLEDs[p.P.port].last = now;
+    if (done) {
+      if (p.P.srv && p.dir > 0) world.srvAct = now;
+      killPacket(p); packets.splice(i, 1); p.res('ok');
+    }
+  }
+
+  for (let i = fx.length - 1; i >= 0; i--) {
+    const f = fx[i]; f.t += dt; if (f.t < 0) { f.m.visible = false; continue; } f.m.visible = true;
+    const k = f.t / f.dur; f.m.scale.setScalar(0.2 + k * f.r); f.m.material.opacity = 0.9 * (1 - k);
+    if (k >= 1) { scene.remove(f.m); f.m.material.dispose(); fx.splice(i, 1); }
+  }
+
+  portLEDs.forEach((L, i) => {
+    if (!L.used) { L.m.color.setRGB(0.02, 0.06, 0.03); return; }
+    const act = now - L.last < 0.25;
+    const on = act ? Math.sin(now * 60 + i) > 0 : Math.sin(now * 1.3 + i * 2) > -0.6;
+    L.m.color.setRGB(0.15, 1, 0.35).multiplyScalar(on ? (act ? 4 : 2.2) : 0.12);
+  });
+  const sd = srv.userData;
+  sd.pwr.material.color.setRGB(0.2, 1, 0.45).multiplyScalar(3);
+  const dAct = now - world.srvAct < 0.6 || Math.sin(now * 2.1) > 0.97;
+  sd.disk.material.color.setRGB(1, 0.6, 0.1).multiplyScalar(dAct && Math.sin(now * 40) > 0 ? 3 : 0.05);
+
+  /* personnages */
+  applyPose(P, stM, now);
+  if (Q.root.visible) applyPose(Q, stQ, now);
+  /* oscilloscope : la respiration défile */
+  if (world.scope === 'breath' && now - lastScope > 0.07) { lastScope = now; world.scopeT = now; drawScope(); }
+  fan.children.forEach((c, k) => { if (c.material && c !== zoneRing && k === 0) c.material.opacity = 0.14 + 0.03 * Math.sin(now * 3); });
+
+  if (tweens.length || packets.length || world.scope === 'breath') shadowFrames = 2;
+  if (shadowFrames > 0) { renderer.shadowMap.needsUpdate = true; shadowFrames--; }
+  composer.render();
+  labelRenderer.render(scene, camera);
+  requestAnimationFrame(tick);
+}
+
+/* Le centre de la scène est décalé à droite du panneau d'explication (grands écrans). */
+function viewShift() {
+  const w = innerWidth, h = innerHeight, panelW = $('#panel').offsetWidth + 16;
+  if (w > 860) camera.setViewOffset(w, h, -panelW / 2, 0, w, h); else camera.clearViewOffset();
+}
+addEventListener('resize', () => {
+  camera.aspect = innerWidth / innerHeight; viewShift(); camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight); composer.setSize(innerWidth, innerHeight);
+  labelRenderer.setSize(innerWidth, innerHeight);
+});
+camera.aspect = innerWidth / innerHeight; viewShift(); camera.updateProjectionMatrix();
+
+(document.fonts ? document.fonts.ready : Promise.resolve()).then(() => { redrawAll(); });
+goStep(new URLSearchParams(location.search).has('step') ? +new URLSearchParams(location.search).get('step') : 0);
+tick();
+window.__goStep = goStep;
+window.__dbg = { world, stM, P, scene, ledGlow, rgbMat, diffMat };
+
+</script>
+</body>
+</html>

@@ -1,0 +1,672 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Le quartier des projets E6</title>
+<link rel="icon" href="data:,">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Atkinson+Hyperlegible:wght@400;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Quartier 3D : une scène de nuit, toujours sombre. Les panneaux d'information suivent le même style. */
+:root{
+  --bg:#070b12; --panel:rgba(14,22,30,.88); --ink:#e4ecf0; --muted:#9aabb5; --line:#2a3a45; --accent:#6fb0de; --chip:#1c2a34;
+  --f-display:"Barlow Condensed","Arial Narrow",Arial,sans-serif;
+  --f-body:"Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Consolas,monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);font-family:var(--f-body);color:var(--ink)}
+canvas#scene{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none}
+button{font:inherit;cursor:pointer}
+:focus-visible{outline:3px solid #f0b93a;outline-offset:2px}
+#scrim{position:fixed;left:0;right:0;top:0;height:120px;pointer-events:none;background:linear-gradient(180deg,rgba(5,8,12,.7),rgba(5,8,12,0))}
+
+#brand{position:fixed;top:max(12px,env(safe-area-inset-top));left:max(16px,env(safe-area-inset-left));text-shadow:0 1px 8px rgba(0,0,0,.6);pointer-events:none}
+#brand .eye{font-family:var(--f-mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent)}
+#brand h1{font-family:var(--f-display);font-size:28px;line-height:1.05;margin:2px 0 0;font-weight:700}
+
+/* panneau d'information (bas gauche) */
+#panel{position:fixed;left:max(16px,env(safe-area-inset-left));bottom:calc(max(16px,env(safe-area-inset-bottom)) + 62px);width:min(430px,calc(100vw - 32px));
+  background:var(--panel);border:1px solid var(--line);border-left:5px solid var(--c,#6fb0de);border-radius:14px;padding:13px 16px 13px;backdrop-filter:blur(10px);
+  box-shadow:0 8px 30px rgba(0,0,0,.45);transition:border-color .4s}
+#pwho{font-family:var(--f-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--c,#6fb0de)}
+#ptitle{font-family:var(--f-display);font-size:26px;font-weight:700;line-height:1.08;margin:3px 0 6px}
+#ptext{font-size:14.5px;line-height:1.5;margin:0;color:#d3dee4}
+#pgo{margin-top:11px;display:flex;gap:8px;align-items:center}
+#pgo button{border:1px solid var(--line);background:var(--chip);color:var(--ink);border-radius:9px;padding:8px 13px;font-size:14px;font-weight:700}
+#pgo button.main{background:var(--c,#1d5a86);border-color:var(--c,#1d5a86);color:#04080c}
+#pgo button:disabled{opacity:.45;cursor:not-allowed}
+#pgo span{font-size:12px;color:var(--muted)}
+
+/* barre de navigation (bas centre) */
+#dock{position:fixed;left:50%;bottom:max(14px,env(safe-area-inset-bottom));transform:translateX(-50%);display:flex;gap:6px;padding:5px;
+  background:var(--panel);border:1px solid var(--line);border-radius:12px;backdrop-filter:blur(10px);max-width:calc(100vw - 24px);flex-wrap:wrap;justify-content:center}
+#dock button{border:0;background:transparent;color:var(--muted);padding:8px 12px;border-radius:8px;font-size:14px;font-weight:700;display:flex;align-items:center;gap:7px;white-space:nowrap}
+#dock button i{width:10px;height:10px;border-radius:50%;background:var(--c,#6fb0de);box-shadow:0 0 8px var(--c,#6fb0de);display:inline-block}
+#dock button[aria-pressed="true"]{background:var(--chip);color:var(--ink);box-shadow:inset 0 0 0 1px var(--c,#2a3a45)}
+#dock button.free i{background:transparent;border:2px dashed var(--c);box-shadow:none}
+
+#hint{position:fixed;right:max(16px,env(safe-area-inset-right));bottom:calc(max(16px,env(safe-area-inset-bottom)) + 62px);font-size:12px;color:#8fa3ae;text-align:right;text-shadow:0 1px 4px #000;pointer-events:none}
+#hint kbd{font-family:var(--f-mono);font-size:11px;border:1px solid #3a4b57;border-radius:4px;padding:0 4px;background:#111a22}
+
+/* fondu noir et chargement */
+#fade{position:fixed;inset:0;background:#05080c;opacity:0;pointer-events:none;z-index:30;display:grid;place-items:center;transition:opacity .45s ease}
+#fade.on{opacity:1;pointer-events:auto}
+#fade p{font-family:var(--f-mono);font-size:13px;letter-spacing:.1em;color:#8fa3ae;margin:0;opacity:0;transition:opacity .3s .5s}
+#fade.on p{opacity:1}
+
+/* maquette ouverte dans la box */
+#room{position:fixed;inset:0;width:100%;height:100%;border:0;background:#0b1016;z-index:20;display:none}
+#back{position:fixed;top:max(10px,env(safe-area-inset-top));left:50%;transform:translateX(-50%);z-index:40;display:none;align-items:center;gap:10px;
+  background:rgba(14,22,30,.92);border:1px solid var(--line);border-top:3px solid var(--c,#6fb0de);border-radius:999px;padding:5px 6px 5px 14px;backdrop-filter:blur(8px);box-shadow:0 4px 18px rgba(0,0,0,.45)}
+#back span{font-size:13px;color:var(--muted);white-space:nowrap;max-width:36vw;overflow:hidden;text-overflow:ellipsis}
+#back b{font-family:var(--f-display);font-size:16px;color:var(--ink)}
+#back button{border:0;background:var(--c,#6fb0de);color:#04080c;border-radius:999px;padding:7px 13px;font-size:13px;font-weight:700;white-space:nowrap}
+#err{position:fixed;inset:0;display:none;place-items:center;color:#e4ecf0;font-size:18px;padding:30px;text-align:center}
+@media (max-width:720px){
+  #brand h1{font-size:21px}
+  #ptitle{font-size:22px}
+  #ptext{font-size:13.5px}
+  #hint{display:none}
+  #dock button{padding:7px 9px;font-size:13px}
+  #back span{display:none}
+}
+</style>
+<script type="importmap">
+{"imports":{
+  "three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+  "three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+}}
+</script>
+</head>
+<body>
+<canvas id="scene" aria-label="Quartier 3D de nuit : un carrefour au centre et une maison par projet, chacune avec un panneau lumineux. Clic sur une maison pour s'en approcher, puis Entrer pour ouvrir sa maquette."></canvas>
+<div id="scrim"></div>
+<div id="brand">
+  <div class="eye">BTS CIEL option A · projets E6 · session 2027</div>
+  <h1>Le quartier des projets</h1>
+</div>
+
+<div id="panel" role="region" aria-live="polite" style="--c:#6fb0de">
+  <div id="pwho"></div>
+  <div id="ptitle"></div>
+  <p id="ptext"></p>
+  <div id="pgo"></div>
+</div>
+<div id="dock" role="group" aria-label="Aller à une maison"></div>
+<div id="hint">Glisser : tourner · Molette : zoom · Clic sur une maison<br><kbd>←</kbd> <kbd>→</kbd> maison suivante · <kbd>Entrée</kbd> entrer · <kbd>Échap</kbd> carrefour</div>
+
+<iframe id="room" title="Maquette 3D du projet" allow="fullscreen"></iframe>
+<div id="back" style="--c:#6fb0de"><span>Maquette de</span><b id="backname"></b><button id="bBack">◀ Retour au quartier (Échap)</button></div>
+<div id="fade"><p id="fadetxt">Chargement de la maquette…</p></div>
+<div id="err">Cette scène a besoin de WebGL. Ouvre la page dans un navigateur récent (Chrome, Edge, Firefox, Brave).</div>
+
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+
+/* =====================================================================
+   1. LES MAISONS DU QUARTIER  (c'est ici qu'on ajoute une maquette)
+   ---------------------------------------------------------------------
+   Pour ajouter la 4e maquette (ou une 5e) : remplacer l'entrée « libre »
+   (ou en ajouter une) avec son titre, sa couleur et le chemin `url` de sa
+   page. Les maisons se répartissent seules autour du carrefour (4 places
+   au minimum ; à partir de la 5e, elles se resserrent).
+   `prop` = petit objet posé devant la porte : 'printer', 'radar', 'kit' ou null.
+   ===================================================================== */
+const SLOTS = [
+  { who: 'Wassim', n: 1, color: '#ffb020', prop: 'printer',
+    title: 'Le service informatique augmenté', sub: 'de l’imprimante muette au PC du nouveau médecin',
+    desc: 'Un boîtier ESP32 écoute l’imprimante. Le serveur compare quatre témoins et ouvre un ticket GLPI quand une panne se prépare.',
+    url: '../Projet apprenti 1/livrables/animation-3d/maquette-3d.html' },
+  { who: 'Lorenzo', n: 3, color: '#c18cff', prop: 'radar',
+    title: 'Poste attentif', sub: 'un radar qui veille quand on s’absente',
+    desc: 'Un radar 24 GHz voit si le poste est abandonné. Le boîtier verrouille la session, puis les installations se font pendant l’absence.',
+    url: '../Projet apprenti 3/livrables/animation-3d/maquette-3d.html' },
+  { who: 'Aziza', n: 4, color: '#3ddc84', prop: 'kit',
+    title: 'Le kit de maintenance', sub: 'PC à jour · documents archivés · parc tracé',
+    desc: 'Des PC de maintenance toujours à jour : un catalogue signé distribue les bons fichiers, et chaque machine est tracée.',
+    url: '../Projet apprenti 4/apprentie4-aziza/livrables/animation-3d/maquette-3d.html' },
+  { who: '', n: 0, color: '#7f8c96', prop: null,
+    title: 'À venir', sub: 'emplacement réservé',
+    desc: 'Cette maison est vide pour l’instant. La prochaine maquette viendra ici.',
+    url: null },
+];
+
+/* =====================================================================
+   2. Réglages généraux
+   ===================================================================== */
+const $ = s => document.querySelector(s);
+const Q = new URLSearchParams(location.search);
+const LITE = Q.has('lite');
+const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const PLAZA_R = 5, RING_R = 17, DOOR_R = 25, BOX_W = 15, BOX_D = 10, BOX_H = 7;
+const BOX_CR = DOOR_R + BOX_D / 2;            // rayon du centre des maisons
+
+let renderer;
+try {
+  renderer = new THREE.WebGLRenderer({ canvas: $('#scene'), antialias: !LITE, powerPreference: 'high-performance' });
+} catch (e) { $('#err').style.display = 'grid'; throw e; }
+renderer.setPixelRatio(LITE ? 1 : Math.min(devicePixelRatio, 2));
+renderer.setSize(innerWidth, innerHeight);
+renderer.shadowMap.enabled = !LITE;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.0;
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x070b12);
+scene.fog = new THREE.FogExp2(0x070b12, 0.0085);
+const pmrem = new THREE.PMREMGenerator(renderer);
+scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+scene.environmentIntensity = 0.12;
+
+const camera = new THREE.PerspectiveCamera(46, innerWidth / innerHeight, 0.5, 900);
+const OVERVIEW = { p: new THREE.Vector3(0, 46, 70), t: new THREE.Vector3(0, 2, 0) };
+camera.position.copy(OVERVIEW.p);
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true; controls.dampingFactor = 0.08;
+controls.target.copy(OVERVIEW.t);
+controls.enablePan = false;
+controls.minDistance = 6; controls.maxDistance = 95;
+controls.maxPolarAngle = Math.PI * 0.485;
+controls.autoRotate = !REDUCED; controls.autoRotateSpeed = 0.35;
+
+/* =====================================================================
+   3. Lumières, ciel, sol
+   ===================================================================== */
+scene.add(new THREE.HemisphereLight(0x6f8fd0, 0x14202a, 0.55));
+const moon = new THREE.DirectionalLight(0xaec4ff, 1.05);
+moon.position.set(-38, 62, -26);
+moon.castShadow = !LITE;
+moon.shadow.mapSize.set(2048, 2048);
+Object.assign(moon.shadow.camera, { left: -52, right: 52, top: 52, bottom: -52, near: 10, far: 160 });
+moon.shadow.bias = -0.0004; moon.shadow.normalBias = 0.04;
+scene.add(moon);
+const centerLamp = new THREE.PointLight(0xffd9a0, 120, 34, 1.6); centerLamp.position.set(0, 6.5, 0); scene.add(centerLamp);
+
+{ // étoiles et lune
+  const n = 600, pos = new Float32Array(n * 3);
+  let s = 7; const rnd = () => (s = (s * 16807) % 2147483647) / 2147483647;
+  for (let i = 0; i < n; i++) {
+    const a = rnd() * Math.PI * 2, e = 0.12 + rnd() * 1.3, r = 420;
+    pos.set([Math.cos(a) * Math.cos(e) * r, Math.sin(e) * r, Math.sin(a) * Math.cos(e) * r], i * 3);
+  }
+  const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  scene.add(new THREE.Points(g, new THREE.PointsMaterial({ color: 0xcfe0ff, size: 1.6, sizeAttenuation: false, fog: false, transparent: true, opacity: .85 })));
+  const m = new THREE.Mesh(new THREE.SphereGeometry(14, 24, 16), new THREE.MeshBasicMaterial({ color: 0xe9f0ff, fog: false, toneMapped: false }));
+  m.position.copy(moon.position).normalize().multiplyScalar(380); scene.add(m);
+}
+
+const mat = (c, o = {}) => new THREE.MeshStandardMaterial({ color: c, roughness: .85, metalness: 0, ...o });
+const glow = (c, k = 1) => new THREE.MeshStandardMaterial({ color: 0x05080b, emissive: c, emissiveIntensity: k, roughness: .6 });
+const flat = (geo, m, x = 0, y = 0, z = 0) => { const o = new THREE.Mesh(geo, m); o.position.set(x, y, z); o.receiveShadow = true; return o; };
+
+const ground = flat(new THREE.CircleGeometry(95, 96), mat(0x0c1519, { roughness: 1 }));
+ground.rotation.x = -Math.PI / 2; scene.add(ground);
+{ // grille polaire discrète, comme un plan de maquette
+  const pg = new THREE.PolarGridHelper(72, 16, 9, 96, 0x23404a, 0x1a2f38);
+  pg.position.y = 0.012; pg.material.transparent = true; pg.material.opacity = .45; scene.add(pg);
+}
+
+const ASPH = mat(0x161c22, { roughness: .95 });
+const ring = flat(new THREE.RingGeometry(RING_R - 2.4, RING_R + 2.4, 128), ASPH); ring.rotation.x = -Math.PI / 2; ring.position.y = .03; scene.add(ring);
+const plaza = flat(new THREE.CircleGeometry(PLAZA_R + .4, 64), ASPH); plaza.rotation.x = -Math.PI / 2; plaza.position.y = .035; scene.add(plaza);
+{ // tirets blancs au milieu de l'anneau + bords lumineux
+  const n = 56, dash = new THREE.InstancedMesh(new THREE.BoxGeometry(1.1, .02, .12), new THREE.MeshBasicMaterial({ color: 0x9aa7b0 }), n);
+  const d = new THREE.Object3D();
+  for (let i = 0; i < n; i++) { const a = i / n * Math.PI * 2; d.position.set(Math.cos(a) * RING_R, .05, Math.sin(a) * RING_R); d.rotation.y = -a + Math.PI / 2; d.updateMatrix(); dash.setMatrixAt(i, d.matrix); }
+  scene.add(dash);
+  for (const r of [RING_R - 2.4, RING_R + 2.4]) { const e = new THREE.Mesh(new THREE.TorusGeometry(r, .05, 6, 160), new THREE.MeshBasicMaterial({ color: 0x35525e })); e.rotation.x = Math.PI / 2; e.position.y = .06; scene.add(e); }
+}
+const island = flat(new THREE.CylinderGeometry(2.7, 2.9, .35, 48), mat(0x1c2a30, { roughness: .8 }), 0, .2, 0); island.castShadow = true; scene.add(island);
+const islandRing = new THREE.Mesh(new THREE.TorusGeometry(2.8, .06, 8, 64), new THREE.MeshBasicMaterial({ color: 0xffd9a0, toneMapped: false })); islandRing.rotation.x = Math.PI / 2; islandRing.position.y = .4; scene.add(islandRing);
+
+/* =====================================================================
+   4. Placement des maisons autour du cercle
+   ===================================================================== */
+const COUNT = Math.max(4, SLOTS.length);
+SLOTS.forEach((s, i) => {
+  s.i = i;
+  s.a = i * Math.PI * 2 / COUNT;                                   // 0 = nord, sens des aiguilles d'une montre
+  s.dir = new THREE.Vector3(Math.sin(s.a), 0, -Math.cos(s.a));      // du carrefour vers la maison
+  s.free = !s.url;
+  s.col = new THREE.Color(s.color);
+});
+const ROAD_MAT = mat(0x161c22, { roughness: .95 });
+for (const s of SLOTS) {
+  const len = DOOR_R - PLAZA_R + 1;
+  const road = flat(new THREE.PlaneGeometry(4, len), ROAD_MAT);
+  road.rotation.x = -Math.PI / 2; road.rotation.z = -s.a;            // allée radiale
+  const mid = s.dir.clone().multiplyScalar(PLAZA_R + len / 2 - .4); road.position.set(mid.x, .034, mid.z);
+  scene.add(road);
+  // liseré de la couleur de la maison, dans l'allée
+  const strip = new THREE.Mesh(new THREE.PlaneGeometry(.18, len - 1), new THREE.MeshBasicMaterial({ color: s.col, transparent: true, opacity: s.free ? .25 : .75, toneMapped: false }));
+  strip.rotation.x = -Math.PI / 2; strip.rotation.z = -s.a; strip.position.set(mid.x, .06, mid.z); scene.add(strip);
+}
+
+/* ---- textes lumineux (canvas) ---- */
+const FAM = '"Barlow Condensed","Arial Narrow",Arial,sans-serif';
+const lighten = (c, k) => { const o = new THREE.Color(c).lerp(new THREE.Color(1, 1, 1), k); return `rgb(${o.r * 255 | 0},${o.g * 255 | 0},${o.b * 255 | 0})`; };
+function fit(ctx, text, maxW, start, min, weight) {
+  let s = start; for (; s > min; s -= 4) { ctx.font = `${weight} ${s}px ${FAM}`; if (ctx.measureText(text).width <= maxW) break; }
+  ctx.font = `${weight} ${s}px ${FAM}`; return s;
+}
+function drawSign(cv, s) {
+  const w = cv.width, h = cv.height, ctx = cv.getContext('2d'), col = s.color;
+  ctx.fillStyle = '#04070b'; ctx.fillRect(0, 0, w, h);
+  ctx.save(); ctx.strokeStyle = col; ctx.lineWidth = 12; ctx.shadowColor = col; ctx.shadowBlur = 26;
+  ctx.beginPath(); ctx.roundRect(24, 24, w - 48, h - 48, 40); ctx.stroke(); ctx.restore();
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.save(); ctx.fillStyle = lighten(col, .6); ctx.shadowColor = col; ctx.shadowBlur = 34;
+  fit(ctx, s.title, w - 200, 230, 90, 700); ctx.fillText(s.title, w / 2, h * .41);
+  ctx.shadowBlur = 16; ctx.fillStyle = lighten(col, .35);
+  fit(ctx, s.sub, w - 260, 92, 44, 500); ctx.fillText(s.sub, w / 2, h * .76);
+  ctx.restore();
+}
+function smallTexture(text, color) {
+  const cv = document.createElement('canvas'); cv.width = 512; cv.height = 128; const ctx = cv.getContext('2d');
+  const draw = () => {
+    ctx.clearRect(0, 0, 512, 128); ctx.fillStyle = '#071014'; ctx.fillRect(0, 0, 512, 128);
+    ctx.fillStyle = color; ctx.fillRect(0, 0, 14, 128);
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = '#eef6fa'; fit(ctx, text, 440, 78, 36, 700); ctx.fillText(text, 262, 68);
+  };
+  draw(); const t = new THREE.CanvasTexture(cv); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4;
+  t.userData = { redraw: () => { draw(); t.needsUpdate = true; } }; return t;
+}
+
+/* ---- les maisons ---- */
+const houses = [], hitboxes = [], fontRedraws = [];
+const BODY_MAT = mat(0x1d2832, { roughness: .6, metalness: .25 });
+const ROOF_MAT = mat(0x10171d, { roughness: .7, metalness: .2 });
+const WALL_TRIM = mat(0x2a3844, { roughness: .6, metalness: .3 });
+
+function makeProp(kind, color) {
+  const g = new THREE.Group(), c = new THREE.Color(color);
+  const led = glow(c, 3);
+  if (kind === 'printer') {
+    const body = new THREE.Mesh(new RoundedBoxGeometry(1.8, .9, 1.3, 3, .08), mat(0xc9d1d6, { roughness: .45 })); body.position.y = .55; g.add(body);
+    const tray = new THREE.Mesh(new THREE.BoxGeometry(1.3, .05, .7), mat(0x3a444c)); tray.position.set(0, 1.03, 0); g.add(tray);
+    const sheet = new THREE.Mesh(new THREE.BoxGeometry(1.0, .02, .7), new THREE.MeshBasicMaterial({ color: 0xffffff })); sheet.position.set(0, 1.08, 0); g.add(sheet); g.userData.sheet = sheet;
+    const l = new THREE.Mesh(new THREE.SphereGeometry(.06, 12, 8), led); l.position.set(.7, .8, .67); g.add(l);
+  } else if (kind === 'radar') {
+    const pole = new THREE.Mesh(new THREE.CylinderGeometry(.12, .16, .8, 16), mat(0x39434c, { metalness: .6, roughness: .4 })); pole.position.y = .55; g.add(pole);
+    const head = new THREE.Mesh(new THREE.CylinderGeometry(.55, .55, .14, 32), mat(0x1c2329, { metalness: .5, roughness: .35 })); head.position.y = 1.05; head.rotation.x = Math.PI / 2 - .5; g.add(head);
+    const face = new THREE.Mesh(new THREE.CircleGeometry(.5, 32), glow(c, 1.6)); face.position.z = .075; head.add(face);
+    g.userData.rings = [0, 1, 2].map(i => { const r = new THREE.Mesh(new THREE.TorusGeometry(.5, .018, 6, 48), new THREE.MeshBasicMaterial({ color: c, transparent: true, toneMapped: false })); r.position.z = .1; head.add(r); r.userData.off = i / 3; return r; });
+  } else if (kind === 'kit') {
+    const cs = new THREE.Mesh(new RoundedBoxGeometry(1.7, .9, .8, 3, .08), mat(0x23303a, { roughness: .5, metalness: .3 })); cs.position.y = .55; g.add(cs);
+    const lid = new THREE.Mesh(new THREE.BoxGeometry(1.72, .05, .82), mat(0x2d3d49)); lid.position.y = .75; lid.visible = false;
+    const hdl = new THREE.Mesh(new THREE.TorusGeometry(.32, .035, 8, 24, Math.PI), mat(0x8a97a1, { metalness: .8, roughness: .3 })); hdl.position.y = 1.0; g.add(hdl);
+    for (const x of [-.5, .5]) { const k = new THREE.Mesh(new THREE.BoxGeometry(.16, .22, .04), mat(0x9aa7b0, { metalness: .8, roughness: .3 })); k.position.set(x, .72, .41); g.add(k); }
+    const l = new THREE.Mesh(new THREE.SphereGeometry(.07, 12, 8), led); l.position.set(0, .55, .42); g.add(l);
+    g.userData.led = l;
+  }
+  g.traverse(o => { if (o.isMesh) { o.castShadow = true; } });
+  return g;
+}
+
+function makeSign(s) {
+  const g = new THREE.Group();
+  const cv = document.createElement('canvas'); cv.width = 2048; cv.height = 512; drawSign(cv, s);
+  const tex = new THREE.CanvasTexture(cv); tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 8;
+  fontRedraws.push(() => { drawSign(cv, s); tex.needsUpdate = true; });
+  const W = 12.4, H = W / 4;
+  const sm = new THREE.MeshBasicMaterial({ map: tex, toneMapped: false });
+  const back = new THREE.Mesh(new THREE.BoxGeometry(W + .3, H + .3, .28), mat(0x0a1015, { roughness: .5, metalness: .4 })); back.castShadow = true; g.add(back);
+  const f = new THREE.Mesh(new THREE.PlaneGeometry(W, H), sm); f.position.z = .145; g.add(f);
+  const b = new THREE.Mesh(new THREE.PlaneGeometry(W, H), sm); b.position.z = -.145; b.rotation.y = Math.PI; g.add(b);     // lisible des deux côtés
+  const glowL = new THREE.PointLight(s.col, s.free ? 4 : 14, 16, 1.6); glowL.position.set(0, -.4, 1.6); g.add(glowL);
+  return { g, sm, glowL };
+}
+
+for (const s of SLOTS) {
+  const g = new THREE.Group();
+  const c = s.col, free = s.free;
+  const pos = s.dir.clone().multiplyScalar(BOX_CR);
+  g.position.copy(pos); g.rotation.y = Math.atan2(-s.dir.x, -s.dir.z);   // la façade (+z local) regarde le carrefour
+  const body = new THREE.Mesh(new RoundedBoxGeometry(BOX_W, BOX_H, BOX_D, 4, .22), BODY_MAT); body.position.y = BOX_H / 2; body.castShadow = body.receiveShadow = true; g.add(body);
+  const roof = new THREE.Mesh(new RoundedBoxGeometry(BOX_W + .7, .4, BOX_D + .7, 3, .12), ROOF_MAT); roof.position.y = BOX_H + .2; roof.castShadow = roof.receiveShadow = true; g.add(roof);
+  const plinth = new THREE.Mesh(new THREE.BoxGeometry(BOX_W + 1, .3, BOX_D + 1), WALL_TRIM); plinth.position.y = .15; plinth.receiveShadow = true; g.add(plinth);
+
+  // liseré néon du toit
+  const neon = glow(c, free ? .25 : 1.6); const nm = [neon];
+  const nt = .13, ny = BOX_H + .43, ow = BOX_W + .75, od = BOX_D + .75;
+  for (const [w, d, x, z] of [[ow, nt, 0, od / 2], [ow, nt, 0, -od / 2], [nt, od, ow / 2, 0], [nt, od, -ow / 2, 0]]) {
+    const m = new THREE.Mesh(new THREE.BoxGeometry(w, nt, d), neon); m.position.set(x, ny, z); g.add(m);
+  }
+  // porte
+  const doorM = glow(c, free ? .08 : 1.1);
+  const frame = new THREE.Mesh(new THREE.BoxGeometry(3.2, 4.0, .25), WALL_TRIM); frame.position.set(0, 2.15, BOX_D / 2 + .02); g.add(frame);
+  const door = new THREE.Mesh(new THREE.PlaneGeometry(2.7, 3.5), doorM); door.position.set(0, 2.05, BOX_D / 2 + .16); g.add(door);
+  const mat1 = new THREE.Mesh(new THREE.PlaneGeometry(3.4, 1.4), new THREE.MeshBasicMaterial({ color: c, transparent: true, opacity: free ? .12 : .35, toneMapped: false })); mat1.rotation.x = -Math.PI / 2; mat1.position.set(0, .34, BOX_D / 2 + 1.1); g.add(mat1);
+  // fenêtres
+  const winM = glow(free ? 0x3a4650 : 0xffd9a0, free ? .15 : .9);
+  for (const x of [-4.6, -2.3 * 0 + 4.6]) for (const y of [2.6, 5.0]) {
+    if (y === 5.0 && false) continue;
+    const w = new THREE.Mesh(new THREE.PlaneGeometry(2.6, 1.5), winM); w.position.set(x, y, BOX_D / 2 + .02); g.add(w);
+  }
+  for (const x of [-1.6, 1.6]) { const w = new THREE.Mesh(new THREE.PlaneGeometry(2.0, 1.2), winM); w.position.set(x, 5.3, BOX_D / 2 + .02); g.add(w); }
+  // panneau lumineux en haut de la maison
+  const sign = makeSign(s);
+  sign.g.position.set(0, BOX_H + .6 + (12.4 / 4 + .3) / 2, BOX_D / 2 - .9); g.add(sign.g);
+  for (const x of [-4.6, 4.6]) { const p = new THREE.Mesh(new THREE.CylinderGeometry(.09, .09, .7, 8), WALL_TRIM); p.position.set(x, BOX_H + .75, BOX_D / 2 - .9); g.add(p); }
+  // lumière de porte
+  const dl = new THREE.PointLight(c, free ? 2 : 22, 15, 1.6); dl.position.set(0, 3.2, BOX_D / 2 + 2.2); g.add(dl);
+  // objet devant la porte
+  let prop = null;
+  if (s.prop) {
+    const ped = new THREE.Mesh(new THREE.CylinderGeometry(1.3, 1.4, .3, 32), WALL_TRIM); ped.position.set(-5.4, .15 + .3, BOX_D / 2 + 2.6); ped.receiveShadow = true; g.add(ped);
+    prop = makeProp(s.prop, s.color); prop.position.set(-5.4, .6, BOX_D / 2 + 2.6); g.add(prop);
+  }
+  // zone de clic invisible
+  const hit = new THREE.Mesh(new THREE.BoxGeometry(BOX_W + 1, BOX_H + 5.2, BOX_D + 5), new THREE.MeshBasicMaterial({ visible: false }));
+  hit.position.set(0, (BOX_H + 5.2) / 2, 1.5); hit.userData.i = s.i; g.add(hit); hitboxes.push(hit);
+  scene.add(g);
+  houses.push({ s, g, nm, neon, doorM, sign, dl, prop });
+}
+
+/* ---- panneau indicateur au carrefour ---- */
+{
+  const pole = new THREE.Mesh(new THREE.CylinderGeometry(.12, .16, 7.2, 12), mat(0x39434c, { metalness: .6, roughness: .4 })); pole.position.y = 3.6; pole.castShadow = true; scene.add(pole);
+  const top = new THREE.Mesh(new THREE.SphereGeometry(.3, 16, 12), new THREE.MeshBasicMaterial({ color: 0xffe2b0, toneMapped: false })); top.position.y = 7.3; scene.add(top);
+  const shape = new THREE.Shape(); shape.moveTo(0, -.34); shape.lineTo(2.9, -.34); shape.lineTo(3.6, 0); shape.lineTo(2.9, .34); shape.lineTo(0, .34); shape.closePath();
+  const armGeo = new THREE.ExtrudeGeometry(shape, { depth: .08, bevelEnabled: false }); armGeo.translate(0, 0, -.04);
+  SLOTS.forEach((s, i) => {
+    const label = s.free ? 'À venir' : `${s.n} · ${s.who}`;
+    const tex = smallTexture(label, s.color); fontRedraws.push(tex.userData.redraw);
+    const arm = new THREE.Group(); arm.position.y = 6.4 - i * .72 * (4 / COUNT) - .2; arm.rotation.y = Math.PI / 2 - s.a;
+    const body = new THREE.Mesh(armGeo, glow(s.col, .5)); body.castShadow = true; arm.add(body);
+    for (const sd of [1, -1]) { const p = new THREE.Mesh(new THREE.PlaneGeometry(2.7, .6), new THREE.MeshBasicMaterial({ map: tex, toneMapped: false })); p.position.set(1.4, 0, sd * .06); if (sd < 0) p.rotation.y = Math.PI; arm.add(p); }
+    scene.add(arm);
+  });
+}
+
+/* ---- lampadaires, arbres, voitures ---- */
+const lampGlow = new THREE.MeshBasicMaterial({ color: 0xffe2b0, toneMapped: false });
+const poleMat = mat(0x2c353c, { metalness: .6, roughness: .45 });
+{
+  const n = 12, lamps = [];
+  for (let i = 0; i < n; i++) {
+    const a = (i + .5) / n * Math.PI * 2, r = RING_R + 3.3;
+    const g = new THREE.Group(); g.position.set(Math.sin(a) * r, 0, -Math.cos(a) * r);
+    const p = new THREE.Mesh(new THREE.CylinderGeometry(.07, .1, 4.2, 8), poleMat); p.position.y = 2.1; p.castShadow = true; g.add(p);
+    const l = new THREE.Mesh(new THREE.SphereGeometry(.22, 12, 8), lampGlow); l.position.y = 4.3; g.add(l);
+    const halo = new THREE.Mesh(new THREE.CircleGeometry(2.6, 24), new THREE.MeshBasicMaterial({ color: 0xffd9a0, transparent: true, opacity: .07, toneMapped: false, depthWrite: false })); halo.rotation.x = -Math.PI / 2; halo.position.y = .07; g.add(halo);
+    scene.add(g);
+  }
+}
+{ // arbres (positions fixes, hors allées et hors maisons)
+  let sd = 11; const rnd = () => (sd = (sd * 16807) % 2147483647) / 2147483647;
+  const spots = [];
+  for (let k = 0; k < 900 && spots.length < 14; k++) {
+    const a = rnd() * Math.PI * 2, r = 12 + rnd() * 50, x = Math.sin(a) * r, z = -Math.cos(a) * r;
+    if (r > RING_R - 3.6 && r < RING_R + 5.2) continue;
+    if (r < PLAZA_R + 2.5) continue;
+    let bad = false;
+    for (const s of SLOTS) {
+      const along = x * s.dir.x + z * s.dir.z, lat = Math.abs(x * s.dir.z - z * s.dir.x);
+      if (lat < 3.6 && along < DOOR_R + 1) bad = true;                                 // allée
+      if (along > DOOR_R - 3 && along < BOX_CR + BOX_D / 2 + 4 && lat < BOX_W / 2 + 4) bad = true;   // maison (+ marge)
+    }
+    if (!bad) spots.push([x, z, .8 + rnd() * .9, rnd()]);
+  }
+  const cone = new THREE.InstancedMesh(new THREE.ConeGeometry(1.2, 3.4, 8), mat(0x123428, { roughness: 1 }), spots.length);
+  const cone2 = new THREE.InstancedMesh(new THREE.ConeGeometry(.95, 2.6, 8), mat(0x174032, { roughness: 1 }), spots.length);
+  const trunk = new THREE.InstancedMesh(new THREE.CylinderGeometry(.14, .18, 1.2, 6), mat(0x2a2018), spots.length);
+  const d = new THREE.Object3D();
+  spots.forEach(([x, z, sc], i) => {
+    d.rotation.set(0, 0, 0); d.scale.setScalar(sc);
+    d.position.set(x, .6 * sc, z); d.updateMatrix(); trunk.setMatrixAt(i, d.matrix);
+    d.position.set(x, (1.2 + 1.5) * sc, z); d.updateMatrix(); cone.setMatrixAt(i, d.matrix);
+    d.position.set(x, (1.2 + 3.3) * sc, z); d.updateMatrix(); cone2.setMatrixAt(i, d.matrix);
+  });
+  for (const m of [cone, cone2, trunk]) { m.castShadow = true; m.receiveShadow = true; scene.add(m); }
+}
+const cars = [];
+{
+  const palette = [0xff6b5a, 0x6fb0de, 0xe8d36a, 0xb4e0a0];
+  const specs = [[RING_R - 1.2, 1, .09, 0], [RING_R - 1.2, 1, .09, 3.1], [RING_R + 1.2, -1, .07, 1.5], [RING_R + 1.2, -1, .07, 4.6]];
+  specs.forEach(([r, dir, sp, a0], i) => {
+    const g = new THREE.Group();
+    const b = new THREE.Mesh(new RoundedBoxGeometry(2.0, .65, 1.0, 2, .12), mat(palette[i], { roughness: .4, metalness: .5 })); b.position.y = .55; b.castShadow = true; g.add(b);
+    const t = new THREE.Mesh(new RoundedBoxGeometry(1.0, .5, .86, 2, .1), mat(0x0e1418, { roughness: .2, metalness: .7 })); t.position.set(-.1, 1.0, 0); g.add(t);
+    for (const z of [-.32, .32]) {
+      const h = new THREE.Mesh(new THREE.BoxGeometry(.06, .14, .22), new THREE.MeshBasicMaterial({ color: 0xfff1c9, toneMapped: false })); h.position.set(1.02, .6, z); g.add(h);
+      const tl = new THREE.Mesh(new THREE.BoxGeometry(.06, .12, .2), new THREE.MeshBasicMaterial({ color: 0xff3b30, toneMapped: false })); tl.position.set(-1.02, .6, z); g.add(tl);
+    }
+    scene.add(g); cars.push({ g, r, dir, sp, a: a0 });
+  });
+}
+
+/* =====================================================================
+   5. Rendu : lueur (néons) sur les écrans puissants
+   ===================================================================== */
+let composer = null, bloom = null;
+function buildComposer() {
+  const rt = new THREE.WebGLRenderTarget(innerWidth * renderer.getPixelRatio(), innerHeight * renderer.getPixelRatio(), { type: THREE.HalfFloatType, samples: 4 });
+  composer = new EffectComposer(renderer, rt);
+  composer.addPass(new RenderPass(scene, camera));
+  bloom = new UnrealBloomPass(new THREE.Vector2(innerWidth, innerHeight), .75, .55, .72);
+  composer.addPass(bloom); composer.addPass(new OutputPass());
+}
+if (!LITE) buildComposer();
+addEventListener('resize', () => {
+  camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight);
+  if (composer) { composer.setSize(innerWidth, innerHeight); }
+});
+document.fonts && document.fonts.load('700 100px "Barlow Condensed"').then(() => document.fonts.ready).then(() => fontRedraws.forEach(f => f())).catch(() => {});
+
+/* =====================================================================
+   6. Navigation : carrefour → maison → intérieur
+   ===================================================================== */
+let mode = 'overview';                // overview | flying | door | entering | inside
+let sel = -1, hover = -1;
+const fly = { k: 1, dur: 1.6, from: null, to: null, arc: 0, done: null };
+const ease = t => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+const idleResume = { t: 0 };
+
+function doorView(s, close) {
+  const D = s.dir.clone().multiplyScalar(DOOR_R);
+  const perp = new THREE.Vector3(s.dir.z, 0, -s.dir.x);
+  const back = close ? 6.5 : 15.5;
+  const p = D.clone().addScaledVector(s.dir, -back).addScaledVector(perp, close ? 0 : 3.2); p.y = close ? 3.2 : 5.4;
+  const t = D.clone(); t.y = close ? 3.0 : 5.0;
+  return { p, t };
+}
+function flyTo(view, opts = {}) {
+  fly.from = { p: camera.position.clone(), t: controls.target.clone() };
+  fly.to = view; fly.k = 0; fly.dur = REDUCED ? .01 : (opts.dur || 1.6); fly.arc = opts.arc ?? 6; fly.done = opts.done || null;
+  controls.enabled = false; controls.autoRotate = false;
+}
+
+const dock = $('#dock'), panel = $('#panel');
+const dockBtns = [];
+{
+  const b = document.createElement('button'); b.innerHTML = '<i style="--c:#ffd9a0"></i>Carrefour'; b.onclick = () => goOverview(); dock.appendChild(b); dockBtns.push(b);
+  SLOTS.forEach((s, i) => {
+    const bt = document.createElement('button'); bt.style.setProperty('--c', s.color); if (s.free) bt.classList.add('free');
+    bt.innerHTML = `<i></i>${s.free ? 'Libre' : s.who}`; bt.onclick = () => goHouse(i); dock.appendChild(bt); dockBtns.push(bt);
+  });
+}
+function refreshUI() {
+  const s = sel >= 0 ? SLOTS[sel] : null;
+  dockBtns.forEach((b, i) => b.setAttribute('aria-pressed', String(i === (s ? s.i + 1 : 0))));
+  panel.style.setProperty('--c', s ? s.color : '#ffd9a0');
+  if (!s) {
+    $('#pwho').textContent = 'Carrefour';
+    $('#ptitle').textContent = 'Bienvenue dans le quartier';
+    $('#ptext').textContent = 'Chaque maison abrite la maquette 3D d’un projet. Clique sur une maison, ou utilise les flèches du clavier, pour t’en approcher.';
+    $('#pgo').innerHTML = '';
+  } else {
+    $('#pwho').textContent = s.free ? 'Emplacement libre' : `Projet ${s.n} · ${s.who}`;
+    $('#ptitle').textContent = s.title;
+    $('#ptext').textContent = s.desc;
+    const go = $('#pgo'); go.innerHTML = '';
+    const b = document.createElement('button'); b.className = 'main'; b.textContent = s.free ? 'Bientôt' : 'Entrer dans la maquette ▶'; b.disabled = s.free; b.onclick = () => enterHouse(s.i); go.appendChild(b);
+    const sp = document.createElement('span'); sp.textContent = s.free ? '' : 'Entrée'; go.appendChild(sp);
+  }
+}
+function goOverview() {
+  if (mode === 'inside' || mode === 'entering') return;
+  sel = -1; mode = 'flying'; refreshUI();
+  flyTo(OVERVIEW, { arc: 4, done: () => { mode = 'overview'; controls.enabled = true; controls.autoRotate = !REDUCED; } });
+}
+function goHouse(i) {
+  if (mode === 'inside' || mode === 'entering') return;
+  sel = i; mode = 'flying'; refreshUI();
+  flyTo(doorView(SLOTS[i]), { done: () => { mode = 'door'; controls.enabled = true; } });
+}
+
+/* ---- entrer : la caméra s'avance vers la porte, fondu, puis la maquette s'ouvre ---- */
+const fade = $('#fade'), room = $('#room'), back = $('#back');
+let enterToken = 0;
+function enterHouse(i) {
+  const s = SLOTS[i];
+  if (mode === 'inside' || mode === 'entering') return;
+  if (s.free) { bump(i); return; }
+  const tok = ++enterToken;
+  sel = i; mode = 'entering'; refreshUI();
+  $('#fadetxt').textContent = `Chargement : ${s.title}…`;
+  flyTo(doorView(s, true), { dur: .9, arc: 0 });
+  setTimeout(() => { if (tok === enterToken) fade.classList.add('on'); }, REDUCED ? 0 : 560);
+  setTimeout(() => {
+    if (tok !== enterToken) return;
+    room.onload = () => {
+      if (tok !== enterToken || room.getAttribute('src') === 'about:blank') return;
+      mode = 'inside'; back.style.setProperty('--c', s.color); $('#backname').textContent = s.title;
+      back.style.display = 'flex'; fade.classList.remove('on');
+      try { room.contentWindow.addEventListener('keydown', e => { if (e.key === 'Escape') exitHouse(); }); room.contentWindow.focus(); } catch (e) { /* page d'un autre domaine : le bouton suffit */ }
+    };
+    room.style.display = 'block'; room.src = encodeURI(s.url);
+  }, REDUCED ? 60 : 1150);
+}
+function exitHouse() {
+  if (mode !== 'inside' && mode !== 'entering') return;
+  const tok = ++enterToken, i = sel;
+  fade.classList.add('on'); back.style.display = 'none';
+  setTimeout(() => {
+    room.onload = null; room.src = 'about:blank'; room.style.display = 'none';
+    const v = doorView(SLOTS[i]);
+    fly.k = 1; camera.position.copy(v.p); controls.target.copy(v.t); controls.enabled = true; controls.update();
+    mode = 'door'; lastT = performance.now(); fade.classList.remove('on'); refreshUI(); canvasFocus();
+  }, REDUCED ? 60 : 480);
+}
+$('#bBack').onclick = exitHouse;
+const canvasFocus = () => { try { document.activeElement && document.activeElement.blur(); window.focus(); } catch (e) { /* rien */ } };
+
+/* ---- petite secousse pour la maison vide ---- */
+const shake = { i: -1, t: 0 };
+function bump(i) { shake.i = i; shake.t = 0; }
+
+/* ---- souris / toucher ---- */
+const ray = new THREE.Raycaster(), ptr = new THREE.Vector2();
+function pick(e) {
+  const r = renderer.domElement.getBoundingClientRect();
+  ptr.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
+  ray.setFromCamera(ptr, camera);
+  const h = ray.intersectObjects(hitboxes, false)[0];
+  return h ? h.object.userData.i : -1;
+}
+let down = null;
+renderer.domElement.addEventListener('pointerdown', e => { down = { x: e.clientX, y: e.clientY, t: performance.now() }; controls.autoRotate = false; idleResume.t = 0; });
+renderer.domElement.addEventListener('pointerup', e => {
+  if (!down) return; const moved = Math.hypot(e.clientX - down.x, e.clientY - down.y), dt = performance.now() - down.t; down = null;
+  if (moved > 6 || dt > 500 || mode === 'flying' || mode === 'entering' || mode === 'inside') return;
+  const i = pick(e);
+  if (i < 0) return;
+  if (i === sel && mode === 'door') enterHouse(i); else goHouse(i);
+});
+renderer.domElement.addEventListener('pointermove', e => {
+  if (e.buttons) return;
+  hover = (mode === 'overview' || mode === 'door') ? pick(e) : -1;
+  renderer.domElement.style.cursor = hover >= 0 ? 'pointer' : '';
+});
+renderer.domElement.addEventListener('wheel', () => { controls.autoRotate = false; idleResume.t = 0; }, { passive: true });
+
+addEventListener('keydown', e => {
+  if (e.metaKey || e.ctrlKey || e.altKey) return;
+  if (e.key === 'Escape') { if (mode === 'inside' || mode === 'entering') exitHouse(); else if (mode === 'door') goOverview(); return; }
+  if (mode === 'inside' || mode === 'entering') return;
+  const n = SLOTS.length;
+  if (e.key === 'ArrowRight') { e.preventDefault(); goHouse(sel < 0 ? 0 : (sel + 1) % n); }
+  else if (e.key === 'ArrowLeft') { e.preventDefault(); goHouse(sel < 0 ? n - 1 : (sel - 1 + n) % n); }
+  else if (e.key === 'Enter' && sel >= 0 && document.activeElement && document.activeElement.tagName !== 'BUTTON') { enterHouse(sel); }
+  else if (e.key === 'Home' || e.key === '0') goOverview();
+  else if (/^[1-9]$/.test(e.key) && +e.key <= n) goHouse(+e.key - 1);
+});
+
+/* =====================================================================
+   7. Boucle d'animation
+   ===================================================================== */
+const tmp = new THREE.Vector3();
+let lastT = performance.now(), time = 0;
+function tick(now) {
+  requestAnimationFrame(tick);
+  if (mode === 'inside' || document.hidden) { lastT = now; return; }       // la maquette ouverte garde tout le GPU
+  const dt = Math.min((now - lastT) / 1000, .05); lastT = now; time += dt;
+
+  if (fly.k < 1) {
+    fly.k = Math.min(1, fly.k + dt / fly.dur); const e = ease(fly.k);
+    camera.position.lerpVectors(fly.from.p, fly.to.p, e); camera.position.y += Math.sin(Math.PI * e) * fly.arc;
+    controls.target.lerpVectors(fly.from.t, fly.to.t, e);
+    if (fly.k >= 1 && fly.done) { const f = fly.done; fly.done = null; f(); }
+  } else if (mode === 'overview' && !controls.autoRotate && !REDUCED) {
+    idleResume.t += dt; if (idleResume.t > 12) controls.autoRotate = true;      // le quartier se remet à tourner tout seul
+  }
+  controls.update();
+
+  // néons, portes, panneaux
+  for (const h of houses) {
+    const s = h.s, on = s.i === sel ? 1 : 0, hv = s.i === hover ? 1 : 0, free = s.free;
+    const pulse = free ? .5 + .5 * Math.sin(time * 1.7 + s.i) * Math.sin(time * 7.3) : .5 + .5 * Math.sin(time * 1.4 + s.i * 1.7);
+    h.neon.emissiveIntensity = (free ? .2 : 1.3) + on * 1.4 + hv * .9 + (free ? pulse * .5 : pulse * .35);
+    h.doorM.emissiveIntensity = (free ? .05 : .9) + on * .9 + hv * .6;
+    h.sign.sm.color.setScalar(free ? .45 + pulse * .45 : .88 + .12 * pulse + on * .1 + hv * .08);
+    h.sign.glowL.intensity = free ? 3 + pulse * 2 : 12 + on * 8 + hv * 5;
+    h.dl.intensity = free ? 2 : 18 + on * 12 + hv * 8;
+    h.g.position.y = 0;
+    if (shake.i === s.i) { shake.t += dt; h.g.position.x = s.dir.x * BOX_CR + Math.sin(shake.t * 55) * .12 * Math.max(0, 1 - shake.t * 3) * (-s.dir.z); h.g.position.z = s.dir.z * BOX_CR + Math.sin(shake.t * 55) * .12 * Math.max(0, 1 - shake.t * 3) * s.dir.x; if (shake.t > .4) { shake.i = -1; h.g.position.set(s.dir.x * BOX_CR, 0, s.dir.z * BOX_CR); } }
+    const p = h.prop;
+    if (p) {
+      p.rotation.y = Math.sin(time * .6 + s.i) * .5;
+      if (p.userData.sheet) { const k = (time * .5) % 1; p.userData.sheet.position.z = -.1 + k * .5; p.userData.sheet.scale.z = .5 + .5 * Math.min(1, k * 3); }
+      if (p.userData.rings) for (const r of p.userData.rings) { const k = (time * .55 + r.userData.off) % 1; r.scale.setScalar(.35 + k * 1.6); r.material.opacity = (1 - k) * .85; }
+      if (p.userData.led) p.userData.led.material.emissiveIntensity = 1.5 + 2.5 * (Math.sin(time * 3) > 0 ? 1 : .15);
+    }
+  }
+  // voitures sur l'anneau
+  for (const c of cars) {
+    c.a += c.dir * c.sp * dt; const x = Math.sin(c.a) * c.r, z = -Math.cos(c.a) * c.r;
+    c.g.position.set(x, .03, z); c.g.rotation.y = Math.atan2(-c.dir * Math.sin(c.a), c.dir * Math.cos(c.a));
+  }
+  islandRing.material.color.setScalar(.8 + .2 * Math.sin(time * 2));
+
+  if (composer) composer.render(); else renderer.render(scene, camera);
+}
+
+/* =====================================================================
+   8. Démarrage (les paramètres de l'adresse servent aux tests : ?maison=2 ou ?entrer=2)
+   ===================================================================== */
+refreshUI();
+requestAnimationFrame(t => { lastT = t; tick(t); });
+const startHouse = Q.has('maison') ? +Q.get('maison') - 1 : -1;
+if (startHouse >= 0 && startHouse < SLOTS.length) {
+  sel = startHouse; mode = 'door'; const v = doorView(SLOTS[sel]); camera.position.copy(v.p); controls.target.copy(v.t); controls.autoRotate = false; refreshUI();
+}
+if (Q.has('entrer')) { const i = +Q.get('entrer') - 1; if (i >= 0 && i < SLOTS.length) setTimeout(() => enterHouse(i), 400); }
+if (Q.has('vue')) { const p = Q.get('vue').split(',').map(Number); if (p.length === 6) { camera.position.set(p[0], p[1], p[2]); controls.target.set(p[3], p[4], p[5]); controls.autoRotate = false; } }
+window.__quartier = { get mode() { return mode; }, get sel() { return sel; }, goHouse, goOverview, enterHouse, exitHouse };
+</script>
+</body>
+</html>

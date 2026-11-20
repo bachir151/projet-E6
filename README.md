@@ -1,6 +1,6 @@
 # Projets E6 – BTS CIEL option A (session 2027)
 
-Conception et documentation des projets individuels E6 de quatre apprentis de BTS CIEL option A (Informatique et réseaux). Les projets partent du besoin exprimé par chaque tuteur d'entreprise et sont réalisés **au lycée, sur maquette, avec des données fictives** (réalisation au lycée à faire valider par l'académie).
+Conception et documentation des projets individuels E6 de quatre apprentis de BTS CIEL option A (Informatique et réseaux). Les projets partent d'un besoin ou d'une proposition de valeur adaptée au service d'entreprise, à faire valider et sont réalisés **au lycée, sur maquette, avec des données fictives** (réalisation au lycée à faire valider par l'académie).
 
 Épreuve E6 « Valorisation de la donnée et cybersécurité » : coefficient 7, oral d'1 h, projet d'environ 150 h. Compétences évaluées : C01, C03, C08, C10, plus un volet physique.
 
@@ -11,10 +11,21 @@ Conception et documentation des projets individuels E6 de quatre apprentis de BT
 | `docs/` | Cadre E6, état des 4 projets, charte d'usage de l'IA, sources vérifiées |
 | `Projet apprenti 1/` | Dossier V3 (modèle du dossier complet) |
 | `Projet apprenti 2/` | Synthèse de 3 pages (modèle de synthèse) |
-| `Projet apprenti 3/` | Dossier V2 |
+| `Projet apprenti 3/` | CyberSentinel de Lorenzo : projet, maquette 3D, page HTML et plan de travail (anciens livrables encore présents) |
 | `Projet apprenti 4/` | Projet d'Aziza : fiche technique, fiche Word à remplir, `apprentie4-aziza/` |
 | `.claude/commands/` | Commandes réutilisables (revue critique, contrôle d'un dossier) |
 | `Journal.md` | Ce qui est fait et ce qui reste à faire |
+
+## Projet de Lorenzo (apprenti 3) — CyberSentinel (20/11/2026)
+
+**Nouveau périmètre :** protéger une session Windows par radar LD2410/ESP32 et détecter des interactions réseau avec un leurre HTTP imitant une imprimante (deuxième ESP32 + Ethernet W5500). Les événements techniques sont centralisés sur Ubuntu. Les mises à jour/installations ont été **abandonnées** dans ce projet.
+
+- [Cahier des charges CyberSentinel](Projet%20apprenti%203/projet-cybersentinel.md)
+- [Maquette 3D animée Three.js](Projet%20apprenti%203/livrables/animation-3d/maquette-3d.html)
+- [Présentation HTML interactive](Projet%20apprenti%203/livrables/page-html/poste-attentif.html)
+- [Plan de travail et tests](Projet%20apprenti%203/TODO.md)
+
+**Statut :** prototypes visuels et documents texte remaniés, mais **aucune réalisation matérielle validée**. L'ancien formulaire académique DOCX/PDF, les questions du jury et l'ancien PowerPoint demeurent obsolètes ; ne pas les présenter comme les documents de la nouvelle version.
 
 ## Projet d'Aziza (apprentie 4)
 
