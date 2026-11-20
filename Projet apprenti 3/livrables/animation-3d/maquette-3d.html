@@ -114,6 +114,25 @@ button{font:inherit;cursor:pointer}
 h1,h2{font-weight:1000}
 #ctrl button,.tbtn,.seg button,#dots button{border-radius:999px}
 #ctrl button,.tbtn,.seg button{font-weight:800;white-space:nowrap}
+
+/* ---- panneau d'explication : plus discret pour laisser voir la maquette ---- */
+#panel{width:min(420px,calc(100vw - 32px));padding:12px 14px 10px;
+  background:color-mix(in srgb,var(--panel-fond,var(--panel)) var(--voile,62%),transparent);
+  backdrop-filter:blur(16px) saturate(150%);-webkit-backdrop-filter:blur(16px) saturate(150%);
+  transition:background .25s ease,opacity .25s ease}
+#panel:hover,#panel:focus-within{background:var(--panel-fond,var(--panel))}
+#title{font-size:21px;padding-right:34px}
+#text{font-size:13.5px;max-height:26vh}
+#legend{font-size:11px;gap:2px 10px}
+#bMini{position:absolute;top:9px;right:9px;width:28px;height:28px;padding:0;border-radius:50%;border:1px solid var(--line);
+  background:transparent;color:var(--ink);font-size:16px;font-weight:900;line-height:1;cursor:pointer;opacity:.75}
+#bMini:hover{opacity:1}
+#panel.mini #text,#panel.mini #legend,#panel.mini #note{display:none}
+#panel.mini #title{font-size:17px;margin-bottom:2px}
+#ctrl{gap:5px}
+#dots{gap:4px;flex-wrap:wrap;justify-content:flex-end;min-width:0}
+#dots button{width:8px!important;height:8px!important}
+#panel{--panel-fond:#F4F2EC;--voile:76%;--ink:#16150F;--muted:#4A4840;--line:#8C8980;--chip:#ECE9E0;--accent:#6E5719;color:var(--ink)}  /* palette papier attachée au panneau : le mode sombre du système ne la remplace plus */
 </style>
 <script type="importmap">
 {"imports":{
@@ -139,6 +158,7 @@ h1,h2{font-weight:1000}
 </div>
 
 <div id="panel" role="region" aria-live="polite">
+  <button id="bMini" type="button" aria-expanded="true" aria-controls="text" title="Réduire le panneau (H)">–</button>
   <div id="stepno"></div>
   <div id="title"></div>
   <div id="text"></div>
@@ -1936,6 +1956,18 @@ tick();
 window.__goStep = goStep;
 window.__dbg = { world, stM, P, scene, ledGlow, rgbMat, diffMat };
 
+</script>
+<script>
+/* Réduire / agrandir le panneau d'explication (bouton « – » ou touche H). Le choix est gardé pour la prochaine visite. */
+(function(){
+  var p = document.getElementById('panel'), b = document.getElementById('bMini'); if (!p || !b) return;
+  function set(mini){ p.classList.toggle('mini', mini); b.textContent = mini ? '+' : '–'; b.setAttribute('aria-expanded', String(!mini));
+    b.title = mini ? 'Agrandir le panneau (H)' : 'Réduire le panneau (H)'; try { localStorage.setItem('panneauMini', mini ? '1' : '0'); } catch (e) {} }
+  var start = false; try { start = localStorage.getItem('panneauMini') === '1'; } catch (e) {}
+  set(start);
+  b.addEventListener('click', function(){ set(!p.classList.contains('mini')); });
+  addEventListener('keydown', function(e){ if ((e.key === 'h' || e.key === 'H') && !e.ctrlKey && !e.metaKey && !e.altKey && !/INPUT|TEXTAREA/.test((document.activeElement||{}).tagName||'')) set(!p.classList.contains('mini')); });
+})();
 </script>
 </body>
 </html>

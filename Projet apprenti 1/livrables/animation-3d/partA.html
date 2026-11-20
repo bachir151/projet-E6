@@ -93,6 +93,24 @@ button{font:inherit;cursor:pointer}
 h1,h2{font-weight:1000}
 #ctrl button,.tbtn,.seg button,#dots button{border-radius:999px}
 #ctrl button,.tbtn,.seg button{font-weight:800;white-space:nowrap}
+
+/* ---- panneau d'explication : plus discret pour laisser voir la maquette ---- */
+#panel{width:min(420px,calc(100vw - 32px));padding:12px 14px 10px;
+  background:color-mix(in srgb,var(--panel-fond,var(--panel)) var(--voile,62%),transparent);
+  backdrop-filter:blur(16px) saturate(150%);-webkit-backdrop-filter:blur(16px) saturate(150%);
+  transition:background .25s ease,opacity .25s ease}
+#panel:hover,#panel:focus-within{background:var(--panel-fond,var(--panel))}
+#title{font-size:21px;padding-right:34px}
+#text{font-size:13.5px;max-height:26vh}
+#legend{font-size:11px;gap:2px 10px}
+#bMini{position:absolute;top:9px;right:9px;width:28px;height:28px;padding:0;border-radius:50%;border:1px solid var(--line);
+  background:transparent;color:var(--ink);font-size:16px;font-weight:900;line-height:1;cursor:pointer;opacity:.75}
+#bMini:hover{opacity:1}
+#panel.mini #text,#panel.mini #legend,#panel.mini #note{display:none}
+#panel.mini #title{font-size:17px;margin-bottom:2px}
+#ctrl{gap:5px}
+#dots{gap:4px;flex-wrap:wrap;justify-content:flex-end;min-width:0}
+#dots button{width:8px!important;height:8px!important}
 </style>
 <script type="importmap">
 {"imports":{
