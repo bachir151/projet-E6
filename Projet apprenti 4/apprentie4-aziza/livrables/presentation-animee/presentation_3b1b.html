@@ -5,11 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Projet E6 – Des PC de maintenance à jour</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=STIX+Two+Text:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@200..1000&display=swap">
 <style>
 :root{--bg:#121417;--fg:#ECECEC;--dim:#8E959D;--blue:#58C4DD;--teal:#5CD0B3;--green:#83C167;--yellow:#FFE36E;--gold:#F0AC5F;--red:#FC6255;--purple:#B189C6;--grid:#2A2F35}
 *{box-sizing:border-box}
-html,body{margin:0;height:100%;background:var(--bg);color:var(--fg);overflow:hidden;font-family:'STIX Two Text',Georgia,serif}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--fg);overflow:hidden;font-family:"Nunito",ui-rounded,"Segoe UI",system-ui,sans-serif}
 #stage{position:absolute;left:50%;top:50%;width:1920px;height:1080px;transform-origin:center center}
 .slide{position:absolute;inset:0;padding:110px 140px;opacity:0;pointer-events:none;transition:opacity .5s}
 .slide.active{opacity:1;pointer-events:auto}
@@ -17,7 +17,7 @@ h1{font-size:96px;font-weight:600;margin:0;line-height:1.05}
 h2{font-size:64px;font-weight:400;margin:0 0 40px;color:var(--fg)}
 h2 .k{color:var(--yellow)}
 p,li{font-size:38px;line-height:1.35;margin:0}
-.mono{font-family:'JetBrains Mono',monospace}
+.mono{font-family:ui-monospace,"SF Mono",Consolas,"Liberation Mono",monospace}
 .dim{color:var(--dim)} .blue{color:var(--blue)} .yellow{color:var(--yellow)} .green{color:var(--green)} .red{color:var(--red)} .teal{color:var(--teal)} .gold{color:var(--gold)}
 [data-s]{opacity:0;transition:opacity .7s ease, transform .7s ease}
 [data-s].on{opacity:1}
@@ -26,21 +26,21 @@ p,li{font-size:38px;line-height:1.35;margin:0}
 .write.on{clip-path:inset(0 0 0 0)}
 .draw{stroke-dasharray:var(--len);stroke-dashoffset:var(--len);transition:stroke-dashoffset 1.6s ease}
 .on .draw,.draw.on{stroke-dashoffset:0}
-svg text{font-family:'STIX Two Text',Georgia,serif;fill:var(--fg)}
+svg text{font-family:"Nunito",ui-rounded,"Segoe UI",system-ui,sans-serif;fill:var(--fg)}
 .box{fill:none;stroke-width:3}
 .badge{display:inline-block;border:2px solid var(--yellow);color:var(--yellow);padding:10px 26px;border-radius:40px;font-size:30px}
 .card{border:2px solid var(--grid);border-radius:18px;padding:30px 36px}
 #hud{position:fixed;left:0;right:0;bottom:0;height:5px;background:#1d2126}
 #bar{height:100%;width:0;background:var(--blue);transition:width .4s}
-#num{position:fixed;right:18px;bottom:14px;font:14px 'JetBrains Mono',monospace;color:var(--dim)}
-#help{position:fixed;left:18px;bottom:14px;font:13px 'JetBrains Mono',monospace;color:#5a6169}
-#fs{position:fixed;right:16px;top:14px;background:none;border:1px solid #3a4048;color:var(--dim);font:13px 'JetBrains Mono',monospace;padding:6px 10px;border-radius:6px;cursor:pointer}
+#num{position:fixed;right:18px;bottom:14px;font:14px ui-monospace,Consolas,monospace;color:var(--dim)}
+#help{position:fixed;left:18px;bottom:14px;font:13px ui-monospace,Consolas,monospace;color:#5a6169}
+#fs{position:fixed;right:16px;top:14px;background:none;border:1px solid #3a4048;color:var(--dim);font:13px ui-monospace,Consolas,monospace;padding:6px 10px;border-radius:6px;cursor:pointer}
 #notes{position:fixed;left:50%;bottom:30px;transform:translateX(-50%);width:min(900px,92vw);background:#1b1f24ee;border:1px solid #3a4048;border-radius:10px;padding:16px 20px;font:17px/1.5 Georgia,serif;color:#d8d8d8;display:none}
 input[type=range]{width:420px;accent-color:var(--yellow)}
 .ctl{font-size:30px;display:flex;align-items:center;gap:24px;margin:10px 0}
-.ctl span.v{font-family:'JetBrains Mono',monospace;color:var(--yellow);width:150px}
-#hashIn{font:34px 'JetBrains Mono',monospace;background:#1b1f24;color:var(--fg);border:2px solid var(--grid);border-radius:10px;padding:10px 18px;width:760px}
-.hex{font:30px 'JetBrains Mono',monospace;letter-spacing:1px;word-break:break-all;line-height:1.4}
+.ctl span.v{font-family:ui-monospace,"SF Mono",Consolas,"Liberation Mono",monospace;color:var(--yellow);width:150px}
+#hashIn{font:34px ui-monospace,Consolas,monospace;background:#1b1f24;color:var(--fg);border:2px solid var(--grid);border-radius:10px;padding:10px 18px;width:760px}
+.hex{font:30px ui-monospace,Consolas,monospace;letter-spacing:1px;word-break:break-all;line-height:1.4}
 .hex b{color:var(--red);font-weight:600}
 .pulse{animation:pulse 1.6s ease-in-out infinite}
 @keyframes pulse{50%{opacity:.35}}

@@ -11,7 +11,7 @@ function cable(points, mat, r = 0.3, seg = 140) {
   return c;
 }
 function reverseCurve(c) { return new THREE.CatmullRomCurve3(c.points.slice().reverse(), false, 'catmullrom', 0.5); }
-const FONT = '"Atkinson Hyperlegible", Arial, sans-serif', MONO = '"IBM Plex Mono", Consolas, monospace';
+const FONT = '"Nunito", Arial, sans-serif', MONO = 'ui-monospace, Consolas, monospace';
 const glowBasic = (hex, k = 3) => new THREE.MeshBasicMaterial({ color: new THREE.Color(hex).multiplyScalar(k), toneMapped: false });
 
 /* ---------------------------------------------------------------------

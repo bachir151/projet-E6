@@ -7,7 +7,7 @@
 <link rel="icon" href="data:,">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Atkinson+Hyperlegible:wght@400;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@200..1000&display=swap">
 <style>
 /* Scène 3D plein écran, toujours sur fond sombre (lumières et paquets lumineux).
    Le panneau d'explication suit le thème clair / sombre. */
@@ -15,9 +15,9 @@
   --bg:#0b1016; --panel:rgba(255,255,255,.92); --ink:#13222c; --muted:#56656f; --line:#d3dde2;
   --accent:#1d5a86; --chip:#eef3f6;
   --kit:#3ddc84; --req:#9fd0ff; --rep:#4aa8ff; --borne:#ffb020; --capt:#c18cff; --err:#ff5a4d;
-  --f-display:"Barlow Condensed","Arial Narrow",Arial,sans-serif;
-  --f-body:"Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",sans-serif;
-  --f-mono:"IBM Plex Mono",ui-monospace,Consolas,monospace;
+  --f-display:"Nunito",ui-rounded,"Segoe UI",system-ui,sans-serif;
+  --f-body:"Nunito",ui-rounded,"Segoe UI",system-ui,sans-serif;
+  --f-mono:ui-monospace,"SF Mono",Consolas,"Liberation Mono",monospace;
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
   --panel:rgba(16,24,31,.88); --ink:#e4ecf0; --muted:#9aabb5; --line:#2a3a45; --accent:#6fb0de; --chip:#1c2a34; color-scheme:dark}}
@@ -88,6 +88,11 @@ button{font:inherit;cursor:pointer}
   #legend{display:none}
   .lab{font-size:10.5px;padding:3px 6px}.lab b{font-size:13px}
 }
+
+/* ---- charte « encre sur papier » appliquée à l'interface (la scène 3D garde son ambiance de nuit) ---- */
+h1,h2{font-weight:1000}
+#ctrl button,.tbtn,.seg button,#dots button{border-radius:999px}
+#ctrl button,.tbtn,.seg button{font-weight:800;white-space:nowrap}
 </style>
 <script type="importmap">
 {"imports":{
