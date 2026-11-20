@@ -33,6 +33,9 @@ button{font:inherit;cursor:pointer}
 
 #brand{position:fixed;top:max(12px,env(safe-area-inset-top));left:max(16px,env(safe-area-inset-left));pointer-events:none}
 #brand .eye{font-family:var(--f-mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+#to2d{pointer-events:auto;display:inline-block;margin-top:8px;font-size:12px;font-weight:800;color:var(--ink);text-decoration:none;border:1px solid var(--border-glass);background:var(--glass);border-radius:999px;padding:4px 12px;backdrop-filter:blur(10px)}
+#to2d:hover{border-color:var(--accent)}
+body.photo #to2d{display:none}
 #brand h1{font-family:var(--f-display);font-size:26px;line-height:1.05;margin:4px 0 0;font-weight:900;letter-spacing:.04em;text-transform:uppercase}
 
 /* panneau de rue (haut centre) : où l'on se trouve */
@@ -142,6 +145,7 @@ body.photo #photo{display:block;animation:cardReveal .35s var(--ease-out-expo) b
 }
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
+<script src="maisons.js"></script>
 <script type="importmap">
 {"imports":{
   "three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
@@ -155,6 +159,7 @@ body.photo #photo{display:block;animation:cardReveal .35s var(--ease-out-expo) b
 <div id="brand">
   <div class="eye">BTS CIEL option A · projets E6 · session 2027</div>
   <h1 class="neon">Le quartier des projets</h1>
+  <a id="to2d" href="plan-2d.html">Voir le plan 2D</a>
 </div>
 <div id="street" aria-hidden="true"><b id="stname">Carrefour des projets</b><span id="stsub">BTS CIEL · E6</span></div>
 
@@ -201,7 +206,7 @@ import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 
 /* =====================================================================
-   1. LES MAISONS DU QUARTIER  (c'est ici qu'on ajoute une maquette)
+   1. LES MAISONS DU QUARTIER : elles sont dans maisons.js (partagé avec le plan 2D)
    ---------------------------------------------------------------------
    Pour ajouter la 4e maquette (ou une 5e) : remplacer l'entrée « libre »
    (ou en ajouter une) avec son titre, sa couleur et le chemin `url` de sa
@@ -209,24 +214,7 @@ import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
    au minimum ; à partir de la 5e, elles se resserrent).
    `prop` = petit objet posé devant la porte : 'printer', 'radar', 'kit' ou null.
    ===================================================================== */
-const SLOTS = [
-  { who: 'Wassim', n: 1, color: '#ffb020', prop: 'printer',
-    title: 'Le service informatique augmenté', sub: 'de l’imprimante muette au PC du nouveau médecin',
-    desc: 'Un boîtier ESP32 écoute l’imprimante. Le serveur compare quatre témoins et ouvre un ticket GLPI quand une panne se prépare.',
-    url: '../Projet apprenti 1/livrables/animation-3d/maquette-3d.html' },
-  { who: 'Lorenzo', n: 3, color: '#c18cff', prop: 'radar',
-    title: 'CyberSentinel', sub: 'un radar pour le poste, un leurre pour le réseau',
-    desc: 'Un radar LD2410 voit que l’agent est parti et le poste Windows se verrouille seul. Un second ESP32 joue une fausse imprimante : toute connexion devient un signal à examiner.',
-    url: '../Projet apprenti 3/livrables/animation-3d/maquette-3d.html' },
-  { who: 'Aziza', n: 4, color: '#3ddc84', prop: 'kit',
-    title: 'Le kit de maintenance', sub: 'PC à jour · documents archivés · parc tracé',
-    desc: 'Des PC de maintenance toujours à jour : un catalogue signé distribue les bons fichiers, et chaque machine est tracée.',
-    url: '../Projet apprenti 4/apprentie4-aziza/livrables/animation-3d/maquette-3d.html' },
-  { who: '', n: 0, color: '#7f8c96', prop: null,
-    title: 'À venir', sub: 'emplacement réservé',
-    desc: 'Cette maison est vide pour l’instant. La prochaine maquette viendra ici.',
-    url: null },
-];
+const SLOTS = window.QUARTIER.maisons.map(m => ({ ...m }));   // liste partagée : voir maisons.js
 
 /* =====================================================================
    2. Réglages généraux
@@ -729,42 +717,7 @@ const dockBtns = [];
     bt.innerHTML = `<i></i>${s.free ? 'Libre' : s.who}`; bt.onclick = () => goHouse(i); dock.appendChild(bt); dockBtns.push(bt);
   });
 }
-/* vignettes dessinées (trait noir épais, aplats, ombre dure décalée) */
-function illus(kind, col) {
-  const K = '#16150F', W = '#FFFBF2';
-  const sh = (d) => `<path d="${d}" fill="${K}" transform="translate(4 4)"/>`;
-  const head = '<svg viewBox="0 0 110 110" xmlns="http://www.w3.org/2000/svg"><g stroke="' + K + '" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">';
-  const foot = '</g></svg>';
-  if (kind === 'carrefour') return head +
-    `<path d="M52 100V22" fill="none"/><ellipse cx="52" cy="101" rx="16" ry="4" fill="${K}" stroke="none"/>
-     <g class="bob">${sh('M54 26h36l10 9-10 9H54z')}<path d="M54 26h36l10 9-10 9H54z" fill="#ffb020"/>
-     ${sh('M50 50H16L6 59l10 9h34z')}<path d="M50 50H16L6 59l10 9h34z" fill="#c18cff"/>
-     ${sh('M54 74h32l9 8-9 8H54z')}<path d="M54 74h32l9 8-9 8H54z" fill="#3ddc84"/></g>
-     <circle cx="52" cy="17" r="6" fill="${col}"/>` + foot;
-  if (kind === 'printer') return head +
-    `<ellipse cx="55" cy="96" rx="40" ry="5" fill="${K}" stroke="none"/>
-     <path d="M32 18h46v26H32z" fill="${W}"/><path d="M39 27h30M39 34h22" fill="none"/>
-     ${sh('M14 42h82v40H14z')}<path d="M14 42h82v40H14z" fill="${col}"/>
-     <path d="M28 82v12h54V82" fill="${W}"/><path d="M36 88h30" fill="none"/>
-     <circle cx="82" cy="54" r="5" fill="#3ddc84"/>
-     <g class="bob">${sh('M62 6h28v20H62z')}<path d="M62 6h28v20H62z" fill="#9CC3E6"/><circle cx="70" cy="16" r="3" fill="#C8372D" stroke="none"/><path d="M78 13h7M78 19h7" fill="none"/></g>` + foot;
-  if (kind === 'radar') return head +
-    `<ellipse cx="44" cy="98" rx="30" ry="5" fill="${K}" stroke="none"/>
-     <path d="M44 96V66" fill="none"/><path d="M30 96h28" fill="none"/>
-     ${sh('M18 36h52v32H18z')}<path d="M18 36h52v32H18z" fill="${col}"/>
-     <circle cx="44" cy="52" r="8" fill="${W}"/><circle cx="44" cy="52" r="2.5" fill="${K}" stroke="none"/>
-     <g class="bob" fill="none"><path d="M76 40c8 6 8 18 0 24"/><path d="M84 32c13 10 13 30 0 40"/><path d="M92 24c18 14 18 42 0 56"/></g>` + foot;
-  if (kind === 'kit') return head +
-    `<ellipse cx="55" cy="97" rx="40" ry="5" fill="${K}" stroke="none"/>
-     <path d="M40 32v-9h30v9" fill="none"/>
-     ${sh('M12 32h86v56H12z')}<path d="M12 32h86v56H12z" fill="${col}"/><path d="M12 52h86" fill="none"/>
-     <path d="M48 48h14v10H48z" fill="${W}"/>
-     <g class="bob">${sh('M74 58a14 14 0 1 0 0.1 0z')}<circle cx="74" cy="72" r="14" fill="${W}"/><path d="M67 72l5 5 9-10" fill="none"/></g>` + foot;
-  return head +   /* emplacement libre : maison en pointillés */
-    `<ellipse cx="55" cy="96" rx="38" ry="5" fill="${K}" stroke="none" opacity=".35"/>
-     <path d="M20 52 55 22l35 30v40H20z" fill="none" stroke-dasharray="7 6"/>
-     <text x="55" y="80" text-anchor="middle" font-size="30" font-weight="900" fill="${K}" stroke="none" font-family="Nunito,sans-serif">?</text>` + foot;
-}
+const illus = window.QUARTIER.illus;   // vignettes partagées : voir maisons.js
 let lastShown = null;
 const replay = (el, cls) => { el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls); };
 function refreshUI() {
