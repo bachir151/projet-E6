@@ -1,0 +1,565 @@
+TROIS PROJETS DE BTS CIEL : WASSIM, LORENZO ET AZIZA
+Explication détaillée, pour préparer un podcast
+Version du 21 novembre 2026
+
+Ce document présente les projets de trois apprentis en BTS CIEL option A (Informatique et réseaux), session 2027. Il est écrit pour être lu et raconté. Les contextes sont anonymisés : on ne cite aucun nom d'entreprise ni de tuteur. Tout ce qui est décrit est une maquette réalisée au lycée, jamais un système installé en entreprise. Les chiffres annoncés sont des objectifs ou des ordres de grandeur ; aucun résultat n'est encore mesuré.
+
+
+======================================================================
+PREMIÈRE PARTIE : LE CADRE COMMUN
+======================================================================
+
+1. L'ÉPREUVE E6
+
+L'épreuve E6 du BTS CIEL s'appelle « Valorisation de la donnée et cybersécurité ». Elle compte beaucoup : coefficient 7. C'est un oral d'une heure, appuyé sur un projet individuel d'environ 150 heures.
+
+Le jury évalue quatre compétences :
+- C01, communiquer : expliquer son projet clairement, à l'écrit et à l'oral.
+- C03, gérer un projet : planifier, découper en étapes, tenir les délais, faire des choix.
+- C08, coder : écrire des programmes qui marchent, sur un microcontrôleur, un serveur ou un PC.
+- C10, exploiter un réseau informatique : se servir du réseau qui existe déjà. Adresses, DHCP, DNS, NTP, protocoles, captures de trames avec Wireshark, supervision.
+
+Un point est important pour C10. Il s'agit d'exploiter le réseau en place, pas de le reconfigurer. Créer des VLAN, des listes de contrôle d'accès ou de l'authentification 802.1X relève d'une autre épreuve, l'E5. Les trois projets observent donc le réseau, le vérifient et le diagnostiquent, mais ne le reconstruisent pas.
+
+Un professeur de physique évalue aussi le projet. Chaque projet doit donc contenir un vrai volet physique : un étalonnage, des mesures répétées, des incertitudes, et un modèle que l'on confronte aux mesures. Ce volet doit servir le projet. Il ne doit jamais être décoratif.
+
+2. UNE RÈGLE DE MÉTHODE : LE BESOIN D'ABORD
+
+Chaque projet part d'un vrai problème rencontré par l'apprenti dans son entreprise, ou d'une amélioration proposée au service, qui reste à faire valider par le tuteur. L'enseignant ne part pas d'une technologie à la mode. Il part d'une question simple : qu'est-ce qui fait perdre du temps, ou qu'est-ce qui expose à un risque, dans le travail réel de l'apprenti ?
+
+Ensuite, le besoin est chiffré. On écrit des hypothèses, que le tuteur valide. On fixe des indicateurs que l'on mesurera sur la maquette : un nombre de pannes bien diagnostiquées, un délai, un taux de fausses alertes.
+
+3. UNE PROGRESSION EN TROIS NIVEAUX
+
+Chaque projet suit la même progression :
+- La V1 est obligatoire. C'est un projet complet à elle seule, qui doit marcher le jour de l'oral.
+- La V2 est visée. Elle ajoute de la robustesse ou une fonction de plus.
+- Les extensions sont facultatives. On les garde ou on les coupe selon le temps restant.
+
+Cette progression protège l'apprenti : s'il prend du retard, il a quand même un projet qui tient debout.
+
+4. LES PALIERS DE SÉCURITÉ
+
+Dès qu'un système agit sur des machines, on avance par paliers de confiance :
+- Palier 1, la simulation ou le conseil : le système dit ce qu'il ferait, sans rien faire.
+- Palier 2, la confirmation humaine : le système prépare l'action, un humain clique pour la lancer.
+- Palier 3, l'automatique : le système agit seul, et note tout ce qu'il fait.
+
+On ne passe au palier suivant qu'après avoir prouvé que le précédent ne se trompe pas.
+
+5. LA RÉALISATION AU LYCÉE
+
+Les trois projets sont réalisés au lycée, sur une maquette, avec le matériel du lycée : PC sous Ubuntu, switchs, routeurs, cartes ESP32 et capteurs. Il n'y a aucune donnée réelle et aucun accès aux réseaux de production des entreprises.
+
+Il y a un point réglementaire à connaître. L'arrêté du 25 janvier 2023 indique que, pour les apprentis, les projets doivent être développés dans l'entreprise. La réalisation au lycée doit donc être validée par l'académie. Chaque dossier le dit clairement.
+
+Deux interdits pour la sécurité des personnes : pas de câblage en 230 volts, et pas de caméra qui filme des personnes.
+
+6. L'INTELLIGENCE ARTIFICIELLE
+
+Les apprentis utiliseront l'IA pour coder et rédiger. Une charte encadre cet usage : une charge de travail réaliste, une liste rouge de choses interdites (par exemple écrire un mot de passe ou une clé secrète dans le code), et un journal où l'apprenti note ce que l'IA a fait et ce qu'il a vérifié lui-même.
+
+7. TROIS PROJETS BIEN DISTINCTS
+
+Les trois projets ont des points communs : un ESP32, un serveur Ubuntu, des scripts PowerShell sur Windows. Mais ils répondent à trois questions différentes.
+- Wassim : « L'imprimante marche-t-elle, et pourquoi pas ? » C'est une question de disponibilité.
+- Lorenzo : « Le poste est-il protégé quand l'agent s'absente, et quelqu'un touche-t-il à ce qu'il ne devrait pas toucher sur le réseau ? » C'est une question de prévention et de détection.
+- Aziza : « Ce PC de terrain a-t-il les bons fichiers, et peut-on le prouver ? » C'est une question d'intégrité.
+
+Chaque apprenti garde une seule question de sécurité, pour que le jury ne voie pas deux fois la même démonstration :
+- Wassim : le diagnostic à distance peut-il faire plus que ce qu'on lui permet ?
+- Lorenzo : le boîtier radar est-il authentique ? Un accès au leurre doit-il être qualifié ?
+- Aziza : ce fichier est-il le bon ?
+
+Et chaque volet physique est différent :
+- Wassim : vibrations de l'imprimante, vitesse des feuilles, et humidité du papier.
+- Lorenzo : réglage d'un radar 24 gigahertz et mesure d'un délai à l'oscilloscope.
+- Aziza : refroidissement d'un PC et risque de condensation.
+
+
+======================================================================
+DEUXIÈME PARTIE : WASSIM
+« Le service informatique augmenté : de l'imprimante muette au PC du nouveau médecin »
+======================================================================
+
+1. QUI EST WASSIM ET QUE FAIT-IL ?
+
+Wassim est apprenti technicien de support au service informatique d'un centre hospitalier. Lors d'un entretien en novembre 2026, il a décrit ses journées. Elles tournent autour de deux choses : des imprimantes qui ne marchent pas, et des PC à préparer pour les médecins qui arrivent.
+
+Ses mots : « Le plus gros problème, c'est les imprimantes. » Elles sont allumées mais n'impriment pas. Il vérifie si elles sont dans le bon réseau, s'il manque de l'encre. Ce sont toujours les mêmes vérifications, refaites à la main.
+
+Pour les nouveaux médecins, il met le PC dans le domaine, le range dans le bon service de l'annuaire Active Directory, puis lance un script qui installe les applications. « Sans le domaine, on ne peut rien faire. » Une erreur de service est vite arrivée.
+
+Il dit aussi : « Il y a trop de tickets. » Et ces tickets sont mal décrits. Le plus souvent, ils disent seulement : « l'imprimante ne marche pas ».
+
+Sa méthode : il prend d'abord la main à distance. Si c'est vraiment bloqué, il se déplace. Un bon diagnostic à distance lui éviterait donc des déplacements.
+
+2. CE QUI EXISTE DÉJÀ, ET CE QUI MANQUE
+
+Plusieurs outils existent déjà.
+- La page web de l'imprimante montre son état et son niveau d'encre. Mais une seule imprimante à la fois. Et elle peut dire « tout va bien » alors que l'imprimante est figée.
+- Les outils de supervision comme Centreon ou Zabbix surveillent toutes les imprimantes du réseau. Mais ils ne voient pas si une feuille sort vraiment, ils ne regardent pas le PC qui imprime, et ils sont lourds à installer.
+- La prise en main à distance permet à Wassim de voir le PC comme s'il y était. Mais il refait les mêmes vérifications, ticket après ticket.
+- GLPI, l'outil de tickets et d'inventaire, suit les demandes et le matériel. Mais le ticket ne contient que la phrase de l'utilisateur, et personne ne prouve que la réparation a marché.
+- Le script d'installation actuel installe les applications vite. Mais le choix du service et du profil se fait à la main, et GLPI n'est pas mis à jour tout seul.
+
+Ce qui manque partout, c'est un témoin physique, qui réponde à la question « la feuille est-elle vraiment sortie ? ». Il manque aussi un lien automatique entre ce qui se passe sur le terrain, l'annuaire et GLPI.
+
+3. LE PROJET EN UNE PHRASE
+
+Quand une imprimante tombe en panne, le système le voit, trouve la cause, aide à réparer et prouve que c'est réparé. Quand un médecin arrive, son PC se prépare quand on pose trois cartes.
+
+Le projet a deux outils sur le terrain et un seul cerveau :
+- le boîtier de l'imprimante, dans les services de soins ;
+- la station de préparation des PC neufs, à l'atelier informatique ;
+- un serveur central, qui reçoit tout, compare, décide et écrit dans GLPI. Un tableau de bord montre une pastille de couleur par imprimante et par PC en préparation.
+
+4. LE BOÎTIER DE L'IMPRIMANTE
+
+Le boîtier est un petit appareil fixé sur l'imprimante. Il contient :
+- un ESP32, le petit ordinateur qui lit les capteurs et parle au serveur par le Wi-Fi ;
+- un accéléromètre, qui sent la vibration. Il doit être fixé de façon rigide, sinon la vibration se perd ;
+- un capteur infrarouge, placé au-dessus de la sortie du papier, qui compte les feuilles ;
+- un gros bouton rouge « Ça ne marche pas », qui ouvre un ticket avec le nom exact de l'imprimante, sans rien écrire ;
+- un écran à encre électronique, qui garde son message même sans courant ;
+- un lecteur de cartes RFID, pour la carte de Wassim ;
+- en V2, un capteur de température et d'humidité, le SHT31.
+
+Il est alimenté par un simple bloc USB 5 volts. Aucun câblage en 230 volts.
+
+Une variante est prévue pour la liaison : les boîtiers peuvent parler entre eux en ESP-NOW, une liaison directe entre ESP32, vers une seule passerelle reliée au réseau. Ainsi, le mot de passe Wi-Fi n'est pas stocké dans chaque boîtier.
+
+5. L'IDÉE CENTRALE : QUATRE TÉMOINS
+
+C'est le cœur du projet. Pour savoir ce qui se passe vraiment, le serveur interroge quatre témoins, comme un enquêteur qui écoute plusieurs versions d'une même histoire.
+
+- La vibration dit : « les moteurs tournent ».
+- Les feuilles disent : « trois feuilles sont sorties ».
+- L'imprimante elle-même, interrogée par le réseau avec le protocole SNMP, dit ce qu'elle croit savoir : « je vais bien », « bourrage », « plus de papier ». Parfois, elle se trompe.
+- Le PC de la secrétaire, lu par un script PowerShell lancé à distance, dit : « cinq pages attendent chez moi ». Le script compte les documents en attente, mais ne lit jamais leur nom, car un nom de fichier peut contenir le nom d'un patient.
+
+L'idée clé : l'imprimante dit ce qu'elle croit, les capteurs disent ce qui se passe vraiment, le PC dit ce qu'il a envoyé. Le serveur compare les trois pour écrire la bonne cause dans le ticket.
+
+Six situations typiques :
+- Ça vibre, cinq feuilles sur cinq, l'imprimante dit « ça va », rien n'attend sur le PC : tout va bien, aucun ticket.
+- Pas de vibration, aucune feuille, l'imprimante dit « plus de papier » : c'est souvent réglé sur place.
+- Ça vibre puis s'arrête, deux feuilles sur cinq, l'imprimante dit « bourrage » : une feuille est coincée après la deuxième page.
+- Pas de vibration, aucune feuille, mais l'imprimante dit « ça va » : elle est figée. Elle ment sans le savoir. C'est exactement le cas que Wassim a décrit.
+- Pas de vibration, aucune feuille, l'imprimante dit « ça va », mais cinq pages sont bloquées sur le PC : le problème est dans le PC, pas dans l'imprimante.
+- L'imprimante ne répond pas du tout : elle n'est plus sur le réseau, ou elle n'est pas dans le réseau attendu.
+
+6. LE DÉROULÉ D'UNE PANNE, ÉTAPE PAR ÉTAPE
+
+Un : la secrétaire imprime cinq pages. L'impression passe par le serveur, qui sait donc combien de pages sont demandées.
+Deux : le boîtier dit ce qu'il sent. L'imprimante vibre-t-elle ? Combien de feuilles sont sorties ?
+Trois : le serveur demande à l'imprimante comment elle va, en SNMP.
+Quatre : le serveur regarde la file d'impression du PC avec PowerShell.
+Cinq : le serveur lit l'annuaire. Le PC est rangé dans le service « Cardiologie », donc l'imprimante devrait être dans le réseau de la cardiologie.
+Six : le serveur compare et décide. S'il y a un problème, il ouvre un ticket GLPI avec la cause probable, et la pastille passe au rouge.
+Sept : l'écran du boîtier donne des nouvelles : « Bac 2 vide », puis « Wassim arrive », puis « Réparé ».
+Huit : Wassim pose sa carte RFID sur le boîtier en arrivant et en partant. Le ticket note l'heure d'arrivée et la durée de l'intervention.
+
+7. CE QUE LE BOÎTIER AJOUTE
+
+- L'encre avant la panne : à 10 % d'encre, le serveur ouvre un ticket préventif. La panne n'arrive jamais.
+- Le bon réseau : le ticket ne dit plus « hors réseau », mais « l'imprimante est dans le réseau de la radiologie, elle devrait être dans celui de la cardiologie ». Le système vérifie ; il ne change rien au réseau.
+- Les vérifications réseau : quand l'imprimante ne répond pas, le serveur cherche où ça bloque. Répond-elle au ping ? Son nom est-il connu du DNS ? A-t-elle reçu son adresse du DHCP ? Les ports d'impression 9100 et 631 sont-ils ouverts ? Le ticket dit lequel bloque. C'est le cœur de la compétence C10 : exploiter le réseau en place.
+- Réglé sur place : si la secrétaire remet du papier ou retire la feuille coincée, les feuilles ressortent, le capteur les compte, et le ticket est marqué « résolu sur place », avec cette preuve. Wassim ne se déplace pas.
+- La preuve de réparation : quand Wassim repose sa carte en partant, le serveur envoie une page de test. Si le capteur la voit sortir, le ticket est fermé avec l'heure de sortie. Sinon, il reste ouvert.
+- L'humidité du local, en V2 : le papier qui a pris l'humidité gondole et se coince plus facilement. Le capteur SHT31 suit l'humidité. Au-dessus d'un seuil, vers 65 % à fixer par les mesures, le serveur ouvre un ticket préventif : « Local humide, papier à ranger ». Il croise aussi l'humidité avec les bourrages comptés.
+- Le redémarrage à distance, pour l'imprimante figée, par le réseau si le modèle l'accepte, sinon avec une prise connectée du commerce. Il suit les trois paliers de confiance.
+- En option, une étagère de cartouches : la LED de la bonne cartouche s'allume, un capteur de poids voit qu'on la prend, et le stock baisse dans GLPI.
+
+8. LA STATION DES PC NEUFS
+
+Deuxième outil. Aujourd'hui, Wassim choisit le service et le profil de mémoire, range le PC dans l'annuaire après coup, et met GLPI à jour à la main, ou l'oublie.
+
+Avec la station, il pose trois cartes RFID :
+- sa propre carte : la station sait qui travaille ;
+- une carte de profil, par exemple « Cardiologie, médecin » : elle sait pour qui est le PC ;
+- l'étiquette RFID collée sur le PC ou son carton : elle sait quel PC. Le lien entre l'étiquette et le numéro de série est dans GLPI depuis l'entrée du PC en stock.
+
+L'écran résume : « PC 5CG12, Cardiologie, médecin. Valider ? » Wassim appuie sur le bouton, le serveur enregistre la commande.
+
+Sur le PC neuf, Wassim lance un seul script PowerShell, comme aujourd'hui. Le script lit le numéro de série du PC, demande sa commande au serveur, met le PC dans le domaine directement dans le bon service, installe les applications du profil depuis un partage réseau, vérifie que tout est en place et le dit au serveur. Les LED de la station avancent à chaque étape. GLPI passe la fiche du PC de « en stock » à « en service, Cardiologie ».
+
+Le mot de passe du compte qui ajoute les PC au domaine est demandé à l'exécution. Il n'est jamais écrit dans le script.
+
+Une contrainte technique a été découverte : les PC du lycée sont sous Windows 11 Famille, qui ne peut rejoindre aucun domaine. La maquette simule donc l'annuaire Active Directory avec Samba sur un PC Ubuntu. Pour Windows, c'est un vrai contrôleur de domaine. Les PC Windows sont des machines virtuelles Windows 11 Entreprise en version d'évaluation de 90 jours, ou Windows 11 Pro si le lycée a des licences.
+
+9. LA SÉCURITÉ CHEZ WASSIM
+
+Sa question de sécurité principale : le diagnostic à distance peut-il faire plus que ce qu'on lui permet ?
+
+Réponse : un point d'accès PowerShell limité, appelé JEA, pour « Just Enough Administration », c'est-à-dire « juste assez d'administration ». C'est une liste fermée de commandes, avec un compte sans droit d'administrateur. Démonstration : une commande hors liste est refusée et tracée.
+
+Autres protections :
+- Le compte GLPI du système ajoute des tickets mais ne supprime rien. Il ne ferme un ticket qu'avec une preuve : la carte de Wassim et la page de test, ou les feuilles qui ressortent.
+- Les cartes RFID bon marché, de type MIFARE Classic, se copient : leur protection est cassée depuis 2008. Le numéro de carte ne suffit donc pas. Le système corrigé demande une confirmation sur l'écran, puis utilise des cartes sécurisées qui prouvent leur identité par chiffrement. Cette démonstration reste secondaire.
+- Une fausse imprimante, un ESP32 qui se fait passer pour une imprimante, sert de piège : personne n'a de raison de lui parler. Si quelqu'un scanne le réseau, elle donne l'alerte. C'est une extension.
+- SNMP version 2 fait circuler son « mot de passe », la communauté, en clair. Deux captures Wireshark le montrent : en version 2, on le lit ; en version 3, chiffrée et authentifiée, on ne lit plus rien.
+- Les trois paliers de confiance pour les actions automatiques : il conseille, il propose, il agit seul la nuit, toujours de façon réversible.
+
+10. LA VIE PRIVÉE CHEZ WASSIM
+
+Aucune donnée de patient : le script lit le nombre de documents en attente, jamais leur nom. Pas de micro ni de caméra : le boîtier ne sent que la vibration de la machine. Un micro aurait été plus simple, mais il aurait capté les conversations. La carte de Wassim sert à mesurer la durée des pannes, pas à surveiller Wassim, et il faut le dire clairement au tuteur.
+
+11. LE VOLET PHYSIQUE CHEZ WASSIM
+
+La question : quand peut-on dire que l'imprimante imprime ?
+
+- Étalonnage : l'accéléromètre est posé dans six positions. Il doit lire plus ou moins un g, l'accélération de la pesanteur. On en tire le décalage et le gain de chaque axe.
+- Vibration : enregistrement à 1000 mesures par seconde, imprimante en veille puis en impression, vingt essais. On calcule l'énergie de vibration et on cherche les fréquences des moteurs avec une transformée de Fourier. Le seuil de détection vaut la moyenne en veille plus quelques écarts-types. On mesure le taux de fausses détections.
+- Échantillonnage : la même vibration est observée à plusieurs fréquences d'échantillonnage. Avec la condition de Shannon, on choisit la fréquence la plus basse qui garde l'information.
+- Vitesse des feuilles : on mesure la durée de passage d'une feuille A4 devant le capteur, sur trente feuilles. La vitesse vaut la longueur de la feuille, 297 millimètres, divisée par la durée. On calcule moyenne, écart-type et incertitude, puis on compare la cadence mesurée à celle du fabricant. Cela justifie le délai au bout duquel le système dit « aucune feuille n'est sortie ».
+- Humidité et papier, en V2 : le SHT31 est comparé à un hygromètre de référence. Des feuilles sont pesées après 48 heures en boîte fermée sèche, puis après 48 heures au-dessus d'une solution saturée de sel, qui maintient environ 75 % d'humidité. Dix feuilles par condition, pesées avec une balance au centigramme. On mesure la prise d'eau du papier, en pourcentage de masse, avec ses incertitudes. Puis on imprime les deux lots et le boîtier compte les bourrages. Le seuil d'alerte « local trop humide » est justifié par ces mesures.
+
+Un risque est assumé honnêtement : il est possible qu'on n'observe aucun bourrage avec le papier humide. Le volet repose d'abord sur la prise d'eau du papier, qui se mesure à coup sûr. Le lien avec les bourrages est un résultat possible, pas une condition de réussite.
+
+12. UNE JOURNÉE AVEC LE SYSTÈME (SCÉNARIO FICTIF SUR MAQUETTE)
+
+8 h 40. Le docteur Martin arrive en cardiologie. Wassim pose sa carte, la carte « Cardiologie, médecin » et l'étiquette du PC sur la station, puis valide. Il lance le script sur le PC neuf et part faire autre chose.
+9 h 05. La dernière LED est verte. Dans GLPI, le PC est en service en cardiologie. Dans l'annuaire, il est rangé au bon endroit.
+9 h 10. En cardiologie, la secrétaire imprime un compte rendu. Rien ne sort. Pas de vibration, aucune feuille, mais l'imprimante répond « tout va bien ». Le serveur conclut : imprimante figée. Ticket ouvert. L'écran du boîtier affiche « Bloquée, Wassim arrive ».
+9 h 11. Palier 2 : le système propose de redémarrer l'imprimante. Wassim clique depuis son bureau.
+9 h 14. L'imprimante repart, les trois feuilles sortent, le capteur les compte. Le ticket se ferme avec la preuve. Wassim ne s'est pas déplacé.
+10 h 05. En pédiatrie, l'écran affiche « Bac 2 vide ». La secrétaire remet du papier. Ticket « résolu sur place ».
+11 h 30. L'imprimante de la radiologie passe sous 10 % d'encre. Ticket préventif.
+15 h 20. Un bourrage en pédiatrie. Wassim y va, pose sa carte, retire la feuille, repose sa carte. La page de test sort. Durée notée : sept minutes.
+16 h 02. Sur la maquette, un « attaquant » scanne le réseau. La fausse imprimante répond, et donne l'alerte.
+
+13. V1, V2, EXTENSIONS CHEZ WASSIM
+
+- V1 obligatoire : le boîtier (vibration, feuilles, bouton, écran), le serveur, la comparaison des quatre témoins, les vérifications réseau, les tickets GLPI aux paliers 1 et 2, les nouvelles sur l'écran, le tableau de bord.
+- V2 visée : la carte RFID du technicien et la preuve de réparation ; l'encre avant la panne ; l'humidité du local croisée avec les bourrages ; la station des PC neufs ; le palier 3.
+- Extensions : le redémarrage à distance de l'imprimante figée ; la fausse imprimante piège ; l'étagère des cartouches ; un hôpital en miniature.
+
+L'ensemble dépasse sans doute 150 heures. C'est voulu : la V1 forme un projet complet, et le reste se garde ou se coupe selon l'avancement.
+
+14. COMMENT SAVOIR SI ÇA MARCHE
+
+Objectifs proposés, à valider avec le tuteur :
+- dix pannes provoquées : la bonne cause dans le ticket au moins neuf fois sur dix ;
+- moins d'une minute entre l'impression ratée et le ticket ;
+- aucune fausse alerte pendant une heure d'impressions normales ;
+- dix pages de test sur dix vues par le capteur ;
+- le SHT31 d'accord avec l'hygromètre de référence, dans sa précision annoncée, et le ticket préventif ouvert à chaque fois que le seuil est dépassé ;
+- dix copies de carte RFID refusées et tracées sur dix ;
+- une commande hors liste toujours refusée et tracée ;
+- cinq PC neufs sur cinq bien rangés, équipés et à jour dans GLPI.
+
+15. CE QUI N'EST PAS ENCORE VÉRIFIÉ
+
+La vibration distingue-t-elle vraiment « imprime » et « attend » ? Peut-on placer le capteur de feuilles sans démonter l'imprimante ? L'imprimante accepte-t-elle un redémarrage par le réseau ? Les PC du lycée ont-ils assez de mémoire pour les machines virtuelles ? Ce sont les premiers essais à faire.
+
+Pistes écartées : un réseau de neurones pour reconnaître les pannes. Il faudrait provoquer des dizaines de bourrages, il serait difficile à expliquer, et il faudrait le réentraîner pour chaque modèle. Quatre témoins et des règles simples suffisent.
+
+
+======================================================================
+TROISIÈME PARTIE : LORENZO
+« CyberSentinel : deux défenses, un signal »
+======================================================================
+
+1. LE CONTEXTE
+
+Lorenzo est apprenti au support informatique d'une grande administration publique qui traite des informations sensibles. Il intervient surtout sur les PC d'employés de bureau, qu'on appelle ici des agents.
+
+Deux constats sont à l'origine du projet.
+- Le premier vient de son tuteur : des agents oublient de verrouiller leur session Windows quand ils quittent leur bureau. Pendant ce temps, un collègue non habilité, un visiteur ou un prestataire peut voir ou utiliser la session.
+- Le second vient d'un rapport public de l'ANSSI, l'agence nationale de la sécurité des systèmes d'information, publié en septembre 2026. Il constate, dans les incidents analysés, des manques de détection et de corrélation. Attention : ce rapport ne recommande pas l'outil de Lorenzo. Il montre seulement que la détection est un vrai sujet.
+
+Un point d'histoire : le projet de Lorenzo s'appelait d'abord « Poste attentif » et comprenait une gestion des mises à jour logicielles. Cette partie a été retirée le 20 novembre 2026. Le projet est maintenant recentré sur deux défenses.
+
+2. LA QUESTION DU PROJET
+
+Un petit dispositif embarqué, peu coûteux, peut-il réduire le temps pendant lequel une session oubliée reste ouverte, et produire un signal d'alerte supplémentaire quand quelqu'un s'intéresse à un faux service sur le réseau ?
+
+Trois objectifs :
+- A, la prévention : verrouiller plus vite la session, sans provoquer trop de verrouillages intempestifs.
+- B, la détection : observer et qualifier les accès à un faux service réseau, sans confondre un accès avec une intrusion prouvée.
+- C, l'exploitation : une supervision technique, horodatée et reproductible.
+
+Lorenzo propose un prototype expérimental, qui pourrait être présenté au service. Il ne remplace ni le centre de supervision de la sécurité, ni les antivirus de nouvelle génération, ni les stratégies Windows, ni les équipements déjà en place. L'innovation n'est pas d'inventer le radar ou le leurre. Elle est de réaliser un système embarqué mesuré, qui s'ajoute aux défenses existantes.
+
+3. CE QUI EXISTE DÉJÀ
+
+Windows sait déjà verrouiller une session après un temps d'inactivité, par exemple dix minutes sans clavier ni souris. Mais ce délai est long, et surtout, inactif ne veut pas dire absent : une personne qui lit un dossier papier sans toucher au clavier serait verrouillée à tort si on raccourcissait trop ce délai.
+
+Les leurres réseau, qu'on appelle aussi pots de miel, existent dans le monde professionnel. Ils sont souvent logiciels et intégrés à de grosses solutions. Lorenzo en fait une version minimale, sur un microcontrôleur, isolée et facile à expliquer.
+
+4. PREMIÈRE DÉFENSE : LE RADAR QUI PROTÈGE LA SESSION
+
+Le matériel : un radar LD2410, qui fonctionne à 24 gigahertz, relié à un ESP32. Le tout tient dans un petit boîtier posé sur le bureau, alimenté par un câble USB 5 volts, et relié au PC Windows par ce même câble, en liaison série.
+
+Le radar ne fait aucune image. Ce n'est pas une caméra. Il envoie une onde et écoute l'écho. Sa longueur d'onde est d'environ 12,5 millimètres. Quand quelqu'un respire, sa poitrine bouge de quelques millimètres, ce qui suffit à modifier l'écho. Le radar voit donc une personne immobile, ce que Windows ne sait pas faire.
+
+Le radar découpe l'espace en tranches de distance, qu'on appelle des portes, d'environ 75 centimètres. L'agente du scénario, Martine, est assise dans la porte 0, entre 0 et 75 centimètres. Un collègue qui passe dans l'allée est plus loin, dans la porte 2. On ne retient que les portes 0 et 1 : le collègue est ignoré.
+
+Le déroulé :
+- Chaque seconde, le boîtier envoie au PC « présente » ou « absente ».
+- Martine lit un dossier sans toucher au clavier. Windows la croit inactive depuis quatre minutes. Mais le radar la voit respirer : elle est présente. Rien ne se passe.
+- Martine se lève et part. Le boîtier envoie « absente ». Une lumière orange s'allume et un avertissement dure trois secondes. Si elle revient pendant l'orange, rien ne se passe.
+- Sinon, le poste verrouille la session. Ensuite seulement, il prévient le serveur.
+
+La règle la plus importante : le verrouillage reste local. Il ne dépend ni du serveur, ni du réseau. Si le serveur Ubuntu tombe en panne, le poste se verrouille quand même, et garde l'événement en attente pour l'envoyer plus tard.
+
+Et si le boîtier est débranché ? Plus aucun message n'arrive. Le filet de sécurité de Windows, le verrouillage après dix minutes d'inactivité réglé par une stratégie locale, continue de protéger. Une panne ne laisse jamais le poste ouvert.
+
+5. LA SÉCURITÉ DU RADAR : CHAQUE MESSAGE EST SIGNÉ
+
+Un problème apparaît : et si quelqu'un branchait un faux boîtier qui dit toujours « Martine est là » ? Le poste ne se verrouillerait jamais.
+
+La réponse : chaque message contient un compteur et une preuve calculée avec un code secret partagé entre le boîtier et le poste. Cette preuve s'appelle un HMAC-SHA256. Le service PowerShell du poste vérifie la preuve et vérifie que le compteur a bien avancé.
+- Un message modifié est refusé, car sa preuve ne correspond plus.
+- Un message rejoué, c'est-à-dire un vieux message valide renvoyé tel quel, est refusé, car son compteur n'a pas avancé.
+- Le poste envoie aussi un défi, un nombre au hasard, auquel seul le vrai boîtier sait répondre.
+
+Le faux boîtier est donc refusé, et le verrouillage normal continue de jouer son rôle.
+
+6. DEUXIÈME DÉFENSE : LA FAUSSE IMPRIMANTE
+
+Le second module est un autre ESP32, équipé d'une carte Ethernet W5500. Il ne pilote aucune vraie imprimante. Il se fait passer pour une imprimante réseau : il répond sur une adresse du réseau du laboratoire avec un petit site web en lecture seule, et une page d'administration volontairement fausse, sans aucun identifiant réel.
+
+Le principe est simple. Aucun utilisateur normal n'a de raison de consulter cet appareil. Si quelqu'un le fait, c'est un signal à examiner.
+
+Le déroulé : un PC de test du laboratoire consulte l'adresse du leurre, puis un chemin « /admin ». L'ESP32 enregistre l'heure, l'adresse IP source et la page demandée. Il ne collecte ni mot de passe ni document. Il envoie cet événement au serveur Ubuntu, par une liaison authentifiée.
+
+Le point le plus important du projet, à répéter : une connexion au leurre ne prouve pas une intrusion. Ce peut être un outil d'inventaire réseau ou de supervision tout à fait autorisé. L'alerte est donc « à qualifier » par un technicien. Lorenzo parle de « détection d'interactions avec un leurre », et non de « détection d'intrusion », tant que ses mesures ne justifient pas davantage. Et le leurre ne voit que les accès dirigés vers lui : il n'y a pas de détection magique.
+
+7. LA SUPERVISION SUR UBUNTU
+
+Un serveur Ubuntu reçoit les événements des deux défenses : les verrouillages du poste Windows et les accès au leurre. Il les horodate, les stocke dans une petite base SQLite, et les affiche sur un tableau de bord technique écrit en Python.
+
+Une règle éthique forte : ce sont deux événements distincts. L'absence de Martine ne prouve aucun lien avec un accès au leurre. Le système ne doit jamais attribuer un événement réseau à une absence ou à une personne. L'absence n'est pas une identité. Et un accès au leurre ne doit jamais verrouiller ou déverrouiller un poste.
+
+8. LE RÉSEAU EN PLACE (COMPÉTENCE C10)
+
+Lorenzo exploite le réseau isolé du laboratoire tel qu'il est. Le routeur fournit déjà les services. DHCP donne les adresses. DNS permet de joindre le serveur Ubuntu par son nom. NTP met toutes les machines à la même heure, ce qui est indispensable pour dater et comparer les événements. HTTPS chiffre les journaux envoyés au serveur. Le leurre a sa propre adresse IP. Wireshark, sur le PC de test, montre les échanges.
+
+Aucun VLAN ni aucune liste de contrôle d'accès n'est à créer. Les adresses utilisées sont des exemples de maquette, pas celles de l'administration.
+
+9. LE VOLET PHYSIQUE CHEZ LORENZO
+
+Le volet physique sert à régler le radar avec des mesures, plutôt qu'au hasard.
+
+- Des notions simples : la longueur d'onde vaut la vitesse de la lumière divisée par la fréquence, soit environ 12,5 millimètres à 24 gigahertz. La résolution en distance d'un radar dépend de sa bande de fréquence : elle vaut la vitesse de la lumière divisée par deux fois la largeur de bande. Pour une bande de 250 mégahertz, cela donne environ 60 centimètres. C'est pour cela que le radar raisonne par tranches de distance.
+- Les mesures R1 à R3 : régler les seuils de détection et la zone retenue. Une personne immobile reste-t-elle détectée ? Un collègue qui passe dans l'allée est-il bien ignoré ?
+- La mesure R4 : le délai entre le départ de la personne et le verrouillage, mesuré à l'oscilloscope, avec des incertitudes.
+
+Les valeurs citées sont des exemples. Les vraies viendront des essais. Ce volet reste à confirmer avec le professeur de physique.
+
+10. V1, V2, EXTENSIONS CHEZ LORENZO
+
+- V1, prototype minimal : le radar et l'ESP32 réglés ; le verrouillage local du poste Windows ; le leurre HTTP sur ESP32 et W5500, sur le réseau isolé ; l'enregistrement des accès au leurre ; l'API Ubuntu et un tableau de bord minimal ; des captures Wireshark et deux scénarios indépendants.
+- V2, robustesse et évaluation : la signature HMAC avec compteur et le rejet des faux boîtiers ; l'authentification et le chiffrement des flux vers Ubuntu ; l'horodatage cohérent par NTP ; la mise en attente et la reprise des envois après une panne réseau ; une politique de qualification des alertes ; des campagnes de mesures avec incertitudes ; des journaux réduits au strict nécessaire.
+- Extensions : un deuxième leurre avec un autre protocole simple ; des tests de résistance à des événements répétés ; la mise en boîtier et une documentation pour reproduire le montage.
+
+Répartition prévue des 150 heures, à faire valider : analyse du besoin 12 heures, radar 18, service Windows 22, leurre 27, serveur Ubuntu et tableau de bord 24, sécurité et repli 12, mesures et physique 22, documentation et soutenance 13.
+
+11. COMMENT SAVOIR SI ÇA MARCHE
+
+Les essais prévus :
+- Martine part : la session se verrouille après le délai défini.
+- Martine lit sans toucher au clavier : pas de verrouillage intempestif.
+- Un collègue passe dans l'allée : il ne maintient pas la session ouverte.
+- Un message falsifié ou rejoué : refus, et repli sur le verrouillage par inactivité.
+- Le serveur Ubuntu est arrêté : le verrouillage local marche toujours.
+- Un PC consulte le leurre : l'événement est reçu et affiché.
+- Un PC consulte « /admin » : l'événement est à qualifier, ce n'est pas une preuve automatique d'attaque.
+- Un inventaire réseau autorisé : l'événement est classé comme bénin, et on mesure le taux de fausses alertes.
+- Le câble du leurre est débranché : on signale qu'il est indisponible.
+- L'API Ubuntu est coupée un moment : les événements sont mis en attente puis renvoyés.
+
+Les seuils de réussite seront fixés avant les essais. Aucune performance n'est encore démontrée.
+
+12. VIE PRIVÉE ET LIMITES
+
+Pas de caméra, pas de reconnaissance des personnes, pas d'enregistrement des durées d'absence, pas de suivi nominatif des présences, pas de capture de mots de passe, pas d'attaque contre un réseau tiers. Le leurre ne contient aucune donnée réelle et aucune application réellement vulnérable. Tout se passe sur un réseau isolé de laboratoire. Un éventuel essai en entreprise demanderait une autorisation écrite et l'accord des responsables de la sécurité et de la protection des données.
+
+
+======================================================================
+QUATRIÈME PARTIE : AZIZA
+« Des PC de maintenance à jour, des documents archivés, un parc tracé »
+======================================================================
+
+1. LE CONTEXTE
+
+Aziza est apprentie dans un service de maintenance des équipements de télécommande d'un réseau électrique ferroviaire, au sein d'une grande entreprise de transport. Ses missions : tenir des tableaux de suivi des équipements, monter et démonter des PC, câbler avec les agents, programmer des installations, archiver et dématérialiser des documents de modification, et animer un exposé de sensibilisation à la cybersécurité.
+
+Son tuteur a exprimé deux besoins :
+- Premier besoin : maintenir à jour une dizaine de PC de maintenance sous Windows 11. Les paramètres, fichiers et programmes dont les agents ont besoin sont centralisés sur un espace SharePoint. Il faudrait automatiser leur mise à jour, ou au moins écrire un mode opératoire.
+- Second besoin : organiser, améliorer et dématérialiser l'archivage des documents de modification.
+
+Le tuteur a confirmé un détail essentiel : les agents emportent ces PC en intervention sur le terrain, et sur place, ils n'ont Internet que par le partage de connexion de leur téléphone. Le projet a été accepté.
+
+Une limite stricte : le projet ne touche pas aux systèmes du réseau électrique lui-même, ni supervision, ni télécommandes, ni automates. Pas de connexion, pas de reproduction, pas de test.
+
+2. LE PROBLÈME, EN MOTS SIMPLES
+
+Un agent part sur le terrain avec un PC portable. Ce PC contient un « kit de maintenance » : des documents, des paramètres, des petits programmes. Si un fichier de ce kit est ancien ou abîmé, l'agent peut travailler avec une mauvaise version, sur un équipement sensible. Et sur le terrain, le réseau est lent, coupe souvent, et passe par Internet.
+
+Le projet répond à trois questions :
+- Ce PC a-t-il exactement les bons fichiers ?
+- Peut-on le prouver, même quand le PC est éteint ou loin du réseau ?
+- Garde-t-on une trace de chaque version, comme une archive ?
+
+3. CE QUI EXISTE DÉJÀ, ET POURQUOI CE N'EST PAS SUFFISANT
+
+- OneDrive synchronise fichier par fichier. Il ne garantit pas qu'un kit validé arrive d'un seul bloc, ne prouve pas quelle version est sur chaque PC, ne prévient pas quand un kit est périmé, et n'installe rien.
+- Intune, l'outil de gestion de parc de Microsoft, est un bon outil pour un parc géré et enrôlé par la direction informatique. Ici, il s'agit d'une dizaine de PC de terrain gérés par le service lui-même. Si un jour la direction informatique les gère, l'agent d'Aziza deviendrait un simple contrôle de conformité.
+- Les versions de SharePoint gardent jusqu'à 500 versions par fichier par défaut, mais fichier par fichier, sans lien avec la modification, l'équipement concerné ou la personne qui a validé.
+
+4. CINQ PRINCIPES, LE FIL DE LA SOUTENANCE
+
+Premier principe : avoir un fichier ne prouve pas que c'est le bon. On calcule donc son empreinte, une sorte d'empreinte digitale numérique appelée SHA-256, et on la compare à celle du catalogue.
+
+Deuxième principe : le réseau n'est pas de confiance, puisqu'il passe par la 4G et Internet. Seul un catalogue signé fait foi.
+
+Troisième principe : un PC éteint ne peut rien affirmer. La borne de sortie lit donc le dernier rapport envoyé par le PC. Si le serveur ne répond pas, la borne dit « vérification impossible », et jamais « à jour ».
+
+Quatrième principe : sur le terrain, le réseau manque. On télécharge donc seulement les fichiers modifiés, on reprend après une coupure, et on prévient l'agent quand son kit est périmé.
+
+Cinquième principe : chaque version a une valeur. Rien n'est écrasé. L'historique devient l'archive.
+
+5. L'ARCHITECTURE DE LA MAQUETTE
+
+- Le poste du référent, sous Windows 11. Le référent prépare le kit. Avec PowerShell, il crée un catalogue de fichiers qui contient l'empreinte de chaque fichier, puis il signe ce catalogue avec son certificat. Il publie le tout sur le serveur.
+- Le serveur, sous Ubuntu Server. Il sert les fichiers en HTTPS avec nginx, fait tourner une petite application web en Python, appelée Flask, garde les informations dans une base SQLite, et donne l'heure exacte au réseau avec NTP.
+- L'agent, sur chaque PC de maintenance. C'est un script PowerShell signé, lancé par une tâche planifiée.
+- La borne de sortie, au bureau. Un ESP32, un lecteur de badges RC522, une LED verte, une LED rouge et un petit buzzer.
+- Le tableau de bord, qui montre l'état du parc et permet un export pour Excel.
+- En V2, l'archive : les documents sont rangés par empreinte, avec une recherche simple par titre, équipement ou date.
+
+6. L'AGENT POWERSHELL, PAS À PAS
+
+L'agent se réveille au démarrage du PC, à l'ouverture de session, et toutes les trente minutes. Ensuite :
+- Il télécharge le catalogue.
+- Il vérifie la signature : le catalogue vient-il bien du référent ?
+- Il vérifie le numéro de version : il doit être plus grand que celui déjà installé, sinon le kit est refusé. Ainsi, un ancien kit, même bien signé, ne peut pas être renvoyé pour tromper le PC.
+- Il compare les empreintes pour savoir quels fichiers ont changé.
+- Il applique le palier prévu : simulation, confirmation par l'agent, ou automatique. Les simples documents sont mis à jour automatiquement, avec une information après coup. Les paramètres et les programmes demandent une confirmation.
+- Il télécharge seulement les fichiers modifiés avec BITS, un service intégré à Windows qui reprend tout seul après une coupure. Les fichiers arrivent dans un dossier de préparation.
+- Il vérifie à nouveau chaque fichier contre le catalogue.
+- Il bascule : l'ancien kit devient « précédent », le nouveau devient « actif ».
+- Il envoie un rapport au serveur.
+- À l'ouverture de session, si la date de validité du kit est dépassée, il affiche l'alerte « kit périmé », même sans réseau.
+
+Un retour en arrière est possible en moins de deux minutes : on remet le kit précédent, après l'avoir revérifié. C'est le seul cas où une version plus ancienne est acceptée, et seulement sur décision locale.
+
+Le serveur ne peut pas « pousser » un kit vers un PC en 4G. C'est toujours le PC qui interroge le serveur.
+
+7. LA 4G SIMULÉE (COMPÉTENCE C10)
+
+Au lycée, le réseau est rapide et ne coupe jamais. Tester seulement au lycée ne prouverait rien. Aziza utilise donc un outil de Linux appelé netem, qui abîme volontairement le réseau du serveur pour qu'il ressemble à la 4G d'un téléphone. On peut le comparer à un ralentisseur et un péage à la sortie du serveur : les données attendent, sortent au compte-gouttes, et certaines sont jetées. Une seule commande permet aussi de simuler une coupure totale.
+
+La démarche : mesurer d'abord une vraie connexion par téléphone (débit, retard, pertes) ; reproduire ces valeurs avec netem ; tester l'agent (télécharge-t-il seulement les fichiers modifiés ? reprend-il après une coupure ? combien de temps cela prend-il ?) ; puis observer les échanges avec Wireshark.
+
+Pourquoi ne pas utiliser directement la vraie 4G ? Parce qu'il faudrait exposer le serveur du lycée sur Internet. Le vrai téléphone sert à mesurer, netem sert à reproduire et à couper à volonté. Aucun routeur, switch ou VLAN n'est reconfiguré. Netem est activé seulement pendant les tests de l'agent, car il ralentit tout ce qui sort du serveur, y compris les réponses à la borne.
+
+8. LA BORNE DE SORTIE
+
+Avant de partir en intervention, l'agent passe à la borne, au bureau. Il présente son badge, puis l'étiquette collée sur le PC.
+
+Le badge et l'étiquette utilisent la même technologie RFID, sous deux formes. Le badge, dans la poche de l'agent, dit « je suis l'agent A-12 ». L'étiquette, un autocollant plat collé sur le PC, dit « je suis le PC numéro 4 ». À l'intérieur, une toute petite puce et une antenne, sans pile. Le champ magnétique du lecteur alimente la puce un instant, et elle renvoie son numéro unique gravé en usine.
+
+La borne demande au serveur si ce PC est à jour.
+- Lumière verte : le rapport est récent et la version est la dernière publiée. La sortie est enregistrée.
+- Lumière rouge : le rapport est trop ancien.
+- Les deux en alternance : le serveur est injoignable. C'est « vérification impossible ». La sortie est mémorisée pour être envoyée plus tard.
+
+Un détail technique intéressant : la coque des PC est souvent en métal, et le métal gêne le champ du lecteur. Une étiquette normale se lit mal. On utilise donc une étiquette anti-métal, avec une fine couche de ferrite qui la protège. Un petit test de mesure sert à choisir la bonne étiquette.
+
+Une limite assumée : le badge identifie, il ne prouve pas, car un badge simple se copie. La borne trace une sortie ; elle ne contrôle pas un accès.
+
+9. LA SÉCURITÉ CHEZ AZIZA
+
+Sa question de sécurité : ce fichier est-il le bon ?
+- Les empreintes SHA-256 détectent le moindre octet modifié.
+- La signature du catalogue prouve qu'il vient du référent. Un catalogue signé avec un autre certificat est refusé.
+- Le numéro de version empêche de renvoyer un ancien kit, même signé.
+- Le script de l'agent est lui-même signé, et Windows est réglé pour n'exécuter que des scripts signés.
+- Chaque PC et la borne ont un jeton secret, enregistré côté serveur. Le serveur refuse tout rapport sans jeton valide. Ainsi, personne ne peut envoyer un faux rapport « à jour » pour faire passer la borne au vert. Sur la borne, le jeton est enregistré une fois dans la mémoire de l'ESP32, jamais écrit dans le code.
+
+10. LE VOLET PHYSIQUE CHEZ AZIZA
+
+La question : combien de temps faut-il attendre avant d'allumer un PC qui revient du froid, pour éviter la condensation ? Un agent qui revient d'une intervention en hiver rentre au bureau chauffé. Si de la buée se forme dans le PC et qu'on l'allume, on risque d'abîmer les composants. Ce point est encore à confirmer avec le tuteur.
+
+Le modèle : la température du PC rejoint celle de la pièce selon une loi exponentielle, caractérisée par une constante de temps notée tau. On calcule le point de rosée de la pièce avec la formule de Magnus : c'est la température en dessous de laquelle l'humidité de l'air se dépose en buée. Le temps d'attente est le temps qu'il faut au PC pour dépasser ce point de rosée. Exemple de calcul : un PC à 0 degré qui entre dans une pièce à 20 degrés et 50 % d'humidité. Le point de rosée est d'environ 9,3 degrés, et le temps d'attente vaut environ 0,62 fois la constante de temps.
+
+Les mesures :
+- étalonnage des capteurs de température DS18B20 et SHT40 face à un thermomètre de référence, avec incertitudes ;
+- un bloc d'aluminium refroidi, une mesure toutes les dix secondes, pour tirer la constante de temps d'une droite ;
+- puis un essai sur un vrai portable, pour confronter le modèle à la réalité ;
+- une plaque témoin : la buée apparaît-elle au moment prévu par le calcul ?
+
+L'usage concret : un tableau « température extérieure, temps d'attente » dans le mode opératoire, et une étiquette collée sur chaque PC.
+
+Un plan B est prévu : si le problème du froid n'est pas confirmé, le test de lecture des étiquettes RFID devient l'expérience principale, avec répétitions et incertitudes.
+
+11. V1, V2, EXTENSIONS CHEZ AZIZA
+
+- V1, environ 116 heures : le catalogue signé, le serveur, l'agent PowerShell, la 4G simulée, la borne, le banc de physique, le tableau de bord.
+- V2, environ 20 heures : l'archive des documents par empreintes, avec recherche.
+- Extensions : des propositions de modification par les techniciens, validées par le chef puis signées par le référent ; un boîtier de sacoche avec écran à encre électronique et capteurs, qui pourrait afficher « attendre encore X minutes » ; un vrai lien avec SharePoint.
+
+Total prévu : environ 136 heures, avec une marge d'environ 14 heures. Budget du matériel de la V1 : de l'ordre de 40 à 70 euros, à confirmer.
+
+12. COMMENT SAVOIR SI ÇA MARCHE
+
+Une recette de quinze tests. Quelques exemples :
+- un kit ancien sur le PC : seuls les fichiers modifiés sont téléchargés ;
+- un octet modifié dans un fichier : refusé ;
+- un catalogue signé par un autre certificat : refusé ;
+- une coupure pendant le téléchargement : reprise, puis vérification ;
+- un retour arrière en moins de deux minutes ;
+- la borne verte, la borne rouge ;
+- le serveur arrêté : « vérification impossible » ;
+- un kit périmé hors réseau : notification ;
+- en V2, retrouver une ancienne version en moins d'une minute ;
+- un ancien kit bien signé : refusé ;
+- un rapport sans jeton valide : refusé, la borne ne passe pas au vert.
+
+13. VIE PRIVÉE
+
+On trace des PC et des versions, pas des personnes au travail. En cas de vrai déploiement, la loi impose d'informer les salariés et de consulter le comité social et économique avant de mettre en place un dispositif de ce type.
+
+
+======================================================================
+CINQUIÈME PARTIE : CE QUI RELIE LES TROIS PROJETS
+======================================================================
+
+Les trois projets partagent une même philosophie, qu'un podcast peut mettre en avant.
+
+Premièrement, ne jamais croire un seul témoin. Wassim ne croit pas l'imprimante quand elle dit « tout va bien » : il vérifie avec la vibration et les feuilles. Lorenzo ne croit pas Windows quand il dit « inactif » : le radar sait que la personne est là. Aziza ne croit pas un fichier parce qu'il est présent : elle vérifie son empreinte et sa signature.
+
+Deuxièmement, dire honnêtement ce qu'on ne sait pas. Chez Wassim, l'imprimante qui ne répond pas donne une cause « probable ». Chez Lorenzo, un accès au leurre est « à qualifier », pas une intrusion. Chez Aziza, un serveur muet donne « vérification impossible », jamais « à jour ».
+
+Troisièmement, rester sûr en cas de panne. Le poste de Lorenzo se verrouille même sans serveur. L'agent d'Aziza prévient d'un kit périmé même sans réseau. Le ticket de Wassim ne se ferme que s'il y a une preuve.
+
+Quatrièmement, respecter les personnes. Pas de caméra, pas de micro, pas de nom de patient, pas de suivi nominatif des présences. Chaque projet a choisi un capteur qui mesure la machine, pas la personne.
+
+Cinquièmement, une physique utile. Chez Wassim, la physique fixe les seuils qui disent « l'imprimante imprime » et « le local est trop humide ». Chez Lorenzo, elle règle la zone du radar et mesure le délai de verrouillage. Chez Aziza, elle donne le temps d'attente écrit sur l'étiquette du PC.
+
+
+======================================================================
+PETIT LEXIQUE
+======================================================================
+
+Active Directory (AD) : l'annuaire de Microsoft qui connaît les utilisateurs et les PC d'une entreprise, rangés par service.
+API : une porte d'entrée par laquelle un programme parle à un autre programme.
+BITS : un service de Windows qui télécharge des fichiers en arrière-plan et reprend après une coupure.
+Condition de Shannon : pour bien observer une vibration, il faut mesurer au moins deux fois plus vite que sa fréquence la plus élevée.
+DHCP : le service qui donne automatiquement une adresse aux appareils d'un réseau.
+DNS : le service qui traduit un nom de machine en adresse.
+Empreinte SHA-256 : une suite de caractères calculée à partir d'un fichier. Si un seul octet change, l'empreinte change complètement.
+ESP32 : un petit microcontrôleur bon marché, avec Wi-Fi, très utilisé pour les objets connectés.
+GLPI : un logiciel libre de gestion des tickets et de l'inventaire informatique.
+HMAC : une preuve calculée avec un code secret, qui montre qu'un message vient bien de l'expéditeur attendu et n'a pas été modifié.
+JEA (Just Enough Administration) : un mode de PowerShell qui donne seulement les commandes nécessaires, rien de plus.
+Leurre, ou pot de miel : un faux service placé sur un réseau. Personne n'a de raison de le consulter, donc chaque visite est un signal.
+NTP : le service qui met toutes les machines d'un réseau à la même heure.
+PowerShell : le langage de scripts de Windows, pour automatiser l'administration.
+RFID : une technologie qui lit à quelques centimètres une petite puce sans pile, dans un badge ou une étiquette.
+Samba : un logiciel libre qui permet à un serveur Linux de jouer le rôle d'un contrôleur de domaine Active Directory.
+SNMP : un protocole pour interroger l'état d'un équipement réseau, comme une imprimante.
+Wireshark : un logiciel qui capture et affiche les échanges qui circulent sur un réseau.
