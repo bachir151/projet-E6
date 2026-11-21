@@ -289,6 +289,8 @@ header .lead{color:var(--encre-2);margin:8px 0 0;max-width:60ch}
       var bt = document.createElement('button'); bt.type = 'button'; bt.className = 'btn entrer';
       bt.textContent = s.free ? 'Bientôt' : 'Entrer dans la maquette ▶'; bt.disabled = s.free;
       bt.addEventListener('click', function () { enter(s.i); }); go.appendChild(bt);
+      if (s.url25) { var b2 = document.createElement('button'); b2.type = 'button'; b2.className = 'btn'; b2.textContent = 'Version 2,5D';
+        b2.title = 'L\'architecture vue de biais, étape par étape'; b2.addEventListener('click', function () { enter(s.i, true); }); go.appendChild(b2); }
       if (!s.free) { var k = document.createElement('kbd'); k.textContent = 'Entrée'; go.appendChild(k); }
     }
     panel.classList.remove('reveal'); void panel.offsetWidth; panel.classList.add('reveal');
@@ -296,11 +298,12 @@ header .lead{color:var(--encre-2);margin:8px 0 0;max-width:60ch}
 
   /* ---- entrer dans une maquette (par-dessus le plan) ---- */
   var room = document.getElementById('room'), back = document.getElementById('back'), inside = false;
-  function enter(i) {
+  function enter(i, v25) {   // v25 : ouvrir la version 2,5D (pas à pas) au lieu de la maquette 3D
     var s = SLOTS[i]; if (!s || s.free) return;
-    inside = true; back.style.setProperty('--c', s.color); document.getElementById('backname').textContent = s.title;
+    var url = v25 && s.url25 ? s.url25 : s.url;
+    inside = true; back.style.setProperty('--c', s.color); document.getElementById('backname').textContent = s.title + (url === s.url25 ? ' · version 2,5D' : '');
     room.onload = function () { try { room.contentWindow.addEventListener('keydown', function (e) { if (e.key === 'Escape') leave(); }); room.contentWindow.focus(); } catch (e) { /* autre domaine : le bouton suffit */ } };
-    room.src = encodeURI(s.url); room.style.display = 'block'; back.style.display = 'flex';
+    room.src = encodeURI(url); room.style.display = 'block'; back.style.display = 'flex';
   }
   function leave() {
     if (!inside) return; inside = false;

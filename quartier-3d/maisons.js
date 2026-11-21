@@ -5,7 +5,8 @@
 
    Pour ajouter la 4e maquette (ou une 5e) : remplacer l'entrée « libre »
    (ou en ajouter une) avec son titre, sa couleur et le chemin `url` de sa
-   page (chemin relatif au dossier quartier-3d/). Les maisons se répartissent
+   page (chemin relatif au dossier quartier-3d/), et `url25` celui de sa
+   version 2,5D « pas à pas » (bouton « Version 2,5D » ; facultatif). Les maisons se répartissent
    seules autour du carrefour (4 places au minimum).
    `prop` = petit objet devant la porte : 'printer', 'radar', 'kit' ou null.
    `color` = couleur d'identité du projet (la même en 2D et en 3D).
@@ -17,15 +18,18 @@ var Q = window.QUARTIER = {
   { who: 'Wassim', n: 1, color: '#ffb020', prop: 'printer',
     title: 'Le service informatique augmenté', sub: 'de l’imprimante muette au PC du nouveau médecin',
     desc: 'Un boîtier ESP32 écoute l’imprimante. Le serveur compare quatre témoins et ouvre un ticket GLPI quand une panne se prépare.',
-    url: '../Projet apprenti 1/livrables/animation-3d/maquette-3d.html' },
+    url: '../Projet apprenti 1/livrables/animation-3d/maquette-3d.html',
+    url25: '../Projet apprenti 1/livrables/pages-html/architecture-2-5d.html' },
   { who: 'Lorenzo', n: 3, color: '#c18cff', prop: 'radar',
     title: 'CyberSentinel', sub: 'un radar pour le poste, un leurre pour le réseau',
     desc: 'Un radar LD2410 voit que l’agent est parti et le poste Windows se verrouille seul. Un second ESP32 joue une fausse imprimante : toute connexion devient un signal à examiner.',
-    url: '../Projet apprenti 3/livrables/animation-3d/maquette-3d.html' },
+    url: '../Projet apprenti 3/livrables/animation-3d/maquette-3d.html',
+    url25: '../Projet apprenti 3/livrables/page-html/architecture-2-5d.html' },
   { who: 'Aziza', n: 4, color: '#3ddc84', prop: 'kit',
     title: 'Le kit de maintenance', sub: 'PC à jour · documents archivés · parc tracé',
     desc: 'Des PC de maintenance toujours à jour : un catalogue signé distribue les bons fichiers, et chaque machine est tracée.',
-    url: '../Projet apprenti 4/apprentie4-aziza/livrables/animation-3d/maquette-3d.html' },
+    url: '../Projet apprenti 4/apprentie4-aziza/livrables/animation-3d/maquette-3d.html',
+    url25: '../Projet apprenti 4/apprentie4-aziza/livrables/pages-html/architecture-2-5d.html' },
   { who: '', n: 0, color: '#7f8c96', prop: null,
     title: 'À venir', sub: 'emplacement réservé',
     desc: 'Cette maison est vide pour l’instant. La prochaine maquette viendra ici.',

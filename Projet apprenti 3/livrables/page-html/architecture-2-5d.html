@@ -1,0 +1,788 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Architecture pas à pas</title>
+<meta name="description" content="Projet de Lorenzo (CyberSentinel) : l'architecture de la maquette en vue 2,5D et le trajet des messages, étape par étape.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="../../../theme.css">
+<style>
+/* Architecture 2,5D du projet de Lorenzo (même moteur que les pages d'Aziza et de Wassim).
+   Couleurs : variables de theme.css uniquement (teintes de matériel = mélanges color-mix()). */
+.tete{padding-top:clamp(18px,3vw,30px);display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:14px 24px}
+.tete h1{margin:0}
+.tete .lead{color:var(--encre-2);margin:8px 0 0;max-width:62ch}
+.liens{display:flex;gap:10px;flex-wrap:wrap}
+.wrap.large{max-width:1560px}
+.grille{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:28px;align-items:start;padding-block:22px 40px}
+
+.scene-cadre{margin:0;position:relative;border:3px solid var(--encre);border-radius:6px;background:var(--papier);box-shadow:8px 8px 0 var(--encre);overflow:hidden}
+.defile{overflow-x:auto;overscroll-behavior-x:contain}
+#scene{display:block;width:100%;height:auto;min-width:0}
+.outils{position:absolute;right:10px;top:10px;display:flex;gap:8px}
+.outils .btn{min-height:34px;padding:4px 14px;font-size:.8rem;text-transform:none;letter-spacing:0}
+.glisse{display:none;font-size:.8rem;font-weight:700;color:var(--encre-2);padding:6px 12px;border-top:2px solid var(--encre)}
+
+#scene{
+  --m-noir-t:color-mix(in srgb,var(--encre) 68%,var(--blanc));--m-noir-l:color-mix(in srgb,var(--encre) 84%,var(--blanc));--m-noir-r:var(--encre);
+  --m-gris-t:var(--blanc);--m-gris-l:var(--papier-2);--m-gris-r:var(--contour-2);
+  --m-alu-t:color-mix(in srgb,var(--contour-2) 35%,var(--blanc));--m-alu-l:color-mix(in srgb,var(--contour-2) 75%,var(--blanc));--m-alu-r:var(--contour);
+  --m-bois-t:color-mix(in srgb,var(--jaune) 42%,var(--papier));--m-bois-l:color-mix(in srgb,var(--jaune-fonce) 42%,var(--papier));--m-bois-r:color-mix(in srgb,var(--jaune-fonce) 62%,var(--encre-2));
+  --m-blanc-t:var(--blanc);--m-blanc-l:color-mix(in srgb,var(--papier-2) 55%,var(--blanc));--m-blanc-r:var(--papier-2);
+  --m-pcb-t:color-mix(in srgb,var(--focus) 72%,var(--blanc));--m-pcb-l:var(--focus);--m-pcb-r:color-mix(in srgb,var(--focus) 65%,var(--encre));
+  --m-jaune-t:var(--jaune);--m-jaune-l:var(--jaune-fonce);--m-jaune-r:color-mix(in srgb,var(--jaune-fonce) 70%,var(--encre));
+  --m-verre-t:color-mix(in srgb,var(--bleu-pale) 55%,transparent);--m-verre-l:color-mix(in srgb,var(--bleu) 30%,transparent);--m-verre-r:color-mix(in srgb,var(--bleu) 45%,transparent);
+  --m-pull-t:color-mix(in srgb,var(--focus) 55%,var(--blanc));--m-pull-l:var(--focus);--m-pull-r:color-mix(in srgb,var(--focus) 60%,var(--encre));
+  --m-rouge-t:color-mix(in srgb,var(--rouge) 70%,var(--blanc));--m-rouge-l:var(--rouge);--m-rouge-r:color-mix(in srgb,var(--rouge) 65%,var(--encre));
+  --m-fantome-t:color-mix(in srgb,var(--jaune-pale) 50%,transparent);--m-fantome-l:color-mix(in srgb,var(--jaune) 22%,transparent);--m-fantome-r:color-mix(in srgb,var(--jaune) 32%,transparent);
+  --m-peau:color-mix(in srgb,var(--jaune-pale) 60%,var(--rouge-pale));
+  --m-eau-t:var(--bleu);--m-eau-l:color-mix(in srgb,var(--bleu) 80%,var(--focus));--m-eau-r:color-mix(in srgb,var(--focus) 70%,var(--encre));
+  --m-mur-t:var(--blanc);--m-mur-l:color-mix(in srgb,var(--papier) 45%,var(--blanc));--m-mur-r:var(--papier);
+  --m-sol-t:var(--papier-2);--m-sol-l:var(--contour-2);--m-sol-r:var(--contour);
+  --ecran-sombre:color-mix(in srgb,var(--encre) 82%,var(--focus));
+  --led-off:color-mix(in srgb,var(--encre) 55%,var(--blanc));
+}
+#scene polygon,#scene .tr{stroke:var(--encre);stroke-width:1.3;stroke-linejoin:round}
+#scene .ns{stroke:none}
+#scene text{font-family:var(--police);fill:var(--encre)}
+#scene .sol-grille{stroke:var(--contour-2);stroke-width:.6;fill:none}
+#scene .cable{fill:none;stroke:var(--encre-2);stroke-width:2.2;stroke-linejoin:round;stroke-linecap:round}
+#scene .fil{fill:none;stroke-width:1.4;stroke-linecap:round}
+#scene .cable.usb{stroke:var(--encre-3);stroke-width:1.8}
+#scene .cable.coupe{stroke:var(--rouge);stroke-dasharray:6 5}
+#scene .porte{fill:var(--focus);fill-opacity:.05;stroke:var(--focus);stroke-width:1;stroke-opacity:.5;transition:fill-opacity .4s}
+#scene .porte.ignoree{stroke-dasharray:4 4;fill:var(--contour-2)}
+#scene .porte.actif{fill-opacity:.2}
+#scene .porte.ignoree.actif{fill-opacity:.12}
+#scene .onde-radar{fill:none;stroke:var(--focus);stroke-width:2}
+#scene .fantome polygon{stroke-dasharray:4 3;stroke:var(--encre-2)}
+#scene .respire{animation:respire 2.6s ease-in-out infinite}
+@keyframes respire{50%{transform:translateY(-1.2px)}}
+#scene .onde{fill:none;stroke:var(--focus);stroke-width:1.6;stroke-dasharray:3 6;opacity:.55}
+
+#scene .dev{transition:opacity .45s}
+#scene.focus .dev:not(.on){opacity:.28}
+#scene .bip{opacity:0}
+#scene .bip.on{animation:bip .9s ease-out}
+@keyframes bip{0%{opacity:1;transform:scale(.6)}100%{opacity:0;transform:scale(1.4)}}
+#scene .flash{animation:flash .5s ease-in-out 3}
+@keyframes flash{50%{fill:var(--jaune)}}
+#scene .vibre{animation:vibre .09s linear infinite}
+@keyframes vibre{0%,100%{transform:translate(0,0)}25%{transform:translate(.8px,-.4px)}75%{transform:translate(-.8px,.4px)}}
+
+#scene .pill rect.fond{fill:var(--blanc);stroke:var(--encre);stroke-width:2}
+#scene .pill rect.ombre{fill:var(--encre)}
+#scene .pill .p1{font-weight:900;font-size:14.5px}
+#scene .pill .p2{font-weight:600;font-size:11.5px;fill:var(--encre-2)}
+#scene .attache{stroke:var(--encre);stroke-width:1.5}
+#scene .lab-dot{fill:var(--encre)}
+#scene.sans-lab .etiq{display:none}
+#scene [data-lab]{transition:opacity .45s}
+#scene.focus [data-lab]:not(.on){opacity:.3}
+#scene [data-lab].cache{display:none}
+#scene .bulle rect.fond{fill:var(--jaune-pale);stroke:var(--encre);stroke-width:2}
+#scene .bulle.alerte rect.fond{fill:var(--rouge-pale)}
+#scene .bulle.ok rect.fond{fill:var(--vert-pale)}
+#scene .bulle text{font-size:12.5px;font-weight:700}
+#scene .bulle text.mono{font-family:var(--police-mono);font-size:11.5px;font-weight:600}
+#scene .bulle text.titre{font-weight:900;font-size:13px}
+#scene .bulle{animation:surgit .3s cubic-bezier(.2,.9,.3,1.3) both}
+@keyframes surgit{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+#scene .tok circle{stroke:var(--encre);stroke-width:2}
+#scene .tok rect{stroke:var(--encre);stroke-width:1.8}
+#scene .tok text{font-size:11.5px;font-weight:800}
+#scene .tok.perdu{animation:perdu .7s ease-out forwards}
+@keyframes perdu{to{opacity:0;transform:scale(1.8)}}
+#scene .trace{fill:none;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;opacity:.6;transition:opacity .6s}
+#scene .trace.fin{opacity:0}
+.k-usb circle,.k-usb .fond-tok{fill:var(--blanc)} .k-usb.trace{stroke:var(--encre-3)}
+.k-https circle,.k-https .fond-tok{fill:var(--bleu)} .k-https.trace{stroke:var(--focus)}
+.k-http circle,.k-http .fond-tok{fill:var(--jaune)} .k-http.trace{stroke:var(--jaune-fonce)}
+.k-net circle{fill:var(--vert)} .k-net .fond-tok{fill:var(--vert-pale)} .k-net.trace{stroke:var(--vert)}
+.k-err circle{fill:var(--rouge)} .k-err .fond-tok{fill:var(--rouge-pale)} .k-err.trace{stroke:var(--rouge)}
+.k-err text{fill:var(--rouge-texte)!important}
+.k-capt circle,.k-capt .fond-tok{fill:var(--blanc)} .k-capt.trace{stroke:var(--encre-3)}
+
+.carte-etape{position:sticky;top:16px;background:var(--blanc);border:3px solid var(--encre);border-radius:6px;box-shadow:8px 8px 0 var(--jaune),8px 8px 0 3px var(--encre);padding:18px 20px 16px}
+#eTitre{font-size:1.38rem;font-weight:900;line-height:1.15;letter-spacing:-.01em;margin:4px 0 10px;text-transform:none}
+#eTexte{min-height:9.5em}
+#eTexte p{margin:0 0 .6em;font-size:.98rem}
+#eTexte code{font-family:var(--police-mono);font-size:.86em;background:var(--papier-2);padding:0 4px;border-radius:4px}
+.commandes{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.commandes .btn{min-height:42px;padding:6px 15px;font-size:.9rem;text-transform:none;letter-spacing:0}
+#bNext{flex:1;justify-content:center}
+#points{display:flex;gap:6px;margin-top:14px;flex-wrap:wrap}
+#points button{width:26px;height:26px;border-radius:50%;border:2px solid var(--encre);background:var(--blanc);font-size:.72rem;font-weight:900;color:var(--encre);padding:0;cursor:pointer}
+#points button.vu{background:var(--papier-2)}
+#points button[aria-current="step"]{background:var(--jaune);box-shadow:2px 2px 0 var(--encre)}
+.legende{list-style:none;padding:12px 0 0;margin:14px 0 0;border-top:2px dashed var(--contour-2);display:grid;grid-template-columns:1fr 1fr;gap:4px 10px;font-size:.82rem;color:var(--encre-2)}
+.legende i{display:inline-block;width:12px;height:12px;border-radius:50%;border:2px solid var(--encre);margin-right:6px;vertical-align:-1px}
+.aide{font-size:.8rem;color:var(--encre-2);margin:10px 0 0}
+.aide kbd{font-size:.72rem}
+.regles ol{margin:10px 0 0;padding-left:1.3em}
+.regles li{margin:.35em 0}
+
+@media (max-width:1060px){.grille{grid-template-columns:1fr}.carte-etape{position:static}}
+@media (max-width:720px){#scene{min-width:760px}.glisse{display:block}.legende{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:reduce){#scene .bulle{animation:none}#scene .respire{animation:none}}
+@media print{.outils,.commandes,#points,.aide,.liens,.glisse{display:none!important}.scene-cadre,.carte-etape{box-shadow:none;position:static}}
+</style>
+</head>
+<body>
+<header class="wrap large tete">
+  <div>
+    <span class="label">Projet 3 · Lorenzo · CyberSentinel</span>
+    <h1>L'architecture pas à pas</h1>
+    <p class="lead">La maquette du lycée vue de biais. Chaque point qui circule est un message. Clique sur <b>Suivant</b> pour suivre le trajet des messages, étape par étape.</p>
+  </div>
+  <nav class="liens" aria-label="Autres pages du projet">
+    <a class="btn petit" href="poste-attentif.html">Le projet</a>
+    <a class="btn petit" href="../animation-3d/maquette-3d.html">Maquette 3D ↗</a>
+  </nav>
+</header>
+
+<main class="wrap large grille">
+  <figure class="scene-cadre">
+    <div class="defile"><svg id="scene" class="focus" role="img" aria-label="Vue 2,5D de la maquette : poste de Martine avec le boîtier radar et un oscilloscope, routeur, switch, serveur Ubuntu, poste de supervision, leurre ESP32 et W5500 qui joue une imprimante, PC de test"></svg></div>
+    <div class="outils"><button class="btn petit" id="bLab" type="button" aria-pressed="true">Étiquettes</button></div>
+    <figcaption class="glisse">← Glisse pour voir toute la maquette →</figcaption>
+  </figure>
+
+  <aside class="carte-etape" aria-live="polite">
+    <div class="label" id="eNum"></div>
+    <h2 id="eTitre"></h2>
+    <div id="eTexte"></div>
+    <div class="commandes">
+      <button class="btn" id="bPrev" type="button" aria-label="Étape précédente">◀</button>
+      <button class="btn" id="bReplay" type="button">↻ Rejouer</button>
+      <button class="btn principal" id="bNext" type="button">Suivant ▶</button>
+    </div>
+    <div id="points" role="group" aria-label="Aller à une étape"></div>
+    <p class="aide"><kbd>←</kbd> <kbd>→</kbd> étapes · <kbd>R</kbd> rejouer · <kbd>E</kbd> étiquettes</p>
+    <ul class="legende" aria-label="Légende des messages">
+      <li><i style="background:var(--blanc)"></i>USB signé, capteur</li>
+      <li><i style="background:var(--bleu)"></i>HTTPS, API</li>
+      <li><i style="background:var(--jaune)"></i>HTTP vers le leurre</li>
+      <li><i style="background:var(--vert)"></i>DHCP, DNS, NTP</li>
+      <li><i style="background:var(--rouge)"></i>refusé, perdu</li>
+      <li><i style="background:transparent;border-color:var(--focus)"></i>onde radar</li>
+    </ul>
+  </aside>
+</main>
+
+<section class="section-finale regles">
+  <div class="wrap">
+    <span class="label">Le fil de la soutenance</span>
+    <h2>Les 5 règles du projet</h2>
+    <ol>
+      <li><b>Inactif ne veut pas dire absent</b> : le radar voit la respiration, le clavier non.</li>
+      <li><b>Le verrou reste local</b> : il ne dépend ni du serveur ni du réseau. Une panne ne laisse jamais le poste ouvert.</li>
+      <li><b>Chaque message est signé</b> (HMAC + compteur + défi) : un faux boîtier ou un message rejoué est refusé.</li>
+      <li><b>Une connexion au leurre n'est pas une intrusion</b> : c'est un signal à qualifier.</li>
+      <li><b>L'absence n'est pas une identité</b> : la supervision n'attribue jamais un événement réseau à une personne absente.</li>
+    </ol>
+  </div>
+</section>
+
+<script>
+(function () {
+'use strict';
+var NS = 'http://www.w3.org/2000/svg', svg = document.getElementById('scene');
+var C = Math.cos(Math.PI / 6), S = 0.5;
+var REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
+var CANCEL = { cancel: true };
+
+/* ---------- petits outils de dessin isométrique ---------- */
+function P(x, y, z) { return [(x - y) * C, (x + y) * S - (z || 0)]; }
+function r1(n) { return Math.round(n * 10) / 10; }
+function pts(a) { return a.map(function (p) { var q = P(p[0], p[1], p[2]); return r1(q[0]) + ',' + r1(q[1]); }).join(' '); }
+function dPath(a) { return a.map(function (p, i) { var q = P(p[0], p[1], p[2]); return (i ? 'L' : 'M') + r1(q[0]) + ' ' + r1(q[1]); }).join(''); }
+function el(tag, attrs, parent, text) {
+  var e = document.createElementNS(NS, tag);
+  if (attrs) for (var k in attrs) if (attrs[k] != null) e.setAttribute(k, attrs[k]);
+  if (text != null) e.textContent = text;
+  if (parent) parent.appendChild(e);
+  return e;
+}
+function poly(g, a, fill, cls) { return el('polygon', { points: pts(a), style: 'fill:' + fill, 'class': cls }, g); }
+function m(name, f) { return 'var(--m-' + name + '-' + f + ')'; }
+function box(g, x, y, z, w, d, h, mat, cls) {
+  var gg = el('g', { 'class': cls }, g);
+  return {
+    g: gg,
+    r: poly(gg, [[x + w, y, z], [x + w, y + d, z], [x + w, y + d, z + h], [x + w, y, z + h]], m(mat, 'r')),
+    l: poly(gg, [[x, y + d, z], [x + w, y + d, z], [x + w, y + d, z + h], [x, y + d, z + h]], m(mat, 'l')),
+    t: poly(gg, [[x, y, z + h], [x + w, y, z + h], [x + w, y + d, z + h], [x, y + d, z + h]], m(mat, 't'))
+  };
+}
+function faceL(g, x0, Y, ztop) { var o = P(x0, Y, ztop); return el('g', { transform: 'matrix(' + C + ' ' + S + ' 0 1 ' + r1(o[0]) + ' ' + r1(o[1]) + ')' }, g); }
+function faceR(g, X, y0, ztop) { var o = P(X, y0, ztop); return el('g', { transform: 'matrix(' + C + ' ' + (-S) + ' 0 1 ' + r1(o[0]) + ' ' + r1(o[1]) + ')' }, g); }
+function faceT(g, x0, y0, Z) { var o = P(x0, y0, Z); return el('g', { transform: 'matrix(' + C + ' ' + S + ' ' + (-C) + ' ' + S + ' ' + r1(o[0]) + ' ' + r1(o[1]) + ')' }, g); }
+function desk(g, x, y, w, d, h) {
+  [[x + 3, y + 3], [x + w - 7, y + 3], [x + 3, y + d - 7], [x + w - 7, y + d - 7]].forEach(function (p) { box(g, p[0], p[1], 0, 4, 4, h - 4, 'noir'); });
+  return box(g, x, y, h - 4, w, d, 4, 'bois');
+}
+function txt(g, x, y, s, style, anchor) { return el('text', { x: x, y: y, 'text-anchor': anchor || null, style: style }, g, s); }
+
+/* ---------- calques ---------- */
+var world = el('g', { id: 'monde' }, svg);
+var layRoom = el('g', {}, world), layCable = el('g', {}, world), layDev = el('g', {}, world);
+var layTrace = el('g', {}, svg), layTok = el('g', {}, svg), layLab = el('g', { 'class': 'etiq' }, svg), layBul = el('g', {}, svg);
+var DEV = {};
+function dev(key) { var g = el('g', { 'class': 'dev', 'data-dev': key }, layDev); DEV[key] = g; return g; }
+
+/* ---------- la pièce ---------- */
+var FX = 640, FY = 470;
+box(layRoom, 0, 0, -14, FX, FY, 14, 'sol');
+var grid = '';
+for (var gx = 40; gx < FX; gx += 40) grid += dPath([[gx, 0, 0], [gx, FY, 0]]);
+for (var gy = 40; gy < FY; gy += 40) grid += dPath([[0, gy, 0], [FX, gy, 0]]);
+el('path', { d: grid, 'class': 'sol-grille' }, layRoom);
+poly(layRoom, [[0, 0, 0], [0, FY, 0], [0, FY, 175], [0, 0, 175]], m('mur', 'r'));
+poly(layRoom, [[0, 0, 0], [FX, 0, 0], [FX, 0, 175], [0, 0, 175]], m('mur', 'l'));
+var fen = faceR(layRoom, 0.5, 440, 150);
+el('rect', { x: 10, y: 10, width: 70, height: 80, rx: 2, 'class': 'tr', style: 'fill:var(--bleu-pale)' }, fen);
+el('path', { d: 'M45 10v80M10 50h70', 'class': 'tr', style: 'fill:none' }, fen);
+
+/* ---------- zones du radar (portes de 0,75 m), dessinées au sol ---------- */
+var RC = [84, 294];                      // le radar regarde vers +x (vers Martine)
+function arcPts(r, z) { var a = []; for (var k = 0; k <= 18; k++) { var t = (-45 + k * 5) * Math.PI / 180; a.push([RC[0] + r * Math.cos(t), RC[1] + r * Math.sin(t), z]); } return a; }
+var GATES = [];
+[[0, 75], [75, 150], [150, 225]].forEach(function (g, i) {
+  var outer = arcPts(g[1], 0.5), inner = g[0] ? arcPts(g[0], 0.5).reverse() : [[RC[0], RC[1], 0.5]];
+  GATES.push(el('polygon', { points: pts(outer.concat(inner)), 'class': 'porte' + (i === 2 ? ' ignoree' : '') }, layRoom));
+  var q = P(RC[0] + (g[0] + g[1]) / 2, RC[1] + 4, 0.5);
+  txt(layRoom, r1(q[0]), r1(q[1]), 'porte ' + i, 'font-size:9px;font-weight:900;fill:var(--encre-2)', 'middle');
+});
+var layPulse = el('g', {}, world);
+
+/* ---------- câbles (chemins utilisés aussi par les messages) ---------- */
+function swEnd(px, lane) { return [[px, lane, 0], [px, 66, 0], [px, 64, 0], [px, 64, 62], [px, 60, 68]]; }
+var SEG = {
+  srv: [[65, 76, 10], [65, 80, 0], [65, 90, 0]].concat(swEnd(160, 90)),
+  pc:  [[36, 224, 20], [36, 232, 10], [36, 232, 0], [104, 232, 0], [104, 122, 0]].concat(swEnd(174, 122)),
+  sup: [[563, 86, 6], [563, 92, 0], [563, 110, 0]].concat(swEnd(205, 110)),
+  leu: [[330, 196, 36], [326, 196, 24], [324, 196, 0], [324, 100, 0]].concat(swEnd(216, 100)),
+  test: [[438, 386, 40], [424, 386, 34], [420, 386, 0], [420, 140, 0]].concat(swEnd(190, 140)),
+  rt:  [[186, 40, 85], [186, 58, 80], [186, 61, 72], [186, 60, 68]]
+};
+var CAB = {};
+['srv', 'pc', 'sup', 'leu', 'test'].forEach(function (k) { CAB[k] = el('path', { d: dPath(SEG[k]), 'class': 'cable' }, layCable); });
+function rev(a) { return a.slice().reverse(); }
+function R(a, b) { return SEG[a].concat(rev(SEG[b])); }
+var USB = [[62, 290, 44], [55, 290, 38.5], [48, 270, 38.5], [42, 240, 38.5], [38, 226, 32]];
+var UART = [[78, 290, 50], [70, 296, 50], [66, 300, 46]];
+var PROBE = [[50, 318, 50], [56, 306, 46], [62, 302, 44]];
+var FAKE_USB = [[64, 252, 42], [50, 246, 38.5], [42, 232, 38.5], [38, 226, 32]];
+CAB.usb = el('path', { d: dPath(USB), 'class': 'cable usb' }, layCable);
+el('path', { d: dPath(PROBE), 'class': 'cable usb' }, layCable);
+
+/* ---------- serveur Ubuntu ---------- */
+(function () {
+  var g = dev('srv');
+  box(g, 40, 20, 0, 50, 55, 100, 'noir');
+  var f = faceL(g, 40, 75, 100);
+  [8, 20, 32].forEach(function (y) { el('rect', { x: 6, y: y, width: 38, height: 8, rx: 1, 'class': 'tr', style: 'fill:var(--m-noir-t);stroke-width:.8' }, f); el('rect', { x: 34, y: y + 3, width: 6, height: 2, 'class': 'ns', style: 'fill:var(--contour-2)' }, f); });
+  for (var i = 0; i < 6; i++) el('rect', { x: 8, y: 52 + i * 6, width: 34, height: 2.2, 'class': 'ns', style: 'fill:var(--m-noir-t)' }, f);
+  el('circle', { cx: 25, cy: 92, r: 2.6, 'class': 'ns', style: 'fill:var(--vert)' }, f);
+})();
+
+/* ---------- baie : switch HP + routeur Cisco ---------- */
+(function () {
+  var g = dev('sw');
+  box(g, 140, 20, 0, 92, 42, 62, 'gris');
+  var fb = faceL(g, 140, 62, 62);
+  el('path', { d: 'M8 10h76M8 20h76M8 30h76M8 40h76M8 50h76', 'class': 'tr', style: 'fill:none;stroke:var(--contour-2);stroke-width:1' }, fb);
+  box(g, 144, 23, 62, 84, 37, 11, 'alu');
+  var f = faceL(g, 144, 60, 73);
+  for (var i = 0; i < 12; i++) {
+    el('rect', { x: 6 + i * 5.6, y: 3, width: 4, height: 4.4, 'class': 'ns', style: 'fill:var(--encre)' }, f);
+    el('rect', { x: 6.8 + i * 5.6, y: 8.4, width: 2.4, height: 1.3, 'class': 'ns', style: 'fill:' + (i < 6 ? 'var(--vert)' : 'var(--jaune-fonce)') }, f);
+  }
+  txt(f, 76, 8, 'HP', 'font-size:4px;font-weight:900');
+  var r = dev('rt');
+  box(r, 144, 23, 73, 84, 37, 12, 'noir');
+  var fr = faceL(r, 144, 60, 85);
+  txt(fr, 6, 8, 'CISCO ISR 4331', 'font-size:4.4px;font-weight:900;fill:var(--blanc)');
+  [52, 58, 64, 70].forEach(function (x) { el('circle', { cx: x, cy: 6.5, r: 1.3, 'class': 'ns', style: 'fill:var(--vert)' }, fr); });
+})();
+
+/* ---------- poste de supervision (tableau de bord servi par Ubuntu) ---------- */
+var evRows = [];
+(function () {
+  var g = dev('sup');
+  desk(g, 360, 20, 180, 80, 38);
+  box(g, 548, 30, 0, 30, 55, 70, 'noir');
+  box(g, 420, 50, 38, 40, 20, 2, 'noir');
+  box(g, 436, 55, 40, 8, 6, 14, 'noir');
+  box(g, 380, 48, 52, 120, 7, 72, 'noir');
+  var f = faceL(g, 380, 55, 124);
+  el('rect', { x: 4, y: 4, width: 112, height: 64, 'class': 'ns', style: 'fill:var(--blanc)' }, f);
+  el('rect', { x: 4, y: 4, width: 112, height: 9, 'class': 'ns', style: 'fill:var(--encre)' }, f);
+  txt(f, 8, 11, 'Supervision · événements techniques', 'font-size:5.8px;font-weight:900;fill:var(--blanc)');
+  for (var i = 0; i < 5; i++) {
+    var y = 22 + i * 10, row = el('g', {}, f);
+    var dot = el('circle', { cx: 10, cy: y - 2, r: 2.4, 'class': 'tr', style: 'stroke-width:.7;fill:var(--papier-2)' }, row);
+    var t = txt(row, 15, y, '', 'font-size:4.6px;font-weight:800');
+    evRows.push({ dot: dot, t: t });
+  }
+  box(g, 400, 72, 38, 80, 16, 2, 'gris');
+  box(g, 488, 76, 38, 9, 12, 2, 'gris');
+})();
+
+/* ---------- poste de Martine : PC Windows, boîtier radar, oscilloscope ---------- */
+var scr = {}, psLines = [], ledB, boite, fakeG, martineG, torsoG, scopeTrace, scopeTxt, bipG, usbOff;
+function person(g, x, y, z0, mat) {
+  var p = el('g', {}, g);
+  box(p, x - 6, y - 5, z0, 12, 10, 26, 'noir');                 // jambes
+  var t = el('g', {}, p); box(t, x - 8, y - 7, z0 + 26, 16, 14, 28, mat);
+  var h = P(x, y, z0 + 64);
+  el('circle', { cx: r1(h[0]), cy: r1(h[1]), r: 8.5, 'class': 'tr', style: 'fill:var(--m-peau)' }, t);
+  return { g: p, torso: t };
+}
+(function () {
+  var g = dev('pc');
+  box(g, 22, 180, 0, 28, 44, 54, 'noir');                         // tour (sous le bureau)
+  desk(g, 15, 170, 90, 170, 38);
+  box(g, 22, 215, 38, 20, 40, 2, 'noir');
+  box(g, 30, 232, 40, 6, 8, 14, 'noir');
+  box(g, 40, 185, 52, 7, 100, 68, 'noir');
+  var f = faceR(g, 47, 285, 120);
+  scr.work = el('g', {}, f);
+  el('rect', { x: 4, y: 4, width: 92, height: 60, 'class': 'ns', style: 'fill:var(--blanc)' }, scr.work);
+  el('rect', { x: 4, y: 4, width: 92, height: 7, 'class': 'ns', style: 'fill:var(--focus)' }, scr.work);
+  txt(scr.work, 8, 9.6, 'dossier-2026-118.pdf', 'font-size:5px;font-weight:800;fill:var(--blanc)');
+  [60, 74, 52, 70, 44].forEach(function (w, i) { el('rect', { x: 10, y: 17 + i * 6.5, width: w, height: 2.6, rx: 1, 'class': 'ns', style: 'fill:var(--contour-2)' }, scr.work); });
+  scr.idle = txt(scr.work, 50, 60, '', 'font-size:5px;font-weight:900;fill:var(--encre-2)', 'middle');
+  scr.warn = el('g', {}, f);
+  el('rect', { x: 4, y: 4, width: 92, height: 60, 'class': 'ns', style: 'fill:var(--jaune)' }, scr.warn);
+  txt(scr.warn, 50, 26, 'Absence détectée', 'font-size:8px;font-weight:1000', 'middle');
+  scr.warnN = txt(scr.warn, 50, 42, '', 'font-size:6.5px;font-weight:800', 'middle');
+  scr.lock = el('g', {}, f);
+  el('rect', { x: 4, y: 4, width: 92, height: 60, 'class': 'ns', style: 'fill:var(--ecran-sombre)' }, scr.lock);
+  txt(scr.lock, 50, 30, '08:47', 'font-size:14px;font-weight:900;fill:var(--blanc)', 'middle');
+  scr.lockTxt = txt(scr.lock, 50, 44, 'Session verrouillée', 'font-size:6px;font-weight:800;fill:var(--blanc)', 'middle');
+  scr.ps = el('g', {}, f);
+  el('rect', { x: 4, y: 4, width: 92, height: 60, 'class': 'ns', style: 'fill:var(--ecran-sombre)' }, scr.ps);
+  el('rect', { x: 4, y: 4, width: 92, height: 7, 'class': 'ns', style: 'fill:var(--encre-2)' }, scr.ps);
+  txt(scr.ps, 8, 9.6, 'Service CyberSentinel (PowerShell)', 'font-size:4.8px;font-weight:800;fill:var(--blanc)');
+  for (var i = 0; i < 6; i++) psLines.push(txt(scr.ps, 7, 18 + i * 7.6, '', 'font-size:4.3px;font-weight:700;font-family:var(--police-mono)'));
+  box(g, 58, 205, 38, 18, 64, 2, 'gris');                         // clavier
+  // boîtier radar : LD2410 derrière une fenêtre, ESP32, LED RVB
+  boite = el('g', {}, g);
+  box(boite, 62, 282, 38, 22, 24, 16, 'blanc');
+  var fr = faceR(boite, 84, 282, 54);
+  el('rect', { x: 4, y: 3, width: 14, height: 9, rx: 1.5, 'class': 'tr', style: 'fill:var(--m-pcb-t);stroke-width:.8' }, fr);
+  txt(fr, 11, 9.4, 'LD2410', 'font-size:2.8px;font-weight:900;fill:var(--blanc)', 'middle');
+  ledB = el('circle', { cx: 21, cy: 7.5, r: 2.2, 'class': 'tr', style: 'stroke-width:.7' }, fr);
+  usbOff = el('g', { style: 'display:none' }, g);
+  var uq = P(52, 300, 50);
+  el('rect', { x: r1(uq[0] - 30), y: r1(uq[1] - 9), width: 60, height: 16, rx: 4, style: 'fill:var(--rouge);stroke:var(--encre);stroke-width:1.5' }, usbOff);
+  txt(usbOff, r1(uq[0]), r1(uq[1] + 3), 'débranché', 'font-size:9px;font-weight:1000;fill:var(--blanc)', 'middle');
+  // faux boîtier (étape 7)
+  fakeG = el('g', { style: 'display:none' }, g);
+  box(fakeG, 62, 244, 38, 16, 16, 12, 'rouge');
+  var ff = faceR(fakeG, 78, 244, 50);
+  txt(ff, 8, 8, '?', 'font-size:8px;font-weight:1000;fill:var(--blanc)', 'middle');
+  // oscilloscope
+  box(g, 20, 304, 38, 30, 30, 22, 'gris');
+  var fs = faceR(g, 50, 304, 60);
+  el('rect', { x: 2, y: 2, width: 19, height: 13, rx: 1, 'class': 'ns', style: 'fill:var(--ecran-sombre)' }, fs);
+  scopeTrace = el('polyline', { points: '', style: 'fill:none;stroke:var(--jaune);stroke-width:.9' }, fs);
+  scopeTxt = txt(fs, 11.5, 13.5, '', 'font-size:2.8px;font-weight:900;fill:var(--blanc)', 'middle');
+  [23.5, 26.5].forEach(function (x) { [4, 8, 12].forEach(function (y) { el('circle', { cx: x, cy: y, r: 1.1, 'class': 'ns', style: 'fill:var(--encre-2)' }, fs); }); });
+  // chaise et Martine
+  box(g, 128, 243, 24, 26, 26, 4, 'noir');
+  box(g, 152, 243, 28, 4, 26, 30, 'noir');
+  box(g, 138, 253, 0, 6, 6, 24, 'noir');
+  var mp = person(g, 140, 256, 4, 'pull');
+  martineG = mp.g; torsoG = mp.torso;
+  var bq = P(73, 294, 60);
+  bipG = el('g', { 'class': 'bip', style: 'transform-origin:' + bq[0] + 'px ' + bq[1] + 'px' }, g);
+  el('path', { d: 'M' + (bq[0] - 12) + ' ' + (bq[1] - 12) + 'q12 -9 24 0', style: 'fill:none;stroke:var(--encre);stroke-width:2;stroke-linecap:round' }, bipG);
+})();
+
+/* ---------- un collègue qui passe dans l'allée (étape 8) ---------- */
+var colG;
+(function () { var g = dev('col'); colG = person(g, 270, 0, 0, 'jaune').g; g.style.display = 'none'; })();
+
+/* ---------- le leurre : ESP32 + W5500 qui joue une imprimante ---------- */
+var leuLed;
+(function () {
+  var g = dev('leu'); var q0 = P(-140, 0, 0); g.setAttribute('transform', 'translate(' + r1(q0[0]) + ' ' + r1(q0[1]) + ')');
+  desk(g, 470, 150, 130, 80, 40);
+  box(g, 500, 172, 40, 46, 30, 5, 'pcb');                         // carte ESP32
+  box(g, 506, 176, 45, 16, 14, 3, 'noir');
+  box(g, 526, 178, 45, 16, 18, 6, 'alu');                          // module W5500 + prise RJ45
+  var ft = faceT(g, 500, 172, 45);
+  leuLed = el('circle', { cx: 40, cy: 24, r: 2.6, 'class': 'tr', style: 'stroke-width:.7;fill:var(--vert)' }, ft);
+  // la « fausse imprimante » : ce que voit le réseau, pas un vrai objet
+  var gh = el('g', { 'class': 'fantome' }, g);
+  box(gh, 496, 168, 52, 60, 46, 34, 'fantome');
+  box(gh, 506, 214, 66, 40, 10, 2, 'fantome');
+})();
+
+/* ---------- PC de test du labo (Wireshark) ---------- */
+var wsLines = [];
+(function () {
+  var g = dev('test');
+  desk(g, 430, 340, 170, 100, 38);
+  box(g, 470, 370, 38, 80, 47, 6, 'noir');
+  box(g, 470, 364, 44, 80, 6, 56, 'noir');
+  var f = faceL(g, 470, 370, 100);
+  el('rect', { x: 4, y: 4, width: 72, height: 48, 'class': 'ns', style: 'fill:var(--blanc)' }, f);
+  el('rect', { x: 4, y: 4, width: 72, height: 7, 'class': 'ns', style: 'fill:var(--focus)' }, f);
+  txt(f, 7, 9.4, 'Wireshark · eth0', 'font-size:4.6px;font-weight:900;fill:var(--blanc)');
+  for (var i = 0; i < 5; i++) wsLines.push(txt(f, 7, 18 + i * 7.2, '', 'font-size:3.7px;font-weight:700;font-family:var(--police-mono)'));
+})();
+
+var LABELS = [
+  ['srv', [65, 47, 100], 0, -26, 'Serveur Ubuntu', 'API · SQLite · 10.10.0.20'],
+  ['rt', [186, 41, 85], 30, -40, 'Routeur Cisco', 'DHCP · DNS · NTP'],
+  ['sw', [228, 40, 70], 40, 6, 'Switch HP', 'réseau isolé du labo'],
+  ['sup', [440, 52, 124], 0, -12, 'Poste de supervision', 'tableau de bord Ubuntu'],
+  ['pc', [44, 235, 120], -10, -14, 'Poste de Martine', 'Windows 11 · 10.10.0.54'],
+  ['boite', [73, 294, 54], -150, -10, 'Boîtier radar', 'LD2410 + ESP32 · USB'],
+  ['scope', [35, 334, 60], -20, 100, 'Oscilloscope', 'mesure du délai (R4)'],
+  ['mar', [140, 256, 74], 110, 0, 'Martine', 'agente (personnage fictif)'],
+  ['leu', [382, 192, 86], 60, -50, 'Leurre ESP32 + W5500', 'fausse imprimante · 10.10.0.80'],
+  ['test', [510, 367, 100], 40, -20, 'PC de test', 'Wireshark · 10.10.0.73']
+];
+var LABDEV = { boite: 'pc', scope: 'pc', mar: 'pc' };
+
+/* ---------- étiquettes des appareils ---------- */
+function pill(parent, x, y, lines) {
+  var g = el('g', { 'class': 'pill' }, parent);
+  var sh = el('rect', { 'class': 'ombre' }, g), bg = el('rect', { 'class': 'fond' }, g), tg = el('g', {}, g);
+  el('text', { x: 0, y: 0, 'class': 'p1', 'text-anchor': 'middle' }, tg, lines[0]);
+  if (lines[1]) el('text', { x: 0, y: 14.5, 'class': 'p2', 'text-anchor': 'middle' }, tg, lines[1]);
+  var b = tg.getBBox(), h = b.height + 9, w = b.width + 18, rx = lines[1] ? 9 : h / 2;
+  [[sh, 3], [bg, 0]].forEach(function (p) { p[0].setAttribute('x', b.x - 9 + p[1]); p[0].setAttribute('y', b.y - 4.5 + p[1]); p[0].setAttribute('width', w); p[0].setAttribute('height', h); p[0].setAttribute('rx', rx); });
+  g.setAttribute('transform', 'translate(' + r1(x) + ' ' + r1(y - (b.y + b.height + 4.5)) + ')');
+  return g;
+}
+LABELS.forEach(function (L) {
+  var a = P(L[1][0], L[1][1], L[1][2]), x = a[0] + L[2], y = a[1] + L[3];
+  var g = el('g', { 'data-lab': L[0] }, layLab);
+  el('line', { x1: r1(x), y1: r1(y), x2: r1(a[0]), y2: r1(a[1]), 'class': 'attache' }, g);
+  el('circle', { cx: r1(a[0]), cy: r1(a[1]), r: 2.6, 'class': 'lab-dot' }, g);
+  pill(g, x, y, [L[4], L[5]]);
+});
+
+(function () { var b = world.getBBox(), l = layLab.getBBox(); var x0 = Math.min(b.x, l.x) - 16, y0 = Math.min(b.y, l.y) - 16, x1 = Math.max(b.x + b.width, l.x + l.width) + 16, y1 = Math.max(b.y + b.height, l.y + l.height) + 16; svg.setAttribute('viewBox', [r1(x0), r1(y0), r1(x1 - x0), r1(y1 - y0)].join(' ')); })();
+
+/* ---------- bulles d'explication ---------- */
+var BUL = {};
+function bubble(key, anchor, lines, opt) {
+  opt = opt || {}; unbubble(key);
+  var lab = layLab.querySelector('[data-lab="' + key + '"]'); if (lab) lab.classList.add('cache');
+  var a = P(anchor[0], anchor[1], anchor[2]), x = a[0] + (opt.dx || 0), y = a[1] + (opt.dy || -40);
+  var g = el('g', { 'class': 'bulle ' + (opt.cls || '') }, layBul);
+  el('line', { x1: r1(a[0]), y1: r1(a[1]), x2: r1(x), y2: r1(y), 'class': 'attache' }, g);
+  el('circle', { cx: r1(a[0]), cy: r1(a[1]), r: 3, 'class': 'lab-dot' }, g);
+  var box2 = el('g', {}, g), sh = el('rect', { style: 'fill:var(--encre)' }, box2), bg = el('rect', { 'class': 'fond' }, box2), tg = el('g', {}, box2);
+  lines.forEach(function (t, i) {
+    var mono = t.charAt(0) === '>', titre = t.charAt(0) === '#';
+    el('text', { x: 0, y: i * 16, 'class': mono ? 'mono' : titre ? 'titre' : '' }, tg, mono || titre ? t.slice(1) : t);
+  });
+  var b = tg.getBBox(), w = b.width + 20, h = b.height + 12;
+  [[sh, 3], [bg, 0]].forEach(function (p) { p[0].setAttribute('x', b.x - 10 + p[1]); p[0].setAttribute('y', b.y - 6 + p[1]); p[0].setAttribute('width', w); p[0].setAttribute('height', h); p[0].setAttribute('rx', 8); });
+  var left = opt.align === 'right' ? x - w + 14 : opt.align === 'left' ? x - 14 : x - w / 2, by = y - (b.y + b.height + 6);
+  if (opt.below) by = y - b.y + 6;
+  box2.setAttribute('transform', 'translate(' + r1(left - b.x + 10) + ' ' + r1(by) + ')');
+  BUL[key] = g; return g;
+}
+function showLab(key) { var lab = layLab.querySelector('[data-lab="' + key + '"]'); if (lab) lab.classList.remove('cache'); }
+function unbubble(key) { if (BUL[key]) { BUL[key].remove(); delete BUL[key]; showLab(key); } }
+function clearBubbles() { for (var k in BUL) { BUL[k].remove(); showLab(k); } BUL = {}; }
+
+/* ---------- messages qui circulent ---------- */
+var RUN = 0;
+function sleep(ms) { var id = RUN; return new Promise(function (res, rej) { setTimeout(function () { id === RUN ? res() : rej(CANCEL); }, REDUCED ? Math.min(ms, 400) : ms); }); }
+function bg(p) { p.catch(function () {}); return p; }
+function go(path3, o) {
+  o = o || {}; var id = RUN, kind = o.kind || 'usb';
+  return new Promise(function (res, rej) {
+    var tr = el('path', { d: dPath(path3), 'class': 'trace k-' + kind }, layTrace), L = tr.getTotalLength();
+    if (o.noTrace) tr.style.display = 'none';
+    tr.style.strokeDasharray = L; tr.style.strokeDashoffset = L;
+    var tok = el('g', { 'class': 'tok k-' + kind }, layTok);
+    el('circle', { r: o.size || 6.5 }, tok);
+    if (o.label) {
+      var lg = el('g', {}, tok), rb = el('rect', { 'class': 'fond-tok', rx: 9 }, lg), t = el('text', { x: 0, y: -15, 'text-anchor': 'middle' }, lg, o.label), b = t.getBBox();
+      rb.setAttribute('x', b.x - 8); rb.setAttribute('y', b.y - 3); rb.setAttribute('width', b.width + 16); rb.setAttribute('height', b.height + 6);
+    }
+    var dur = REDUCED ? 300 : Math.max(600, L / (o.speed || 240) * 1000), stopAt = o.dropAt == null ? 1 : o.dropAt, t0 = null;
+    function frame(t) {
+      if (id !== RUN) { tr.remove(); tok.remove(); return rej(CANCEL); }
+      if (t0 == null) t0 = t;
+      var k = Math.min(1, (t - t0) / dur), e = 0.5 - Math.cos(Math.PI * k) / 2, kk = Math.min(e, stopAt);
+      var pt = tr.getPointAtLength(kk * L);
+      tok.setAttribute('transform', 'translate(' + r1(pt.x) + ' ' + r1(pt.y) + ')');
+      tr.style.strokeDashoffset = L * (1 - kk);
+      if (e >= stopAt) {
+        if (o.dropAt != null) tok.classList.add('perdu');
+        setTimeout(function () { tr.classList.add('fin'); setTimeout(function () { tr.remove(); }, 650); if (o.dropAt == null) tok.remove(); else setTimeout(function () { tok.remove(); }, 700); }, 150);
+        return res();
+      }
+      requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+  });
+}
+function anim(ms, fn) {
+  var id = RUN;
+  return new Promise(function (res, rej) {
+    var t0 = null, dur = REDUCED ? 1 : ms;
+    function f(t) { if (id !== RUN) return rej(CANCEL); if (t0 == null) t0 = t; var k = Math.min(1, (t - t0) / dur); fn(0.5 - Math.cos(Math.PI * k) / 2); if (k < 1) requestAnimationFrame(f); else res(); }
+    requestAnimationFrame(f);
+  });
+}
+/* ---------- ondes du radar ---------- */
+function pulse(maxR) {
+  var p = el('path', { 'class': 'onde-radar' }, layPulse), R0 = maxR || 230;
+  return anim(1400, function (k) { var r = 10 + (R0 - 10) * k; p.setAttribute('d', dPath(arcPts(r, 1))); p.style.opacity = 1 - k; }).then(function () { p.remove(); }, function (e) { p.remove(); throw e; });
+}
+function bip() { bipG.classList.remove('on'); void bipG.getBBox(); bipG.classList.add('on'); }
+
+/* ---------- état de la maquette ---------- */
+var ST;
+var LEDC = { vert: 'var(--vert)', orange: 'var(--jaune-fonce)', off: 'var(--led-off)' };
+function stateFor(i) {
+  var s = { mar: 'here', scr: 'work', idle: '', warnN: '', lockTxt: 'Session verrouillée', ps: [], led: 'vert', ev: [], net: true, boxOn: true, fake: false, col: false,
+    gate: -1, scope: 'idle', dt: '', leu: 'vert', ws: [] };
+  if (i === 11) s.ev = [['08:47:12 · PC-04 · session verrouillée (absence)', 'var(--encre-2)']];
+  return s;
+}
+function render() {
+  var s = ST;
+  ['work', 'warn', 'lock', 'ps'].forEach(function (k) { scr[k].style.display = s.scr === k ? '' : 'none'; });
+  scr.idle.textContent = s.idle; scr.warnN.textContent = s.warnN; scr.lockTxt.textContent = s.lockTxt;
+  psLines.forEach(function (t, i) { var l = s.ps[i]; t.textContent = l ? l[0] : ''; t.style.fill = l ? l[1] : 'var(--blanc)'; });
+  ledB.style.fill = LEDC[s.boxOn ? s.led : 'off'];
+  evRows.forEach(function (r, i) { var e = s.ev[i]; r.t.textContent = e ? e[0] : (i === 0 ? 'aucun événement' : ''); r.dot.style.fill = e ? e[1] : 'var(--papier-2)'; });
+  CAB.pc.classList.toggle('coupe', !s.net);
+  boite.style.opacity = s.boxOn ? 1 : .35; CAB.usb.style.display = s.boxOn ? '' : 'none'; usbOff.style.display = s.boxOn ? 'none' : '';
+  fakeG.style.display = s.fake ? '' : 'none';
+  martineG.style.transform = ''; martineG.style.opacity = s.mar === 'here' ? 1 : 0;
+  var ml = layLab.querySelector('[data-lab="mar"]'); if (ml) ml.style.display = s.mar === 'here' ? '' : 'none';
+  DEV.col.style.display = s.col ? '' : 'none';
+  GATES.forEach(function (g, i) { g.classList.toggle('actif', s.gate === i || (s.gate === 9 && i < 2)); });
+  scopeTxt.textContent = s.dt;
+  if (s.scope === 'idle') scopeTrace.setAttribute('points', '3,9 21,9');
+  leuLed.style.fill = s.leu === 'vert' ? 'var(--vert)' : 'var(--jaune-fonce)';
+  wsLines.forEach(function (t, i) { var l = s.ws[i]; t.textContent = l ? l[0] : ''; t.style.fill = l ? l[1] : 'var(--encre)'; });
+}
+function set(o) { for (var k in o) ST[k] = o[k]; render(); }
+function psPush(t, col) { var a = ST.ps.slice(); a.push([t, col || 'var(--blanc)']); if (a.length > 6) a.shift(); set({ ps: a, scr: 'ps' }); }
+function evPush(t, col) { var a = ST.ev.slice(); a.push([t, col || 'var(--encre-2)']); if (a.length > 5) a.shift(); set({ ev: a }); }
+function wsPush(t, col) { var a = ST.ws.slice(); a.push([t, col]); if (a.length > 5) a.shift(); set({ ws: a }); }
+function partir() {   // Martine se lève et s'en va vers l'avant
+  var d = P(170, 160, 0), o0 = P(0, 0, 0), dx = d[0] - o0[0], dy = d[1] - o0[1];
+  return anim(1600, function (k) { martineG.style.transform = 'translate(' + r1(dx * k) + 'px,' + r1(dy * k) + 'px)'; martineG.style.opacity = 1 - k * k; }).then(function () { ST.mar = 'gone'; render(); });
+}
+function respire(on) { torsoG.classList.toggle('respire', !!on); }
+var B_SRV = { dx: 70, dy: -10, align: 'left' }, B_SUP = { dx: 20, dy: -40, align: 'left' }, B_BOX = { dx: -30, dy: -70, align: 'right' }, B_PC = { dx: 30, dy: -40, align: 'left' };
+var A = { srv: [65, 47, 100], sup: [440, 52, 124], pc: [44, 235, 120], box: [73, 294, 54], leu: [382, 192, 60], test: [510, 367, 100], rt: [186, 41, 85], scope: [35, 334, 60], col: [270, 300, 70] };
+function o(base, extra) { var r = {}; for (var k in base) r[k] = base[k]; for (var k2 in extra) r[k2] = extra[k2]; return r; }
+async function radarLoop() { for (;;) { bg(pulse(80)); await sleep(1100); } }
+
+/* ---------- les étapes ---------- */
+var STEPS = [
+{ t: 'Vue d\'ensemble', all: true,
+  x: '<p><b>CyberSentinel</b> réunit deux défenses. À gauche, un <b>radar LD2410</b> et un ESP32 verrouillent le poste de Martine quand elle s\'absente. À droite, un <b>second ESP32 Ethernet (W5500)</b> joue une <b>fausse imprimante</b> et note qui consulte son faux service web.</p><p>Au fond, le <b>réseau isolé du labo</b> : routeur, switch, serveur Ubuntu et poste de supervision.</p><p>Scénario simulé, adresses d\'exemple. Clique sur <b>Suivant</b>.</p>',
+  run: async function () {
+    respire(true); bg(radarLoop());
+    for (var n = 1; ; n++) {
+      bg(go(USB, { kind: 'usb', size: 4, speed: 90 }));
+      if (n % 4 === 0) bg(go(R('test', 'leu'), { kind: 'http', size: 5 }));
+      if (n % 5 === 0) bg(go(R('pc', 'srv'), { kind: 'https', size: 5 }));
+      await sleep(1200);
+    }
+  } },
+{ t: '1. Le boîtier, pièce par pièce', on: ['pc'],
+  x: '<p>Le <b>radar LD2410</b> (24 GHz) regarde Martine à travers la face avant du boîtier. Il envoie ses mesures à l\'<b>ESP32</b> par une liaison série (256 000 bauds).</p><p>L\'ESP32 décide, <b>signe chaque message</b> et commande la <b>LED RVB</b>. Tout est alimenté par le câble <b>USB 5 V</b> : pas de 230 V.</p><p>Aucune caméra : le radar ne fait <b>aucune image</b>.</p>',
+  run: async function () {
+    respire(true);
+    bubble('boite', A.box, ['#Boîtier radar', '>LD2410 · 24 GHz · série 256 000 bauds', '>ESP32 · signe chaque message', '>LED RVB · alimentation USB 5 V', 'aucune image, aucune caméra'], B_BOX);
+    for (;;) { bg(pulse(80)); await go(UART, { kind: 'capt', size: 3, speed: 20, noTrace: true }); await go(USB, { kind: 'usb', size: 4, speed: 60, label: 'USB · présent' }); await sleep(500); }
+  } },
+{ t: '2. Le radar voit la respiration', on: ['pc'],
+  x: '<p>Martine <b>lit un dossier papier</b>, sans toucher au clavier. Windows se croit seul : « inactif depuis 4 minutes ».</p><p>Le radar envoie une onde (λ = 12,5 mm) et écoute l\'écho. En respirant, la poitrine bouge de quelques millimètres : l\'écho change, et la <b>porte 0</b> (0 à 0,75 m) garde de l\'énergie. Résultat : <b>présente</b>.</p><p><b>Inactif ne veut pas dire absent.</b></p>',
+  run: async function () {
+    respire(true); set({ gate: 0, idle: 'inactif depuis 04:00' }); bg(radarLoop());
+    bubble('boite', A.box, ['#Radar', 'porte 0 : énergie de micro-mouvement', '→ présente'], o(B_BOX, { cls: 'ok' }));
+    for (var s = 0; ; s++) { set({ idle: 'inactif depuis 04:' + String(s % 60).padStart(2, '0') }); bg(go(USB, { kind: 'usb', size: 4, speed: 80, noTrace: true })); await sleep(1000); }
+  } },
+{ t: '3. Chaque message est signé', on: ['pc'],
+  x: '<p>Chaque seconde, le boîtier envoie « présente » ou « absente ». Il ajoute un <b>compteur</b> et une <b>preuve calculée avec un code secret</b> (HMAC-SHA256).</p><p>Le service PowerShell du poste vérifie la preuve et que le compteur a bien avancé. Un message modifié ou <b>rejoué</b> est <b>refusé</b>.</p>',
+  run: async function () {
+    respire(true); set({ scr: 'ps' });
+    for (var n = 41; n < 44; n++) {
+      await go(USB, { kind: 'usb', size: 4.5, speed: 50, label: '#' + n + ' présente · HMAC' });
+      psPush('#' + n + ' présente', 'var(--blanc)'); psPush('  HMAC ✔ compteur ✔ → accepté', 'var(--m-pcb-t)');
+      await sleep(300);
+    }
+    await go(USB, { kind: 'err', size: 4.5, speed: 50, label: '#42 rejoué (copie)' });
+    psPush('#42 présente (déjà vu)', 'var(--blanc)'); psPush('  compteur ✘ → REFUSÉ', 'var(--rouge)');
+    bubble('pc', A.pc, ['#Service du poste', 'message rejoué → refusé'], o(B_PC, { cls: 'alerte' }));
+  } },
+{ t: '4. Martine part : orange, puis blocage', on: ['pc', 'sw', 'srv', 'sup'],
+  x: '<p>Martine se lève. Dès que le radar ne la voit plus : message signé « absente », <b>lumière orange</b> et avertissement pendant 3 secondes. Si elle revient pendant l\'orange, <b>rien ne se passe</b>.</p><p>Sinon, le poste <b>verrouille la session</b>. Ensuite seulement, il prévient le serveur.</p><p><b>Le verrou ne dépend ni du serveur ni du réseau.</b></p>',
+  run: async function () {
+    await sleep(600); respire(false);
+    await partir();
+    bg(pulse(120));
+    await go(USB, { kind: 'usb', size: 4.5, speed: 50, label: 'absente · HMAC' });
+    set({ led: 'orange', scr: 'warn' });
+    for (var k = 3; k > 0; k--) { set({ warnN: 'verrouillage dans ' + k + ' s' }); await sleep(800); }
+    set({ scr: 'lock', led: 'off' }); bip();
+    bubble('pc', A.pc, ['#Poste', 'verrouillé en local', 'sans attendre le serveur'], o(B_PC, { cls: 'ok' }));
+    await sleep(700);
+    await go(R('pc', 'srv'), { kind: 'https', label: 'HTTPS · événement : verrouillage' });
+    await go(R('srv', 'sup'), { kind: 'https', size: 5 });
+    evPush('08:47:12 · PC-04 · session verrouillée (absence)', 'var(--encre-2)');
+  } },
+{ t: '5. Le réseau en place (C10)', on: ['pc', 'rt', 'sw', 'srv', 'leu', 'test'],
+  x: '<p>Lorenzo <b>exploite</b> le réseau isolé du labo : <b>DHCP</b> donne les adresses, <b>DNS</b> permet de joindre Ubuntu par son nom, <b>NTP</b> met tout le monde à la même heure (pour dater les événements), <b>HTTPS</b> chiffre les journaux.</p><p>Le leurre a sa propre adresse IP. <b>Wireshark</b> sur le PC de test montre les échanges.</p><p>Adresses d\'exemple. Le routeur fournit déjà DHCP, DNS et NTP : <b>aucun VLAN ni ACL à créer</b>.</p>',
+  run: async function () {
+    set({ ws: [] });
+    await go(R('pc', 'rt'), { kind: 'net', label: 'DHCP · qui me donne une adresse ?' });
+    await go(R('rt', 'pc'), { kind: 'net', label: 'DHCP · 10.10.0.54' }); wsPush('DHCP  ACK 10.10.0.54', 'var(--encre)');
+    await go(R('pc', 'rt'), { kind: 'net', label: 'DNS · ubuntu.labo ?' });
+    await go(R('rt', 'pc'), { kind: 'net', label: 'DNS · 10.10.0.20' }); wsPush('DNS   ubuntu.labo → 10.10.0.20', 'var(--encre)');
+    await go(R('pc', 'rt'), { kind: 'net', label: 'NTP · quelle heure ?' });
+    await go(R('rt', 'pc'), { kind: 'net', label: 'NTP · 08:42:10,123' }); wsPush('NTP   08:42:10,123', 'var(--encre)');
+    await go(R('pc', 'srv'), { kind: 'https', label: 'HTTPS (TLS) · journal du poste' }); wsPush('TLS   10.10.0.54 → .20:443', 'var(--focus)');
+    bubble('rt', A.rt, ['#Réseau en place', 'DHCP · DNS · NTP fournis par le routeur', 'rien à reconfigurer'], { dx: 40, dy: -60, align: 'left', cls: 'ok' });
+  } },
+{ t: '6. Quand ça tombe en panne', on: ['pc', 'sw', 'srv', 'sup'],
+  x: '<p><b>Le réseau est coupé</b> : Martine part, le poste se verrouille quand même et garde l\'événement en attente. Quand le réseau revient, il l\'envoie.</p><p>Puis le <b>boîtier est débranché</b> : plus aucun message. Le <b>filet de sécurité</b> de Windows (blocage après 10 minutes sans clavier ni souris, réglé par une stratégie locale) continue de protéger.</p><p>Une panne ne laisse <b>jamais</b> le poste ouvert.</p>',
+  run: async function () {
+    set({ net: false });
+    bubble('pc', A.pc, ['#Câble réseau débranché'], o(B_PC, { cls: 'alerte' }));
+    await sleep(900); unbubble('pc'); respire(false);
+    await partir();
+    await go(USB, { kind: 'usb', size: 4.5, speed: 50, label: 'absente · HMAC' });
+    set({ led: 'orange', scr: 'warn', warnN: 'verrouillage dans 3 s' }); await sleep(1500);
+    set({ scr: 'lock', led: 'off' }); bip();
+    await go(R('pc', 'srv'), { kind: 'err', label: 'événement', dropAt: 0.12 });
+    bubble('pc', A.pc, ['#Poste verrouillé', 'événement gardé en attente'], o(B_PC, { cls: 'ok' }));
+    await sleep(1500);
+    set({ net: true }); unbubble('pc');
+    await go(R('pc', 'srv'), { kind: 'https', label: 'reprise · événement en retard' });
+    await go(R('srv', 'sup'), { kind: 'https', size: 5 });
+    evPush('08:47:12 · PC-04 · verrouillage (reçu en retard)', 'var(--jaune-fonce)');
+    await sleep(1400);
+    /* deuxième panne : le boîtier est débranché */
+    set({ mar: 'here', scr: 'work', boxOn: false, idle: 'inactif depuis 00:00' }); respire(true);
+    bubble('boite', A.box, ['#Boîtier débranché', 'plus aucun message'], o(B_BOX, { cls: 'alerte' }));
+    for (var m = 0; m <= 10; m++) { set({ idle: 'inactif depuis ' + String(m).padStart(2, '0') + ':00' }); await sleep(380); }
+    set({ scr: 'lock', lockTxt: 'Verrouillé · 10 min sans activité' });
+    bubble('pc', A.pc, ['#Filet de sécurité Windows', 'blocage après 10 min sans activité'], o(B_PC, { cls: 'ok' }));
+  } },
+{ t: '7. Le faux boîtier', on: ['pc'],
+  x: '<p>Quelqu\'un branche un <b>faux boîtier</b> qui dit toujours « Martine est là ». Mais il ne connaît pas le <b>code secret</b> : ses messages n\'ont pas de preuve valable.</p><p>Le poste envoie aussi un <b>défi</b> (un nombre au hasard). Seul le vrai boîtier sait calculer la bonne réponse. Le faux est <b>refusé</b>, et le blocage normal continue de jouer son rôle.</p>',
+  run: async function () {
+    respire(true); set({ fake: true, scr: 'ps' });
+    psPush('PS> Get-PresenceLog -Tail 6', 'var(--bleu)');
+    await go(USB, { kind: 'usb', size: 4.5, speed: 50, label: 'B1 · #57 · HMAC' }); psPush('boîtier B1 : #57 HMAC ✔ → accepté', 'var(--m-pcb-t)');
+    await go(FAKE_USB, { kind: 'err', size: 4.5, speed: 50, label: '? · « présente » · HMAC faux' }); psPush('boîtier ? : HMAC ✘ → REFUSÉ', 'var(--rouge)');
+    await go(rev(USB), { kind: 'capt', size: 4, speed: 50, label: 'défi : 83 120 417' });
+    await go(USB, { kind: 'usb', size: 4, speed: 50, label: 'bonne réponse' }); psPush('défi B1 ✔', 'var(--m-pcb-t)');
+    await go(rev(FAKE_USB), { kind: 'capt', size: 4, speed: 50, label: 'défi : 51 004 962' });
+    await go(FAKE_USB, { kind: 'err', size: 4, speed: 50, label: 'mauvaise réponse' }); psPush('défi ? ✘ : non authentifié', 'var(--rouge)');
+    psPush('filet de sécurité : blocage à 10 min', 'var(--jaune)');
+    bubble('pc', A.pc, ['#Faux boîtier refusé', 'sans le code secret, pas de preuve'], o(B_PC, { cls: 'alerte' }));
+  } },
+{ t: '8. La physique : régler le radar avec des mesures', on: ['pc', 'col'],
+  x: '<p>Le radar découpe l\'espace en <b>portes</b> de 0,75 m. Martine est dans la porte 0. Un collègue qui passe dans l\'allée est dans la porte 2 : la <b>zone retenue</b> (portes 0 et 1) l\'ignore.</p><p>Lorenzo mesure les seuils et la zone (R1 à R3), puis le <b>délai</b> entre le départ et le blocage (R4, à l\'oscilloscope), avec des incertitudes.</p><p>λ = c/f = 12,5 mm · ΔR = c/2B = 0,6 m (B = 250 MHz). Valeurs d\'exemple : les vraies viendront des essais.</p>',
+  run: async function () {
+    respire(true); set({ gate: 9, col: true }); bg(radarLoop());
+    var cg = colG, y0 = 140, y1 = 450, a = P(0, y0, 0), b = P(0, y1, 0), o0 = P(0, 0, 0);
+    bubble('col', A.col, ['#Collègue dans la porte 2', 'hors de la zone retenue → ignoré'], { dx: 60, dy: -50, align: 'left' });
+    await anim(4200, function (k) { var y = y0 + (y1 - y0) * k, q = P(0, y, 0); cg.setAttribute('transform', 'translate(' + r1(q[0] - o0[0]) + ' ' + r1(q[1] - o0[1]) + ')'); });
+    set({ col: false }); unbubble('col');
+    bubble('boite', A.box, ['#Martine : porte 0 → présente', '>λ = c/f = 12,5 mm', '>ΔR = c/2B = 0,6 m'], o(B_BOX, { cls: 'ok' }));
+    await sleep(1600);
+    /* R4 : Martine part, l'oscilloscope chronomètre */
+    unbubble('boite'); respire(false); set({ scope: 'run' });
+    var pr = partir();
+    await anim(2600, function (k) { var x = 3 + 18 * k, pts2 = '3,5 ' + r1(Math.min(x, 7)) + ',5'; if (x > 7) pts2 += ' 7,12 ' + r1(Math.min(x, 15)) + ',12'; if (x > 15) pts2 += ' 15,5 ' + r1(x) + ',5'; scopeTrace.setAttribute('points', pts2); });
+    await pr;
+    set({ dt: 'Δt = 3,2 s', scr: 'lock' });
+    bubble('scope', A.scope, ['#R4 : délai départ → blocage', '>Δt = 3,2 s ± 0,1 s (exemple)'], { dx: 40, dy: 50, below: true, align: 'left', cls: 'ok' });
+  } },
+{ t: '9. Leurre réseau : une fausse imprimante', on: ['leu', 'sw'],
+  x: '<p>Le second module ne pilote <b>aucune vraie imprimante</b>. Un <b>ESP32 + W5500</b> (Ethernet) répond sur l\'adresse 10.10.0.80 comme une imprimante : un petit site web en lecture seule, avec une page d\'administration volontairement fausse et <b>sans identifiants réels</b>.</p><p>En pointillés : ce que le réseau croit voir. Les consultations sont notées pour produire un <b>signal de sécurité complémentaire</b>. Le réseau reste limité au labo.</p>',
+  run: async function () {
+    bubble('leu', A.leu, ['#Leurre · 10.10.0.80', '>HTTP · port 80 · lecture seule', '>page /admin fictive', 'aucun mot de passe, aucune donnée'], { dx: 50, dy: -50, align: 'left' });
+    for (;;) { set({ leu: 'jaune' }); await sleep(500); set({ leu: 'vert' }); await sleep(900); }
+  } },
+{ t: '10. Un PC interroge la fausse imprimante', on: ['leu', 'sw', 'test'],
+  x: '<p>Le <b>PC de test</b> du labo consulte l\'adresse du leurre, puis un chemin <code>/admin</code>. L\'ESP32 enregistre l\'<b>heure</b>, l\'<b>adresse IP source</b> et la <b>page demandée</b>.</p><p>Il ne collecte <b>ni mots de passe ni documents</b>.</p><p>Une connexion <b>ne prouve pas une attaque</b> : ce peut être un inventaire réseau ou un outil de supervision autorisé.</p>',
+  run: async function () {
+    await go(R('test', 'leu'), { kind: 'http', label: 'GET / (10.10.0.73 → .80)' }); wsPush('HTTP  .73 → .80  GET /', 'var(--encre)');
+    set({ leu: 'jaune' });
+    await go(R('leu', 'test'), { kind: 'http', label: '200 · page « imprimante »' }); set({ leu: 'vert' });
+    await sleep(400);
+    await go(R('test', 'leu'), { kind: 'http', label: 'GET /admin' }); wsPush('HTTP  .73 → .80  GET /admin', 'var(--jaune-fonce)');
+    set({ leu: 'jaune' });
+    bubble('leu', A.leu, ['#Journal du leurre', '>08:51:03 · 10.10.0.73 · GET /admin', 'signal à examiner, pas une preuve'], { dx: 50, dy: -50, align: 'left' });
+    await go(R('leu', 'test'), { kind: 'http', label: '200 · formulaire fictif' });
+  } },
+{ t: '11. L\'alerte Ubuntu et ses limites', on: ['leu', 'sw', 'srv', 'sup', 'pc'],
+  x: '<p>Ubuntu reçoit l\'événement du leurre et l\'affiche avec celui du <b>verrouillage Windows</b>. Ce sont <b>deux événements distincts</b> : l\'absence de Martine ne prouve <b>aucun lien</b> avec l\'accès au leurre.</p><p>L\'alerte est « <b>à qualifier</b> » par le technicien. Les essais comparent le délai d\'alerte, les faux positifs (scans autorisés) et le comportement si le serveur est arrêté.</p><p><b>Pas de détection magique</b> : seuls les accès dirigés vers le leurre sont vus.</p>',
+  run: async function () {
+    set({ leu: 'jaune' });
+    await go(R('leu', 'srv'), { kind: 'https', label: 'API authentifiée · accès au leurre' });
+    await go(R('srv', 'sup'), { kind: 'https', size: 5 });
+    evPush('08:51:03 · 10.10.0.73 → .80 · GET /admin', 'var(--jaune-fonce)');
+    evPush('ALERTE : accès au leurre · à qualifier', 'var(--rouge)');
+    bubble('sup', A.sup, ['#Deux événements distincts', 'absence ≠ identité', 'accès au leurre = signal à qualifier'], o(B_SUP, { cls: 'alerte' }));
+  } }
+];
+
+/* ---------- navigation ---------- */
+var cur = 0, vus = {};
+var eNum = document.getElementById('eNum'), eTitre = document.getElementById('eTitre'), eTexte = document.getElementById('eTexte');
+var pointsBox = document.getElementById('points'), bNext = document.getElementById('bNext'), bPrev = document.getElementById('bPrev');
+STEPS.forEach(function (s, i) {
+  var b = document.createElement('button'); b.type = 'button'; b.textContent = i; b.setAttribute('aria-label', 'Étape ' + i + ' : ' + s.t);
+  b.addEventListener('click', function () { show(i); }); pointsBox.appendChild(b);
+});
+function show(i) {
+  cur = Math.max(0, Math.min(STEPS.length - 1, i)); var s = STEPS[cur]; vus[cur] = true;
+  RUN++; layTok.innerHTML = ''; layTrace.innerHTML = ''; clearBubbles(); respire(false); layPulse.innerHTML = ''; colG.removeAttribute('transform');
+  ST = stateFor(cur); render();
+  eNum.textContent = 'Étape ' + cur + ' sur ' + (STEPS.length - 1);
+  eTitre.textContent = s.t; eTexte.innerHTML = s.x;
+  Object.keys(DEV).forEach(function (k) { DEV[k].classList.toggle('on', !!s.all || (s.on || []).indexOf(k) >= 0); });
+  Array.prototype.forEach.call(layLab.children, function (g) { var k = g.getAttribute('data-lab'); k = LABDEV[k] || k; g.classList.toggle('on', !!s.all || (s.on || []).indexOf(k) >= 0); });
+  svg.classList.toggle('focus', !s.all);
+  bPrev.disabled = cur === 0;
+  bNext.textContent = cur === STEPS.length - 1 ? 'Recommencer ↺' : 'Suivant ▶';
+  Array.prototype.forEach.call(pointsBox.children, function (b, j) { if (j === cur) b.setAttribute('aria-current', 'step'); else b.removeAttribute('aria-current'); b.classList.toggle('vu', !!vus[j]); });
+  try { history.replaceState(null, '', '#etape-' + cur); } catch (e) {}
+  s.run().catch(function (e) { if (e !== CANCEL) console.error(e); });
+}
+bNext.addEventListener('click', function () { show(cur === STEPS.length - 1 ? 0 : cur + 1); });
+bPrev.addEventListener('click', function () { show(cur - 1); });
+document.getElementById('bReplay').addEventListener('click', function () { show(cur); });
+var bLab = document.getElementById('bLab');
+function toggleLab() { var on = bLab.getAttribute('aria-pressed') !== 'true'; bLab.setAttribute('aria-pressed', String(on)); svg.classList.toggle('sans-lab', !on); }
+bLab.addEventListener('click', toggleLab);
+addEventListener('keydown', function (e) {
+  if (e.ctrlKey || e.metaKey || e.altKey) return;
+  if (e.key === 'ArrowRight') { e.preventDefault(); if (cur < STEPS.length - 1) show(cur + 1); }
+  else if (e.key === 'ArrowLeft') { e.preventDefault(); if (cur > 0) show(cur - 1); }
+  else if (e.key === 'r' || e.key === 'R') show(cur);
+  else if (e.key === 'e' || e.key === 'E') toggleLab();
+});
+var h = /#etape-(\d+)/.exec(location.hash);
+show(h ? +h[1] : 0);
+})();
+</script>
+</body>
+</html>

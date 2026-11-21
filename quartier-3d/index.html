@@ -63,7 +63,7 @@ body.photo #to2d{display:none}
 #pwho b{color:var(--trait);font-weight:800}
 #ptitle{font-size:23px;font-weight:900;line-height:1.12;margin:3px 0 7px;letter-spacing:-.018em;text-wrap:balance}
 #ptext{font-size:14.5px;line-height:1.55;margin:0;color:var(--texte)}
-#pgo{margin-top:13px;display:flex;gap:10px;align-items:center}
+#pgo{margin-top:13px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
 #pgo:empty{display:none}
 #pgo button{border:2.5px solid var(--trait);background:var(--carte);color:var(--trait);border-radius:999px;padding:8px 18px;font-size:14px;font-weight:900;
   box-shadow:3px 3px 0 var(--trait);transition:transform .12s,box-shadow .12s}
@@ -743,6 +743,7 @@ function refreshUI() {
     $('#ptext').textContent = s.desc;
     const go = $('#pgo'); go.innerHTML = '';
     const b = document.createElement('button'); b.className = 'main'; b.textContent = s.free ? 'Bientôt' : 'Entrer dans la maquette ▶'; b.disabled = s.free; b.onclick = () => enterHouse(s.i); go.appendChild(b);
+    if (s.url25) { const b2 = document.createElement('button'); b2.textContent = 'Version 2,5D'; b2.title = 'L\'architecture vue de biais, étape par étape'; b2.onclick = () => enterHouse(s.i, true); go.appendChild(b2); }
     const sp = document.createElement('span'); sp.textContent = s.free ? '' : 'Entrée'; go.appendChild(sp);
   }
 }
@@ -760,24 +761,24 @@ function goHouse(i) {
 /* ---- entrer : la caméra s'avance vers la porte, fondu, puis la maquette s'ouvre ---- */
 const fade = $('#fade'), room = $('#room'), back = $('#back');
 let enterToken = 0;
-function enterHouse(i) {
-  const s = SLOTS[i];
+function enterHouse(i, v25) {   // v25 : ouvrir la version 2,5D (pas à pas) au lieu de la maquette 3D
+  const s = SLOTS[i], url = v25 && s.url25 ? s.url25 : s.url, nom = s.title + (url === s.url25 ? ' · version 2,5D' : '');
   if (mode === 'inside' || mode === 'entering') return;
   if (s.free) { bump(i); return; }
   const tok = ++enterToken;
   sel = i; mode = 'entering'; refreshUI();
-  $('#fadetxt').textContent = `Chargement : ${s.title}…`;
+  $('#fadetxt').textContent = `Chargement : ${nom}…`;
   flyTo(doorView(s, true), { dur: .9, arc: 0 });
   setTimeout(() => { if (tok === enterToken) fade.classList.add('on'); }, REDUCED ? 0 : 560);
   setTimeout(() => {
     if (tok !== enterToken) return;
     room.onload = () => {
       if (tok !== enterToken || room.getAttribute('src') === 'about:blank') return;
-      mode = 'inside'; back.style.setProperty('--c', s.color); $('#backname').textContent = s.title;
+      mode = 'inside'; back.style.setProperty('--c', s.color); $('#backname').textContent = nom;
       back.style.display = 'flex'; fade.classList.remove('on');
       try { room.contentWindow.addEventListener('keydown', e => { if (e.key === 'Escape') exitHouse(); }); room.contentWindow.focus(); } catch (e) { /* page d'un autre domaine : le bouton suffit */ }
     };
-    room.style.display = 'block'; room.src = encodeURI(s.url);
+    room.style.display = 'block'; room.src = encodeURI(url);
   }, REDUCED ? 60 : 1150);
 }
 function exitHouse() {
