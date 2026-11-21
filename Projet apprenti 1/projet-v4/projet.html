@@ -320,6 +320,7 @@
   <tr><td class="k">Gros bouton rouge</td><td>« Ça ne marche pas » : ouvre un ticket avec le nom exact de l'imprimante.</td></tr>
   <tr><td class="k">Écran à encre électronique</td><td>Donne des nouvelles. Il garde son image même sans courant : le message reste lisible si le boîtier est débranché.</td></tr>
   <tr><td class="k">Lecteur RFID</td><td>Lit la carte de Wassim à son arrivée et à son départ.</td></tr>
+  <tr><td class="k">Capteur de température et d'humidité (SHT31, V2)</td><td>Mesure l'humidité du local, sur le bus I²C de l'ESP32. Un papier qui a pris l'humidité gondole et se coince plus facilement : le boîtier peut prévenir avant les bourrages.</td></tr>
   <tr><td class="k">Alimentation</td><td>Un bloc USB 5 V du commerce branché sur une prise, ou le port USB de l'imprimante s'il en a un. Aucun câblage 230 V.</td></tr>
   <tr><td class="k">Liaison avec le serveur</td><td>Par le Wi-Fi. Variante : les boîtiers parlent en <b>ESP-NOW</b> (liaison directe entre ESP32) à une seule passerelle reliée au réseau. Ainsi, aucun mot de passe Wi-Fi n'est stocké dans chaque boîtier.</td></tr>
 </table>
@@ -349,6 +350,7 @@
 <table>
   <tr><th style="width:24%">Ajout</th><th>Ce que ça fait</th></tr>
   <tr><td class="k">L'encre avant la panne</td><td>À 10 % d'encre, le serveur ouvre un ticket préventif. L'écran affiche <span class="screen">Encre 8 % – cartouche prévue</span>. La panne n'arrive jamais.</td></tr>
+  <tr><td class="k">L'humidité du local (V2)</td><td>Le capteur SHT31 suit l'humidité. Au-dessus d'un seuil (vers 65 %, à fixer par la mesure du volet physique), le serveur ouvre un ticket préventif : <span class="screen">Local humide – papier à ranger</span>. Le serveur croise aussi l'humidité avec les bourrages comptés par le boîtier.</td></tr>
   <tr><td class="k">Le bon VLAN (AD)</td><td>Le ticket ne dit plus « hors réseau » mais « l'imprimante est dans le réseau de la radiologie, elle devrait être dans celui de la cardiologie ». Le système vérifie, il ne change rien au réseau.</td></tr>
   <tr><td class="k">Les vérifications réseau</td><td>Quand l'imprimante ne répond pas, le serveur cherche où ça bloque : répond-elle au <b>ping</b> ? Son nom est-il connu du <b>DNS</b> ? A-t-elle reçu son adresse du <b>DHCP</b> ? Les ports d'impression <b>9100</b> (impression directe) et <b>631</b> (IPP) sont-ils ouverts ? Le ticket dit lequel bloque.</td></tr>
   <tr><td class="k">Réglé sur place</td><td>Si la secrétaire règle le problème elle-même (elle remet du papier, elle retire la feuille coincée), les feuilles ressortent et le capteur les compte. Le ticket est marqué « résolu sur place », avec cette preuve. Wassim ne se déplace pas.</td></tr>
@@ -529,6 +531,8 @@ Add-Computer -DomainName "maquette.lan" -OUPath $commande.ou `
   <tr><td class="k">ESP32 (× 3)</td><td>Boîtier, station, fausse imprimante</td><td>≈ 8 à 15 € l'unité</td></tr>
   <tr><td class="k">Accéléromètre (MPU6050)</td><td>Sentir la vibration</td><td>≈ 3 à 5 €</td></tr>
   <tr><td class="k">Capteur infrarouge de passage</td><td>Compter les feuilles</td><td>≈ 2 à 5 €</td></tr>
+  <tr><td class="k">Capteur SHT31 (V2)</td><td>Humidité et température du local</td><td>≈ 5 à 10 € (module)</td></tr>
+  <tr><td class="k">Hygromètre de référence, balance au centigramme</td><td>Volet physique humidité et papier</td><td>Laboratoire de physique du lycée</td></tr>
   <tr><td class="k">Écran à encre électronique 2,9 pouces (× 2)</td><td>Écran du boîtier et de la station</td><td>≈ 15 à 25 € l'unité</td></tr>
   <tr><td class="k">Gros bouton, LED RGB</td><td>Signaler, montrer l'avancement</td><td>≈ 5 à 10 €</td></tr>
   <tr><td class="k">Lecteur RFID (RC522, ou PN532 pour les cartes sécurisées) (× 2)</td><td>Lire les cartes</td><td>≈ 3 à 15 € l'unité</td></tr>
@@ -555,6 +559,7 @@ Add-Computer -DomainName "maquette.lan" -OUPath $commande.ou `
   <tr><td>Panne provoquée, chronomètre en main</td><td>Temps entre l'impression ratée et le ticket</td><td>Moins d'1 minute</td></tr>
   <tr><td>1 heure d'impressions normales</td><td>Fausses alertes</td><td>Aucune</td></tr>
   <tr><td>10 pages de test après réparation</td><td>Feuilles vues par le capteur</td><td>10 sur 10</td></tr>
+  <tr><td>Humidité (V2) : SHT31 comparé à l'hygromètre de référence, puis local amené au-dessus du seuil</td><td>Écart entre les deux appareils ; ticket préventif ouvert</td><td>Écart dans la précision annoncée (≈ ± 2 %, à vérifier) ; ticket à chaque fois</td></tr>
   <tr><td>10 essais avec une carte RFID copiée</td><td>Copies refusées et tracées</td><td>10 sur 10</td></tr>
   <tr><td>Commande hors liste envoyée au PC</td><td>Refusée et tracée</td><td>Toujours</td></tr>
   <tr><td>5 PC neufs préparés avec la station</td><td>Rangés dans le bon service de l'AD, applications installées, fiche GLPI à jour</td><td>5 sur 5</td></tr>
@@ -564,7 +569,7 @@ Add-Computer -DomainName "maquette.lan" -OUPath $commande.ou `
 <table>
   <tr><th style="width:24%">Étape</th><th>Ce qu'on construit</th></tr>
   <tr><td class="k">1. Le cœur</td><td>Le boîtier (vibration, feuilles, bouton, écran), le serveur, les tickets GLPI, le tableau de bord.</td></tr>
-  <tr><td class="k">2. Le rendre malin</td><td>Le PC comme quatrième témoin (PowerShell) ; le bon VLAN avec l'AD ; l'encre avant la panne ; la carte de Wassim et la preuve de réparation.</td></tr>
+  <tr><td class="k">2. Le rendre malin</td><td>Le PC comme quatrième témoin (PowerShell) ; le bon VLAN avec l'AD ; l'encre avant la panne ; l'humidité du local (SHT31) ; la carte de Wassim et la preuve de réparation.</td></tr>
   <tr><td class="k">3. Les PC neufs</td><td>La station RFID, le script PowerShell, le rangement dans l'AD, la mise à jour de GLPI.</td></tr>
   <tr><td class="k">4. Aller loin</td><td>Le redémarrage en trois niveaux ; la fausse imprimante ; la démonstration de la carte copiée et des cartes sécurisées.</td></tr>
   <tr><td class="k">5. Le spectacle (option)</td><td>L'étagère des cartouches ; l'hôpital en miniature (plan en plexiglas, une LED par imprimante ; on touche un service sur le plan, grâce aux broches tactiles de l'ESP32, et l'écran affiche ce service).</td></tr>
@@ -586,7 +591,7 @@ Add-Computer -DomainName "maquette.lan" -OUPath $commande.ou `
   <tr><td class="k">Une imprimante réseau disponible au lycée</td><td>À demander.</td></tr>
   <tr><td class="k">Machines virtuelles Windows 11 sur les PC Ubuntu</td><td>Vérifier la mémoire (environ 4 Go par machine) et la virtualisation dans le BIOS. Une évaluation dure 90 jours : prévoir de la réinstaller pendant le projet.</td></tr>
   <tr><td class="k">Proximité avec le projet de Lorenzo</td><td>Lorenzo installe aussi des logiciels pour les nouveaux agents. À différencier : chez Wassim, la préparation est déclenchée par les cartes et suivie dans GLPI.</td></tr>
-  <tr><td class="k">Mesures physiques</td><td>À définir plus tard. Pistes : la vibration de l'imprimante (fréquences, seuil), la vitesse de sortie des feuilles (pages par minute mesurées et annoncées).</td></tr>
+  <tr><td class="k">Mesures physiques</td><td>Question : « quand peut-on dire que l'imprimante imprime ? ». <b>Vibration</b> : étalonnage de l'accéléromètre (6 positions, ± 1 g), enregistrement à 1 kHz en veille et en impression, fréquences des moteurs, seuil = moyenne en veille + k écarts-types. <b>Vitesse des feuilles</b> : v = L / Δt sur 30 feuilles, avec incertitude, comparée à la cadence du fabricant. <b>Humidité et papier (V2)</b> : SHT31 comparé à un hygromètre de référence ; 10 feuilles pesées après 48 h en boîte fermée sèche, puis au-dessus d'une solution saturée de sel (≈ 75 %) ; prise d'eau du papier (en % de masse) avec incertitudes ; les deux lots imprimés, bourrages comptés par le boîtier ; seuil « local trop humide » justifié par la mesure. <b>Risque</b> : peu ou pas de bourrage avec le papier humide. La prise d'eau du papier se mesure à coup sûr ; le lien avec les bourrages est un résultat possible, pas une condition. À valider avec le professeur de physique.</td></tr>
 </table>
 
 <h2><span class="n">12</span>Questions au tuteur</h2>

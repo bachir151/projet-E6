@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Schéma réseau pas à pas</title>
+<meta name="description" content="Projet de Wassim : le schéma réseau à plat de la maquette, avec le trajet des messages, étape par étape.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="../../../theme.css">
+<link rel="stylesheet" href="../../../commun/schema-2d.css">
+</head>
+<body>
+<header class="wrap large tete">
+  <div>
+    <span class="label">Projet 1 · Wassim · le service informatique augmenté</span>
+    <h1>Le schéma réseau pas à pas</h1>
+    <p class="lead">La maquette du lycée, à plat : le matériel vu de face et les liens réseau. Chaque point qui circule est un message. Clique sur <b>Suivant</b> pour suivre leur trajet, étape par étape.</p>
+  </div>
+  <nav class="liens" aria-label="Autres pages du projet"><a class="btn petit" href="architecture-2-5d.html">Version 2,5D</a><a class="btn petit" href="../animation-3d/maquette-3d.html">Maquette 3D ↗</a></nav>
+</header>
+
+<main class="wrap large grille">
+  <figure class="scene-cadre">
+    <div class="defile"><svg id="schema" class="focus" role="img" aria-label="Schéma réseau de la maquette de Wassim, matériel vu de face, avec le trajet des messages"></svg></div>
+    <div class="outils"><button class="btn petit" id="bLab" type="button" aria-pressed="true">Étiquettes</button></div>
+    <figcaption class="glisse">← Glisse pour voir tout le schéma →</figcaption>
+  </figure>
+
+  <aside class="carte-etape" aria-live="polite">
+    <div class="label" id="eNum"></div>
+    <h2 id="eTitre"></h2>
+    <div id="eTexte"></div>
+    <div class="commandes">
+      <button class="btn" id="bPrev" type="button" aria-label="Étape précédente">◀</button>
+      <button class="btn" id="bReplay" type="button">↻ Rejouer</button>
+      <button class="btn principal" id="bNext" type="button">Suivant ▶</button>
+    </div>
+    <div id="points" role="group" aria-label="Aller à une étape"></div>
+    <p class="aide"><kbd>←</kbd> <kbd>→</kbd> étapes · <kbd>R</kbd> rejouer · <kbd>E</kbd> étiquettes</p>
+    <ul class="legende" aria-label="Légende"><li><i style="background:var(--jaune)"></i>MQTT (boîtier)</li><li><i style="background:var(--bleu)"></i>IPP (impression)</li><li><i style="background:var(--vert)"></i>SNMP, JEA</li><li><i style="background:var(--blanc)"></i>GLPI</li><li><i style="background:var(--rouge)"></i>refus, panne</li><li><s class="wifi"></s>Wi-Fi</li><li><s></s>Ethernet</li><li><s class="fixe"></s>fixé dessus</li></ul>
+  </aside>
+</main>
+
+<section class="section-finale regles">
+  <div class="wrap">
+    <span class="label">Le fil de la soutenance</span>
+    <h2>Les 4 règles du projet</h2>
+    <ol>
+      <li><b>Une imprimante peut mentir</b> : « prête » en SNMP ne prouve rien. Le serveur croise quatre témoins (vibration, feuilles, SNMP, file du PC).</li>
+      <li><b>La feuille est la preuve</b> : un ticket n'est fermé que si le capteur a compté les pages.</li>
+      <li><b>Le système propose, l'humain valide</b> : aucun redémarrage sans le clic du technicien (palier 2).</li>
+      <li><b>Le diagnostic ne fait que ce qui est permis</b> : liste fermée de commandes (JEA), refus tracés, compte GLPI sans droit de suppression.</li>
+    </ol>
+  </div>
+</section>
+
+<script>
+/* Titres et textes des étapes : les mêmes que la version 2,5D (architecture-2-5d.html). */
+var TXT = [
+{
+"t": "Vue d'ensemble",
+"x": "<p>La maquette du lycée, vue de biais. Au fond, le <b>réseau en place</b> : serveur Ubuntu, switch, borne Wi-Fi et <b>poste du technicien</b> (GLPI).</p><p>Au milieu, une <b>imprimante réseau</b> avec, collé dessus, le <b>boîtier ESP32</b> et ses capteurs. À gauche, le <b>PC de la secrétaire</b>. Devant à droite, le <b>banc de physique</b>.</p><p>Les points qui circulent sont des <b>messages</b>. Clique sur <b>Suivant</b>.</p>"
+},
+{
+"t": "1. Le boîtier, de près",
+"x": "<p>Un boîtier en plexiglas, <b>collé de façon rigide</b> sur l'imprimante (sinon la vibration se perd). Dedans, des modules du commerce :</p><p>• <b>ESP32</b> : le petit ordinateur, en Wi-Fi.<br>• <b>MPU6050</b> (bleu) : sent la <b>vibration</b>, bus I²C.<br>• <b>SHT31</b> (V2) : <b>température et humidité</b>, même bus I²C.<br>• <b>FC-51</b> : infrarouge au-dessus du bac, il <b>compte les feuilles</b>.<br>• <b>Écran e-paper</b>, <b>bouton</b> rouge, <b>LED</b>, lecteur <b>RC522</b> (V2).</p>"
+},
+{
+"t": "2. Une impression normale",
+"x": "<p>La secrétaire imprime 5 pages. Le travail passe par <b>CUPS</b> sur le serveur, qui sait donc combien de pages sont demandées, puis part vers l'imprimante (<b>IPP</b>, port 631).</p><p>L'imprimante <b>vibre</b> (MPU6050) et le capteur infrarouge <b>compte 5 feuilles</b>. Le boîtier l'envoie en <b>MQTT</b> (chiffré TLS) par le Wi-Fi.</p><p>Le serveur interroge aussi l'imprimante en <b>SNMP</b> : « prête, encre 64 % ». Les témoins sont d'accord : <b>aucun ticket</b>.</p>"
+},
+{
+"t": "3. La panne : l'imprimante figée",
+"x": "<p>La secrétaire relance une impression. Le travail arrive… mais <b>rien ne vibre</b> et <b>aucune feuille ne sort</b>.</p><p>Pourtant, en SNMP, l'imprimante répond « <b>prête</b> » : elle se trompe. Le serveur demande aussi au PC, par un point d'accès PowerShell limité (<b>JEA</b>), si des documents y sont bloqués : non.</p><p>Conclusion : <b>imprimante figée</b>. Le ticket GLPI s'ouvre avec la cause, et l'écran du boîtier prévient sur place.</p>"
+},
+{
+"t": "4. Palier 2 : le technicien valide, la feuille prouve",
+"x": "<p>Le système <b>propose</b> de redémarrer l'imprimante. Il n'agit pas seul : le technicien <b>valide d'un clic</b> (palier 2).</p><p>L'imprimante redémarre, les 5 feuilles sortent, le capteur les <b>compte</b>. Cette mesure est la <b>preuve</b> : le ticket est fermé « résolu, preuve : 5/5 feuilles ».</p><p>Personne ne s'est déplacé.</p>"
+},
+{
+"t": "5. L'humidité du local (V2)",
+"x": "<p>Le <b>SHT31</b> mesure l'humidité de l'air autour de l'imprimante. Air trop humide : le papier absorbe de l'eau, gonfle et se coince plus souvent. Au-delà du <b>seuil</b> (ici 65 %), le serveur ouvre un <b>ticket préventif</b>.</p><p><b>Physique :</b> au lycée, Wassim garde des feuilles 48 h à humidité basse, puis haute (≈ 75 %, au-dessus d'eau salée), et les <b>pèse</b>. Le seuil vient de ces mesures, avec leurs incertitudes.</p><p>Les valeurs affichées sont des <b>exemples</b> : les vraies viendront des essais.</p>"
+},
+{
+"t": "6. Le gros bouton rouge",
+"x": "<p>La secrétaire voit un problème que les capteurs ne voient pas (une impression pâle, par exemple). Elle appuie sur le <b>bouton</b>.</p><p>Le ticket s'ouvre tout seul, avec le <b>nom exact de l'imprimante</b>. Elle n'a rien à écrire, et l'écran confirme le numéro du ticket.</p>"
+},
+{
+"t": "7. La carte du technicien (V2)",
+"x": "<p>En arrivant devant l'imprimante, le technicien pose sa <b>carte RFID</b> sur le boîtier. Le lecteur <b>RC522</b> la lit à travers le couvercle (bus <b>SPI</b>).</p><p>Le ticket note l'<b>heure d'arrivée</b>, puis la <b>durée</b> de l'intervention quand il repose sa carte en partant.</p><p>Cela sert à mesurer le temps des pannes, <b>pas à surveiller</b> le technicien.</p>"
+},
+{
+"t": "8. Sécurité : le diagnostic ne fait que ce qui est permis",
+"x": "<p>La question de sécurité de Wassim : « <b>le diagnostic à distance peut-il faire plus que ce qu'on lui permet ?</b> »</p><p>Sur le PC, un point d'accès PowerShell limité (<b>JEA</b>) n'accepte qu'une <b>liste fermée</b> de commandes, avec un compte sans droit d'administrateur. <code>Get-PrintJob</code> passe. Une commande hors liste est <b>refusée et tracée</b>.</p><p>De même, le compte du serveur dans GLPI ne peut <b>rien supprimer</b>.</p>"
+}
+];
+TXT[0].x = '<p>Le schéma réseau de la maquette, à plat. En haut, le <b>réseau en place</b> : borne Wi-Fi, switch, serveur Ubuntu. À gauche, le <b>PC de la secrétaire</b> ; à droite, le <b>poste du technicien</b> (GLPI).</p><p>En bas, l\'<b>imprimante réseau</b> et le <b>boîtier ESP32</b> collé dessus, qui parle en Wi-Fi. À gauche, le <b>banc de physique</b>.</p><p>Les points qui circulent sont des <b>messages</b>. Clique sur <b>Suivant</b>.</p>';
+var UP = ['box', 'ap', 'sw', 'srv'], DOWN = UP.slice().reverse();
+function glpi(S, rows) { S.ecran('tec', [['GLPI · imprimantes', 'var(--focus)']].concat(rows.length ? rows : [['aucun ticket ouvert', 'var(--encre-2)']]), 'clair'); }
+function ep(S, t) { S.q('box', '.epaper').textContent = t; }
+function lcd(S, t, c) { var e = S.q('prn', '.lcd'); e.textContent = t; e.style.fill = c || 'var(--vert)'; }
+async function feuilles(S, n) {
+  for (var i = 1; i <= n; i++) { S.etat('prn', 'vibre · feuille ' + i + ' / ' + n, 'info'); await S.sleep(420); }
+  S.etat('prn', n + ' / ' + n + ' feuilles comptées', 'ok');
+}
+async function imprimer(S) {
+  S.ecran('sec', [['Imprimer :'], ['compte-rendu.pdf'], ['cardio-2 · 5 pages', 'var(--bleu)']]);
+  await S.go(['sec', 'sw', 'srv'], 'bleu', 'IPP · 5 pages');
+  S.bulle('srv', ['#CUPS', '5 pages demandées'], { cote: 'haut', dx: -60, dy: -10 });
+  await S.go(['srv', 'sw', 'prn'], 'bleu', 'IPP 631 · travail');
+}
+window.SCHEMA = {
+  noeuds: [
+    { id: 'ap', k: 'ap', x: 600, y: 60, nom: 'Borne Wi-Fi', sous: 'réseau du lycée', cote: 'droite' },
+    { id: 'sw', k: 'switch', x: 600, y: 230, nom: 'Switch du lycée', sous: 'réseau en place', cote: 'bas' },
+    { id: 'srv', k: 'serveur', x: 1010, y: 230, nom: 'Serveur Ubuntu', sous: 'Mosquitto · CUPS · Python' },
+    { id: 'sec', k: 'pc', x: 190, y: 230, nom: 'PC de la secrétaire', sous: 'Windows 11 · point JEA' },
+    { id: 'tec', k: 'pc', x: 1010, y: 560, nom: 'Poste du technicien', sous: 'GLPI · tableau de bord' },
+    { id: 'prn', k: 'imprimante', x: 620, y: 560, nom: 'Imprimante réseau', sous: 'IPP 631 · SNMP 161' },
+    { id: 'box', k: 'boitier', x: 360, y: 560, nom: 'Boîtier ESP32', sous: 'collé sur l\'imprimante' },
+    { id: 'banc', k: 'banc-papier', x: 130, y: 560, nom: 'Banc de physique', sous: 'humidité et pesée' }
+  ],
+  liens: [
+    ['sec', 'sw', 'eth', 'Ethernet'],
+    ['sw', 'srv', 'eth', ''],
+    ['ap', 'sw', 'eth', ''],
+    ['sw', 'prn', 'eth', 'IPP · SNMP', { via: [[620, 330]], t: 0.75 }],
+    ['sw', 'tec', 'eth', '', { via: [[800, 230], [800, 560]] }],
+    ['box', 'ap', 'wifi', 'Wi-Fi · MQTT (TLS)', { via: [[360, 60]], t: 0.2 }],
+    ['box', 'prn', 'fixe', 'collé']
+  ],
+  init: function (S) { S.ecran('sec', [['Bureau'], ['comptes-rendus'], ['agenda']], 'clair'); glpi(S, []); },
+  etapes: [
+    { t: TXT[0].t, x: TXT[0].x, all: true,
+      run: async function (S) {
+        for (;;) {
+          if (Math.random() < 0.6) S.bg(S.go(UP, 'jaune', null, { size: 6 }));
+          else S.bg(S.go(['srv', 'sw', 'prn'], 'vert', null, { size: 6 }).then(function () { return S.go(['prn', 'sw', 'srv'], 'vert', null, { size: 6 }); }));
+          await S.sleep(1600);
+        }
+      } },
+    { t: TXT[1].t, x: TXT[1].x, on: ['box', 'prn', 'ap'],
+      run: async function (S) {
+        S.bulle('box', ['#Dans le boîtier', '>ESP32 · Wi-Fi', '>MPU6050 · vibration (I²C)', '>SHT31 · humidité (I²C, V2)', '>FC-51 · compte les feuilles', '>écran e-paper · bouton · LED', '>RC522 · carte RFID (V2)'], { cote: 'haut', dx: -60, dy: -20 });
+        for (;;) { await S.go(UP, 'jaune', 'MQTT · mesures', { size: 6 }); await S.sleep(1200); }
+      } },
+    { t: TXT[2].t, x: TXT[2].x, on: ['sec', 'sw', 'srv', 'prn', 'box', 'ap', 'tec'],
+      run: async function (S) {
+        await imprimer(S);
+        await feuilles(S, 5);
+        await S.go(UP, 'jaune', 'MQTT · vib 0,42 g · 5/5');
+        await S.go(['srv', 'sw', 'prn'], 'vert', 'SNMP GET état ?');
+        await S.go(['prn', 'sw', 'srv'], 'vert', '« prête » · encre 64 %');
+        S.bulle('srv', ['#4 témoins d\'accord', 'vibration : oui', 'feuilles : 5 / 5', 'SNMP : « prête »', 'file du PC : vide'], { cote: 'haut', dx: -60, dy: -10, cls: 'ok' });
+        await S.go(['srv', 'sw', 'tec'], 'blanc', 'tableau : vert');
+        await S.go(DOWN, 'jaune', 'écran : PRÊTE');
+        ep(S, 'PRÊTE'); S.led('box', 'vert');
+      } },
+    { t: TXT[3].t, x: TXT[3].x, on: ['sec', 'sw', 'srv', 'prn', 'box', 'ap', 'tec'],
+      run: async function (S) {
+        await imprimer(S);
+        for (var s = 5; s <= 30; s += 5) { S.etat('prn', 'immobile · 0 / 5 · ' + s + ' s', s === 30 ? 'alerte' : ''); await S.sleep(400); }
+        await S.go(UP, 'jaune', 'MQTT · vib 0,00 g · 0/5 en 30 s');
+        await S.go(['srv', 'sw', 'prn'], 'vert', 'SNMP GET état ?');
+        await S.go(['prn', 'sw', 'srv'], 'vert', '« prête » (faux)');
+        await S.go(['srv', 'sw', 'sec'], 'vert', 'WinRM 5986 · Get-PrintJob (JEA)');
+        S.ecran('sec', [['PS> Get-PrintJob', 'var(--bleu)'], ['0 document bloqué', 'var(--vert)']]);
+        await S.go(['sec', 'sw', 'srv'], 'vert', '0 document bloqué');
+        S.bulle('srv', ['#4 témoins', 'vibration : non ✖', 'feuilles : 0 / 5 ✖', 'SNMP : « prête »', 'file du PC : vide', '→ imprimante figée'], { cote: 'haut', dx: -60, dy: -10, cls: 'alerte' });
+        await S.go(['srv', 'sw', 'tec'], 'blanc', 'API GLPI · ticket 1234');
+        glpi(S, [['● 1234 cardio-2 figée', 'var(--rouge)'], ['  nouveau · 0/5 feuilles']]); S.etat('tec', 'ticket 1234 ouvert', 'alerte');
+        await S.go(DOWN, 'jaune', 'écran : BLOQUÉE');
+        ep(S, 'BLOQUÉE'); S.led('box', 'rouge');
+      } },
+    { t: TXT[4].t, x: TXT[4].x, on: ['tec', 'sw', 'srv', 'prn', 'box', 'ap'],
+      init: function (S) { glpi(S, [['● 1234 cardio-2 figée', 'var(--rouge)'], ['  proposé : redémarrer', 'var(--jaune-fonce)'], ['  [ Valider ? ]', 'var(--focus)']]); ep(S, 'BLOQUÉE'); S.led('box', 'rouge'); },
+      run: async function (S) {
+        S.bulle('tec', ['#Palier 2', 'le système propose,', 'le technicien décide'], { cote: 'gauche', dy: -20 });
+        await S.sleep(1800);
+        glpi(S, [['● 1234 cardio-2 figée', 'var(--rouge)'], ['  ✔ validé par le technicien', 'var(--vert)']]);
+        await S.go(['tec', 'sw', 'srv'], 'blanc', 'validé : redémarrer');
+        await S.go(['srv', 'sw', 'prn'], 'vert', 'SNMP SET · redémarrage');
+        lcd(S, 'Redémarre', 'var(--jaune)'); await S.sleep(1500); lcd(S, 'Prête');
+        await feuilles(S, 5);
+        await S.go(UP, 'jaune', 'MQTT · 5/5 feuilles : preuve');
+        await S.go(['srv', 'sw', 'tec'], 'blanc', 'ticket 1234 résolu');
+        glpi(S, [['● 1234 résolu', 'var(--vert)'], ['  preuve : 5/5 feuilles']]); S.etat('tec', 'résolu · preuve : 5/5', 'ok');
+        await S.go(DOWN, 'jaune', 'écran : RÉPARÉ');
+        ep(S, 'RÉPARÉ'); S.led('box', 'vert');
+      } },
+    { t: TXT[5].t, x: TXT[5].x, on: ['box', 'ap', 'sw', 'srv', 'tec', 'banc'],
+      run: async function (S) {
+        for (var k = 0; k <= 7; k++) { var hr = 46 + k * 4; S.etat('box', 'SHT31 : ' + hr + ' % HR', hr > 65 ? 'alerte' : 'info'); await S.sleep(380); }
+        await S.go(UP, 'jaune', 'MQTT · HR 74 % · 23,1 °C');
+        S.bulle('srv', ['#Serveur', 'humidité 74 % > seuil 65 %'], { cote: 'haut', dx: -60, dy: -10, cls: 'alerte' });
+        await S.go(['srv', 'sw', 'tec'], 'blanc', 'ticket préventif 1236');
+        glpi(S, [['● 1236 local humide', 'var(--jaune-fonce)'], ['  préventif · protéger le papier']]); S.etat('tec', 'ticket préventif', 'accent');
+        await S.go(DOWN, 'jaune', 'écran : LOCAL HUMIDE');
+        ep(S, 'HUMIDE'); S.led('box', 'orange');
+        for (var j = 0; j <= 10; j++) {
+          var h2 = Math.round(40 + j * 3.5), m = (50 + j * 0.15).toFixed(1).replace('.', ',');
+          S.q('banc', '.hr').textContent = h2 + ' %'; S.q('banc', '.masse').textContent = m + ' g';
+          S.bulle('banc', ['#Banc (valeurs d\'exemple)', '>enceinte : ' + h2 + ' % HR', '>10 feuilles : ' + m + ' g', j === 10 ? '+3 % d\'eau : le papier gonfle' : '48 h à chaque palier'], { cote: 'haut', dx: 40, dy: -40, cls: j === 10 ? 'ok' : '' });
+          await S.sleep(380);
+        }
+      } },
+    { t: TXT[6].t, x: TXT[6].x, on: ['box', 'ap', 'sw', 'srv', 'tec'],
+      run: async function (S) {
+        await S.sleep(600);
+        var b = S.q('box', '.bouton'); b.style.fill = 'var(--rouge-pale)'; S.etat('box', 'bouton appuyé', 'accent'); await S.sleep(500); b.style.fill = 'var(--rouge)';
+        await S.go(UP, 'jaune', 'MQTT · bouton · cardio-2');
+        await S.go(['srv', 'sw', 'tec'], 'blanc', 'API GLPI · ticket 1235');
+        glpi(S, [['● 1235 signalé sur place', 'var(--rouge)'], ['  bouton du boîtier · 10:52']]); S.etat('tec', 'ticket 1235 ouvert', 'alerte');
+        await S.go(DOWN, 'jaune', 'écran : ticket 1235');
+        ep(S, 'TICKET 1235'); S.etat('box', 'écran : ticket 1235', 'ok');
+      } },
+    { t: TXT[7].t, x: TXT[7].x, on: ['box', 'ap', 'sw', 'srv', 'tec'],
+      init: function (S) { glpi(S, [['● 1235 signalé sur place', 'var(--rouge)'], ['  nouveau']]); },
+      run: async function (S) {
+        await S.sleep(500);
+        S.etat('box', 'carte posée sur le RC522', 'info');
+        S.bulle('box', ['#Lecteur RC522 (SPI)', 'numéro de la carte du technicien'], { cote: 'haut', dx: -40, dy: -20 });
+        await S.sleep(1200);
+        await S.go(UP, 'jaune', 'MQTT · carte technicien · 10:58');
+        await S.go(['srv', 'sw', 'tec'], 'blanc', 'arrivée notée');
+        glpi(S, [['● 1235 en cours', 'var(--jaune-fonce)'], ['  technicien là à 10:58']]); S.etat('tec', 'en cours · arrivée 10:58', 'accent');
+        ep(S, 'TECHNICIEN');
+      } },
+    { t: TXT[8].t, x: TXT[8].x, on: ['sec', 'sw', 'srv', 'tec'],
+      run: async function (S) {
+        S.ecran('sec', [['PS> Get-PrintJob', 'var(--bleu)']]);
+        await S.go(['srv', 'sw', 'sec'], 'vert', 'Get-PrintJob');
+        S.ecran('sec', [['PS> Get-PrintJob', 'var(--bleu)'], ['autorisé · 0 document', 'var(--vert)']]);
+        await S.go(['sec', 'sw', 'srv'], 'vert', '0 document');
+        await S.sleep(500);
+        await S.go(['srv', 'sw', 'sec'], 'rouge', 'Remove-Item … (hors liste)');
+        S.ecran('sec', [['PS> Get-PrintJob', 'var(--bleu)'], ['autorisé · 0 document', 'var(--vert)'], ['PS> Remove-Item …', 'var(--bleu)'], ['REFUSÉ · hors liste', 'var(--rouge)'], ['tracé · 10:59', 'var(--jaune)']]);
+        S.bulle('sec', ['#Point JEA', 'commande hors liste → refusée', 'refus tracé dans le journal'], { cote: 'haut', dy: -20, cls: 'alerte' });
+        await S.go(['sec', 'sw', 'srv'], 'rouge', 'refusé · tracé');
+        await S.go(['srv', 'sw', 'tec'], 'rouge', 'DELETE ticket ?');
+        S.bulle('tec', ['#GLPI', 'compte du serveur :', 'créer et commenter,', 'jamais supprimer'], { cote: 'gauche', dy: -20, cls: 'alerte' });
+      } }
+  ]
+};
+
+</script>
+<script src="../../../commun/schema-2d.js"></script>
+</body>
+</html>

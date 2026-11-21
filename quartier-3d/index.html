@@ -121,8 +121,13 @@ body.photo #photo{display:block;animation:cardReveal .35s var(--ease-out-expo) b
 #back{position:fixed;top:max(10px,env(safe-area-inset-top));left:50%;transform:translateX(-50%);z-index:40;display:none;align-items:center;gap:10px;
   background:var(--glass-strong);border:1px solid var(--border-glass);border-radius:999px;padding:5px 6px 5px 16px;backdrop-filter:blur(14px) saturate(145%);box-shadow:0 4px 18px rgba(0,0,0,.45)}
 #back span{font-size:13px;color:var(--muted);white-space:nowrap;max-width:36vw;overflow:hidden;text-overflow:ellipsis}
-#back b{font-size:15px;font-weight:800;color:var(--ink)}
+#back span{flex-shrink:0}
+#back b{font-size:15px;font-weight:800;color:var(--ink);white-space:nowrap;max-width:40vw;overflow:hidden;text-overflow:ellipsis}
+#back button{flex-shrink:0}
+#back small{font-size:inherit}
+#back .v-court{display:none}
 #back button{border:0;background:var(--c,#ff6b1a);color:#05070b;border-radius:999px;padding:7px 14px;font-size:13px;font-weight:800;white-space:nowrap}
+#back button.alt{background:transparent;color:var(--ink);box-shadow:inset 0 0 0 2px var(--c,#ff6b1a)}
 #err{position:fixed;inset:0;display:none;place-items:center;color:var(--ink);font-size:18px;padding:30px;text-align:center}
 @media (max-width:720px){
   #brand h1{font-size:18px}
@@ -142,6 +147,10 @@ body.photo #photo{display:block;animation:cardReveal .35s var(--ease-out-expo) b
   #hint{display:none}
   #dock button{padding:7px 10px;font-size:13px}
   #back span{display:none}
+  #back b,#back .echap,#back .v-long{display:none}
+  #back .v-court{display:inline}
+  #back{gap:6px}
+  #back button{padding:7px 11px}
 }
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
@@ -189,7 +198,7 @@ body.photo #photo{display:block;animation:cardReveal .35s var(--ease-out-expo) b
 </div>
 
 <iframe id="room" title="Maquette 3D du projet" allow="fullscreen"></iframe>
-<div id="back" style="--c:#ff6b1a"><span>Maquette de</span><b id="backname"></b><button id="bBack">◀ Retour au quartier (Échap)</button></div>
+<div id="back" style="--c:#ff6b1a"><span>Maquette de</span><b id="backname"></b><div id="bVues" style="display:contents"></div><button id="bBack">◀ Retour<small class="echap"> au quartier (Échap)</small></button></div>
 <div id="fade"><p id="fadetxt">Chargement de la maquette…</p></div>
 <div id="err">Cette scène a besoin de WebGL. Ouvre la page dans un navigateur récent (Chrome, Edge, Firefox, Brave).</div>
 
@@ -743,7 +752,7 @@ function refreshUI() {
     $('#ptext').textContent = s.desc;
     const go = $('#pgo'); go.innerHTML = '';
     const b = document.createElement('button'); b.className = 'main'; b.textContent = s.free ? 'Bientôt' : 'Entrer dans la maquette ▶'; b.disabled = s.free; b.onclick = () => enterHouse(s.i); go.appendChild(b);
-    if (s.url25) { const b2 = document.createElement('button'); b2.textContent = 'Version 2,5D'; b2.title = 'L\'architecture vue de biais, étape par étape'; b2.onclick = () => enterHouse(s.i, true); go.appendChild(b2); }
+    if (!s.free) window.QUARTIER.vues.slice(1).forEach(v => { if (!s[v.champ]) return; const b2 = document.createElement('button'); b2.textContent = v.bouton; b2.onclick = () => enterHouse(s.i, v.k); go.appendChild(b2); });
     const sp = document.createElement('span'); sp.textContent = s.free ? '' : 'Entrée'; go.appendChild(sp);
   }
 }
@@ -761,12 +770,24 @@ function goHouse(i) {
 /* ---- entrer : la caméra s'avance vers la porte, fondu, puis la maquette s'ouvre ---- */
 const fade = $('#fade'), room = $('#room'), back = $('#back');
 let enterToken = 0;
-function enterHouse(i, v25) {   // v25 : ouvrir la version 2,5D (pas à pas) au lieu de la maquette 3D
-  const s = SLOTS[i], url = v25 && s.url25 ? s.url25 : s.url, nom = s.title + (url === s.url25 ? ' · version 2,5D' : '');
+/* vue ouverte dans la maison : maquette 3D, version 2,5D ou version 2D ; les boutons du haut passent de l'une à l'autre */
+const VUES = window.QUARTIER.vues;
+let vue = VUES[0];
+function setBar(s) {
+  $('#backname').textContent = s.title + vue.suffixe;
+  const box = $('#bVues'); box.innerHTML = '';
+  VUES.forEach(v => { if (v === vue || !s[v.champ]) return; const b = document.createElement('button'); b.className = 'alt'; b.innerHTML = '<small class="v-long">' + v.bouton + '</small><small class="v-court">' + v.court + '</small> ▶'; b.onclick = () => changeVue(v); box.appendChild(b); });
+}
+function changeVue(v) {
+  const s = SLOTS[sel]; if (mode !== 'inside' || !s || !s[v.champ]) return;
+  vue = v; setBar(s); room.src = encodeURI(s[v.champ]);
+}
+function enterHouse(i, k) {   // k : '3d' (par défaut), '25' ou '2d' : la vue à ouvrir
+  const s = SLOTS[i], v = VUES.find(x => x.k === k && s[x.champ]) || VUES[0], url = s[v.champ], nom = s.title + v.suffixe;
   if (mode === 'inside' || mode === 'entering') return;
   if (s.free) { bump(i); return; }
   const tok = ++enterToken;
-  sel = i; mode = 'entering'; refreshUI();
+  vue = v; sel = i; mode = 'entering'; refreshUI();
   $('#fadetxt').textContent = `Chargement : ${nom}…`;
   flyTo(doorView(s, true), { dur: .9, arc: 0 });
   setTimeout(() => { if (tok === enterToken) fade.classList.add('on'); }, REDUCED ? 0 : 560);
@@ -774,7 +795,7 @@ function enterHouse(i, v25) {   // v25 : ouvrir la version 2,5D (pas à pas) au 
     if (tok !== enterToken) return;
     room.onload = () => {
       if (tok !== enterToken || room.getAttribute('src') === 'about:blank') return;
-      mode = 'inside'; back.style.setProperty('--c', s.color); $('#backname').textContent = nom;
+      mode = 'inside'; back.style.setProperty('--c', s.color); setBar(s);
       back.style.display = 'flex'; fade.classList.remove('on');
       try { room.contentWindow.addEventListener('keydown', e => { if (e.key === 'Escape') exitHouse(); }); room.contentWindow.focus(); } catch (e) { /* page d'un autre domaine : le bouton suffit */ }
     };
