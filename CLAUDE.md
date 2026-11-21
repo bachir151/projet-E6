@@ -55,3 +55,27 @@ La fiche d'une page à faire signer par l'entreprise reste utile quand le tuteur
 - PDF : HTML + CSS puis `weasyprint` (voir `Projet apprenti 4/apprentie4-aziza/livrables/fiche/fiche.html`). Toujours vérifier le nombre de pages (`pdfinfo`) et le rendu (`pdftoppm`) avant de livrer.
 - PowerPoint : `pptxgenjs` (voir `Projet apprenti 4/apprentie4-aziza/livrables/powerpoint/build.js`) puis `animate.py` pour les animations au clic.
 - Présentation animée : page HTML autonome (`Projet apprenti 4/apprentie4-aziza/livrables/presentation-animee/presentation_3b1b.html`), navigation au clavier, touche N pour les notes.
+
+## Design (décision du 20/11/2026)
+- **Règle** : toute page ou composant HTML nouveau lie `theme.css` (racine du dépôt) et l'utilise. **Aucune couleur, police ou ombre en dur** : seulement les variables (`var(--papier)`, `var(--encre)`, `var(--ombre-douce)`…). Dans un SVG : `style="fill:var(--…)"`.
+- **Source de vérité** : `theme.css` (palette, Nunito, rayons, ombres, composants, `@media print`). Changer une valeur = la changer là, nulle part ailleurs.
+- **Identité** « encre sur papier », inspirée de lastbook.org : Nunito partout (h1 et titres de section en Black 1000, MAJUSCULES ; titres de cartes en 900) ; fond papier `#F4F2EC` ; cartes blanches arrondies à contour gris fin et ombre douce ; boutons pilule à contour encre et ombre décalée ; bandeau noir avec mots-clés jaunes ; section finale jaune.
+- **Couleurs sémantiques** : rouge = danger/erreur, vert = validé, bleu = info, jaune = mise en avant. Texte rouge sur fond clair : `--rouge-texte` (AA).
+- **Proscrits** : anciens verts/bleus/teals, Libre Baskerville, Inter, Space Grotesk, IBM Plex Sans/Mono, Barlow, Atkinson, Bricolage, STIX, JetBrains Mono ; modes sombres des pages claires ; styles « vintage » ou « plat moderne ».
+- **Contraintes** : responsive testé à 375, 768 et 1280 px ; contrastes AA (attention : `--encre-3` sur `--papier-2` < 4,5 → utiliser `--encre-2`) ; documents A4 : vérifier le nombre de pages ; schémas réseau avec **images réalistes de matériel** (vrais switchs, routeurs, PC, serveurs), pas de pictogrammes.
+- **Exception** : les scènes 3D (maquettes, quartier) et la présentation 3B1B gardent leur fond sombre ; seule leur interface suit la charte (Nunito, boutons pilule). Elles ne lient pas `theme.css` (sa base claire casserait la scène).
+
+### Composants existants (à réutiliser, ne pas recréer)
+| Composant | Classe | Remarque |
+|---|---|---|
+| Carte | `.carte` (alias `.card`) | variantes `.plate`, `.a-venir`, + `.danger/.succes/.info/.accent` (filet en haut) |
+| Tag | `.tag` (alias `.pill`) | variantes `.papier`, `.jaune`, `.info`, `.danger`, `.succes` |
+| Bouton | `.bouton` (alias `.btn`) | `.principal` (encre), `.jaune`, `.petit` ; `aria-pressed="true"` = jaune |
+| Bandeau de sous-titres | `.bandeau` | fond encre ; `<b>`/`<strong>`/`.cle` en jaune |
+| Section finale | `.section-finale` | fond jaune |
+| Étiquette | `.label` (alias `.eyebrow`, `.kicker`) | gris, gras, majuscules espacées |
+| Encadré | `.encadre` (alias `.callout`) | + classe sémantique pour la couleur du filet |
+| Note | `.note` | papier jaune pâle |
+| Terminal | `.terminal` | bloc de code sombre |
+| Zone secondaire | `.zone-2` | fond `--papier-2` |
+| Dessin au trait | `.trait` (SVG) | trait encre, `--trait` |

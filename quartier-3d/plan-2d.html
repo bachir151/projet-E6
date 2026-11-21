@@ -1,0 +1,328 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Le quartier des projets (plan 2D)</title>
+<meta name="description" content="Plan 2D du quartier des projets E6 : un carrefour, une maison par apprenti, une maquette 3D derrière chaque porte.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="../theme.css">
+<script src="maisons.js"></script>
+<style>
+/* Plan 2D du quartier. Couleurs, polices, ombres : theme.css uniquement.
+   Seules exceptions : les couleurs d'identité des projets, lues dans maisons.js (les mêmes qu'en 3D). */
+body{min-height:100vh}
+header.wrap{padding-top:clamp(18px,3vw,30px);display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:14px 24px}
+header h1{margin:0}
+header .lead{color:var(--encre-2);margin:8px 0 0;max-width:60ch}
+.layout{display:grid;grid-template-columns:minmax(0,1fr) 400px;gap:28px;align-items:start;padding-block:22px 110px}
+
+/* la carte */
+.plan{position:relative;margin:0;border:3px solid var(--encre);border-radius:6px;background:var(--papier);overflow:hidden;
+  background-image:radial-gradient(var(--contour-2) 1.3px,transparent 1.6px);background-size:22px 22px;box-shadow:8px 8px 0 var(--encre)}
+.plan svg{display:block;width:100%;height:auto}
+.plan figcaption{position:absolute;left:12px;bottom:10px;font-size:.8rem;font-weight:700;color:var(--encre-3);pointer-events:none}
+#map .trait{fill:none;stroke:var(--encre);stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+#map .ombre{fill:var(--encre)}
+#map .sol{fill:var(--papier-2);stroke:var(--encre);stroke-width:3}
+#map .pelouse{fill:var(--vert-pale)}
+#map .route{fill:none;stroke:var(--encre-2);stroke-linecap:butt}
+#map .bord{fill:none;stroke:var(--encre);stroke-width:3}
+#map .axe{fill:none;stroke:var(--papier);stroke-width:2.5;stroke-dasharray:14 12}
+#map .zebra{fill:var(--blanc)}
+#map .place{fill:var(--papier);stroke:var(--encre);stroke-width:3}
+#map .ilot{fill:var(--jaune);stroke:var(--encre);stroke-width:3}
+#map .arbre{fill:var(--vert);stroke:var(--encre);stroke-width:3}
+#map .tronc{stroke:var(--encre);stroke-width:4;stroke-linecap:round}
+#map .mur{fill:var(--blanc);stroke:var(--encre);stroke-width:3}
+#map .fenetre{fill:var(--bleu-pale);stroke:var(--encre);stroke-width:2.5}
+#map .toit,#map .porte{stroke:var(--encre);stroke-width:3;stroke-linejoin:round}
+#map .etiquette rect{fill:var(--blanc);stroke:var(--encre);stroke-width:2.5}
+#map .etiquette text{font-family:var(--police);font-weight:900;font-size:17px;fill:var(--encre)}
+#map .voiture rect{stroke:var(--encre);stroke-width:2.5}
+#map .libre .mur,#map .libre .toit{fill:var(--papier);stroke-dasharray:8 7}
+#map .libre .etiquette text{fill:var(--encre-3)}
+
+/* maisons : soulevées au survol, marquées quand on les choisit */
+#map .maison{cursor:pointer;outline:none}
+#map .maison .corps{transition:transform .18s cubic-bezier(.2,.9,.3,1.3)}
+#map .maison .ombre-maison{transition:transform .18s}
+#map .maison:hover .corps,#map .maison:focus-visible .corps,#map .maison.sel .corps{transform:translate(-3px,-6px)}
+#map .maison:hover .ombre-maison,#map .maison:focus-visible .ombre-maison,#map .maison.sel .ombre-maison{transform:translate(3px,3px)}
+#map .maison .halo{opacity:0;transition:opacity .25s}
+#map .maison.sel .halo{opacity:1;animation:halo 1.6s ease-in-out infinite}
+#map .maison:focus-visible .halo{opacity:.6}
+@keyframes halo{0%,100%{stroke-width:3}50%{stroke-width:7}}
+#map .bob{animation:bob 3.2s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+
+/* carte d'information (même esprit que le quartier 3D) */
+#panel{position:sticky;top:18px;display:grid;grid-template-columns:96px 1fr;background:var(--blanc);border:3px solid var(--encre);border-radius:6px;
+  box-shadow:8px 8px 0 var(--c,var(--jaune)),8px 8px 0 3px var(--encre)}
+#panel.reveal{animation:pop .4s cubic-bezier(.16,1,.3,1) both}
+@keyframes pop{from{opacity:0;transform:translate(-8px,8px)}to{opacity:1;transform:none}}
+#pimg{background:var(--jaune-pale);border-right:3px solid var(--encre);display:grid;place-items:center;padding:10px}
+#pimg svg{width:100%;max-width:96px;height:auto;overflow:visible}
+#pimg svg .bob{animation:bob 3.2s ease-in-out infinite}
+#pbody{padding:14px 16px 16px;min-width:0}
+#pwho{font-size:.86rem;font-weight:600;color:var(--encre-3)}
+#pwho b{color:var(--encre);font-weight:800}
+#ptitle{font-size:1.35rem;font-weight:900;line-height:1.12;letter-spacing:-.015em;margin:3px 0 7px;text-transform:none}
+#ptext{font-size:.95rem;color:var(--encre-2);margin:0}
+#pgo{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:13px}
+#pgo:empty{display:none}
+#pgo .btn{min-height:40px;padding:7px 16px;font-size:.88rem;text-transform:none;letter-spacing:0}
+#pgo .btn.entrer{background:var(--c,var(--jaune))}
+#pgo kbd{font-size:.75rem}
+
+/* barre de navigation */
+#dock{position:fixed;left:50%;bottom:max(14px,env(safe-area-inset-bottom));transform:translateX(-50%);z-index:5;display:flex;gap:6px;padding:6px;
+  background:var(--blanc);border:3px solid var(--encre);border-radius:999px;box-shadow:4px 4px 0 var(--encre);max-width:calc(100vw - 24px);overflow-x:auto;scrollbar-width:none}
+#dock::-webkit-scrollbar{display:none}
+#dock button{flex:none;display:flex;align-items:center;gap:7px;border:2px solid transparent;background:transparent;border-radius:999px;padding:6px 13px;font-weight:800;font-size:.92rem;color:var(--encre-2)}
+#dock button i{width:11px;height:11px;border-radius:50%;background:var(--c);border:2px solid var(--encre);display:inline-block}
+#dock button.free i{background:transparent;border-style:dashed}
+#dock button:hover{color:var(--encre);background:var(--papier-2)}
+#dock button[aria-pressed="true"]{color:var(--encre);background:var(--jaune);border-color:var(--encre)}
+.aide{font-size:.85rem;color:var(--encre-3);margin-top:16px}
+.aide kbd{font-size:.75rem}
+
+/* maquette ouverte par-dessus le plan */
+#room{position:fixed;inset:0;width:100%;height:100%;border:0;background:var(--encre);z-index:20;display:none}
+#back{position:fixed;top:max(10px,env(safe-area-inset-top));left:50%;transform:translateX(-50%);z-index:21;display:none;align-items:center;gap:10px;
+  background:var(--blanc);border:3px solid var(--encre);border-radius:999px;padding:5px 6px 5px 16px;box-shadow:4px 4px 0 var(--encre)}
+#back b{font-weight:900;white-space:nowrap;max-width:40vw;overflow:hidden;text-overflow:ellipsis}
+#back .btn{min-height:36px;padding:5px 14px;font-size:.82rem;text-transform:none;letter-spacing:0;background:var(--c,var(--jaune))}
+
+@media (max-width:900px){
+  .layout{grid-template-columns:1fr;gap:22px}
+  #panel{position:static}
+}
+@media (max-width:520px){
+  #panel{grid-template-columns:78px 1fr}
+  #pimg{padding:6px}
+  .aide,.plan figcaption{display:none}
+  #back b{display:none}
+  #map .etiquette text{font-size:20px}
+}
+@media (prefers-reduced-motion:reduce){#map .bob,#pimg svg .bob,#map .maison.sel .halo{animation:none}}
+@media print{#dock,#room,#back,.aide,header .btn{display:none!important}.plan{box-shadow:none}#panel{position:static;box-shadow:none}}
+</style>
+</head>
+<body>
+<header class="wrap">
+  <div>
+    <span class="label">BTS CIEL option A · projets E6 · session 2027</span>
+    <h1>Le quartier des projets</h1>
+    <p class="lead">Le plan du quartier, en 2D. Une maison par apprenti, une maquette 3D derrière chaque porte. Clique sur une maison pour la découvrir.</p>
+  </div>
+  <a class="btn principal" href="index.html">Voir le quartier en 3D ↗</a>
+</header>
+
+<main class="wrap layout">
+  <figure class="plan">
+    <svg id="map" viewBox="0 0 1000 720" role="group" aria-label="Plan du quartier : un rond-point au centre et une maison par projet autour"></svg>
+    <figcaption>Plan schématique, sans échelle</figcaption>
+  </figure>
+  <div>
+    <section id="panel" aria-live="polite" style="--c:var(--jaune)">
+      <div id="pimg" aria-hidden="true"></div>
+      <div id="pbody">
+        <div id="pwho"></div>
+        <h2 id="ptitle"></h2>
+        <p id="ptext"></p>
+        <div id="pgo"></div>
+      </div>
+    </section>
+    <p class="aide"><kbd>←</kbd> <kbd>→</kbd> maison suivante · <kbd>Entrée</kbd> entrer · <kbd>Échap</kbd> carrefour</p>
+  </div>
+</main>
+
+<nav id="dock" aria-label="Aller à une maison"></nav>
+<iframe id="room" title="Maquette 3D du projet" allow="fullscreen"></iframe>
+<div id="back"><b id="backname"></b><button class="btn" id="bBack" type="button">◀ Retour au plan (Échap)</button></div>
+
+<script>
+(function () {
+  'use strict';
+  var Q = window.QUARTIER, SLOTS = Q.maisons, illus = Q.illus;
+  var NS = 'http://www.w3.org/2000/svg', svg = document.getElementById('map');
+  var CX = 500, CY = 372, K = 0.6;                       // centre du plan et aplatissement (vue un peu en hauteur)
+  var RING = 232, PLAZA = 84, HOUSE = 336, COUNT = Math.max(4, SLOTS.length);
+  var REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function el(tag, attrs, parent, text) {
+    var e = document.createElementNS(NS, tag);
+    for (var k in attrs) e.setAttribute(k, attrs[k]);
+    if (text != null) e.textContent = text;
+    (parent || svg).appendChild(e); return e;
+  }
+  function pos(a, r) { return [CX + Math.sin(a) * r, CY - Math.cos(a) * r * K]; }
+  function ell(r, cls, parent) { return el('ellipse', { cx: CX, cy: CY, rx: r, ry: r * K, 'class': cls }, parent); }
+
+  SLOTS.forEach(function (s, i) { s.i = i; s.a = i * Math.PI * 2 / COUNT; s.free = !s.url; });
+
+  /* ---- sol, pelouse, allées, rond-point ---- */
+  el('ellipse', { cx: CX + 9, cy: CY + 9, rx: 478, ry: 330, 'class': 'ombre' });
+  el('ellipse', { cx: CX, cy: CY, rx: 478, ry: 330, 'class': 'sol' });
+  ell(RING + 4, 'pelouse');
+  SLOTS.forEach(function (s) {
+    var p0 = pos(s.a, PLAZA - 6), p1 = pos(s.a, HOUSE - 4);
+    el('line', { x1: p0[0], y1: p0[1], x2: p1[0], y2: p1[1], 'class': 'route', stroke: 'var(--encre)', 'stroke-width': 46, style: 'stroke:var(--encre)' });
+    el('line', { x1: p0[0], y1: p0[1], x2: p1[0], y2: p1[1], 'class': 'route', 'stroke-width': 39 });
+  });
+  ell(RING + 31, 'bord'); ell(RING - 31, 'bord');
+  var anneau = ell(RING, 'route'); anneau.setAttribute('stroke-width', 59);
+  ell(RING, 'axe');
+  // passages piétons en face de chaque allée
+  SLOTS.forEach(function (s) {
+    var tan = Math.atan2(Math.sin(s.a) * K, Math.cos(s.a)) * 180 / Math.PI;
+    for (var b = -2; b <= 2; b++) {
+      var c = pos(s.a, RING + b * 11);
+      el('rect', { x: c[0] - 19, y: c[1] - 3, width: 38, height: 6, rx: 1.5, 'class': 'zebra', transform: 'rotate(' + tan + ' ' + c[0] + ' ' + c[1] + ')' });
+    }
+  });
+  el('ellipse', { cx: CX + 6, cy: CY + 6, rx: PLAZA, ry: PLAZA * K, 'class': 'ombre' });
+  ell(PLAZA, 'place');
+  ell(34, 'ilot');
+  var pan = el('svg', { x: CX - 34, y: CY - 92, width: 68, height: 68, viewBox: '0 0 110 110', 'aria-hidden': 'true' });
+  pan.innerHTML = illus('carrefour', 'var(--rouge,#C8372D)').replace(/^<svg[^>]*>|<\/svg>$/g, '');
+
+  /* ---- voitures sur l'anneau ---- */
+  if (!REDUCED) {
+    [[RING + 14, 19, '0', 'var(--rouge)'], [RING - 14, 23, '1', 'var(--bleu)'], [RING + 14, 19, '0.5', 'var(--jaune)']].forEach(function (c, j) {
+      var r = c[0], d = 'M ' + (CX - r) + ' ' + CY + ' a ' + r + ' ' + (r * K) + ' 0 1 ' + (j === 1 ? 0 : 1) + ' ' + (2 * r) + ' 0 a ' + r + ' ' + (r * K) + ' 0 1 ' + (j === 1 ? 0 : 1) + ' ' + (-2 * r) + ' 0';
+      var g = el('g', { 'class': 'voiture' });
+      el('rect', { x: -13, y: -7, width: 26, height: 14, rx: 4, style: 'fill:' + c[3] }, g);
+      el('rect', { x: -3, y: -5, width: 9, height: 10, rx: 2, style: 'fill:var(--encre)' }, g);
+      var m = el('animateMotion', { dur: c[1] + 's', repeatCount: 'indefinite', rotate: 'auto', begin: '-' + (parseFloat(c[2]) * c[1]) + 's', path: d }, g);
+    });
+  }
+
+  /* ---- arbres et maisons, dessinés du fond vers l'avant ---- */
+  var items = [];
+  var sd = 17; function rnd() { sd = (sd * 16807) % 2147483647; return sd / 2147483647; }
+  for (var t = 0; t < 900 && items.length < 16; t++) {
+    var x = CX + (rnd() * 2 - 1) * 440, y = CY + (rnd() * 2 - 1) * 290;
+    var nx = (x - CX), ny = (y - CY) / K, r = Math.hypot(nx, ny);
+    if (((x - CX) / 452) * ((x - CX) / 452) + ((y - CY) / 306) * ((y - CY) / 306) > 1) continue;   // reste sur le sol
+    if (r < PLAZA + 30 || (r > RING - 52 && r < RING + 58)) continue;
+    var ok = true;
+    SLOTS.forEach(function (s) {
+      var dx = Math.sin(s.a), dy = -Math.cos(s.a), along = nx * dx + ny * dy, lat = Math.abs(nx * dy - ny * dx);
+      if (along > 0 && along < HOUSE + 40 && lat < 46) ok = false;
+      var h = pos(s.a, HOUSE); if (Math.abs(x - h[0]) < 150 && y > h[1] - 175 && y < h[1] + 60) ok = false;
+    });
+    items.forEach(function (o) { if (o.tree && Math.hypot(o.x - x, o.y - y) < 46) ok = false; });
+    if (ok) items.push({ tree: true, x: x, y: y, s: 0.75 + rnd() * 0.45 });
+  }
+  SLOTS.forEach(function (s) { var p = pos(s.a, HOUSE); items.push({ house: s, x: p[0], y: p[1] }); });
+  items.sort(function (p, q) { return p.y - q.y; });
+
+  var houses = [];
+  items.forEach(function (o) {
+    if (o.tree) {
+      var g = el('g', { transform: 'translate(' + o.x + ' ' + o.y + ') scale(' + o.s + ')', 'aria-hidden': 'true' });
+      el('line', { x1: 0, y1: 0, x2: 0, y2: -22, 'class': 'tronc' }, g);
+      el('circle', { cx: 5, cy: -33, r: 20, 'class': 'ombre' }, g);
+      el('circle', { cx: 0, cy: -38, r: 20, 'class': 'arbre' }, g);
+      return;
+    }
+    var s = o.house, col = s.color;
+    var g = el('g', { 'class': 'maison' + (s.free ? ' libre' : ''), transform: 'translate(' + o.x + ' ' + o.y + ')', tabindex: '0', role: 'button',
+      'aria-label': s.free ? 'Emplacement libre, à venir' : 'Projet ' + s.n + ', ' + s.who + ' : ' + s.title });
+    el('ellipse', { cx: 0, cy: 4, rx: 118, ry: 22, 'class': 'halo', style: 'fill:none;stroke:' + col, 'stroke-dasharray': '10 8' }, g);
+    var sh = el('g', { 'class': 'ombre-maison' }, g);
+    el('path', { d: 'M-82 0V-88L0-140 82-88V0Z', 'class': 'ombre', transform: 'translate(8 6)' }, sh);
+    var c = el('g', { 'class': 'corps' }, g);
+    el('rect', { x: -80, y: -88, width: 160, height: 88, 'class': 'mur' }, c);
+    el('path', { d: 'M-94-86 0-142 94-86Z', 'class': 'toit', style: 'fill:' + (s.free ? 'var(--papier)' : col) }, c);
+    if (!s.free) {
+      el('rect', { x: -66, y: -70, width: 32, height: 24, 'class': 'fenetre' }, c);
+      el('rect', { x: 34, y: -70, width: 32, height: 24, 'class': 'fenetre' }, c);
+      el('path', { d: 'M-50-70v24M-66-58h32M50-70v24M34-58h32', 'class': 'trait', style: 'stroke-width:2' }, c);
+      el('rect', { x: -17, y: -50, width: 34, height: 50, 'class': 'porte', style: 'fill:' + col }, c);
+      el('circle', { cx: 9, cy: -24, r: 2.6, style: 'fill:var(--encre)' }, c);
+      var pr = el('svg', { x: 86, y: -64, width: 64, height: 64, viewBox: '0 0 110 110', 'aria-hidden': 'true', style: 'overflow:visible' }, c);
+      pr.innerHTML = illus(s.prop, col).replace(/^<svg[^>]*>|<\/svg>$/g, '');
+    } else {
+      el('text', { x: 0, y: -26, 'text-anchor': 'middle', style: 'font:900 40px var(--police);fill:var(--encre-3)' }, c, '?');
+    }
+    var lab = el('g', { 'class': 'etiquette', transform: 'translate(0 26)' }, c);
+    var txt = s.free ? 'Libre' : s.n + ' · ' + s.who, w = 26 + txt.length * 10.5;
+    el('rect', { x: -w / 2 + 4, y: -15, width: w, height: 30, rx: 15, style: 'fill:var(--encre);stroke:none', transform: 'translate(3 3)' }, lab);
+    el('rect', { x: -w / 2, y: -18, width: w, height: 30, rx: 15 }, lab);
+    el('text', { x: 0, y: 3, 'text-anchor': 'middle' }, lab, txt);
+    g.addEventListener('click', function () { if (sel === s.i) enter(s.i); else select(s.i); });
+    g.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); if (sel === s.i) enter(s.i); else select(s.i); } });
+    houses[s.i] = g;
+  });
+
+  /* ---- carte d'information et barre de navigation ---- */
+  var sel = -1, panel = document.getElementById('panel'), dock = document.getElementById('dock'), dockBtns = [];
+  function addDock(label, c, free, fn) {
+    var b = document.createElement('button'); b.type = 'button'; if (free) b.className = 'free';
+    b.innerHTML = '<i></i>'; b.querySelector('i').style.setProperty('--c', c); b.appendChild(document.createTextNode(label));
+    b.addEventListener('click', fn); dock.appendChild(b); dockBtns.push(b);
+  }
+  addDock('Carrefour', 'var(--jaune)', false, function () { select(-1); });
+  SLOTS.forEach(function (s) { addDock(s.free ? 'Libre' : s.who, s.color, s.free, function () { select(s.i); }); });
+
+  function select(i) {
+    sel = i; var s = i >= 0 ? SLOTS[i] : null;
+    houses.forEach(function (h, j) { h.classList.toggle('sel', j === i); });
+    dockBtns.forEach(function (b, j) { b.setAttribute('aria-pressed', String(j === i + 1)); });
+    panel.style.setProperty('--c', s ? s.color : 'var(--jaune)');
+    document.getElementById('pimg').innerHTML = illus(s ? (s.free ? 'libre' : s.prop) : 'carrefour', s ? s.color : 'var(--rouge,#C8372D)');
+    var who = document.getElementById('pwho'), go = document.getElementById('pgo');
+    who.innerHTML = ''; go.innerHTML = '';
+    var b = document.createElement('b');
+    if (!s) {
+      b.textContent = 'Carrefour'; who.appendChild(b); who.appendChild(document.createTextNode(' · point de départ'));
+      document.getElementById('ptitle').textContent = 'Bienvenue dans le quartier';
+      document.getElementById('ptext').textContent = 'Chaque maison abrite la maquette 3D d’un projet. Clique sur une maison du plan, ou utilise les flèches du clavier.';
+    } else {
+      b.textContent = s.free ? 'Emplacement libre' : 'Projet ' + s.n + ' · ' + s.who; who.appendChild(b);
+      who.appendChild(document.createTextNode(s.free ? ' · à venir' : ' · ' + s.sub));
+      document.getElementById('ptitle').textContent = s.title;
+      document.getElementById('ptext').textContent = s.desc;
+      var bt = document.createElement('button'); bt.type = 'button'; bt.className = 'btn entrer';
+      bt.textContent = s.free ? 'Bientôt' : 'Entrer dans la maquette ▶'; bt.disabled = s.free;
+      bt.addEventListener('click', function () { enter(s.i); }); go.appendChild(bt);
+      if (!s.free) { var k = document.createElement('kbd'); k.textContent = 'Entrée'; go.appendChild(k); }
+    }
+    panel.classList.remove('reveal'); void panel.offsetWidth; panel.classList.add('reveal');
+  }
+
+  /* ---- entrer dans une maquette (par-dessus le plan) ---- */
+  var room = document.getElementById('room'), back = document.getElementById('back'), inside = false;
+  function enter(i) {
+    var s = SLOTS[i]; if (!s || s.free) return;
+    inside = true; back.style.setProperty('--c', s.color); document.getElementById('backname').textContent = s.title;
+    room.onload = function () { try { room.contentWindow.addEventListener('keydown', function (e) { if (e.key === 'Escape') leave(); }); room.contentWindow.focus(); } catch (e) { /* autre domaine : le bouton suffit */ } };
+    room.src = encodeURI(s.url); room.style.display = 'block'; back.style.display = 'flex';
+  }
+  function leave() {
+    if (!inside) return; inside = false;
+    room.onload = null; room.src = 'about:blank'; room.style.display = 'none'; back.style.display = 'none';
+    if (sel >= 0 && houses[sel]) houses[sel].focus();
+  }
+  document.getElementById('bBack').addEventListener('click', leave);
+
+  addEventListener('keydown', function (e) {
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+    if (e.key === 'Escape') { if (inside) leave(); else select(-1); return; }
+    if (inside) return;
+    var n = SLOTS.length, tag = (document.activeElement || {}).tagName;
+    if (e.key === 'ArrowRight') { e.preventDefault(); select(sel < 0 ? 0 : (sel + 1) % n); houses[sel].focus(); }
+    else if (e.key === 'ArrowLeft') { e.preventDefault(); select(sel < 0 ? n - 1 : (sel - 1 + n) % n); houses[sel].focus(); }
+    else if (e.key === 'Enter' && sel >= 0 && tag !== 'BUTTON' && tag !== 'A' && !(document.activeElement && document.activeElement.classList && document.activeElement.classList.contains('maison'))) enter(sel);
+    else if (/^[1-9]$/.test(e.key) && +e.key <= n) { select(+e.key - 1); houses[sel].focus(); }
+  });
+
+  var q = new URLSearchParams(location.search), m = +q.get('maison');
+  select(m >= 1 && m <= SLOTS.length ? m - 1 : -1);
+})();
+</script>
+</body>
+</html>

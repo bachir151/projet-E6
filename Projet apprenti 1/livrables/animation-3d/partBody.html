@@ -14,6 +14,7 @@
 </div>
 
 <div id="panel" role="region" aria-live="polite">
+  <button id="bMini" type="button" aria-expanded="true" aria-controls="text" title="Réduire le panneau (H)">–</button>
   <div id="stepno"></div>
   <div id="title"></div>
   <div id="text"></div>
@@ -38,3 +39,16 @@
 <div id="hint">Glisser : tourner · Molette : zoom · Clic droit : déplacer<br>Flèches ← → : étapes · R : rejouer</div>
 <div id="err">Cette animation a besoin de WebGL. Ouvre la page dans un navigateur récent (Chrome, Edge, Firefox).</div>
 
+
+<script>
+/* Réduire / agrandir le panneau d'explication (bouton « – » ou touche H). Le choix est gardé pour la prochaine visite. */
+(function(){
+  var p = document.getElementById('panel'), b = document.getElementById('bMini'); if (!p || !b) return;
+  function set(mini){ p.classList.toggle('mini', mini); b.textContent = mini ? '+' : '–'; b.setAttribute('aria-expanded', String(!mini));
+    b.title = mini ? 'Agrandir le panneau (H)' : 'Réduire le panneau (H)'; try { localStorage.setItem('panneauMini', mini ? '1' : '0'); } catch (e) {} }
+  var start = false; try { start = localStorage.getItem('panneauMini') === '1'; } catch (e) {}
+  set(start);
+  b.addEventListener('click', function(){ set(!p.classList.contains('mini')); });
+  addEventListener('keydown', function(e){ if ((e.key === 'h' || e.key === 'H') && !e.ctrlKey && !e.metaKey && !e.altKey && !/INPUT|TEXTAREA/.test((document.activeElement||{}).tagName||'')) set(!p.classList.contains('mini')); });
+})();
+</script>

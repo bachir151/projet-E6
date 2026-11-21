@@ -3,42 +3,45 @@
 <head>
 <meta charset="utf-8">
 <title>Fiche de présentation du projet E6 – Aziza</title>
+<link rel="stylesheet" href="../../../../theme.css">
 <style>
-  @page { size: A4 portrait; margin: 9mm 12mm 9mm 12mm;
-    @bottom-center { content: "Fiche de présentation du projet E6 — apprentie 4 — page unique"; font: 6.8pt Inter, sans-serif; color: #8a93a0; } }
-  * { box-sizing: border-box; }
-  body { font-family: Inter, "DejaVu Sans", sans-serif; font-size: 8pt; line-height: 1.27; color: #1d2733; margin: 0; }
-  .top { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2pt solid #1f3a5f; padding-bottom: 3pt; }
-  .top .exam { font-size: 7.4pt; color: #4a5868; }
-  .top .doc { font-size: 7.4pt; font-weight: 700; color: #1f3a5f; text-transform: uppercase; letter-spacing: .06em; }
-  h1 { font-size: 11.3pt; line-height: 1.18; margin: 4pt 0 3pt; color: #1f3a5f; font-weight: 700; }
-  .banner { display: inline-block; background: #1f3a5f; color: #fff; font-weight: 700; font-size: 8.4pt; padding: 2.5pt 8pt; border-radius: 2pt; letter-spacing: .02em; }
-  .ids { width: 100%; border-collapse: collapse; margin: 5pt 0 2pt; font-size: 7.9pt; }
-  .ids td { border: 0.6pt solid #c7cfd8; padding: 2pt 5pt; vertical-align: middle; }
-  .ids td.k { background: #eef2f6; color: #3a4a5c; font-weight: 600; width: 13%; white-space: nowrap; }
-  .ids td.v { width: 37%; }
-  .dots { color: #9aa5b1; letter-spacing: .5pt; }
-  h2 { font-size: 8.9pt; text-transform: uppercase; letter-spacing: .05em; color: #1f3a5f; margin: 5pt 0 2.5pt; padding-bottom: 1.2pt; border-bottom: 0.7pt solid #c7cfd8; }
+  /* Fiche A4 d'une page, à signer. Couleurs et polices : theme.css uniquement. */
+  @page { size: A4 portrait; margin: 9mm 12mm 9mm 12mm; background: var(--papier);
+    @bottom-center { content: "Fiche de présentation du projet E6 — apprentie 4 — page unique"; font: 6.8pt var(--police); color: var(--encre-3); } }
+  body { font-size: 7.9pt; line-height: 1.27; margin: 0; }
+  @media screen { body { max-width: 210mm; margin: 0 auto; padding: 9mm 12mm; } }
+  .top { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2pt solid var(--encre); padding-bottom: 3pt; }
+  .top .exam { font-size: 7.4pt; color: var(--encre-2); }
+  .top .doc { font-size: 7.4pt; font-weight: 900; text-transform: uppercase; letter-spacing: .12em; color: var(--encre-3); }
+  h1 { font-size: 11.6pt; line-height: 1.12; margin: 4pt 0 3pt; }
+  .banner { display: inline-block; background: var(--encre); color: var(--papier); font-weight: 800; font-size: 8.2pt; padding: 2.5pt 8pt; border-radius: 3pt; letter-spacing: .02em; }
+  .banner b, .banner strong { color: var(--jaune); }
+  .ids { margin: 5pt 0 2pt; font-size: 7.8pt; }
+  .ids td { border: 0.6pt solid var(--contour-2); padding: 2pt 5pt; vertical-align: middle; }
+  .ids td.k { background: var(--papier-2); color: var(--encre-2); font-weight: 800; width: 13%; white-space: nowrap; }
+  .ids td.v { width: 37%; background: var(--blanc); }
+  .dots { color: var(--contour); letter-spacing: .5pt; }
+  h2 { font-size: 9pt; letter-spacing: .04em; margin: 5pt 0 2.5pt; padding-bottom: 1.2pt; border-bottom: 0.8pt solid var(--encre); }
   .two { display: flex; gap: 8pt; }
   .two > div { flex: 1; }
-  .box { border: 0.6pt solid #c7cfd8; border-left: 2.4pt solid #1f3a5f; padding: 3.5pt 6pt; background: #f8fafc; }
-  .box b.t { display: block; color: #1f3a5f; margin-bottom: 1pt; }
+  .box { border: 0.7pt solid var(--contour); border-left: 3pt solid var(--jaune); border-radius: 0 4pt 4pt 0; padding: 3.5pt 6pt; background: var(--blanc); }
+  .box b.t { display: block; font-weight: 900; margin-bottom: 1pt; }
   p { margin: 0 0 3pt; }
-  table.mods { width: 100%; border-collapse: collapse; font-size: 7.8pt; margin-top: 3pt; }
-  table.mods th { background: #1f3a5f; color: #fff; text-align: left; padding: 2.4pt 5pt; font-weight: 600; }
-  table.mods td { border-bottom: 0.6pt solid #d5dbe2; padding: 1.8pt 5pt; vertical-align: top; }
-  table.mods td.n { font-weight: 600; white-space: nowrap; width: 23%; }
-  table.mods td.v { width: 7%; text-align: center; font-weight: 700; }
-  .v1 { color: #1d6b3a; } .v2 { color: #8a5a00; }
-  .note { font-size: 7.3pt; color: #4a5868; margin-top: 2.5pt; }
+  table.mods { font-size: 7.7pt; margin-top: 3pt; }
+  table.mods th { background: var(--encre); color: var(--papier); padding: 2.4pt 5pt; font-weight: 800; }
+  table.mods td { border-bottom: 0.6pt solid var(--contour-2); padding: 1.8pt 5pt; vertical-align: top; }
+  table.mods td.n { font-weight: 800; white-space: nowrap; width: 23%; }
+  table.mods td.v { width: 7%; text-align: center; font-weight: 900; }
+  .v1 { color: var(--vert); } .v2 { color: var(--encre); background: var(--jaune-pale); }
+  .note { font-size: 7.3pt; color: var(--encre-2); margin-top: 2.5pt; }
   ul { margin: 0; padding-left: 11pt; }
   li { margin: 0 0 1.2pt; }
-  .fill { margin-top: 3pt; font-size: 7.6pt; color: #4a5868; }
-  .fill .line { border-bottom: 0.6pt dotted #8a93a0; height: 11pt; }
+  .fill { margin-top: 3pt; font-size: 7.6pt; color: var(--encre-2); }
+  .fill .line { border-bottom: 0.6pt dotted var(--contour); height: 11pt; }
   .sign { display: flex; gap: 7pt; margin-top: 3pt; }
-  .sign > div { flex: 1; border: 0.7pt solid #8a93a0; border-radius: 2pt; height: 27mm; padding: 3pt 5pt; font-size: 7.7pt; }
-  .sign b { display: block; color: #1f3a5f; margin-bottom: 2pt; }
-  .sign .l { color: #4a5868; }
+  .sign > div { flex: 1; border: 0.8pt solid var(--contour); border-radius: 4pt; background: var(--blanc); height: 27mm; padding: 3pt 5pt; font-size: 7.7pt; }
+  .sign b { display: block; font-weight: 900; margin-bottom: 2pt; }
+  .sign .l { color: var(--encre-2); }
 </style>
 </head>
 <body>

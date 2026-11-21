@@ -6,94 +6,70 @@
 <meta name="description" content="CyberSentinel : prototype E6 de Lorenzo. Verrouillage par radar et détection d'interactions avec un leurre réseau.">
 <title>CyberSentinel — projet E6 Lorenzo</title>
 <link rel="icon" href="data:,">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../../theme.css">
 <style>
-:root{--paper:#F4F2EC;--paper2:#ECE9E0;--ink:#16150F;--body:#4A4840;--muted:#6E6B62;--line:#8C8980;--yellow:#F6D77A;--green:#295F48;--red:#8B332B;--radius:16px}
-*{box-sizing:border-box}
-html{scroll-behavior:smooth}
-body{margin:0;background:var(--paper);color:var(--ink);font-family:Nunito,system-ui,sans-serif;font-size:16px;line-height:1.62}
-a{color:inherit;text-underline-offset:3px}
-button{font:inherit;cursor:pointer}
-button:focus-visible,a:focus-visible{outline:3px solid var(--red);outline-offset:3px}
-.wrap{max-width:1120px;margin:auto;padding:0 22px}
-header{border-bottom:1px solid var(--line);background:var(--paper);position:sticky;top:0;z-index:3}
+/* Mise en page propre à cette page. Couleurs, polices, ombres : theme.css uniquement. */
+header{border-bottom:1.5px solid var(--contour-2);background:var(--papier);position:sticky;top:0;z-index:3}
 header .wrap{min-height:62px;display:flex;align-items:center;justify-content:space-between;gap:14px}
-.brand{font-weight:900;letter-spacing:-.05em;text-decoration:none;font-size:1.36rem}
-nav{display:flex;gap:18px;flex-wrap:wrap;font-size:.9rem}
+.brand{font-weight:1000;letter-spacing:-.02em;text-decoration:none;font-size:1.36rem}
+.brand span{color:var(--jaune-fonce)}
+nav{display:flex;gap:18px;flex-wrap:wrap;font-size:.95rem;font-weight:800}
 nav a{text-decoration:none}
-h1,h2,h3{font-weight:900;line-height:1.1;letter-spacing:-.035em;margin:0}
-h1{font-size:clamp(2.6rem,7vw,5.5rem);max-width:770px;text-transform:uppercase}
-h2{font-size:clamp(1.9rem,4vw,2.8rem)}
-h3{font-size:1.26rem}
-p{margin:0 0 13px}
-section{padding:52px 0;border-bottom:1px solid var(--line)}
-.eyebrow{font-weight:900;font-size:.75rem;letter-spacing:.14em;color:var(--muted);text-transform:uppercase;margin-bottom:14px}
-.hero{padding:72px 0 54px;display:grid;grid-template-columns:1.15fr .85fr;gap:32px;align-items:center}
-.hero h1 em{font-style:normal;background:linear-gradient(transparent 59%,var(--yellow) 59%)}
-.lead{font-size:1.17rem;color:var(--body);max-width:62ch;margin-top:24px}
-.pill{display:inline-block;border:1px solid var(--line);padding:6px 13px;border-radius:999px;font-size:.83rem;font-weight:900;letter-spacing:.02em}
-.pill.yellow{background:var(--yellow);border-color:var(--ink)}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:12px 20px;background:var(--yellow);border:1.5px solid var(--ink);border-radius:999px;text-decoration:none;font-weight:900;box-shadow:4px 4px 0 var(--ink);transition:transform .15s,box-shadow .15s}
-.btn:hover{transform:translate(2px,2px);box-shadow:2px 2px 0 var(--ink)}
-.btn.ghost{background:var(--paper)}
+nav a:hover{text-decoration:underline;text-decoration-color:var(--jaune-fonce)}
+section{padding:52px 0;border-bottom:1.5px solid var(--contour-2)}
+.hero{padding-block:64px 50px;display:grid;grid-template-columns:1.15fr .85fr;gap:32px;align-items:center}
+.hero h1{max-width:770px}
+.hero h1 em{font-style:normal;background:linear-gradient(transparent 58%,var(--jaune) 58%)}
+.lead{font-size:1.17rem;color:var(--encre-2);max-width:62ch;margin-top:22px}
 .actions{display:flex;flex-wrap:wrap;gap:15px;margin-top:26px}
-.illustration{min-height:300px;border:1.5px solid var(--ink);border-radius:20px;background:var(--paper2);padding:24px}
-.illustration svg{width:100%;height:auto}
-.grid2,.grid3{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:17px}
+.illustration{border:1.5px solid var(--contour);border-radius:var(--r-carte);background:var(--blanc);box-shadow:var(--ombre-douce);padding:22px}
+.illustration svg{width:100%;height:auto;display:block}
+.grid2,.grid3{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
 .grid3{grid-template-columns:repeat(3,minmax(0,1fr))}
-.card{background:var(--paper2);border:1px solid var(--line);border-radius:var(--radius);padding:22px}
-.card p{color:var(--body)}
-.card .eyebrow{margin-bottom:10px}
-.card h3{margin-bottom:12px}
-.callout{border-left:6px solid var(--yellow);padding:12px 20px;background:var(--paper2);margin-top:23px}
-.small{font-size:.86rem;color:var(--muted)}
-.flow{display:grid;grid-template-columns:1fr auto 1fr auto 1fr;align-items:center;gap:10px}
-.flow .card{text-align:center;min-height:120px}
-.flow .arrow{font-size:1.5rem;color:var(--muted)}
-.scenario{background:var(--paper2);border:1px solid var(--line);border-radius:18px;padding:24px}
-.scenario .choices{display:flex;gap:9px;flex-wrap:wrap;margin-bottom:18px}
-.choice{border:1px solid var(--line);background:var(--paper);padding:9px 14px;border-radius:999px;font-weight:900}
-.choice[aria-pressed="true"]{background:var(--yellow);border-color:var(--ink)}
+.card p{color:var(--encre-2)}
+.small{font-size:.9rem;color:var(--encre-3)}
+.zone-2 .small,.scenario .small{color:var(--encre-2)}
+.scenario{background:var(--papier-2);border:1.5px solid var(--contour);border-radius:var(--r-carte);padding:24px}
+.scenario .choices{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:20px}
 .readout{display:grid;grid-template-columns:1fr 1fr;gap:18px}
-.terminal{background:var(--ink);color:#F4F2EC;border-radius:12px;padding:20px;min-height:190px;font:13px/1.75 ui-monospace,Consolas,monospace;white-space:pre-wrap;overflow:auto}
-.status{font-weight:900;padding:10px 14px;background:var(--paper);border:1px solid var(--line);border-radius:10px;margin-bottom:12px}
-table{width:100%;border-collapse:collapse}
-td,th{border-bottom:1px solid var(--line);padding:12px 10px;text-align:left;vertical-align:top}
-th{font-weight:900}
-footer{padding:34px 0;font-size:.9rem;color:var(--muted)}
-@media(max-width:820px){.hero,.grid2,.grid3,.readout{grid-template-columns:1fr}.flow{grid-template-columns:1fr}.flow .arrow{transform:rotate(90deg);text-align:center}.hero{padding-top:45px}nav{gap:11px}}
-@media(max-width:560px){header .wrap{flex-direction:column;align-items:flex-start;padding-top:9px;padding-bottom:9px}.illustration{min-height:auto}.wrap{padding:0 16px}}
-@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.btn{transition:none}}
+.terminal{min-height:190px;margin:0}
+.status{font-weight:900;padding:10px 14px;background:var(--blanc);border:1.5px solid var(--contour);border-radius:var(--r-petit);margin-bottom:12px}
+.bandeau{margin-top:24px}
+.section-finale{border-bottom:0}
+.section-finale .card{background:var(--blanc)}
+.section-finale .small{color:var(--encre-2)}
+footer{padding:34px 0;font-size:.92rem;color:var(--encre-3)}
+@media(max-width:820px){.hero,.grid2,.grid3,.readout{grid-template-columns:1fr}.hero{padding-top:42px}nav{gap:12px}}
+@media(max-width:560px){header{position:static}header .wrap{flex-direction:column;align-items:flex-start;padding-block:10px}}
+@media print{header{position:static}.scenario .choices{display:none}}
 </style>
 </head>
 <body>
-<header><div class="wrap"><a href="#" class="brand">CYBERSENTINEL<span style="color:#95731b">.</span></a><nav aria-label="Navigation"><a href="#probleme">Besoin</a><a href="#architecture">Architecture</a><a href="#scenario">Simulation</a><a href="#validation">Expériences</a></nav></div></header>
+<header><div class="wrap"><a href="#" class="brand">CYBERSENTINEL<span>.</span></a><nav aria-label="Navigation"><a href="#probleme">Besoin</a><a href="#architecture">Architecture</a><a href="#scenario">Simulation</a><a href="#validation">Expériences</a></nav></div></header>
 <main>
 <div class="wrap hero">
  <div>
   <div class="eyebrow">BTS CIEL · Épreuve E6 · Projet de Lorenzo</div>
   <h1>DEUX DÉFENSES.<br><em>UN SIGNAL.</em></h1>
   <p class="lead">Sécuriser une session Windows lorsqu'un agent s'absente, puis détecter des interactions inattendues avec un équipement leurre sur un réseau isolé.</p>
-  <div><span class="pill yellow">Prototype pédagogique</span> <span class="pill">Sans accès au SI réel</span></div>
-  <div class="actions"><a class="btn" href="../animation-3d/maquette-3d.html">Explorer la maquette 3D ↗</a><a class="btn ghost" href="#scenario">Tester le scénario</a></div>
+  <div><span class="tag jaune">Prototype pédagogique</span> <span class="tag papier">Sans accès au SI réel</span></div>
+  <div class="actions"><a class="btn principal" href="../animation-3d/maquette-3d.html">Explorer la maquette 3D ↗</a><a class="btn" href="#scenario">Tester le scénario</a></div>
  </div>
  <div class="illustration" role="img" aria-label="Schéma : un capteur radar protège Windows et un leurre réseau alimente Ubuntu">
   <svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
-   <rect x="12" y="16" width="177" height="105" rx="12" fill="#F6D77A" stroke="#16150F" stroke-width="2"/>
-   <rect x="212" y="16" width="176" height="105" rx="12" fill="#F4F2EC" stroke="#16150F" stroke-width="2"/>
-   <g fill="#16150F" font-family="Nunito, sans-serif" text-anchor="middle">
+   <rect x="12" y="16" width="177" height="105" rx="12" stroke-width="2" style="fill:var(--jaune);stroke:var(--encre)"/>
+   <rect x="212" y="16" width="176" height="105" rx="12" stroke-width="2" style="fill:var(--papier);stroke:var(--encre)"/>
+   <g text-anchor="middle" style="fill:var(--encre)">
     <text x="100" y="41" font-size="14" font-weight="900">RADAR LD2410</text><text x="100" y="66" font-size="12">ESP32 / Présence</text>
     <text x="300" y="41" font-size="14" font-weight="900">LEURRE HTTP</text><text x="300" y="66" font-size="12">ESP32 / Ethernet</text>
    </g>
-   <g stroke="#16150F" stroke-width="2.5" fill="none">
+   <g stroke-width="2.5" fill="none" style="stroke:var(--encre)">
      <path d="M80 82c10-12 30-12 40 0M72 88c16-23 40-23 56 0"/>
      <rect x="285" y="71" width="30" height="27" rx="2"/><path d="M290 79h20m-20 7h20m-20 7h20"/>
      <path d="M100 121v50M300 121v50M100 170h200M200 170v26"/>
    </g>
-   <rect x="47" y="200" width="306" height="80" rx="14" fill="#ECE9E0" stroke="#16150F" stroke-width="2"/>
-   <g font-family="Nunito,sans-serif" text-anchor="middle" fill="#16150F">
+   <rect x="47" y="200" width="306" height="80" rx="14" stroke-width="2" style="fill:var(--papier-2);stroke:var(--encre)"/>
+   <g text-anchor="middle" style="fill:var(--encre)">
     <text x="200" y="230" font-weight="900" font-size="19">SUPERVISION UBUNTU</text>
     <text x="200" y="254" font-size="13">Événements techniques · Alertes</text>
    </g>
@@ -106,7 +82,7 @@ footer{padding:34px 0;font-size:.9rem;color:var(--muted)}
   <article class="card"><div class="eyebrow">Risque physique</div><h3>Une session laissée ouverte</h3><p>Un agent quitte son bureau sans verrouiller Windows. Un radar de présence peut réduire le délai pendant lequel la session reste accessible.</p><p class="small">Le tuteur a confirmé l'existence d'oublis de verrouillage ; la performance du dispositif reste à mesurer.</p></article>
   <article class="card"><div class="eyebrow">Risque réseau</div><h3>Une activité qui passe inaperçue</h3><p>Un équipement leurre simule un service non utilisé : une connexion vers ce service fournit un signal supplémentaire à examiner.</p><p class="small">L'ANSSI a publié en septembre 2026 un rapport sur des faiblesses de détection à la DGFiP. Cela ne démontre pas qu'un leurre ESP32 aurait empêché les incidents.</p></article>
  </div>
- <div class="callout"><strong>Problématique :</strong> dans quelle mesure un prototype embarqué peut-il améliorer la prévention des accès locaux non autorisés et compléter la détection d'interactions réseau inhabituelles, avec un minimum de fausses alertes ?</div>
+ <div class="bandeau"><strong>Problématique :</strong> dans quelle mesure un prototype embarqué peut-il améliorer la prévention des accès locaux non autorisés et compléter la détection d'interactions réseau inhabituelles, avec un minimum de fausses alertes ?</div>
 </div></section>
 <section id="architecture"><div class="wrap">
  <div class="eyebrow">02 — Architecture</div><h2>Deux fonctions indépendantes, une supervision commune.</h2>
@@ -115,17 +91,17 @@ footer{padding:34px 0;font-size:.9rem;color:var(--muted)}
   <article class="card"><div class="eyebrow">B / Détection</div><h3>ESP32 + W5500</h3><p>Le second boîtier présente un service HTTP imitant une imprimante. Il journalise uniquement les interactions techniques avec ce service, sans recevoir de données métier.</p></article>
   <article class="card"><div class="eyebrow">C / Exploitation</div><h3>Windows + Ubuntu</h3><p>Un PC Windows de test et un serveur Ubuntu de laboratoire permettent les scripts PowerShell, le transport sécurisé des événements, les captures Wireshark et les alertes.</p></article>
  </div>
- <div class="callout"><strong>Frontière de confiance :</strong> le verrouillage doit continuer même si Ubuntu ou le réseau sont indisponibles. Une interaction avec le leurre ne doit jamais entraîner le verrouillage d'un poste.</div>
+ <div class="callout danger"><strong>Frontière de confiance :</strong> le verrouillage doit continuer même si Ubuntu ou le réseau sont indisponibles. Une interaction avec le leurre ne doit jamais entraîner le verrouillage d'un poste.</div>
 </div></section>
-<section id="scenario"><div class="wrap">
+<section id="scenario" class="zone-2"><div class="wrap">
  <div class="eyebrow">03 — Démonstration interactive</div><h2>Une journée de Martine, en laboratoire.</h2>
  <p class="lead" style="margin-bottom:22px">Choisis un événement. Le résultat affiché est une <strong>simulation de principe</strong>, pas une mesure obtenue avec le matériel.</p>
  <div class="scenario">
   <div class="choices" role="group" aria-label="Choix du scénario">
-   <button class="choice" aria-pressed="true" data-scenario="absence">Martine s'absente</button>
-   <button class="choice" aria-pressed="false" data-scenario="leurre">Accès au faux service</button>
-   <button class="choice" aria-pressed="false" data-scenario="legitime">Scan réseau autorisé</button>
-   <button class="choice" aria-pressed="false" data-scenario="panne">Serveur indisponible</button>
+   <button class="choice btn petit" aria-pressed="true" data-scenario="absence">Martine s'absente</button>
+   <button class="choice btn petit" aria-pressed="false" data-scenario="leurre">Accès au faux service</button>
+   <button class="choice btn petit" aria-pressed="false" data-scenario="legitime">Scan réseau autorisé</button>
+   <button class="choice btn petit" aria-pressed="false" data-scenario="panne">Serveur indisponible</button>
   </div>
   <div class="readout">
    <div><div class="status" id="scenario-state" aria-live="polite">Session Windows : verrouillée</div><p id="scenario-desc">Le radar détecte une absence suffisamment longue. Le poste valide le message et verrouille localement la session.</p><p class="small">Le radar ne permet pas d'identifier l'utilisateur. Les seuils et délais doivent être étalonnés et testés.</p></div>
@@ -149,7 +125,7 @@ footer{padding:34px 0;font-size:.9rem;color:var(--muted)}
   <div class="card"><h3>Version 2 — robustesse et évaluation</h3><p>HMAC/compteur, gestion des pannes, authentification de l'API, filtrage des alertes, campagnes de tests et indicateurs.</p></div>
  </div>
 </div></section>
-<section id="limites"><div class="wrap">
+<section id="limites" class="section-finale"><div class="wrap">
  <div class="eyebrow">05 — Périmètre et éthique</div><h2>Pas de surveillance des agents. Pas de réseau réel.</h2>
  <div class="grid2" style="margin-top:22px">
   <div class="card"><h3>Ce que le projet ne fait pas</h3><p>Pas de caméra, pas de reconnaissance des personnes, pas d'enregistrement des durées d'absence, pas de capture de mots de passe, pas d'attaque contre un réseau tiers. Il n'affirme pas détecter toutes les intrusions.</p></div>
