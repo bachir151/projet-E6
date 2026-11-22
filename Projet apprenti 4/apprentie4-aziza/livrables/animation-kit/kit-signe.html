@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Le kit signé</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900;1000&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../../../theme.css">
+<style>
+/* Animation de cours : le kit de maintenance signé du projet d'Aziza (apprentie 4).
+   Couleurs, polices, ombres : theme.css uniquement (variables). Scène 1600×900, un clic = une étape. */
+html,body{margin:0;height:100%;overflow:hidden;background:var(--papier);line-height:1.3}
+#stage{position:absolute;left:50%;top:50%;width:1600px;height:900px;transform-origin:center;background:var(--papier);user-select:none;font-family:var(--police);color:var(--encre)}
+.instant,.instant *{transition:none!important}
+.fi{fill:var(--encre)}.fi2{fill:var(--encre-2)}.fi3{fill:var(--encre-3)}.fc{fill:var(--contour)}.fc2{fill:var(--contour-2)}.fp{fill:var(--papier)}.fp2{fill:var(--papier-2)}.fw{fill:var(--blanc)}.fj{fill:var(--jaune)}.fjf{fill:var(--jaune-fonce)}.fb{fill:var(--bleu)}.fbp{fill:var(--bleu-pale)}.fr{fill:var(--rouge)}.fv{fill:var(--vert)}.fn{fill:none}
+.si{stroke:var(--encre)}.si2{stroke:var(--encre-2)}.sc{stroke:var(--contour)}.sjf{stroke:var(--jaune-fonce)}
+/* en-tête */
+.top{position:absolute;left:40px;right:40px;top:18px;height:84px;display:flex;align-items:flex-end;justify-content:space-between}
+.sur{font-weight:800;text-transform:uppercase;letter-spacing:.14em;font-size:14px;color:var(--encre-3)}
+.titre{font-weight:1000;font-size:46px;margin:4px 0 0;text-transform:uppercase;line-height:1}
+.legende{display:flex;gap:8px;padding-bottom:6px}
+.legende span{border:2px solid var(--encre);border-radius:99px;padding:5px 14px;font-weight:900;font-size:15px}
+.lg-j{background:var(--jaune)}.lg-b{background:var(--bleu)}.lg-v{background:var(--vert-pale)}
+/* câbles */
+#wires{position:absolute;left:0;top:0;width:1600px;height:900px;overflow:visible;max-width:none}
+#wires .base{fill:none;stroke:var(--encre-2);stroke-width:6;stroke-linecap:round}
+#wires .radio{fill:none;stroke:var(--encre-2);stroke-width:4;stroke-dasharray:3 9;stroke-linecap:round;transition:stroke .3s,opacity .3s}
+#wires .radio.cut{stroke:var(--rouge);opacity:.35}
+#wires .flow{fill:none;stroke:var(--jaune);stroke-width:3;stroke-dasharray:10 14;opacity:0}
+#wires .flow.live{opacity:1;animation:flow .6s linear infinite}
+/* appareils */
+.dev{position:absolute;transform:translateX(-50%);display:flex;gap:10px;align-items:center;font-size:17px;font-weight:700;color:var(--encre-2);white-space:nowrap}
+.dev.col{flex-direction:column;gap:3px}
+.dev b{border:2px solid var(--encre);border-radius:99px;padding:3px 14px;color:var(--encre);font-weight:1000;background:var(--blanc);letter-spacing:.06em}
+.dev .ip{font-family:var(--police-mono);font-weight:800;color:var(--encre);background:var(--papier);border-radius:6px;padding:0 4px}
+#zone{position:absolute;left:1100px;top:112px;width:470px;height:612px;border:2.5px dashed var(--contour);border-radius:22px}
+#zoneT{position:absolute;left:18px;top:-15px;background:var(--papier);padding:0 10px;font-weight:1000;font-size:15px;letter-spacing:.1em;text-transform:uppercase;color:var(--encre-2)}
+/* PC portable */
+#lap{position:absolute;left:40px;top:126px;width:520px;height:332px;background:var(--encre);border-radius:16px 16px 6px 6px;padding:12px;box-shadow:var(--ombre-douce)}
+#lbase{position:absolute;left:14px;top:456px;width:572px;height:22px;background:var(--contour-2);clip-path:polygon(4% 0,96% 0,100% 100%,0 100%);border-bottom:3px solid var(--contour)}
+.screen{width:100%;height:100%;background:var(--blanc);border-radius:4px;overflow:hidden;position:relative}
+.pane{position:absolute;inset:0;display:flex;flex-direction:column;opacity:0;transition:opacity .35s}
+.pane.on{opacity:1}
+.wbar{height:32px;flex:none;display:flex;align-items:center;gap:8px;padding:0 12px;background:var(--papier-2);font-weight:900;font-size:15px}
+.wbar em{margin-left:auto;font-style:normal;font-size:13px;border:1.5px solid var(--encre);border-radius:99px;padding:0 10px;background:var(--blanc)}
+#emode.agent{background:var(--jaune)}
+.frw{display:flex;align-items:center;gap:10px;padding:0 14px;height:46px;border-bottom:1px solid var(--papier-2);font-weight:800;font-size:18px;transition:background .3s}
+.frw .ic{width:22px;height:26px;flex:none}
+.frw .nm{flex:1;font-family:var(--police-mono);font-size:17px}
+.frw .ver{font:900 15px var(--police);border:1.5px solid var(--encre);border-radius:99px;padding:0 10px;background:var(--papier-2)}
+.frw .ver.n{background:var(--jaune)}
+.frw .st{width:28px;text-align:center;font-size:20px;font-weight:1000}
+.st.ok{color:var(--vert)}.st.ko{color:var(--rouge-texte)}.st.sy{color:var(--encre-3)}
+.frw.flash{background:var(--jaune-pale)}
+#efoot{margin-top:auto;padding:8px 14px;font-weight:800;font-size:17px;background:var(--papier);border-top:1px solid var(--papier-2);min-height:40px}
+#efoot.ko{background:var(--rouge-pale);color:var(--rouge-texte)}
+#efoot.ok{background:var(--vert-pale);color:var(--vert)}
+#pP{background:var(--encre);color:var(--papier)}
+#pP .wbar{background:var(--encre-2);color:var(--papier)}
+#plines{flex:1;padding:8px 12px;display:flex;flex-direction:column;justify-content:flex-start;font:700 15px/1.38 var(--police-mono);overflow:hidden}
+.pl{overflow-wrap:anywhere}.pl .t{color:var(--contour-2)}.pl.ok{color:var(--vert-pale)}.pl.ko{color:var(--rouge-pale)}.pl.hi{color:var(--jaune)}
+.bar{display:inline-block;width:180px;height:13px;border:1.5px solid var(--papier);border-radius:3px;vertical-align:-1px;position:relative;overflow:hidden}
+.bar i{position:absolute;left:0;top:0;bottom:0;background:var(--jaune);width:0}
+.tabs{height:34px;background:var(--papier-2);display:flex;align-items:flex-end;padding:0 10px;flex:none}
+.onglet{background:var(--blanc);height:28px;border-radius:10px 10px 0 0;padding:0 12px;display:flex;align-items:center;gap:8px;width:250px;font-size:15px;font-weight:800}
+.toolbar{height:44px;display:flex;align-items:center;padding:0 10px;border-bottom:1px solid var(--papier-2);flex:none}
+.addr{flex:1;height:32px;border-radius:99px;background:var(--papier-2);display:flex;align-items:center;padding:0 14px;font-size:18px;font-weight:800;white-space:nowrap;overflow:hidden}
+#berr{flex:1;padding:22px 30px;opacity:0;transition:opacity .4s}
+#berr.on{opacity:1}
+#berr h4{margin:0 0 6px;font-size:24px;font-weight:1000}
+#berr p{margin:0 0 6px;font-size:17px;font-weight:700;color:var(--encre-2)}
+#berr code{font:800 15px var(--police-mono);color:var(--encre-3)}
+#toast{position:absolute;right:12px;bottom:12px;width:280px;background:var(--blanc);border:2px solid var(--encre);border-radius:12px;padding:8px 12px;box-shadow:var(--ombre-decalee);font-weight:800;font-size:16px;opacity:0;transform:translateY(10px);transition:opacity .3s,transform .3s;z-index:3}
+#toast.on{opacity:1;transform:none}
+#toast small{display:block;font-size:13px;color:var(--encre-3);letter-spacing:.08em;font-weight:900}
+/* téléphone */
+#phone{position:absolute;left:604px;top:392px;width:62px;height:118px;background:var(--encre);border-radius:12px;padding:8px 5px}
+#phone .ps{width:100%;height:100%;background:var(--bleu-pale);border-radius:6px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font:900 13px var(--police);transition:background .3s}
+#phone.cut .ps{background:var(--rouge-pale)}
+#phone .ps svg{width:30px;height:30px}
+#phone .x{display:none;color:var(--rouge-texte);font-size:22px}#phone.cut .x{display:block}#phone.cut .w{display:none}
+#ant{position:absolute;left:690px;top:200px;width:100px;height:210px}
+#inet,#sp{position:absolute;left:810px;width:250px;overflow:visible}
+#inet{top:272px;height:120px}
+#sp{top:116px;height:112px;opacity:0;transition:opacity .4s}
+#sp.on{opacity:1}
+#rtr{position:absolute;left:1120px;top:300px;width:160px;height:46px;filter:drop-shadow(0 8px 8px rgba(22,21,15,.25))}
+#srv{position:absolute;left:1380px;top:170px;width:84px;height:196px;filter:drop-shadow(0 12px 10px rgba(22,21,15,.3))}
+#srv .act{animation:blink 1.6s steps(2) infinite}
+#srv.busy .act{animation-duration:.15s}
+#ref{position:absolute;left:1132px;top:500px;width:176px;height:112px}
+#borne{position:absolute;left:1372px;top:470px;width:166px;height:150px}
+#borne .ledv,#borne .ledr{transition:fill .3s}
+#borne.vert .ledv{fill:var(--vert)}#borne.vert .halo-v{opacity:1}
+#borne .halo-v{opacity:0;transition:opacity .3s}
+#sbad{position:absolute;left:1140px;top:440px;width:420px;background:var(--blanc);border:2px solid var(--encre);border-radius:12px;padding:6px 12px;box-shadow:var(--ombre-decalee);font-weight:800;font-size:16px;opacity:0;transition:opacity .4s;z-index:3}
+#sbad.on{opacity:1}
+#sbad small{font-size:13px;letter-spacing:.1em;color:var(--encre-3);font-weight:900;margin-right:8px}
+#sbad b{font-family:var(--police-mono)}
+/* paquets */
+#fx{position:absolute;inset:0;pointer-events:none;z-index:7}
+.pk{position:absolute;left:0;top:0;font:800 15px var(--police-mono);border:2px solid var(--encre);border-radius:10px;padding:3px 10px;box-shadow:var(--ombre-decalee);white-space:nowrap;background:var(--jaune);opacity:0}
+.pk.rep{background:var(--bleu)}.pk.sys{background:var(--blanc)}.pk.evt{background:var(--vert-pale)}.pk.ko{background:var(--rouge-pale)}
+.pk.dot{width:16px;height:16px;padding:0;border-radius:50%;box-shadow:none;background:var(--bleu)}
+.fly{position:absolute;left:0;top:0;font:800 17px var(--police-mono);background:var(--blanc);border:2px solid var(--encre);border-radius:8px;padding:3px 9px;box-shadow:var(--ombre-decalee);white-space:nowrap}
+.fly.y{background:var(--jaune)}.fly.b{background:var(--bleu-pale)}.fly.g{background:var(--vert-pale)}.fly.r{background:var(--rouge-pale)}
+#stamp{position:absolute;left:0;top:0;width:150px;height:150px;margin:-75px 0 0 -75px;border-radius:50%;border:6px solid var(--rouge);color:var(--rouge-texte);background:var(--blanc);display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:1000;z-index:8;opacity:0;text-align:center;line-height:1.05;box-shadow:var(--ombre-douce)}
+#stamp b{font-size:46px}#stamp span{font-size:16px;padding:0 10px}
+/* bulle */
+#say{position:absolute;width:380px;background:var(--blanc);border:2px solid var(--encre);border-radius:16px;padding:10px 16px;font-weight:800;font-size:19px;line-height:1.35;box-shadow:var(--ombre-decalee-forte);opacity:0;transform:scale(.94);transition:opacity .3s,transform .3s;z-index:6}
+#say.on{opacity:1;transform:none}
+#say small{display:block;font-size:13px;letter-spacing:.12em;color:var(--encre-3);font-weight:900;text-transform:uppercase}
+#say code{font:800 16px var(--police-mono);background:var(--papier-2);border-radius:5px;padding:0 4px}
+/* cartes */
+.cardc{position:absolute;left:590px;top:118px;width:500px;background:var(--blanc);border:2px solid var(--encre);border-radius:20px;box-shadow:6px 6px 0 var(--encre);padding:18px 22px;opacity:0;transform:scale(.95);transition:opacity .4s,transform .4s;z-index:5;pointer-events:none}
+.cardc.open{opacity:1;transform:none}
+.cardc.wide{left:40px;width:1520px}
+.cardc h2{margin:0 0 12px;font-weight:1000;font-size:28px;text-transform:uppercase;line-height:1.05}
+.rw{display:flex;gap:12px;align-items:flex-start;padding:8px 0;border-top:1px solid var(--papier-2);opacity:0;transform:translateX(8px);transition:opacity .35s,transform .35s}
+.rw.on{opacity:1;transform:none}
+.rw .n{flex:none;width:34px;height:34px;border-radius:50%;border:2px solid var(--encre);display:grid;place-items:center;font-weight:1000;font-size:17px;background:var(--jaune)}
+.rw h3{margin:0;font-size:20px;font-weight:900;line-height:1.2}
+.rw p{margin:2px 0 0;font-size:18px;font-weight:700;color:var(--encre-2);line-height:1.3}
+.foot{margin:10px 0 0;background:var(--encre);color:var(--papier);border-radius:14px;padding:11px 16px;font-size:19px;font-weight:700;line-height:1.35;opacity:0;transition:opacity .4s}
+.foot.on{opacity:1}.foot b{color:var(--jaune);font-weight:1000}
+.foot code,.tb code,.rc code{font:800 16px var(--police-mono)}
+.foot code{color:var(--jaune);background:none}
+.tb{display:grid;gap:6px 10px;align-items:stretch}
+.tb .hd{font-weight:1000;font-size:20px;border-radius:12px;padding:6px 12px;border:2px solid var(--encre);text-align:center}
+.tb .k{font-weight:900;font-size:15px;letter-spacing:.06em;color:var(--encre-2);text-transform:uppercase;align-self:center}
+.tb .v{background:var(--papier);border-radius:10px;padding:7px 12px;font-weight:700;font-size:18px;line-height:1.3}
+.tb .v b{font-weight:900}
+.tb .r{opacity:0;transition:opacity .35s}.tb .r.on{opacity:1}
+.tb .v.bon{background:var(--vert-pale)}.tb .v.mal{background:var(--rouge-pale)}.tb .v.moy{background:var(--jaune-pale)}
+.tb .v.choix{outline:3px solid var(--encre)}
+/* atelier signature */
+#lab{height:612px}
+#lab .zone{position:absolute;top:66px;font-weight:1000;font-size:14px;letter-spacing:.1em;text-transform:uppercase;color:var(--encre-2);border-bottom:3px solid var(--papier-2);width:440px;padding-bottom:4px}
+#lab .el{position:absolute;opacity:0;transition:opacity .35s}
+#lab .el.on{opacity:1}
+.doc{background:var(--papier);border:2px solid var(--encre);border-radius:12px;padding:10px 14px}
+.doc h4{margin:0 0 4px;font:900 15px var(--police);letter-spacing:.08em;color:var(--encre-2);text-transform:uppercase}
+.doc .code{font:800 19px var(--police-mono)}
+#dig{transition:background .3s;border-radius:4px;padding:0 2px}
+#dig.chg{background:var(--rouge-pale)}
+#hm{display:flex;align-items:center;gap:12px}
+#hm .mach{flex:none;background:var(--encre);color:var(--jaune);font-weight:1000;font-size:17px;border-radius:10px;padding:8px 12px}
+#hout{font:800 19px var(--police-mono);background:var(--blanc);border:2px solid var(--encre);border-radius:8px;padding:6px 10px;min-width:260px;min-height:38px}
+#hout.chg{background:var(--rouge-pale)}
+#hexp{font-size:18px;font-weight:800;color:var(--encre-2)}
+#cat{left:20px;top:330px;width:440px;background:var(--blanc);transition:left .9s cubic-bezier(.4,0,.2,1),opacity .35s,border-color .3s}
+#cat.mid{left:540px}#cat.pc{left:1036px}
+#cat .cl{display:flex;justify-content:space-between;gap:8px;font:800 17px/1.6 var(--police-mono);border-top:1px dashed var(--contour-2)}
+#cat .cl span:last-child{transition:background .3s;border-radius:4px;padding:0 3px}
+#cat .cl .chg{background:var(--rouge-pale)}
+#seal{position:absolute;right:6px;top:-40px;width:76px;height:76px;border-radius:50%;background:var(--jaune);border:3px solid var(--encre);display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:1000;font-size:13px;line-height:1.1;text-align:center;transform:rotate(-10deg);opacity:0;transition:opacity .35s,background .3s}
+#seal.on{opacity:1}
+#seal svg{width:22px;height:22px}
+#seal.broken{background:var(--rouge-pale);border-color:var(--rouge);color:var(--rouge-texte)}
+#pir{left:540px;top:110px;width:440px;display:flex;gap:12px;align-items:flex-start}
+#pir svg{width:90px;height:110px;flex:none}
+#pirB{background:var(--rouge-pale);border:2px solid var(--rouge);border-radius:14px;padding:8px 12px;font-weight:800;font-size:18px;line-height:1.3;min-height:60px}
+#pirB code{font:800 16px var(--police-mono)}
+#chk{left:1036px;top:110px;width:440px}
+#chk .kr{display:flex;justify-content:space-between;gap:8px;font:800 17px/1.7 var(--police-mono);border-top:1px dashed var(--contour-2)}
+#chk .kr b{font-family:var(--police);font-weight:1000}
+#chk .kr .ok{color:var(--vert)}#chk .kr .ko{color:var(--rouge-texte)}
+#verd{margin-top:8px;border-radius:10px;padding:6px 12px;font-weight:1000;font-size:20px;text-align:center;border:2px solid var(--encre)}
+#verd.ok{background:var(--vert-pale)}#verd.ko{background:var(--rouge);color:var(--blanc);border-color:var(--rouge)}#verd.piege{background:var(--rouge-pale);color:var(--rouge-texte);border-color:var(--rouge)}
+.keychip{display:flex;align-items:center;gap:8px;font-weight:900;font-size:17px;border:2px solid var(--encre);border-radius:99px;padding:4px 14px;background:var(--jaune-pale)}
+.keychip svg{width:26px;height:26px}
+#kpriv{left:20px;top:540px}#kpub{left:1036px;top:540px}
+/* lieux 192.168.1.10 */
+.lieux{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:10px}
+.lieu{border:2px solid var(--encre);border-radius:14px;padding:8px 10px;text-align:center;background:var(--papier);opacity:0;transition:opacity .35s}
+.lieu.on{opacity:1}
+.lieu svg{width:54px;height:44px}
+.lieu b{display:block;font-size:16px;font-weight:900}
+.lieu code{font:800 15px var(--police-mono);background:var(--jaune);border-radius:4px;padding:0 4px}
+#rec{background:var(--jaune)}
+.rg{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.rc{background:var(--blanc);border:2px solid var(--encre);border-radius:16px;padding:12px 16px;opacity:0;transition:opacity .4s}
+.rc.on{opacity:1}
+.rc h3{margin:0 0 4px;font-size:21px;font-weight:1000}
+.rc p{margin:0;font-size:18px;font-weight:700;color:var(--encre-2);line-height:1.35}
+.rc p b{color:var(--encre);font-weight:900}
+/* bandeau */
+#subbar{position:absolute;left:40px;right:40px;top:780px;height:100px;background:var(--encre);border-radius:18px;display:flex;align-items:center;padding:0 20px 0 32px;gap:22px;z-index:8}
+#sub{flex:1;color:var(--papier);font-size:29px;font-weight:700;line-height:1.28;margin:0}
+#sub .k{color:var(--jaune);font-weight:1000}
+.ctl{display:flex;align-items:center;gap:10px;flex:none}
+.ctl button{height:52px;min-width:52px;border-radius:99px;border:2px solid var(--papier);background:transparent;color:var(--papier);font:900 17px var(--police);cursor:pointer;padding:0 16px}
+.ctl button:disabled{opacity:.3;cursor:default}
+.ctl #next{background:var(--jaune);color:var(--encre);border-color:var(--jaune);box-shadow:4px 4px 0 var(--papier);padding:0 22px}
+.ctl button:focus-visible{outline:3px solid var(--jaune);outline-offset:3px}
+.num{color:var(--contour-2);font-weight:900;font-size:15px;min-width:64px;text-align:center}
+.part{position:absolute;left:40px;top:742px;display:flex;gap:6px}
+.part span{font-size:14px;font-weight:900;letter-spacing:.08em;border-radius:99px;padding:3px 10px;color:var(--encre-2);border:1.5px solid var(--contour)}
+.part span.on{background:var(--encre);color:var(--jaune);border-color:var(--encre)}
+.hint{position:absolute;right:44px;top:884px;font-size:13px;color:var(--encre-2);font-weight:700}
+#pausebadge{position:absolute;left:58%;top:740px;transform:translateX(-50%);background:var(--jaune);border:2px solid var(--encre);border-radius:99px;padding:5px 18px;font-weight:1000;font-size:15px;box-shadow:var(--ombre-decalee);z-index:9;opacity:0;transition:opacity .2s}
+#pausebadge.show{opacity:1}
+#pause{font-size:15px!important;letter-spacing:-2px}
+@keyframes blink{50%{opacity:.15}}
+@keyframes flow{to{stroke-dashoffset:-24}}
+@media (prefers-reduced-motion:reduce){#wires .flow.live,#srv .act{animation:none}}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="top">
+    <div><div class="sur">BTS CIEL · E6 · Projet d'Aziza · Des PC de maintenance à jour</div><h1 class="titre">Le kit signé</h1></div>
+    <div class="legende"><span class="lg-j">JAUNE · le PC demande</span><span class="lg-b">BLEU · le serveur répond</span><span class="lg-v">VERT · rapport</span></div>
+  </div>
+
+  <div id="zone"><span id="zoneT">Lycée · maquette</span></div>
+
+  <svg id="wires" viewBox="0 0 1600 900" aria-hidden="true">
+    <path class="radio" id="wLap" d="M560 420Q585 428 604 440"/>
+    <path class="radio" id="wPh" d="M640 392Q662 262 738 232"/>
+    <path class="base" id="wAnt" d="M760 300L935 332"/>
+    <path class="base" id="wNet" d="M935 332L1120 323"/>
+    <path class="base" id="wSrv" d="M1280 323L1380 292"/>
+    <path class="base" id="wRef" d="M1220 500L1200 346"/>
+    <path class="base" id="wBor" d="M1455 470L1422 366"/>
+    <path class="base" id="wSp" d="M935 300L935 228" style="opacity:0" />
+    <path class="flow" id="fLap" d="M560 420Q585 428 604 440"/>
+    <path class="flow" id="fPh" d="M640 392Q662 262 738 232"/>
+    <path class="flow" id="fAnt" d="M760 300L935 332"/>
+    <path class="flow" id="fNet" d="M935 332L1120 323"/>
+    <path class="flow" id="fSrv" d="M1280 323L1380 292"/>
+    <path class="flow" id="fRef" d="M1220 500L1200 346"/>
+    <path class="flow" id="fBor" d="M1455 470L1422 366"/>
+    <path class="flow" id="fSp" d="M935 300L935 228"/>
+  </svg>
+
+  <!-- PC portable du technicien -->
+  <div id="lap"><div class="screen">
+    <div class="pane on" id="pE">
+      <div class="wbar">C:\Kit\actif <em id="emode">OneDrive</em></div>
+      <div id="erows"></div>
+      <div id="efoot"></div>
+    </div>
+    <div class="pane" id="pP">
+      <div class="wbar">Agent du kit · PowerShell (tâche planifiée)</div>
+      <div id="plines"></div>
+    </div>
+    <div class="pane" id="pB">
+      <div class="tabs"><div class="onglet"><span id="btab">Nouvel onglet</span></div></div>
+      <div class="toolbar"><div class="addr" id="baddr"></div></div>
+      <div id="berr"><h4>Ce site est inaccessible</h4><p>192.168.1.10 a mis trop de temps à répondre.</p><code>ERR_CONNECTION_TIMED_OUT</code></div>
+    </div>
+    <div id="toast"><small id="toastW">AGENT DU KIT</small><span id="toastT"></span></div>
+  </div></div>
+  <div id="lbase"></div>
+  <div class="dev" style="left:300px;top:492px"><b>PC-04</b>Windows 11 · sur le terrain</div>
+
+  <div id="phone"><div class="ps"><svg class="w" viewBox="0 0 30 30"><path d="M4 12a16 16 0 0 1 22 0M8 16a10 10 0 0 1 14 0M12 20a4 4 0 0 1 6 0" class="fn si" stroke-width="2.4" stroke-linecap="round"/><circle cx="15" cy="24" r="2" class="fi"/></svg><span class="w">4G</span><span class="x">✕</span></div></div>
+  <div class="dev col" style="left:636px;top:516px"><b>TÉLÉPHONE</b>partage de connexion</div>
+
+  <svg id="ant" viewBox="0 0 100 210" role="img" aria-label="Relais 4G">
+    <path d="M50 20L22 205M50 20L78 205M30 150H70M36 110H64M42 70H58M30 150L64 110M70 150L36 110M36 110L58 70M64 110L42 70" class="fn si" stroke-width="3.5" stroke-linejoin="round"/>
+    <rect x="38" y="22" width="9" height="34" rx="2" class="fc2 si" stroke-width="2"/><rect x="53" y="22" width="9" height="34" rx="2" class="fc2 si" stroke-width="2"/>
+    <path d="M24 18a30 30 0 0 1 0-16M76 18a30 30 0 0 0 0-16" class="fn si2" stroke-width="2.5" stroke-linecap="round"/>
+  </svg>
+  <div class="dev" style="left:740px;top:418px"><b>RELAIS 4G</b></div>
+
+  <svg id="sp" viewBox="0 0 250 112" role="img" aria-label="Nuage SharePoint">
+    <path d="M44 100c-24 0-38-16-34-34 3-15 18-24 32-21 6-22 28-36 52-29 15 4 25 14 30 26 8-9 21-13 34-9 18 5 25 21 22 36 18 2 30 15 28 30-2 14-14 21-28 21z" class="fbp si" stroke-width="2.5"/>
+    <text x="128" y="68" text-anchor="middle" style="font:1000 19px var(--police);fill:var(--encre)">SharePoint</text>
+    <text x="128" y="90" text-anchor="middle" style="font:800 15px var(--police);fill:var(--encre-2)">OneDrive</text>
+  </svg>
+  <svg id="inet" viewBox="0 0 250 120" role="img" aria-label="Internet">
+    <path d="M44 108c-24 0-38-16-34-34 3-15 18-24 32-21 6-22 28-36 52-29 15 4 25 14 30 26 8-9 21-13 34-9 18 5 25 21 22 36 18 2 30 15 28 30-2 14-14 21-28 21z" class="fw si" stroke-width="2.5"/>
+    <text x="128" y="80" text-anchor="middle" style="font:1000 21px var(--police);fill:var(--encre)">Internet</text>
+  </svg>
+
+  <!-- côté serveur -->
+  <svg id="rtr" viewBox="0 0 160 46" role="img" aria-label="Routeur"></svg>
+  <div class="dev col" style="left:1196px;top:352px"><b>ROUTEUR</b><span class="ip">203.0.113.10</span></div>
+  <svg id="srv" viewBox="0 0 84 196" role="img" aria-label="Serveur Ubuntu"></svg>
+  <div class="dev col" style="left:1422px;top:374px"><b>SERVEUR UBUNTU</b><span class="ip">192.168.1.10</span></div>
+  <div id="sbad"><small>TABLEAU DE BORD</small><span id="sbadT"></span></div>
+  <svg id="ref" viewBox="0 0 176 112" role="img" aria-label="Poste de la référente">
+    <rect x="22" y="4" width="132" height="86" rx="7" class="fi"/><rect x="29" y="11" width="118" height="72" rx="2" class="fbp"/>
+    <rect x="38" y="20" width="60" height="7" rx="2" class="fi2"/><rect x="38" y="33" width="96" height="5" rx="2" class="fc2"/><rect x="38" y="43" width="86" height="5" rx="2" class="fc2"/><rect x="38" y="53" width="92" height="5" rx="2" class="fc2"/>
+    <circle cx="128" cy="66" r="10" class="fj si" stroke-width="2"/><path d="M123 66l4 4 7-8" class="fn si" stroke-width="2.5"/>
+    <path d="M6 92h164l-8 14H14z" class="fc2 si" stroke-width="1.5"/>
+  </svg>
+  <div class="dev col" style="left:1220px;top:630px"><b>POSTE D'AZIZA</b>référente du kit</div>
+  <svg id="borne" viewBox="0 0 166 150" role="img" aria-label="Borne de sortie ESP32 avec lecteur RFID">
+    <rect x="8" y="8" width="150" height="134" rx="16" class="fp2 si" stroke-width="2.5"/>
+    <rect x="28" y="24" width="110" height="64" rx="10" class="fw si" stroke-width="2"/>
+    <path d="M56 56a28 28 0 0 1 54 0M66 60a17 17 0 0 1 34 0M76 64a6 6 0 0 1 14 0" class="fn si2" stroke-width="3" stroke-linecap="round"/>
+    <text x="83" y="82" text-anchor="middle" style="font:900 13px var(--police);fill:var(--encre-2)">BADGE ICI</text>
+    <circle class="halo-v fv" cx="58" cy="114" r="15" style="opacity:0" fill-opacity=".25"/>
+    <circle class="ledv fc2 si" cx="58" cy="114" r="9" stroke-width="2"/><circle class="ledr fc2 si" cx="108" cy="114" r="9" stroke-width="2"/>
+  </svg>
+  <div class="dev col" style="left:1455px;top:630px"><b>BORNE DE SORTIE</b>ESP32 + RC522</div>
+
+  <div id="say"><small id="sayW"></small><div id="sayT"></div></div>
+  <div id="stamp"><b>✕</b><span id="stampT"></span></div>
+
+  <!-- ===== cartes ===== -->
+  <div class="cardc" id="garantit">
+    <h2>OneDrive synchronise. Mais…</h2>
+    <div class="rw"><span class="n">1</span><div><h3>Un kit à moitié copié</h3><p>Il copie fichier par fichier : un PC qui part trop tôt emporte un mélange.</p></div></div>
+    <div class="rw"><span class="n">2</span><div><h3>Une erreur copiée partout</h3><p>Un fichier modifié par erreur part sur tous les PC. Rien ne dit « validé ».</p></div></div>
+    <div class="rw"><span class="n">3</span><div><h3>« Disponible en ligne uniquement »</h3><p>Un fichier jamais ouvert peut manquer sur le terrain, sans réseau.</p></div></div>
+    <div class="rw"><span class="n">4</span><div><h3>Personne ne sait qui a quoi</h3><p>Un PC éteint dans une armoire ne peut pas dire sa version.</p></div></div>
+  </div>
+
+  <div class="cardc wide" id="roles">
+    <h2>Le problème précis, et le rôle de chaque brique</h2>
+    <div class="tb" style="grid-template-columns:240px 1fr 1fr">
+      <span></span><div class="hd" style="background:var(--bleu)">SharePoint / OneDrive</div><div class="hd" style="background:var(--jaune)">Ce que le projet ajoute</div>
+      <span class="k r">Copier les fichiers</span><div class="v r bon">oui, très bien</div><div class="v r">il garde SharePoint comme source (lien réel en extension)</div>
+      <span class="k r">Kit complet d'un bloc</span><div class="v r mal">non : fichier par fichier</div><div class="v r bon">préparation, vérification, puis bascule d'un coup</div>
+      <span class="k r">Validé par la référente</span><div class="v r mal">non : « dernier modifié par… »</div><div class="v r bon">catalogue signé, n° de version (pas de retour arrière)</div>
+      <span class="k r">Savoir, PC éteint, s'il est à jour</span><div class="v r mal">non</div><div class="v r bon">rapport de chaque PC + borne de sortie (vert / rouge)</div>
+      <span class="k r">Alerte kit périmé, hors réseau</span><div class="v r mal">non</div><div class="v r bon">date de validité signée, notification à l'ouverture de session</div>
+    </div>
+    <p class="foot"><b>Ubuntu</b> publie et garde les preuves · <b>PowerShell</b> est déjà dans Windows 11 : il vérifie et bascule · l'<b>ESP32</b> est la borne qui lit l'état d'un PC <b>sans l'allumer</b>. Si la DSI gère ces PC (Intune…), l'agent devient un simple contrôle de conformité.</p>
+  </div>
+
+  <div class="cardc wide" id="lab">
+    <h2>Empreinte SHA-256 et signature</h2>
+    <div class="zone" style="left:20px">Aziza · la référente</div>
+    <div class="zone" style="left:540px">Le chemin · Internet, 4G…</div>
+    <div class="zone" style="left:1036px">Le PC-04 vérifie</div>
+    <div class="el doc" id="fileA" style="left:20px;top:110px;width:440px"><h4>parametres.xml</h4><div class="code">&lt;seuil_alarme&gt;<span id="dig">1200</span>&lt;/seuil_alarme&gt;</div></div>
+    <div class="el" id="hm" style="left:20px;top:200px;width:440px"><span class="mach">SHA-256 →</span><span id="hout"></span></div>
+    <div class="el" id="hexp" style="left:20px;top:256px;width:440px"></div>
+    <div class="el doc" id="cat"><h4>catalogue.cat · kit 14</h4>
+      <div class="cl"><span>parametres.xml</span><span id="c1">1b14fba1…40ee</span></div>
+      <div class="cl"><span>outil-diag.ps1</span><span id="c2">dbc21a1b…61bf</span></div>
+      <div class="cl"><span>mode-operatoire.pdf</span><span id="c3">2fc4c4dd…f7a8</span></div>
+      <div id="seal"><svg viewBox="0 0 28 28"><circle cx="9" cy="14" r="6" class="fn si" stroke-width="2.6"/><path d="M15 14h11M22 14v5M26 14v4" class="fn si" stroke-width="2.6" stroke-linecap="round"/></svg><span id="sealT">signé<br>Aziza</span></div>
+    </div>
+    <div class="el" id="pir"><svg viewBox="0 0 90 110"><path d="M45 6c-22 0-34 18-34 40v12c0 6 4 10 10 10h48c6 0 10-4 10-10V46C79 24 67 6 45 6z" class="fi"/><ellipse cx="45" cy="48" rx="22" ry="20" class="fi2"/><rect x="28" y="40" width="34" height="9" rx="4" class="fj"/><path d="M8 108c2-22 16-34 37-34s35 12 37 34z" class="fi"/></svg><div id="pirB"></div></div>
+    <div class="el doc" id="chk"><h4>Vérification</h4><div id="krows"></div><div id="verd"></div></div>
+    <div class="el keychip" id="kpriv"><svg viewBox="0 0 28 28"><circle cx="9" cy="14" r="6" class="fj si" stroke-width="2.4"/><path d="M15 14h11M22 14v5M26 14v4" class="fn si" stroke-width="2.4" stroke-linecap="round"/></svg>clé privée · gardée par Aziza seule</div>
+    <div class="el keychip" id="kpub"><svg viewBox="0 0 28 28"><rect x="3" y="5" width="22" height="18" rx="3" class="fw si" stroke-width="2"/><path d="M7 11h14M7 16h9" class="fn si" stroke-width="2"/></svg>certificat d'Aziza · connu du PC</div>
+  </div>
+
+  <div class="cardc wide" id="shacmp">
+    <h2>SHA-256 seul ne suffit pas : pourquoi les deux</h2>
+    <div class="tb" style="grid-template-columns:260px 1fr 1fr">
+      <span></span><div class="hd" style="background:var(--bleu)">Empreinte SHA-256</div><div class="hd" style="background:var(--jaune)">Signature numérique</div>
+      <span class="k r">Elle répond à…</span><div class="v r">« ce fichier est-il identique à la référence ? »</div><div class="v r">« cette référence vient-elle bien d'Aziza ? »</div>
+      <span class="k r">Un secret ?</span><div class="v r mal">aucun : tout le monde peut la calculer</div><div class="v r bon">la clé privée, que seule Aziza possède</div>
+      <span class="k r">Un pirate peut la refaire ?</span><div class="v r mal">oui, en une fraction de seconde</div><div class="v r bon">non, sans la clé privée</div>
+      <span class="k r">Ce qu'on en fait</span><div class="v r">une empreinte par fichier, même gros ; trouver le seul fichier qui a changé</div><div class="v r">une seule signature, sur le petit catalogue qui contient les empreintes</div>
+    </div>
+    <p class="foot">Image : l'empreinte est la <b>photo du colis</b> ; la signature est le <b>tampon officiel sur le bordereau</b>. Et le <b>n° de version</b> est dans le catalogue signé : un vieux kit bien signé est refusé (test T14).</p>
+  </div>
+
+  <div class="cardc" id="prive">
+    <h2>192.168.1.10 : une adresse privée</h2>
+    <div class="lieux">
+      <div class="lieu"><svg viewBox="0 0 54 44"><path d="M6 22L27 5l21 17v19H6z" class="fp2 si" stroke-width="2.5" stroke-linejoin="round"/><rect x="22" y="28" width="10" height="13" class="fc2"/></svg><b>une maison</b><code>192.168.1.10</code></div>
+      <div class="lieu"><svg viewBox="0 0 54 44"><rect x="6" y="10" width="42" height="31" class="fp2 si" stroke-width="2.5"/><path d="M6 10L27 2l21 8" class="fn si" stroke-width="2.5"/><rect x="13" y="18" width="8" height="8" class="fbp"/><rect x="33" y="18" width="8" height="8" class="fbp"/></svg><b>le lycée</b><code>192.168.1.10</code></div>
+      <div class="lieu"><svg viewBox="0 0 54 44"><rect x="12" y="4" width="30" height="37" class="fp2 si" stroke-width="2.5"/><rect x="18" y="10" width="7" height="6" class="fbp"/><rect x="29" y="10" width="7" height="6" class="fbp"/><rect x="18" y="21" width="7" height="6" class="fbp"/><rect x="29" y="21" width="7" height="6" class="fbp"/></svg><b>une entreprise</b><code>192.168.1.10</code></div>
+    </div>
+    <div class="rw"><div><h3>Réservées aux réseaux locaux</h3><p><code style="font:800 16px var(--police-mono)">10.x · 172.16 à 172.31 · 192.168.x</code> (RFC 1918). Des millions de réseaux réutilisent les mêmes.</p></div></div>
+    <div class="rw"><div><h3>Internet ne les achemine pas</h3><p>L'opérateur ne sait pas lequel choisir : il jette le paquet.</p></div></div>
+  </div>
+
+  <div class="cardc wide" id="sol">
+    <h2>Quelle entrée sécurisée vers le serveur ? On compare</h2>
+    <div class="tb" style="grid-template-columns:300px 1fr 1fr 170px">
+      <span></span><div class="hd" style="background:var(--vert-pale)">Avantages</div><div class="hd" style="background:var(--rouge-pale)">Inconvénients</div><div class="hd" style="background:var(--papier-2)">Verdict</div>
+      <span class="k r">A · Ouvrir le port 443 du routeur vers le serveur</span><div class="v r">simple ; nom DNS + vrai certificat</div><div class="v r">serveur exposé à tout Internet ; interdit sans accord de la DSI ou de l'académie</div><div class="v r mal"><b>non</b> pour la maquette</div>
+      <span class="k r">B · VPN (WireGuard, IPsec…)</span><div class="v r">tunnel chiffré ; le serveur reste caché</div><div class="v r">client à installer ; à remonter après chaque coupure 4G ; réglage du routeur (hors E6)</div><div class="v r moy">oui si l'entreprise <b>en a déjà un</b></div>
+      <span class="k r">C · Serveur dans la zone exposée (DMZ) de l'entreprise, derrière un relais HTTPS</span><div class="v r">nom DNS + certificat ; jeton par PC ; géré et surveillé par la DSI</div><div class="v r">dépend de la DSI ; à faire valider</div><div class="v r bon choix"><b>la cible</b> en vrai déploiement</div>
+      <span class="k r">D · Tunnel sortant par un service tiers</span><div class="v r">aucun port à ouvrir</div><div class="v r">les données passent par un tiers : inacceptable ici</div><div class="v r mal"><b>non</b></div>
+    </div>
+    <p class="foot"><b>Maquette</b> : tout reste au lycée et la 4G est <b>simulée</b> (<code>tc netem</code> : retard, pertes, coupures). <b>Et même si le chemin est piraté</b>, le PC refuse tout kit mal signé : le réseau n'est pas de confiance.</p>
+  </div>
+
+  <div class="cardc wide" id="rec">
+    <h2>À retenir : les réponses au jury</h2>
+    <div class="rg">
+      <div class="rc"><h3>Pourquoi pas juste SharePoint / OneDrive ?</h3><p>Ils <b>copient</b> bien, fichier par fichier. Ils ne garantissent pas un kit <b>complet</b>, <b>validé</b> par la référente, ni de savoir <b>quel PC</b> a quelle version, même éteint.</p></div>
+      <div class="rc"><h3>Pourquoi SHA-256 ET signature ?</h3><p>SHA-256 n'a <b>pas de secret</b> : un pirate recalcule l'empreinte. La signature prouve <b>qui</b> a validé la liste des empreintes, grâce à une <b>clé privée</b>.</p></div>
+      <div class="rc"><h3>Comment le PC récupère le kit en 4G ?</h3><p><b>Le PC</b> commence (tâche planifiée). DHCP du téléphone, <b>DNS</b>, <b>HTTPS</b> (TCP 443 + TLS), catalogue, <b>BITS</b> pour le fichier modifié. Coupure : <b>reprise</b>, kit actif intact.</p></div>
+      <div class="rc"><h3>Pourquoi https://192.168.1.10 échoue ?</h3><p>Adresse <b>privée</b> : Internet ne l'achemine pas, et le routeur refuse ce qui vient de dehors. En vrai : <b>entrée HTTPS</b> de l'entreprise ou son <b>VPN</b>. Maquette : 4G <b>simulée</b>.</p></div>
+    </div>
+  </div>
+
+  <div id="fx"></div>
+
+  <div class="part" id="parts"><span>SHAREPOINT ?</span><span>SIGNATURE</span><span>SUR LE TERRAIN</span><span>ADRESSE PRIVÉE</span><span>RETENIR</span></div>
+  <div id="subbar">
+    <p id="sub" aria-live="polite"></p>
+    <div class="ctl">
+      <button id="restart" title="Recommencer (touche Début)" aria-label="Recommencer">↺</button>
+      <button id="prev" title="Étape précédente (←)" aria-label="Étape précédente">←</button>
+      <button id="pause" title="Pause (P)" aria-label="Pause (P)" disabled>❚❚</button>
+      <span class="num" id="num"></span>
+      <button id="next" title="Étape suivante (→, espace)">Suivant →</button>
+      <button id="fs" title="Plein écran (F)" aria-label="Plein écran">⛶</button>
+    </div>
+  </div>
+  <div class="hint">Maquette · adresses d'exemple · → / espace : suivant · P : pause · ← : retour · F : plein écran</div>
+  <div id="pausebadge">❚❚ PAUSE · appuie sur P ou → pour reprendre</div>
+</div>
+
+<script>
+{
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const stage=$('#stage');
+let scale=1;
+function fit(){scale=Math.min(innerWidth/1600,innerHeight/900);stage.style.transform=`translate(-50%,-50%) scale(${scale})`}
+addEventListener('resize',fit);fit();
+const esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
+/* ---------- dessins ---------- */
+(function(){
+ const R=[`<rect x="0" y="0" width="160" height="46" rx="4" class="fi2 si" stroke-width="2"/><rect x="6" y="6" width="148" height="34" rx="3" class="fi"/>`];
+ for(let i=0;i<4;i++)R.push(`<rect x="${14+i*20}" y="14" width="15" height="14" rx="1.5" class="fc"/><rect x="${15+i*20}" y="30" width="4" height="3" class="fv"/>`);
+ R.push(`<rect x="100" y="14" width="22" height="14" rx="2" class="fc2"/><circle cx="138" cy="18" r="3" class="fv"/><circle cx="138" cy="29" r="3" class="fjf"/>`);
+ $('#rtr').innerHTML=R.join('');
+ const T=[`<rect x="2" y="2" width="80" height="192" rx="6" class="fi2 si" stroke-width="2"/><rect x="10" y="12" width="64" height="30" rx="3" class="fi"/><rect x="10" y="48" width="64" height="12" rx="2" class="fi"/><rect x="10" y="64" width="64" height="12" rx="2" class="fi"/>`];
+ for(let r=0;r<8;r++)for(let c=0;c<7;c++)T.push(`<circle cx="${15+c*9}" cy="${94+r*9}" r="2.2" class="fi"/>`);
+ T.push(`<circle cx="42" cy="176" r="7" class="fc si" stroke-width="1.5"/><circle cx="20" cy="27" r="3" class="fv act"/><circle cx="30" cy="27" r="3" class="fjf act" style="animation-delay:-.7s"/>`);
+ $('#srv').innerHTML=T.join('');
+})();
+
+/* ---------- moteur (repris du modèle) ---------- */
+const RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
+let fast=RM,running=false,step=0,nav=false;
+const pend=new Set();
+const D=ms=>fast?1:ms;
+let paused=false,frozen=[];
+function startT(o){o.t0=performance.now();o.t=setTimeout(()=>{pend.delete(o);o.r()},o.rem)}
+const wait=ms=>fast?Promise.resolve():new Promise(r=>{const o={r,rem:ms,t:null};pend.add(o);if(!paused)startT(o)});
+function pause(){if(paused||!running)return;paused=true;pend.forEach(o=>{if(o.t!=null){clearTimeout(o.t);o.t=null;o.rem=Math.max(0,o.rem-(performance.now()-o.t0))}});
+ frozen=document.getAnimations().filter(a=>a.playState==='running');frozen.forEach(a=>{try{a.pause()}catch(e){}});pui()}
+function resume(){if(!paused)return;paused=false;frozen.forEach(a=>{try{a.play()}catch(e){}});frozen=[];pend.forEach(o=>{if(o.t==null)startT(o)});pui()}
+function pui(){const b=$('#pause');b.textContent=paused?'▶':'❚❚';b.title=paused?'Reprendre (P)':'Pause (P)';b.setAttribute('aria-label',b.title);b.disabled=!running&&!paused;$('#pausebadge').classList.toggle('show',paused)}
+const isCss=a=>(typeof CSSAnimation!=='undefined'&&a instanceof CSSAnimation)||(typeof CSSTransition!=='undefined'&&a instanceof CSSTransition);
+function skip(){resume();fast=true;pend.forEach(o=>{clearTimeout(o.t);o.r()});pend.clear();document.getAnimations().forEach(a=>{if(!isCss(a))try{a.finish()}catch(e){}})}
+function pos(el){const r=el.getBoundingClientRect(),s=stage.getBoundingClientRect();return{x:(r.left+r.width/2-s.left)/scale,y:(r.top+r.height/2-s.top)/scale}}
+async function anim(el,kf,ms,o={}){const a=el.animate(kf,{duration:D(ms),easing:o.easing||'ease-in-out',fill:'forwards'});try{await a.finished}catch(e){}return a}
+async function typeInto(el,txt,ms=60){el.textContent='';for(const ch of txt){el.textContent+=ch;await wait(ms)}}
+async function fly(text,from,to,cls='',ms=1000){
+ if(fast)return;const c=document.createElement('div');c.className='fly '+cls;c.textContent=text;$('#fx').append(c);
+ const w=c.offsetWidth,h=c.offsetHeight,a=pos(from),b=pos(to);
+ await anim(c,[{transform:`translate(${a.x-w/2}px,${a.y-h/2}px) scale(.7)`,opacity:0},{transform:`translate(${a.x-w/2}px,${a.y-h/2-20}px) scale(1.05)`,opacity:1,offset:.2},{transform:`translate(${b.x-w/2}px,${b.y-h/2}px) scale(1)`,opacity:1}],ms);
+ c.remove();
+}
+
+/* ---------- réseau ---------- */
+const UP=['Lap','Ph','Ant','Net','Srv'],SPP=['Lap','Ph','Ant','Sp'];
+function seg(id){const p=$('#w'+id),L=p.getTotalLength(),a=[];for(let i=0;i<=16;i++){const q=p.getPointAtLength(L*i/16);a.push({x:q.x,y:q.y})}return a}
+function pts(ids,rev){let a=[];for(const id of ids)a=a.concat(seg(id));return rev?a.reverse():a}
+const liveN={};
+function live(id,on){liveN[id]=Math.max(0,(liveN[id]||0)+(on?1:-1));$('#f'+id).classList.toggle('live',liveN[id]>0)}
+async function travel(el,P,ms){
+ const w=el.offsetWidth,h=el.offsetHeight,Ls=[0];
+ for(let i=1;i<P.length;i++)Ls.push(Ls[i-1]+Math.max(.5,Math.hypot(P[i].x-P[i-1].x,P[i].y-P[i-1].y)));
+ const T=Ls[Ls.length-1];
+ await anim(el,P.map((p,i)=>({transform:`translate(${p.x-w/2}px,${p.y-h/2}px)`,opacity:(i===0||i===P.length-1)?0:1,offset:Ls[i]/T})),ms,{easing:'linear'});
+}
+async function go(label,cls,ids,rev=false,ms=1800,keep=false){
+ if(fast)return;const p=document.createElement('div');p.className='pk '+cls;p.textContent=label;$('#fx').append(p);
+ ids.forEach(i=>live(i,1));if(ids.includes('Srv'))$('#srv').classList.add('busy');
+ let P=pts(ids,rev);if(keep){P=P.concat([P[P.length-1]])}
+ await travel(p,P,ms);p.remove();ids.forEach(i=>live(i,0));$('#srv').classList.remove('busy');
+}
+async function stamp(x,y,t){const s=$('#stamp');s.style.left=x+'px';s.style.top=y+'px';$('#stampT').textContent=t;await anim(s,[{opacity:0,transform:'scale(2) rotate(-20deg)'},{opacity:1,transform:'scale(1) rotate(-8deg)'}],450,{easing:'cubic-bezier(.3,1.4,.5,1)'});await wait(900)}
+const stampHide=()=>$('#stamp').getAnimations().forEach(a=>a.cancel());
+
+/* ---------- PC ---------- */
+function pane(id){$$('#lap .pane').forEach(p=>p.classList.toggle('on',p.id===id))}
+const FILES=[['parametres.xml','x'],['outil-diag.ps1','s'],['mode-operatoire.pdf','p'],['plan-cablage.pdf','p']];
+const ICON={x:'fbp',s:'fj',p:'fr'};
+$('#erows').innerHTML=FILES.map((f,i)=>`<div class="frw" data-i="${i}"><svg class="ic" viewBox="0 0 22 26"><path d="M2 2h12l6 6v16H2z" class="${ICON[f[1]]} si" stroke-width="1.6" stroke-linejoin="round"/><path d="M14 2v6h6" class="fn si" stroke-width="1.6"/></svg><span class="nm">${f[0]}</span><span class="ver"></span><span class="st"></span></div>`).join('');
+function fset(i,ver,st){const r=$$('.frw')[i];const v=r.querySelector('.ver');v.textContent='kit '+ver;v.classList.toggle('n',ver>=13);const s=r.querySelector('.st');s.className='st '+({ok:'ok',ko:'ko',sy:'sy'}[st]||'');s.textContent={ok:'✓',ko:'✕',sy:'⟳'}[st]||'';if(!fast){r.classList.add('flash');setTimeout(()=>r.classList.remove('flash'),D(500))}}
+function efoot(t,c=''){const e=$('#efoot');e.textContent=t;e.className=c}
+function emode(agent){const e=$('#emode');e.textContent=agent?'Agent du projet':'OneDrive';e.classList.toggle('agent',agent)}
+function pl(html,cls=''){const d=document.createElement('div');d.className='pl '+cls;d.innerHTML=html;$('#plines').append(d);const a=$$('#plines .pl');if(a.length>12)a[0].remove();return d}
+const T=t=>`<span class="t">${t}</span> `;
+function toast(t,w='AGENT DU KIT'){$('#toastW').textContent=w;$('#toastT').innerHTML=t;$('#toast').classList.add('on')}
+const toastHide=()=>$('#toast').classList.remove('on');
+async function bar(el,from,to,ms){const i=el.querySelector('i'),lab=el.parentNode.querySelector('.pc');const n=Math.max(1,Math.round(ms/80));for(let k=0;k<=n;k++){const v=from+(to-from)*k/n;i.style.width=v+'%';if(lab)lab.textContent=Math.round(v)+' %';await wait(80)}i.style.width=to+'%';if(lab)lab.textContent=to+' %'}
+function cut(on){$('#phone').classList.toggle('cut',on);$('#wPh').classList.toggle('cut',on)}
+function borne(v){$('#borne').classList.toggle('vert',v)}
+function sbad(h){$('#sbadT').innerHTML=h;$('#sbad').classList.add('on')}
+
+/* ---------- bulle, cartes ---------- */
+function say(who,html,x,y,w=380){const s=$('#say');$('#sayW').textContent=who;$('#sayT').innerHTML=html;s.style.left=x+'px';s.style.top=y+'px';s.style.width=w+'px';s.classList.add('on')}
+const sayHide=()=>$('#say').classList.remove('on');
+async function card(id){$('#'+id).classList.add('open');await wait(400)}
+async function uncard(){$$('.cardc.open').forEach(c=>c.classList.remove('open'));await wait(350)}
+async function rows(sel,ms=420){for(const r of $$(sel)){r.classList.add('on');await wait(ms)}}
+const on=id=>$('#'+id).classList.add('on'), off=id=>$('#'+id).classList.remove('on');
+function chk(list,v,cls){$('#krows').innerHTML=list.map(r=>`<div class="kr"><span>${r[0]}</span><b class="${r[1]?'ok':'ko'}">${r[1]?'✓':'✕'} ${r[2]||''}</b></div>`).join('');const e=$('#verd');e.textContent=v;e.className=cls}
+function catPos(p){const c=$('#cat');c.classList.remove('mid','pc');if(p)c.classList.add(p)}
+
+/* ---------- état initial ---------- */
+function reset(){
+ document.getAnimations().forEach(a=>{if(!isCss(a))a.cancel()});
+ pend.forEach(o=>clearTimeout(o.t));pend.clear();paused=false;frozen=[];
+ $('#fx').innerHTML='';for(const k in liveN){liveN[k]=0}$$('#wires .flow').forEach(f=>f.classList.remove('live'));
+ pane('pE');emode(false);for(let i=0;i<4;i++)fset(i,12,'ok');efoot('Kit 12 · synchronisé');
+ $('#plines').innerHTML='';$('#baddr').textContent='';$('#btab').textContent='Nouvel onglet';$('#berr').classList.remove('on');toastHide();
+ cut(false);borne(false);$('#sbad').classList.remove('on');$('#sp').classList.remove('on');$('#wSp').style.opacity=0;$('#zoneT').textContent='Lycée · maquette';
+ sayHide();$$('.cardc').forEach(c=>c.classList.remove('open'));
+ $$('.rw,.foot,.tb .r,.rc,.lieu,#lab .el').forEach(e=>e.classList.remove('on'));
+ $('#dig').textContent='1200';$('#dig').classList.remove('chg');$('#hout').textContent='';$('#hout').classList.remove('chg');$('#hexp').textContent='';
+ catPos('');$('#seal').className='';$('#sealT').innerHTML='signé<br>Aziza';$('#c2').textContent='dbc21a1b…61bf';$('#c2').classList.remove('chg');$('#pirB').innerHTML='';chk([],'','');
+}
+
+const K=s=>s.replace(/\[([^\]]+)\]/g,'<span class="k">$1</span>');
+const STEPS=[
+ /* 0 */ {p:0,sub:"Aziza, la [référente], prépare le [kit de maintenance]. Une dizaine de PC le prennent en intervention, avec Internet [par le téléphone].",run:async()=>{}},
+ /* ===== SHAREPOINT ===== */
+ {p:0,sub:"Aujourd'hui, les fichiers sont sur [SharePoint] et OneDrive les [synchronise] sur chaque PC. Au bureau, ça marche bien.",run:async()=>{
+   $('#sp').classList.add('on');$('#wSp').style.opacity=1;await wait(400);
+   for(let i=0;i<3;i++){await go('','dot',SPP,true,1100)}
+   efoot('Kit 12 · synchronisé · ✓ à jour','ok')}},
+ {p:0,sub:"Aziza publie le kit 13 : trois fichiers changent. OneDrive les copie [un par un]… et le technicien part en intervention [avant la fin].",run:async()=>{
+   efoot('Synchronisation en cours…');
+   for(let i=0;i<3;i++){fset(i,12,'sy')}fset(3,13,'ok');
+   await go('parametres.xml','rep',SPP,true,1500);fset(0,13,'ok');
+   await go('outil-diag.ps1','rep',SPP,true,1500);fset(1,13,'ok');
+   const g=go('mode-operatoire.pdf','rep',SPP,true,2400);await wait(D(900));cut(true);await g;
+   fset(2,12,'ko');efoot('Kit mélangé : le mode opératoire est l\'ancien · rien ne le signale','ko');
+   say('Le technicien',"Je pars avec un kit… à moitié neuf, à moitié ancien. Et je ne le sais pas.",60,560,420)}},
+ {p:0,sub:"La synchronisation [copie] des fichiers. Elle ne garantit pas que le kit est [complet], [validé], ni [qui a quoi].",run:async()=>{
+   sayHide();await card('garantit');await rows('#garantit .rw',500)}},
+ {p:0,sub:"Le projet ne remplace pas SharePoint : il ajoute une [preuve]. Le kit est préparé à part, vérifié, puis basculé [d'un coup].",run:async()=>{
+   await uncard();cut(false);emode(true);efoot('Préparation (dossier à part) : 0 / 3');
+   for(let k=1;k<=3;k++){await go('','dot',UP,true,900);efoot(`Préparation (dossier à part) : ${k} / 3`)}
+   efoot('Vérification du catalogue signé… ✓');await wait(700);
+   for(let i=0;i<3;i++)fset(i,13,'ok');fset(3,13,'ok');efoot('Bascule d\'un coup : kit 13 complet ✓','ok');
+   await go('rapport : kit 13','evt',UP,false,2000);sbad('PC-04 : <b>kit 13</b> ✓ · 09:12');borne(true);
+   say('La borne de sortie',"Badge + étiquette du PC : <b>vert</b>, ce PC part avec le bon kit. Sans l'allumer.",1140,236,410)}},
+ {p:0,sub:"Le problème précis : garantir qu'un PC part avec [le kit complet et validé], et [le prouver], même éteint.",run:async()=>{
+   sayHide();await card('roles');await rows('#roles .tb .r',200);$('#roles .foot').classList.add('on')}},
+ /* ===== SIGNATURE ===== */
+ {p:1,sub:"Une [empreinte SHA-256] résume un fichier en 64 caractères. Un seul chiffre change… [toute l'empreinte] change.",run:async()=>{
+   await uncard();$('#sp').classList.remove('on');$('#wSp').style.opacity=0;await card('lab');
+   on('fileA');await wait(400);on('hm');await wait(300);await typeInto($('#hout'),'1b14fba19dce…940ee',35);
+   await wait(700);$('#dig').textContent='1201';$('#dig').classList.add('chg');await wait(600);
+   $('#hout').classList.add('chg');await typeInto($('#hout'),'41b147b058bf…58fd9',35);
+   $('#hexp').textContent='1200 → 1201 : rien en commun entre les deux empreintes.';on('hexp')}},
+ {p:1,sub:"Aziza range les empreintes dans un [catalogue]. Le PC recalcule celles des fichiers reçus et compare : identiques = [même fichier].",run:async()=>{
+   $('#dig').textContent='1200';$('#dig').classList.remove('chg');$('#hout').classList.remove('chg');$('#hout').textContent='1b14fba19dce…940ee';off('hexp');
+   on('cat');await wait(400);await fly('1b14fba1…40ee',$('#hout'),$('#c1'),'y',800);
+   catPos('mid');await wait(1000);catPos('pc');await wait(1000);
+   on('chk');chk([['parametres.xml',1,'identique'],['outil-diag.ps1',1,'identique'],['mode-operatoire.pdf',1,'identique']],'ACCEPTÉ','ok')}},
+ {p:1,sub:"Mais un pirate sur le chemin modifie un fichier… puis [recalcule son empreinte] dans le catalogue. SHA-256 est [public] : tout concorde !",run:async()=>{
+   chk([],'','');off('chk');catPos('');await wait(900);catPos('mid');await wait(1000);
+   on('pir');$('#pirB').innerHTML="Je glisse mon code dans <code>outil-diag.ps1</code>…";await wait(1300);
+   $('#pirB').innerHTML="…et je recalcule son SHA-256. Pas besoin de secret !";
+   await fly('85b272cf…065e',$('#pirB'),$('#c2'),'r',900);$('#c2').textContent='85b272cf…065e';$('#c2').classList.add('chg');await wait(500);
+   catPos('pc');await wait(1000);on('chk');
+   chk([['parametres.xml',1,'identique'],['outil-diag.ps1',1,'identique'],['mode-operatoire.pdf',1,'identique']],'ACCEPTÉ… et piégé !','piege')}},
+ {p:1,sub:"La [signature] ajoute un secret : Aziza signe le catalogue avec sa [clé privée]. Le PC vérifie avec son [certificat]. Le pirate est démasqué.",run:async()=>{
+   off('chk');chk([],'','');off('pir');catPos('');$('#c2').textContent='dbc21a1b…61bf';$('#c2').classList.remove('chg');await wait(900);
+   on('kpriv');await wait(500);await fly('clé privée',$('#kpriv'),$('#seal'),'y',800);$('#seal').classList.add('on');on('kpub');await wait(500);
+   catPos('mid');await wait(1000);on('pir');$('#pirB').innerHTML="Je modifie encore le fichier et son empreinte…";
+   $('#c2').textContent='85b272cf…065e';$('#c2').classList.add('chg');await wait(700);
+   $('#seal').classList.add('broken');$('#sealT').innerHTML='cachet<br>invalide';
+   $('#pirB').innerHTML="…mais je ne peux pas refaire le cachet sans la <b>clé privée</b> d'Aziza.";await wait(800);
+   catPos('pc');await wait(1000);on('chk');
+   chk([['signature du catalogue',0,'ne correspond pas'],['certificat',1,'Aziza'],['outil-diag.ps1',0,'non installé']],'REFUSÉ · rien n\'est installé','ko')}},
+ {p:1,sub:"L'empreinte dit [« le fichier n'a pas changé »]. La signature dit [« c'est Aziza qui a validé cette liste »]. Il faut les deux.",run:async()=>{
+   await uncard();await card('shacmp');await rows('#shacmp .tb .r',220);$('#shacmp .foot').classList.add('on')}},
+ /* ===== SUR LE TERRAIN ===== */
+ {p:2,sub:"À 100 km, kit 14 publié. Qui commence ? [Le PC]. Le serveur ne peut pas l'appeler : derrière le téléphone, le PC n'a [pas d'adresse joignable].",run:async()=>{
+   await uncard();$('#zoneT').textContent='Service · déploiement visé';sbad('PC-04 : <b>kit 13</b> · kit 14 publié');
+   await go('kit 14 disponible !','ko',['Ph','Ant','Net','Srv'],true,2200,true);await stamp(640,300,'pas d\'adresse joignable');stampHide();
+   pane('pP');await wait(300);pl(T('10:40')+'Déclencheur : ouverture de session','hi');pl(T('     ')+'(et toutes les 30 min)');
+   say('Pourquoi ?',"Le téléphone et l'opérateur partagent une adresse publique entre beaucoup de clients (NAT, CGNAT) : rien ne peut entrer vers le PC.",60,560,500)}},
+ {p:2,sub:"Le PC est sur le [Wi-Fi du téléphone]. Le téléphone lui a donné une adresse par [DHCP] et lui sert de [passerelle].",run:async()=>{
+   sayHide();await go('DHCP : une adresse ?','sys',['Lap'],false,900);await go('172.20.10.2','rep',['Lap'],true,900);
+   pl(T('10:40')+'Wi-Fi téléphone · IP 172.20.10.2 · passerelle 172.20.10.1')}},
+ {p:2,sub:"Comment trouver le serveur ? Par son [nom]. Le [DNS] répond : kit.service.example = 203.0.113.10.",run:async()=>{
+   await go('DNS : kit.service.example ?','sys',['Lap','Ph','Ant'],false,1700);
+   say('Le serveur DNS',"<code>kit.service.example</code> → <code>203.0.113.10</code>",800,410,360);
+   await go('203.0.113.10','rep',['Lap','Ph','Ant'],true,1700);pl(T('10:40')+'DNS : kit.service.example → 203.0.113.10');await wait(300);sayHide()}},
+ {p:2,sub:"Connexion [TCP 443], puis [TLS] : le PC vérifie le certificat du serveur, tout devient chiffré. Il demande le [catalogue].",run:async()=>{
+   await go('TCP 443 · TLS','',UP,false,1700);await go('certificat','rep',UP,true,1500);pl(T('10:41')+'TLS 1.3 · certificat valide pour kit.service.example');
+   await go('GET /kit/catalogue','',UP,false,1700);await go('catalogue · 4 Ko','rep',UP,true,1700);
+   pl(T('10:41')+'Signature : OK (Aziza) · version 14 > 13','ok')}},
+ {p:2,sub:"Il compare les empreintes : [un seul fichier] a changé. [BITS] le télécharge en arrière-plan, dans un dossier [préparation].",run:async()=>{
+   pl(T('10:41')+'Empreintes : 1 fichier sur 4 a changé');pl(T('10:41')+'BITS : mode-operatoire.pdf (48 Mo)');
+   const d=pl(`<span class="bar"><i></i></span> <span class="pc">0 %</span>`,'hi');
+   const flowP=(async()=>{for(let k=0;k<5;k++){go('','dot',UP,true,1200);await wait(450)}})();
+   await bar(d.querySelector('.bar'),0,60,2600);await flowP}},
+ {p:2,sub:"La 4G [coupe] à 60 % ! BITS met le travail [en attente]. Le kit actif [n'est pas touché] : le technicien continue à travailler.",run:async()=>{
+   cut(true);await stamp(640,300,'4G coupée');stampHide();
+   pl(T('10:43')+'BITS : erreur passagère · nouvel essai automatique','ko');
+   say('Agent du kit',"Kit actif : <b>kit 13</b>, intact et utilisable. Le kit 14 attend dans « préparation ».",60,560,500);await wait(1200)}},
+ {p:2,sub:"Le réseau revient : BITS [reprend à 60 %] grâce à l'en-tête HTTP [Range], sans tout recommencer.",run:async()=>{
+   sayHide();cut(false);await wait(400);
+   await go('Range: bytes=28800000-','',UP,false,2000);pl(T('10:52')+'BITS : reprise à 60 % (Range)','hi');
+   const d=pl(`<span class="bar"><i style="width:60%"></i></span> <span class="pc">60 %</span>`,'hi');
+   const flowP=(async()=>{for(let k=0;k<4;k++){go('','dot',UP,true,1200);await wait(450)}})();
+   await bar(d.querySelector('.bar'),60,100,2000);await flowP}},
+ {p:2,sub:"[Test-FileCatalog] revérifie tout, puis bascule d'un coup. Le PC envoie son [rapport] avec son jeton : la borne passera au [vert].",run:async()=>{
+   pl(T('10:53')+'Test-FileCatalog -Detailed : OK','ok');pl(T('10:53')+'Bascule : actif → precedent, preparation → actif','ok');
+   await go('POST /pc/PC-04/rapport','evt',UP,false,2000);pl(T('10:53')+'Rapport envoyé (jeton du PC) : 200 OK','ok');
+   sbad('PC-04 : <b>kit 14</b> ✓ · 10:53');borne(true);say('Agent du kit',"Kit 14 installé ✓ · l'ancien reste dans « precedent » (retour arrière &lt; 2 min).",60,560,500)}},
+ /* ===== ADRESSE PRIVÉE ===== */
+ {p:3,sub:"Retour à la maquette : le serveur est au lycée, en [192.168.1.10]. En 4G, le technicien tape [https://192.168.1.10]…",run:async()=>{
+   sayHide();borne(false);$('#zoneT').textContent='Lycée · maquette';pane('pB');await wait(300);
+   await typeInto($('#baddr'),'https://192.168.1.10',55);$('#btab').textContent='Chargement…';
+   await go('vers 192.168.1.10','',['Lap','Ph','Ant'],false,2000,true);await stamp(850,330,'ne mène nulle part');stampHide();
+   $('#berr').classList.add('on');$('#btab').textContent='192.168.1.10'}},
+ {p:3,sub:"[192.168.x.x] est une adresse [privée] : chaque réseau local peut l'utiliser. Sur Internet, elle ne désigne [aucune machine précise].",run:async()=>{
+   await card('prive');await rows('#prive .lieu',350);await rows('#prive .rw',450)}},
+ {p:3,sub:"Et l'adresse [publique] du lycée ? Le routeur la partage entre tous ([NAT]) et [refuse] ce qui arrive de dehors sans règle.",run:async()=>{
+   await uncard();await go('vers 203.0.113.10:443','',['Lap','Ph','Ant','Net'],false,2400,true);await stamp(1200,323,'refusé : aucune règle');stampHide();
+   say('Le routeur du lycée',"Je ne sais pas à qui donner cette connexion, et personne ne m'a autorisé à l'ouvrir.",1140,420,410)}},
+ {p:3,sub:"La solution : une entrée [sécurisée] et [autorisée]. On compare quatre pistes : en vrai, l'[entrée HTTPS de l'entreprise] ou son [VPN].",run:async()=>{
+   sayHide();await card('sol');await rows('#sol .tb .r',150);$('#sol .foot').classList.add('on')}},
+ /* ===== RETENIR ===== */
+ {p:4,sub:"Les quatre réponses au jury : [une preuve en plus], [un secret en plus], [le PC commence], [une adresse privée ne sort pas].",run:async()=>{
+   await uncard();await card('rec');await rows('#rec .rc',450)}}
+];
+const N=STEPS.length;
+
+function ui(){$('#num').textContent=`${step} / ${N-1}`;$('#prev').disabled=step===0;$('#next').disabled=step===N-1;$('#next').textContent=step===0?'Commencer →':'Suivant →';
+ $$('#parts span').forEach((s,i)=>s.classList.toggle('on',step>0&&STEPS[step].p===i))}
+function setSub(i){const s=$('#sub');s.innerHTML=K(STEPS[i].sub);if(!fast)s.animate([{opacity:0,transform:'translateY(6px)'},{opacity:1,transform:'none'}],{duration:350})}
+async function play(i){running=true;fast=RM;setSub(i);ui();pui();try{await STEPS[i].run()}catch(e){console.error(e)}running=false;fast=RM;pui()}
+async function next(){if(paused){resume();return}if(nav)return;if(running){skip();return}if(step>=N-1)return;step++;await play(step)}
+async function goto(n){
+ if(nav)return;nav=true;
+ resume();if(running){skip();while(running)await new Promise(r=>setTimeout(r,20))}
+ stage.classList.add('instant');fast=true;reset();running=true;
+ for(let i=1;i<=n;i++){try{await STEPS[i].run()}catch(e){console.error(e)}}
+ running=false;step=n;setSub(n);fast=RM;ui();pui();
+ requestAnimationFrame(()=>requestAnimationFrame(()=>stage.classList.remove('instant')));nav=false;
+}
+const prev=()=>{if(step>0)goto(step-1)};
+$('#next').addEventListener('click',e=>{e.stopPropagation();next()});
+$('#prev').addEventListener('click',e=>{e.stopPropagation();prev()});
+$('#pause').addEventListener('click',e=>{e.stopPropagation();paused?resume():pause()});
+$('#restart').addEventListener('click',e=>{e.stopPropagation();goto(0)});
+function full(){try{const d=document;if(d.fullscreenElement)d.exitFullscreen();else d.documentElement.requestFullscreen().catch(()=>{})}catch(e){}}
+$('#fs').addEventListener('click',e=>{e.stopPropagation();full()});
+stage.addEventListener('click',e=>{if(!e.target.closest('button'))next()});
+addEventListener('keydown',e=>{
+ const k=e.key;
+ if(['ArrowRight','PageDown',' ','Enter'].includes(k)){e.preventDefault();next()}
+ else if(['ArrowLeft','PageUp','Backspace'].includes(k)){e.preventDefault();prev()}
+ else if(k==='Home'){e.preventDefault();goto(0)}
+ else if(k==='f'||k==='F')full();
+ else if(k==='p'||k==='P'||k==='Pause'||k==='MediaPlayPause'){e.preventDefault();paused?resume():pause()}
+});
+reset();setSub(0);ui();
+window.__goto=goto;window.__state=()=>({step,running,N});
+}
+</script>
+</body>
+</html>

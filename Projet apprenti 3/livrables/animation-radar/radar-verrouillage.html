@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Le radar qui verrouille</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900;1000&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../../theme.css">
+<style>
+/* Animation de cours : le radar LD2410 + ESP32 qui verrouille la session Windows (CyberSentinel, Lorenzo).
+   Couleurs, polices, ombres : theme.css uniquement (variables). Scène 1600×900, un clic = une étape. */
+html,body{margin:0;height:100%;overflow:hidden;background:var(--papier);line-height:1.3}
+#stage{position:absolute;left:50%;top:50%;width:1600px;height:900px;transform-origin:center;background:var(--papier);user-select:none;font-family:var(--police);color:var(--encre)}
+.instant,.instant *{transition:none!important}
+.fi{fill:var(--encre)}.fi2{fill:var(--encre-2)}.fi3{fill:var(--encre-3)}.fc{fill:var(--contour)}.fc2{fill:var(--contour-2)}.fp{fill:var(--papier)}.fp2{fill:var(--papier-2)}.fw{fill:var(--blanc)}.fj{fill:var(--jaune)}.fjp{fill:var(--jaune-pale)}.fjf{fill:var(--jaune-fonce)}.fb{fill:var(--bleu)}.fbp{fill:var(--bleu-pale)}.fr{fill:var(--rouge)}.fv{fill:var(--vert)}.fn{fill:none}
+.si{stroke:var(--encre)}.si2{stroke:var(--encre-2)}.sc{stroke:var(--contour)}.sc2{stroke:var(--contour-2)}.sj{stroke:var(--jaune)}.sjf{stroke:var(--jaune-fonce)}.sb{stroke:var(--bleu)}.sr{stroke:var(--rouge)}.sv{stroke:var(--vert)}
+.top{position:absolute;left:40px;right:40px;top:18px;height:84px;display:flex;align-items:flex-end;justify-content:space-between}
+.sur{font-weight:800;text-transform:uppercase;letter-spacing:.14em;font-size:14px;color:var(--encre-3)}
+.titre{font-weight:1000;font-size:46px;margin:4px 0 0;text-transform:uppercase;line-height:1}
+.legende{display:flex;gap:8px;padding-bottom:6px}
+.legende span{border:2px solid var(--encre);border-radius:99px;padding:5px 14px;font-weight:900;font-size:15px}
+.lg-j{background:var(--jaune)}.lg-b{background:var(--bleu)}.lg-v{background:var(--vert-pale)}
+/* le bureau vu de dessus */
+#room{position:absolute;left:40px;top:118px;width:800px;height:610px;background:var(--papier-2);border-radius:22px;overflow:hidden;border:2px solid var(--contour-2)}
+#room svg{position:absolute;left:0;top:0;width:800px;height:610px;max-width:none}
+#roomT{position:absolute;left:58px;top:128px;font-weight:1000;font-size:14px;letter-spacing:.12em;text-transform:uppercase;color:var(--encre-2);z-index:2}
+#zoneF{opacity:0;transition:opacity .4s}#zoneF.on{opacity:1}
+.gate{transition:opacity .4s}.gates-dim .gate.far{opacity:.3}
+.glab{font:800 13px var(--police);fill:var(--encre-2)}
+#waves path{transform-box:view-box;transform-origin:250px 420px;animation:wave 2.4s linear infinite;opacity:0}
+#waves path:nth-child(2){animation-delay:-.8s}#waves path:nth-child(3){animation-delay:-1.6s}
+@keyframes wave{0%{transform:scale(.3);opacity:.7}100%{transform:scale(2.2);opacity:0}}
+.pers{position:absolute;left:0;top:0;width:76px;height:76px;margin:-38px 0 0 -38px;transition:left 1.3s ease-in-out,top 1.3s ease-in-out,opacity .5s;z-index:4;pointer-events:none}
+.pers svg{width:76px;height:76px}
+.pers b{position:absolute;left:50%;top:70px;transform:translateX(-50%);font-size:14px;font-weight:900;background:var(--blanc);border:1.5px solid var(--encre);border-radius:99px;padding:0 8px;white-space:nowrap}
+.pers .ring{position:absolute;inset:6px;border-radius:50%;border:3px solid var(--jaune-fonce);opacity:0}
+.pers.breath .ring{animation:breath 2.6s ease-in-out infinite}
+@keyframes breath{0%,100%{transform:scale(.95);opacity:.15}50%{transform:scale(1.12);opacity:.8}}
+#rd{position:absolute;left:600px;top:140px;width:228px;background:var(--blanc);border:2px solid var(--encre);border-radius:14px;padding:8px 12px;box-shadow:var(--ombre-decalee);z-index:5}
+#rd h4{margin:0 0 4px;font:900 13px var(--police);letter-spacing:.1em;color:var(--encre-2);text-transform:uppercase}
+#rd .r{display:flex;justify-content:space-between;gap:6px;font-size:15px;font-weight:800;border-top:1px dashed var(--contour-2);padding:2px 0}
+#rd .r span:last-child{font-family:var(--police-mono)}
+#rdDec{margin-top:6px;text-align:center;border-radius:99px;border:2px solid var(--encre);font-weight:1000;font-size:16px;padding:2px 0;background:var(--papier)}
+#rdDec.pres{background:var(--vert-pale)}#rdDec.abs{background:var(--rouge-pale);color:var(--rouge-texte)}
+#cd{margin-top:4px;font-size:14px;font-weight:800;text-align:center;color:var(--encre-2);min-height:18px}
+/* appareils */
+.dev{position:absolute;transform:translateX(-50%);display:flex;gap:10px;align-items:center;font-size:17px;font-weight:700;color:var(--encre-2);white-space:nowrap}
+.dev.col{flex-direction:column;gap:3px}
+.dev b{border:2px solid var(--encre);border-radius:99px;padding:3px 14px;color:var(--encre);font-weight:1000;background:var(--blanc);letter-spacing:.06em}
+.dev .ip{font-family:var(--police-mono);font-weight:800;color:var(--encre)}
+#mon{position:absolute;left:880px;top:126px;width:420px;height:270px;background:var(--encre);border-radius:14px;padding:10px 10px 22px;box-shadow:var(--ombre-douce)}
+.neck{position:absolute;background:var(--contour);clip-path:polygon(14% 0,86% 0,100% 100%,0 100%)}
+.pied{position:absolute;height:10px;border-radius:8px 8px 4px 4px;background:var(--contour-2)}
+.screen{width:100%;height:100%;background:var(--blanc);border-radius:4px;overflow:hidden;position:relative}
+.pane{position:absolute;inset:0;opacity:0;transition:opacity .45s}
+.pane.on{opacity:1}
+#desk{background:var(--bleu-pale)}
+#desk .win{position:absolute;left:30px;top:24px;width:300px;height:160px;background:var(--blanc);border:1.5px solid var(--contour);border-radius:8px;box-shadow:var(--ombre-douce)}
+#desk .win .tb{height:24px;background:var(--papier-2);border-radius:8px 8px 0 0;font-size:13px;font-weight:900;padding:3px 10px}
+#desk .win i{display:block;height:7px;margin:9px 14px;background:var(--contour-2);border-radius:3px}
+#desk .task{position:absolute;left:0;right:0;bottom:0;height:26px;background:var(--papier-2);display:flex;align-items:center;justify-content:center;gap:8px}
+#desk .task span{width:16px;height:16px;border-radius:4px;background:var(--encre-2)}
+#desk .task em{position:absolute;right:10px;font-style:normal;font-size:13px;font-weight:900}
+#lock{background:var(--encre-2);color:var(--papier);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px}
+#lock .clk{font-size:52px;font-weight:1000;line-height:1}
+#lock .who{font-size:18px;font-weight:900}
+#lock .lk{display:flex;align-items:center;gap:6px;font-size:15px;font-weight:800;color:var(--jaune)}
+#lock svg{width:20px;height:20px}
+#tmr{position:absolute;right:8px;top:8px;background:var(--blanc);border:2px solid var(--encre);border-radius:10px;padding:3px 10px;font-weight:900;font-size:14px;opacity:0;transition:opacity .3s;z-index:2}
+#tmr.on{opacity:1}#tmr b{font-family:var(--police-mono);font-size:17px}
+#tmr.red{background:var(--rouge-pale);color:var(--rouge-texte);border-color:var(--rouge)}
+#srv{position:absolute;left:1440px;top:140px;width:70px;height:170px}
+#srv .act{animation:blink 1.6s steps(2) infinite}
+#srvX{position:absolute;left:1440px;top:170px;width:70px;text-align:center;font-size:70px;font-weight:1000;color:var(--rouge);opacity:0;transition:opacity .3s;z-index:3}
+#srvX.on{opacity:1}
+#dash{position:absolute;left:1316px;top:378px;width:246px;background:var(--blanc);border:2px solid var(--encre);border-radius:12px;padding:6px 10px;box-shadow:var(--ombre-decalee)}
+#dash h4{margin:0 0 2px;font:900 13px var(--police);letter-spacing:.1em;color:var(--encre-2);text-transform:uppercase}
+#drows .dr{font:800 13px/1.4 var(--police-mono);border-top:1px dashed var(--contour-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#drows .dv{font-size:13px;font-weight:700;color:var(--encre-3)}
+#term{position:absolute;left:880px;top:494px;width:680px;height:234px;background:var(--encre);border-radius:14px;overflow:hidden;box-shadow:var(--ombre-douce)}
+#term .hd{background:var(--encre-2);color:var(--papier);font-weight:900;font-size:15px;padding:5px 14px}
+#tl{padding:6px 14px;font:700 15px/1.42 var(--police-mono);color:var(--papier)}
+.tl{overflow-wrap:anywhere}.tl .t{color:var(--contour-2)}.tl.ok{color:var(--vert-pale)}.tl.ko{color:var(--rouge-pale)}.tl.hi{color:var(--jaune)}
+/* câbles et paquets */
+#wires{position:absolute;left:0;top:0;width:1600px;height:900px;overflow:visible;max-width:none;pointer-events:none}
+#wires .base{fill:none;stroke:var(--encre-2);stroke-width:5;stroke-linecap:round;stroke-linejoin:round}
+#wires .flow{fill:none;stroke:var(--jaune);stroke-width:3;stroke-dasharray:10 14;opacity:0}
+#wires .flow.live{opacity:1;animation:flow .6s linear infinite}
+#wires .wl{font:900 14px var(--police);fill:var(--encre-2)}
+#fx{position:absolute;inset:0;pointer-events:none;z-index:7}
+.pk{position:absolute;left:0;top:0;font:800 15px var(--police-mono);border:2px solid var(--encre);border-radius:10px;padding:3px 10px;box-shadow:var(--ombre-decalee);white-space:nowrap;background:var(--jaune);opacity:0}
+.pk.uart{background:var(--blanc)}.pk.evt{background:var(--vert-pale)}.pk.ko{background:var(--rouge-pale)}
+.fly{position:absolute;left:0;top:0;font:800 17px var(--police-mono);background:var(--blanc);border:2px solid var(--encre);border-radius:8px;padding:3px 9px;box-shadow:var(--ombre-decalee);white-space:nowrap}
+#stamp{position:absolute;left:0;top:0;width:150px;height:150px;margin:-75px 0 0 -75px;border-radius:50%;border:6px solid var(--rouge);color:var(--rouge-texte);background:var(--blanc);display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:1000;z-index:8;opacity:0;text-align:center;line-height:1.05;box-shadow:var(--ombre-douce)}
+#stamp.ok{border-color:var(--vert);color:var(--vert)}
+#stamp b{font-size:46px}#stamp span{font-size:16px;padding:0 10px}
+/* faux boîtier */
+#fake{position:absolute;left:96px;top:600px;width:120px;opacity:0;transition:opacity .4s;z-index:5}
+#fake.on{opacity:1}
+#fake svg{width:120px;height:60px}
+#fake b{display:block;text-align:center;font-size:14px;font-weight:900;color:var(--rouge-texte);background:var(--blanc);border:1.5px solid var(--rouge);border-radius:99px}
+#esp{transition:opacity .4s}#esp.gone{opacity:.15}
+/* bulle */
+#say{position:absolute;width:380px;background:var(--blanc);border:2px solid var(--encre);border-radius:16px;padding:10px 16px;font-weight:800;font-size:19px;line-height:1.35;box-shadow:var(--ombre-decalee-forte);opacity:0;transform:scale(.94);transition:opacity .3s,transform .3s;z-index:6}
+#say.on{opacity:1;transform:none}
+#say small{display:block;font-size:13px;letter-spacing:.12em;color:var(--encre-3);font-weight:900;text-transform:uppercase}
+#say code{font:800 16px var(--police-mono);background:var(--papier-2);border-radius:5px;padding:0 4px}
+/* cartes */
+.cardc{position:absolute;left:880px;top:118px;width:680px;background:var(--blanc);border:2px solid var(--encre);border-radius:20px;box-shadow:6px 6px 0 var(--encre);padding:18px 22px;opacity:0;transform:scale(.95);transition:opacity .4s,transform .4s;z-index:6;pointer-events:none}
+.cardc.open{opacity:1;transform:none}
+.cardc.wide{left:40px;width:1520px}
+.cardc h2{margin:0 0 12px;font-weight:1000;font-size:28px;text-transform:uppercase;line-height:1.05}
+.cardc .intro{margin:0 0 8px;font-size:19px;font-weight:700;color:var(--encre-2)}
+.rw{display:flex;gap:12px;align-items:flex-start;padding:8px 0;border-top:1px solid var(--papier-2);opacity:0;transform:translateX(8px);transition:opacity .35s,transform .35s}
+.rw.on{opacity:1;transform:none}
+.rw .n{flex:none;width:34px;height:34px;border-radius:50%;border:2px solid var(--encre);display:grid;place-items:center;font-weight:1000;font-size:17px;background:var(--jaune)}
+.rw .n.r{background:var(--rouge-pale)}.rw .n.v{background:var(--vert-pale)}
+.rw h3{margin:0;font-size:20px;font-weight:900;line-height:1.2}
+.rw p{margin:2px 0 0;font-size:18px;font-weight:700;color:var(--encre-2);line-height:1.3}
+.foot{margin:10px 0 0;background:var(--encre);color:var(--papier);border-radius:14px;padding:11px 16px;font-size:19px;font-weight:700;line-height:1.35;opacity:0;transition:opacity .4s}
+.foot.on{opacity:1}.foot b{color:var(--jaune);font-weight:1000}
+.foot code{font:800 16px var(--police-mono);color:var(--jaune);background:none}
+.tb{display:grid;gap:6px 10px;align-items:stretch}
+.tb .hd{font-weight:1000;font-size:19px;border-radius:12px;padding:6px 10px;border:2px solid var(--encre);text-align:center;background:var(--papier-2)}
+.tb .k{font-weight:900;font-size:15px;letter-spacing:.06em;color:var(--encre-2);text-transform:uppercase;align-self:center}
+.tb .v{background:var(--papier);border-radius:10px;padding:7px 12px;font-weight:700;font-size:18px;line-height:1.3}
+.tb .v b{font-weight:900}
+.tb code{font:800 16px var(--police-mono)}
+.tb .r{opacity:0;transition:opacity .35s}.tb .r.on{opacity:1}
+.tb .v.bon{background:var(--vert-pale)}.tb .v.mal{background:var(--rouge-pale)}.tb .v.moy{background:var(--jaune-pale)}
+.tb .v.choix{outline:3px solid var(--encre)}
+/* câblage UART */
+#wiring svg{width:100%;height:230px}
+#frame{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px;font:800 16px var(--police-mono)}
+#frame span{border:1.5px solid var(--encre);border-radius:5px;padding:1px 5px;background:var(--papier);opacity:0;transition:opacity .2s}
+#frame span.on{opacity:1}
+#frame span.h{background:var(--papier-2)}#frame span.s{background:var(--jaune)}#frame span.d{background:var(--bleu-pale)}#frame span.e{background:var(--vert-pale)}
+#fexp{margin-top:6px;font-size:17px;font-weight:700;color:var(--encre-2);opacity:0;transition:opacity .3s}#fexp.on{opacity:1}
+#fexp code{font:800 15px var(--police-mono);background:var(--papier-2);border-radius:4px;padding:0 3px}
+/* message signé */
+.mline{display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:10px;margin-bottom:6px;font:800 18px var(--police-mono);background:var(--papier);opacity:0;transition:opacity .35s,background .3s}
+.mline.on{opacity:1}
+.mline .lab{margin-left:auto;font:900 13px var(--police);letter-spacing:.08em;color:var(--encre-2);text-transform:uppercase;white-space:nowrap}
+.mline.m{background:var(--jaune-pale)}.mline.k{background:var(--papier-2)}.mline.h{background:var(--bleu-pale)}
+.mline.ok{background:var(--vert-pale)}.mline.ko{background:var(--rouge-pale);color:var(--rouge-texte)}
+#rec{background:var(--jaune)}
+.rg{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+.rc{background:var(--blanc);border:2px solid var(--encre);border-radius:16px;padding:12px 14px;opacity:0;transition:opacity .4s}
+.rc.on{opacity:1}
+.rc h3{margin:0 0 4px;font-size:20px;font-weight:1000;line-height:1.15}
+.rc p{margin:0;font-size:17px;font-weight:700;color:var(--encre-2);line-height:1.35}
+.rc p b{color:var(--encre);font-weight:900}
+/* bandeau */
+#subbar{position:absolute;left:40px;right:40px;top:780px;height:100px;background:var(--encre);border-radius:18px;display:flex;align-items:center;padding:0 20px 0 32px;gap:22px;z-index:8}
+#sub{flex:1;color:var(--papier);font-size:29px;font-weight:700;line-height:1.28;margin:0}
+#sub .k{color:var(--jaune);font-weight:1000}
+.ctl{display:flex;align-items:center;gap:10px;flex:none}
+.ctl button{height:52px;min-width:52px;border-radius:99px;border:2px solid var(--papier);background:transparent;color:var(--papier);font:900 17px var(--police);cursor:pointer;padding:0 16px}
+.ctl button:disabled{opacity:.3;cursor:default}
+.ctl #next{background:var(--jaune);color:var(--encre);border-color:var(--jaune);box-shadow:4px 4px 0 var(--papier);padding:0 22px}
+.ctl button:focus-visible{outline:3px solid var(--jaune);outline-offset:3px}
+.num{color:var(--contour-2);font-weight:900;font-size:15px;min-width:64px;text-align:center}
+.part{position:absolute;left:40px;top:742px;display:flex;gap:6px}
+.part span{font-size:14px;font-weight:900;letter-spacing:.06em;border-radius:99px;padding:3px 10px;color:var(--encre-2);border:1.5px solid var(--contour)}
+.part span.on{background:var(--encre);color:var(--jaune);border-color:var(--encre)}
+.hint{position:absolute;right:44px;top:884px;font-size:13px;color:var(--encre-2);font-weight:700}
+#pausebadge{position:absolute;left:62%;top:740px;transform:translateX(-50%);background:var(--jaune);border:2px solid var(--encre);border-radius:99px;padding:5px 18px;font-weight:1000;font-size:15px;box-shadow:var(--ombre-decalee);z-index:9;opacity:0;transition:opacity .2s}
+#pausebadge.show{opacity:1}
+#pause{font-size:15px!important;letter-spacing:-2px}
+@keyframes blink{50%{opacity:.15}}
+@keyframes flow{to{stroke-dashoffset:-24}}
+@media (prefers-reduced-motion:reduce){#wires .flow.live,#waves path,.pers.breath .ring,#srv .act{animation:none}}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="top">
+    <div><div class="sur">BTS CIEL · E6 · Projet de Lorenzo · CyberSentinel, partie 1</div><h1 class="titre">Le radar qui verrouille</h1></div>
+    <div class="legende"><span class="lg-j">JAUNE · message de présence</span><span class="lg-b">BLEU · décision locale</span><span class="lg-v">VERT · événement</span></div>
+  </div>
+
+  <!-- le bureau, vue de dessus -->
+  <div id="room"><svg viewBox="40 118 800 610" aria-label="Bureau vu de dessus : bureau, radar, fauteuil, passage">
+    <rect x="40" y="118" width="800" height="610" class="fp2"/>
+    <rect x="470" y="118" width="92" height="610" class="fp"/>
+    <text x="516" y="716" text-anchor="middle" class="glab">passage</text>
+    <g id="cone">
+      <path d="M250 420L475 30A450 450 0 0 1 475 810Z" class="fw" fill-opacity=".55"/>
+      <path id="zoneF" d="M250 420L340 264A180 180 0 0 1 340 576Z" class="fj" fill-opacity=".55"/>
+      <g id="gates"></g>
+      <g id="waves"><path d="M280 368A60 60 0 0 1 280 472" class="fn sjf" stroke-width="3"/><path d="M280 368A60 60 0 0 1 280 472" class="fn sjf" stroke-width="3"/><path d="M280 368A60 60 0 0 1 280 472" class="fn sjf" stroke-width="3"/></g>
+    </g>
+    <!-- bureau -->
+    <rect x="66" y="226" width="186" height="390" rx="8" class="fw si2" stroke-width="2.5"/>
+    <rect x="112" y="330" width="16" height="180" rx="3" class="fi"/><rect x="100" y="400" width="12" height="40" rx="2" class="fc"/>
+    <rect x="168" y="365" width="40" height="110" rx="5" class="fc2 si2" stroke-width="1.5"/>
+    <rect x="176" y="490" width="22" height="34" rx="10" class="fc2 si2" stroke-width="1.5"/>
+    <!-- radar LD2410 -->
+    <rect x="238" y="402" width="16" height="36" rx="2" class="fb si" stroke-width="2"/>
+    <text x="250" y="458" text-anchor="middle" class="glab">LD2410</text>
+    <!-- ESP32 -->
+    <g id="esp"><rect x="148" y="545" width="90" height="36" rx="4" class="fi"/><rect x="196" y="550" width="36" height="26" rx="2" class="fc2"/><rect x="140" y="555" width="12" height="16" rx="2" class="fc2 si" stroke-width="1"/><circle cx="170" cy="572" r="3" class="fr"/>
+    <text x="193" y="600" text-anchor="middle" class="glab">ESP32</text></g>
+    <!-- fauteuil -->
+    <g><rect x="318" y="384" width="68" height="72" rx="14" class="fc2 si2" stroke-width="2"/><rect x="384" y="378" width="16" height="84" rx="7" class="fc si2" stroke-width="2"/><rect x="316" y="376" width="58" height="12" rx="6" class="fc si2" stroke-width="1.5"/><rect x="316" y="452" width="58" height="12" rx="6" class="fc si2" stroke-width="1.5"/></g>
+  </svg></div>
+  <div id="roomT">Le bureau · vue de dessus</div>
+
+  <div class="pers" id="mart"><svg viewBox="0 0 76 76"><ellipse cx="40" cy="38" rx="17" ry="30" class="fj si" stroke-width="2.5"/><circle cx="34" cy="38" r="12" class="fjf si" stroke-width="2.5"/></svg><i class="ring"></i><b>Martine</b></div>
+  <div class="pers" id="coll"><svg viewBox="0 0 76 76"><ellipse cx="38" cy="38" rx="17" ry="30" class="fb si" stroke-width="2.5"/><circle cx="38" cy="38" r="12" class="fbp si" stroke-width="2.5"/></svg><i class="ring"></i><b>un collègue</b></div>
+
+  <div id="fake"><svg viewBox="0 0 120 60"><rect x="10" y="12" width="88" height="36" rx="5" class="fr si" stroke-width="2"/><rect x="96" y="22" width="18" height="16" rx="2" class="fc2 si" stroke-width="1.5"/><rect x="22" y="20" width="30" height="20" rx="2" class="fi"/></svg><b>faux boîtier</b></div>
+
+  <div id="rd"><h4>LD2410 · ce qu'il dit</h4>
+    <div class="r"><span>Cible</span><span id="rdS">—</span></div>
+    <div class="r"><span>En mouvement</span><span id="rdM">—</span></div>
+    <div class="r"><span>Immobile</span><span id="rdI">—</span></div>
+    <div id="rdDec">—</div><div id="cd"></div>
+  </div>
+
+  <!-- PC Windows -->
+  <div id="mon"><div class="screen">
+    <div class="pane on" id="desk"><div class="win"><div class="tb">Document de travail</div><i></i><i style="width:70%"></i><i></i><i style="width:55%"></i><i></i></div><div class="task"><span></span><span></span><span></span><em id="clk1">10:30</em></div></div>
+    <div class="pane" id="lock"><div class="clk" id="clk2">10:42</div><div class="who">Martine</div><div class="lk"><svg viewBox="0 0 20 20"><rect x="4" y="9" width="12" height="9" rx="2" class="fj"/><path d="M7 9V6a3 3 0 0 1 6 0v3" class="fn sj" stroke-width="2"/></svg>Session verrouillée</div></div>
+    <div id="tmr">Verrouillage d'inactivité dans <b id="tmrV">15:00</b></div>
+  </div></div>
+  <div class="neck" style="left:1060px;top:396px;width:60px;height:22px"></div><div class="pied" style="left:1020px;top:416px;width:140px"></div>
+  <div class="dev" style="left:1090px;top:436px"><b>PC WINDOWS 11</b><span class="ip">10.10.0.54</span></div>
+
+  <svg id="srv" viewBox="0 0 70 170" role="img" aria-label="Serveur Ubuntu"></svg>
+  <div id="srvX">✕</div>
+  <div class="dev col" style="left:1475px;top:314px"><b>SERVEUR UBUNTU</b><span class="ip">10.10.0.20</span></div>
+  <div id="dash"><h4>Tableau de bord</h4><div id="drows"></div></div>
+
+  <div id="term"><div class="hd">Agent PowerShell · session de Martine</div><div id="tl"></div></div>
+
+  <svg id="wires" viewBox="0 0 1600 900" aria-hidden="true">
+    <path class="base" id="wUart" d="M247 440C247 500 236 520 222 545" style="stroke-width:3"/>
+    <path class="base" id="wUsb" d="M140 563H100V706H856V300H880"/>
+    <path class="base" id="wNet" d="M1300 300C1370 300 1380 226 1440 226"/>
+    <path class="flow" id="fUart" d="M247 440C247 500 236 520 222 545"/>
+    <path class="flow" id="fUsb" d="M140 563H100V706H856V300H880"/>
+    <path class="flow" id="fNet" d="M1300 300C1370 300 1380 226 1440 226"/>
+    <text x="258" y="540" class="wl">UART</text><text x="560" y="698" class="wl">câble USB</text><text x="1340" y="320" class="wl">HTTPS</text>
+  </svg>
+
+  <div id="say"><small id="sayW"></small><div id="sayT"></div></div>
+  <div id="stamp"><b id="stB">✕</b><span id="stampT"></span></div>
+
+  <!-- ===== cartes ===== -->
+  <div class="cardc" id="dilem">
+    <h2>Le dilemme du délai d'inactivité</h2>
+    <div class="rw"><span class="n r">↓</span><div><h3>Délai court (2 min)</h3><p>L'écran se verrouille pendant qu'elle lit un dossier. Elle s'agace, et on finit par allonger le délai.</p></div></div>
+    <div class="rw"><span class="n r">↑</span><div><h3>Délai long (15 min)</h3><p>Quand elle part sans verrouiller, la session reste ouverte jusqu'à 15 minutes.</p></div></div>
+    <div class="rw"><span class="n">?</span><div><h3>Ce qu'il faudrait</h3><p>Verrouiller vite <b>quand elle part</b>, et jamais <b>quand elle est là</b>, même immobile.</p></div></div>
+  </div>
+
+  <div class="cardc wide" id="exist">
+    <h2>Ce qui existe déjà, et ce que le radar ajoute</h2>
+    <div class="tb" style="grid-template-columns:330px 1fr 1fr">
+      <span></span><div class="hd">Ce que ça fait bien</div><div class="hd">Ce qui manque ici</div>
+      <span class="k r">Stratégie d'inactivité Windows</span><div class="v r bon">simple, déjà en place, gérée par la DSI</div><div class="v r mal">ne sait pas si l'agent est là : trop tôt ou trop tard</div>
+      <span class="k r">Verrouillage dynamique (téléphone Bluetooth)</span><div class="v r bon">verrouille quand le téléphone jumelé s'éloigne</div><div class="v r moy">dépend du téléphone personnel ; délai de l'ordre de la minute (à vérifier)</div>
+      <span class="k r">Détection de présence de Windows 11</span><div class="v r bon">même idée que le radar, intégrée</div><div class="v r moy">seulement sur les PC équipés d'un capteur (surtout des portables récents)</div>
+      <span class="k r">Radar LD2410 + ESP32</span><div class="v r bon choix">tout PC fixe ; zone et délai réglables ; mesurable</div><div class="v r moy">du matériel en plus ; à sécuriser (voir faux boîtier)</div>
+    </div>
+    <p class="foot">Le radar <b>ne remplace pas</b> la stratégie Windows : il verrouille <b>plus tôt</b>. Il n'empêche jamais le verrouillage d'inactivité, qui reste le <b>filet</b>. La DSI pourra ensuite décider de son délai.</p>
+  </div>
+
+  <div class="cardc" id="ld">
+    <h2>Le LD2410 distingue-t-il deux personnes&nbsp;? Non.</h2>
+    <div class="rw"><span class="n v">✓</span><div><h3>Ce qu'il donne</h3><p>Cible absente, en mouvement ou immobile ; une distance pour chacune ; une énergie par tranche de 0,75 m.</p></div></div>
+    <div class="rw"><span class="n r">✕</span><div><h3>Ce qu'il ne donne pas</h3><p>Qui est là, combien de personnes, dans quel sens elles vont.</p></div></div>
+    <div class="rw"><span class="n">⚙</span><div><h3>Donc on joue sur…</h3><p>L'orientation, les tranches retenues, la sensibilité, et le temps (immobile plusieurs secondes).</p></div></div>
+    <p class="foot">Le test <b>T03</b> mesure le résultat : combien de passages maintiennent la session à tort.</p>
+  </div>
+
+  <div class="cardc" id="ident">
+    <h2>Présence n'est pas identité</h2>
+    <div class="rw"><span class="n r">!</span><div><h3>Le radar voit « quelqu'un »</h3><p>Il ne sait pas si c'est Martine. Aucun capteur de présence ne le sait.</p></div></div>
+    <div class="rw"><span class="n r">!</span><div><h3>La stratégie Windows non plus</h3><p>Si le collègue touche le clavier, le compteur d'inactivité repart à zéro.</p></div></div>
+    <div class="rw"><span class="n v">✓</span><div><h3>Mais on peut repérer le changement</h3><p>Un fauteuil qui se <b>vide</b> puis se <b>réoccupe</b> : c'est le moment suspect.</p></div></div>
+  </div>
+
+  <div class="cardc" id="reste">
+    <h2>Ce qui reste, et on le dit</h2>
+    <div class="rw"><span class="n r">!</span><div><h3>Un échange en quelques secondes</h3><p>Si le collègue s'assoit aussitôt, le trou est trop court pour être vu.</p></div></div>
+    <div class="rw"><span class="n v">✓</span><div><h3>Ce n'est pas pire qu'aujourd'hui</h3><p>Sans radar, il aurait 15 minutes. Le projet <b>réduit</b> la fenêtre, il ne la supprime pas.</p></div></div>
+    <div class="rw"><span class="n v">✓</span><div><h3>Le radar ne déverrouille jamais</h3><p>Pour rouvrir la session, il faut le mot de passe ou Windows Hello de Martine.</p></div></div>
+    <p class="foot">Les seuils (trou de 5 s, départ de 20 s) sont des <b>exemples</b> : ils seront réglés et mesurés (faux verrouillages, test T02).</p>
+  </div>
+
+  <div class="cardc wide" id="roles">
+    <h2>Qui fait quoi, et que se passe-t-il en cas de panne&nbsp;?</h2>
+    <div class="tb" style="grid-template-columns:230px 1fr 1fr 1fr">
+      <span></span><div class="hd">Son rôle</div><div class="hd">Il décide le verrouillage ?</div><div class="hd">S'il tombe en panne</div>
+      <span class="k r">Radar LD2410</span><div class="v r">émet en 24 GHz, mesure les échos, envoie distances et énergies</div><div class="v r">non : il mesure</div><div class="v r moy">plus de trames → l'ESP32 ne peut plus dire « présente »</div>
+      <span class="k r">ESP32</span><div class="v r">applique la zone et le délai ; signe un message par seconde</div><div class="v r">il propose : « absente »</div><div class="v r moy">silence de plus de 3 s → l'agent verrouille (choix prudent, à valider)</div>
+      <span class="k r">Agent PowerShell</span><div class="v r">vérifie signature et compteur ; appelle <code>LockWorkStation</code></div><div class="v r bon"><b>oui</b>, sur le PC, sans réseau</div><div class="v r moy">la stratégie d'inactivité Windows reste active</div>
+      <span class="k r">Serveur Ubuntu</span><div class="v r">reçoit les événements ; journal ; tableau de bord</div><div class="v r">non : il observe</div><div class="v r bon">rien ne change sur le poste ; les événements attendent (T05, T10)</div>
+    </div>
+  </div>
+
+  <div class="cardc" id="wiring">
+    <h2>Radar → ESP32 : l'UART</h2>
+    <svg viewBox="0 0 640 230" aria-label="Câblage du LD2410 vers l'ESP32">
+      <rect x="20" y="40" width="190" height="150" rx="10" class="fb si" stroke-width="2.5"/><text x="115" y="30" text-anchor="middle" style="font:900 16px var(--police);fill:var(--encre)">LD2410</text>
+      <rect x="430" y="20" width="190" height="190" rx="10" class="fi"/><text x="525" y="14" text-anchor="middle" style="font:900 16px var(--police);fill:var(--encre)">ESP32</text>
+      <g id="pins"></g>
+    </svg>
+    <div id="frame"></div>
+    <div id="fexp"><code>02</code> = cible immobile · <code>46 00</code> = 70 cm · <code>3A</code> = énergie 58. Format d'après la doc du fabricant, à vérifier.</div>
+  </div>
+
+  <div class="cardc wide" id="bus">
+    <h2>Pourquoi l'UART et pas I²C ou SPI&nbsp;?</h2>
+    <div class="tb" style="grid-template-columns:240px 1fr 1fr 1fr">
+      <span></span><div class="hd" style="background:var(--jaune)">UART</div><div class="hd">I²C</div><div class="hd">SPI</div>
+      <span class="k r">Fils de données</span><div class="v r">2 (TX, RX) croisés</div><div class="v r">2 (SDA, SCL) partagés</div><div class="v r">4 (MOSI, MISO, SCK, CS)</div>
+      <span class="k r">Horloge</span><div class="v r">aucune : les deux côtés s'accordent sur un débit (256 000 bauds)</div><div class="v r">donnée par le maître</div><div class="v r">donnée par le maître</div>
+      <span class="k r">Adresse</span><div class="v r">aucune : point à point</div><div class="v r">7 bits par composant</div><div class="v r">un fil CS par composant</div>
+      <span class="k r">Bon pour</span><div class="v r">un module qui envoie ses trames tout seul</div><div class="v r">plusieurs petits capteurs sur 2 fils</div><div class="v r">gros débits (écran, carte SD, W5500)</div>
+    </div>
+    <p class="foot">La vraie raison : le <b>LD2410 ne propose que l'UART</b> (plus une broche OUT tout-ou-rien). Le choix est imposé par le module, et l'UART lui convient : il envoie ses mesures sans qu'on les demande.</p>
+  </div>
+
+  <div class="cardc wide" id="couches">
+    <h2>UART, USB série, HTTPS : trois niveaux différents</h2>
+    <div class="tb" style="grid-template-columns:230px 1fr 1fr 1fr">
+      <span></span><div class="hd" style="background:var(--papier-2)">UART</div><div class="hd" style="background:var(--jaune-pale)">USB série</div><div class="hd" style="background:var(--vert-pale)">HTTPS</div>
+      <span class="k r">Entre</span><div class="v r">radar ⟷ ESP32, sur 20 cm de fils</div><div class="v r">ESP32 ⟷ PC, par un câble USB</div><div class="v r">PC ⟷ serveur, par le réseau</div>
+      <span class="k r">Ce qui circule</span><div class="v r">des octets, bit après bit, en 3,3 V</div><div class="v r">les mêmes octets, emballés par USB ; Windows montre un port <b>COM</b></div><div class="v r">des requêtes HTTP chiffrées par TLS, dans TCP/IP</div>
+      <span class="k r">Adresse IP ?</span><div class="v r mal">non</div><div class="v r mal">non : une adresse USB donnée par le PC</div><div class="v r bon">oui : 10.10.0.54 → 10.10.0.20</div>
+      <span class="k r">Numéro de port ?</span><div class="v r mal">non</div><div class="v r mal">non (« COM5 » n'est qu'un nom)</div><div class="v r bon">oui : TCP 443</div>
+    </div>
+    <p class="foot">Seul le dernier maillon est un <b>réseau</b>. Le verrouillage n'utilise que les deux premiers : il marche <b>sans réseau</b>.</p>
+  </div>
+
+  <div class="cardc" id="com">
+    <h2>Le port COM ne prouve rien</h2>
+    <div class="rw"><span class="n r">1</span><div><h3>Windows numérote n'importe quel adaptateur</h3><p>Un autre ESP32, un Arduino, un adaptateur à 3 € : tous deviennent « COM5 ».</p></div></div>
+    <div class="rw"><span class="n r">2</span><div><h3>L'identifiant USB se copie</h3><p>VID, PID, numéro de série : un microcontrôleur peut annoncer ceux qu'il veut.</p></div></div>
+    <div class="rw"><span class="n v">✓</span><div><h3>Il faut un secret</h3><p>Une preuve que seul le vrai boîtier peut fabriquer : une signature.</p></div></div>
+  </div>
+
+  <div class="cardc" id="msg">
+    <h2 id="msgT">Le message signé</h2>
+    <div class="mline m" id="m1"><span id="m1t">ETAT=PRESENT;N=1843</span><span class="lab">message</span></div>
+    <div class="mline k" id="m2"><span>clé secrète (32 octets)</span><span class="lab">dans l'ESP32 et le PC</span></div>
+    <div class="mline h" id="m3"><span id="m3t">HMAC = 9969d63a…8ed9</span><span class="lab">HMAC-SHA256</span></div>
+    <div class="mline" id="m4"><span id="m4t"></span><span class="lab" id="m4l"></span></div>
+    <p class="foot" id="msgF"></p>
+  </div>
+
+  <div class="cardc wide" id="rec">
+    <h2>À retenir : les six réponses au jury</h2>
+    <div class="rg">
+      <div class="rc"><h3>Pourquoi pas juste la stratégie Windows ?</h3><p>Elle ne sait pas si l'agent est là. Le radar verrouille <b>plus tôt au départ</b> ; la stratégie reste le <b>filet</b>. Immobile, l'agent respire : le radar le voit.</p></div>
+      <div class="rc"><h3>Le collègue qui passe ?</h3><p>Le LD2410 ne distingue <b>personne</b>. On retient la <b>zone du fauteuil</b> (0 à 1,5 m) et une présence <b>immobile</b> de quelques secondes. Mesuré par T03.</p></div>
+      <div class="rc"><h3>Le collègue qui s'assoit ?</h3><p>Présence ≠ identité. Parade : <b>vide puis réoccupé = verrouiller</b>. Il reste un échange très rapide : on <b>réduit</b> la fenêtre, on ne la supprime pas.</p></div>
+      <div class="rc"><h3>Le circuit, et si Ubuntu tombe ?</h3><p>Radar <b>mesure</b> → ESP32 <b>propose</b> → PowerShell <b>décide</b> et verrouille → Ubuntu <b>observe</b>. Ubuntu en panne : le verrouillage continue.</p></div>
+      <div class="rc"><h3>UART, USB série, HTTPS ?</h3><p>UART : imposé par le LD2410, sans adresse. USB série : un port COM, sans IP. Seul <b>HTTPS</b> a une <b>IP</b> et un <b>port</b> (443).</p></div>
+      <div class="rc"><h3>Le faux boîtier ?</h3><p>Le port COM ne prouve rien. <b>HMAC-SHA256</b> avec une clé secrète + <b>compteur</b> qui augmente. Faux, rejoué ou silence : l'agent <b>verrouille</b>.</p></div>
+    </div>
+  </div>
+
+  <div id="fx"></div>
+
+  <div class="part" id="parts"><span>WINDOWS SUFFIT ?</span><span>LE PASSANT</span><span>LE FAUTEUIL</span><span>LE CIRCUIT</span><span>UART · USB · HTTPS</span><span>FAUX BOÎTIER</span><span>RETENIR</span></div>
+  <div id="subbar">
+    <p id="sub" aria-live="polite"></p>
+    <div class="ctl">
+      <button id="restart" title="Recommencer (touche Début)" aria-label="Recommencer">↺</button>
+      <button id="prev" title="Étape précédente (←)" aria-label="Étape précédente">←</button>
+      <button id="pause" title="Pause (P)" aria-label="Pause (P)" disabled>❚❚</button>
+      <span class="num" id="num"></span>
+      <button id="next" title="Étape suivante (→, espace)">Suivant →</button>
+      <button id="fs" title="Plein écran (F)" aria-label="Plein écran">⛶</button>
+    </div>
+  </div>
+  <div class="hint">Maquette · délais d'exemple, à mesurer · → / espace : suivant · P : pause · ← : retour · F : plein écran</div>
+  <div id="pausebadge">❚❚ PAUSE · appuie sur P ou → pour reprendre</div>
+</div>
+
+<script>
+{
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const stage=$('#stage');
+let scale=1;
+function fit(){scale=Math.min(innerWidth/1600,innerHeight/900);stage.style.transform=`translate(-50%,-50%) scale(${scale})`}
+addEventListener('resize',fit);fit();
+
+/* ---------- dessins ---------- */
+(function(){
+ const R=250,Y=420,g=[];
+ for(let k=1;k<=5;k++){const r=k*90,a=Math.PI/3,x1=R+r*Math.cos(a),y1=Y-r*Math.sin(a),y2=Y+r*Math.sin(a);
+  g.push(`<path class="gate ${k>2?'far':''} fn sc" stroke-width="1.5" stroke-dasharray="4 5" d="M${x1.toFixed(1)} ${y1.toFixed(1)}A${r} ${r} 0 0 1 ${x1.toFixed(1)} ${y2.toFixed(1)}"/>`);
+  const lx=R+r*Math.cos(.95),ly=Y+r*Math.sin(.95);g.push(`<text class="glab gate ${k>2?'far':''}" x="${(lx-4).toFixed(0)}" y="${(ly+4).toFixed(0)}" text-anchor="end">${(k*0.75).toFixed(2).replace('.',',')} m</text>`)}
+ $('#gates').innerHTML=g.join('');
+ const T=[`<rect x="2" y="2" width="66" height="166" rx="6" class="fi2 si" stroke-width="2"/><rect x="9" y="12" width="52" height="26" rx="3" class="fi"/><rect x="9" y="44" width="52" height="10" rx="2" class="fi"/>`];
+ for(let r=0;r<8;r++)for(let c=0;c<5;c++)T.push(`<circle cx="${15+c*10}" cy="${74+r*9}" r="2.2" class="fi"/>`);
+ T.push(`<circle cx="35" cy="152" r="6" class="fc si" stroke-width="1.5"/><circle cx="18" cy="25" r="3" class="fv act"/>`);
+ $('#srv').innerHTML=T.join('');
+ // câblage UART
+ const P=[['VCC','5V',70,'fr'],['GND','GND',100,'fi2'],['TX','GPIO16 (RX2)',130,'fjf'],['RX','GPIO17 (TX2)',160,'fv']],o=[];
+ P.forEach(([a,b,y,c])=>{o.push(`<circle cx="210" cy="${y}" r="6" class="fc2 si" stroke-width="2"/><text x="196" y="${y+5}" text-anchor="end" style="font:900 15px var(--police-mono);fill:var(--encre)">${a}</text><circle cx="430" cy="${y-20+ (y>100?0:0)}" r="6" class="fc2 si" stroke-width="2"/><text x="444" y="${y-15}" style="font:800 15px var(--police-mono);fill:var(--papier)">${b}</text>`);
+  o.push(`<path class="pin fn" d="M216 ${y}C320 ${y} 320 ${y-20} 424 ${y-20}" style="stroke:var(--${c==='fr'?'rouge':c==='fi2'?'encre-2':c==='fjf'?'jaune-fonce':'vert'});stroke-width:4"/>`)});
+ o.push(`<text x="320" y="214" text-anchor="middle" style="font:800 14px var(--police);fill:var(--encre-2)">TX du radar → RX de l'ESP32, et inversement</text>`);
+ $('#pins').innerHTML=o.join('');
+ const F=[['F4 F3 F2 F1','h'],['0D 00','h'],['02','h'],['AA','h'],['02','s'],['00 00','d'],['00','d'],['46 00','e'],['3A','e'],['46 00','d'],['55 00','h'],['F8 F7 F6 F5','h']];
+ $('#frame').innerHTML=F.map(f=>`<span class="${f[1]}">${f[0]}</span>`).join('');
+})();
+
+/* ---------- moteur (repris du modèle) ---------- */
+const RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
+let fast=RM,running=false,step=0,nav=false;
+const pend=new Set();
+const D=ms=>fast?1:ms;
+let paused=false,frozen=[];
+function startT(o){o.t0=performance.now();o.t=setTimeout(()=>{pend.delete(o);o.r()},o.rem)}
+const wait=ms=>fast?Promise.resolve():new Promise(r=>{const o={r,rem:ms,t:null};pend.add(o);if(!paused)startT(o)});
+function pause(){if(paused||!running)return;paused=true;pend.forEach(o=>{if(o.t!=null){clearTimeout(o.t);o.t=null;o.rem=Math.max(0,o.rem-(performance.now()-o.t0))}});
+ frozen=document.getAnimations().filter(a=>a.playState==='running');frozen.forEach(a=>{try{a.pause()}catch(e){}});pui()}
+function resume(){if(!paused)return;paused=false;frozen.forEach(a=>{try{a.play()}catch(e){}});frozen=[];pend.forEach(o=>{if(o.t==null)startT(o)});pui()}
+function pui(){const b=$('#pause');b.textContent=paused?'▶':'❚❚';b.title=paused?'Reprendre (P)':'Pause (P)';b.setAttribute('aria-label',b.title);b.disabled=!running&&!paused;$('#pausebadge').classList.toggle('show',paused)}
+const isCss=a=>(typeof CSSAnimation!=='undefined'&&a instanceof CSSAnimation)||(typeof CSSTransition!=='undefined'&&a instanceof CSSTransition);
+function skip(){resume();fast=true;pend.forEach(o=>{clearTimeout(o.t);o.r()});pend.clear();document.getAnimations().forEach(a=>{if(!isCss(a))try{a.finish()}catch(e){}})}
+function pos(el){const r=el.getBoundingClientRect(),s=stage.getBoundingClientRect();return{x:(r.left+r.width/2-s.left)/scale,y:(r.top+r.height/2-s.top)/scale}}
+async function anim(el,kf,ms,o={}){const a=el.animate(kf,{duration:D(ms),easing:o.easing||'ease-in-out',fill:'forwards'});try{await a.finished}catch(e){}return a}
+
+/* ---------- réseau et paquets ---------- */
+function seg(id){const p=$('#w'+id),L=p.getTotalLength(),a=[];const n=Math.max(8,Math.round(L/30));for(let i=0;i<=n;i++){const q=p.getPointAtLength(L*i/n);a.push({x:q.x,y:q.y})}return a}
+const liveN={};
+function live(id,on){liveN[id]=Math.max(0,(liveN[id]||0)+(on?1:-1));$('#f'+id).classList.toggle('live',liveN[id]>0)}
+async function travel(el,P,ms){
+ const w=el.offsetWidth,h=el.offsetHeight,Ls=[0];
+ for(let i=1;i<P.length;i++)Ls.push(Ls[i-1]+Math.max(.5,Math.hypot(P[i].x-P[i-1].x,P[i].y-P[i-1].y)));
+ const T=Ls[Ls.length-1];
+ await anim(el,P.map((p,i)=>({transform:`translate(${p.x-w/2}px,${p.y-h/2}px)`,opacity:(i===0||i===P.length-1)?0:1,offset:Ls[i]/T})),ms,{easing:'linear'});
+}
+async function go(label,cls,id,ms=1800,rev=false){
+ if(fast)return;const p=document.createElement('div');p.className='pk '+cls;p.textContent=label;$('#fx').append(p);live(id,1);
+ let P=seg(id);if(rev)P.reverse();await travel(p,P,ms);p.remove();live(id,0);
+}
+async function stamp(x,y,t,ok=false){const s=$('#stamp');s.style.left=x+'px';s.style.top=y+'px';s.className=ok?'ok':'';$('#stB').textContent=ok?'✓':'✕';$('#stampT').textContent=t;await anim(s,[{opacity:0,transform:'scale(2) rotate(-20deg)'},{opacity:1,transform:'scale(1) rotate(-8deg)'}],450,{easing:'cubic-bezier(.3,1.4,.5,1)'});await wait(900)}
+const stampHide=()=>$('#stamp').getAnimations().forEach(a=>a.cancel());
+
+/* ---------- personnages et radar ---------- */
+function place(id,x,y,o=1){const e=$('#'+id);e.style.left=x+'px';e.style.top=y+'px';e.style.opacity=o}
+const SEAT=[350,420];
+async function walk(id,pts,ms=1300){for(const p of pts){place(id,p[0],p[1],p[2]??1);await wait(ms)}}
+function breath(id,on){$('#'+id).classList.toggle('breath',on)}
+function rd(s,m,i,dec,cls){$('#rdS').textContent=s;$('#rdM').textContent=m;$('#rdI').textContent=i;const d=$('#rdDec');d.textContent=dec;d.className=cls||''}
+function cd(t){$('#cd').textContent=t}
+async function count(from,to,label,ms=110){for(let k=from;k<=to;k++){cd(label.replace('#',k));await wait(ms)}}
+const PRES=()=>{rd('immobile','—','0,70 m · énergie 58','PRÉSENTE','pres');cd('')};
+const VIDE=()=>rd('aucune','—','—','zone vide','');
+
+/* ---------- PC ---------- */
+function screen(id){$$('#mon .pane').forEach(p=>p.classList.toggle('on',p.id===id))}
+function tmr(v,red=false){const t=$('#tmr');t.classList.add('on');t.classList.toggle('red',red);$('#tmrV').textContent=v}
+const tmrHide=()=>$('#tmr').classList.remove('on');
+function tl(html,cls=''){const d=document.createElement('div');d.className='tl '+cls;d.innerHTML=html;$('#tl').append(d);const a=$$('#tl .tl');if(a.length>9)a[0].remove();return d}
+const T=t=>`<span class="t">${t}</span> `;
+function dreset(){$('#drows').innerHTML='<div class="dv">aucun événement</div>'}
+function dadd(t){const v=$('#drows .dv');if(v)v.remove();const d=document.createElement('div');d.className='dr';d.textContent=t;$('#drows').prepend(d);const a=$$('#drows .dr');if(a.length>3)a[a.length-1].remove()}
+function lockPC(t='10:42'){$('#clk2').textContent=t;screen('lock');tmrHide()}
+
+/* ---------- bulle, cartes ---------- */
+function say(who,html,x,y,w=380){const s=$('#say');$('#sayW').textContent=who;$('#sayT').innerHTML=html;s.style.left=x+'px';s.style.top=y+'px';s.style.width=w+'px';s.classList.add('on')}
+const sayHide=()=>$('#say').classList.remove('on');
+async function card(id){$('#'+id).classList.add('open');await wait(400)}
+async function uncard(){$$('.cardc.open').forEach(c=>c.classList.remove('open'));await wait(350)}
+async function rows(sel,ms=420){for(const r of $$(sel)){r.classList.add('on');await wait(ms)}}
+function ml(id,t,cls,lab){const e=$('#'+id);e.classList.add('on');if(cls!==undefined){e.className='mline on '+cls}if(t!==undefined)$('#'+id+'t').textContent=t;if(lab!==undefined)$('#m4l').textContent=lab}
+function mfoot(h){const f=$('#msgF');f.innerHTML=h;f.classList.add('on')}
+
+/* ---------- état initial ---------- */
+function reset(){
+ document.getAnimations().forEach(a=>{if(!isCss(a))a.cancel()});
+ pend.forEach(o=>clearTimeout(o.t));pend.clear();paused=false;frozen=[];
+ $('#fx').innerHTML='';for(const k in liveN)liveN[k]=0;$$('#wires .flow').forEach(f=>f.classList.remove('live'));
+ place('mart',...SEAT);breath('mart',false);place('coll',516,800,0);breath('coll',false);
+ PRES();cd('');$('#zoneF').classList.remove('on');$('#cone').classList.remove('gates-dim');
+ screen('desk');tmrHide();$('#tl').innerHTML='';dreset();$('#srvX').classList.remove('on');
+ $('#fake').classList.remove('on');$('#esp').classList.remove('gone');
+ sayHide();$$('.cardc').forEach(c=>c.classList.remove('open'));
+ $$('.rw,.foot,.tb .r,.rc,#frame span,#fexp,.mline').forEach(e=>e.classList.remove('on'));
+ $('#m1t').textContent='ETAT=PRESENT;N=1843';$('#m3t').textContent='HMAC = 9969d63a…8ed9';$('#m4t').textContent='';$('#m4l').textContent='';$('#msgT').textContent='Le message signé';
+ $$('.mline').forEach(e=>e.className=e.className.replace(/ (ok|ko)\b/g,''));
+}
+
+const K=s=>s.replace(/\[([^\]]+)\]/g,'<span class="k">$1</span>');
+const STEPS=[
+ /* 0 */ {p:0,sub:"Martine travaille. Sur son bureau, un petit [radar LD2410] surveille le fauteuil. Il ne filme rien : il mesure des [échos radio].",run:async()=>{}},
+ /* ===== WINDOWS SUFFIT ? ===== */
+ {p:0,sub:"Windows sait déjà se verrouiller après une [inactivité], par exemple [15 min] sans clavier ni souris. Martine part…",run:async()=>{
+   tmr('15:00');await wait(500);await walk('mart',[[300,560],[260,700,0]],900);VIDE();
+   for(const v of ['14:00','11:00','8:00','5:00','2:00','0:30']){tmr(v,true);await wait(380)}
+   say('Pendant ce temps',"La session reste ouverte jusqu'à <b>15 minutes</b>. N'importe qui peut s'asseoir.",880,500,420)}},
+ {p:0,sub:"Le dilemme : délai [court], l'écran se verrouille pendant qu'elle lit ; délai [long], la session reste ouverte quand elle part.",run:async()=>{
+   sayHide();await card('dilem');await rows('#dilem .rw',550)}},
+ {p:0,sub:"Le radar voit aussi les [micro-mouvements] : la respiration suffit. Assise sans toucher au clavier, Martine reste [présente].",run:async()=>{
+   await uncard();lockPC('10:45');await wait(300);screen('desk');tmrHide();
+   await walk('mart',[[300,560,1],[...SEAT]],900);breath('mart',true);PRES();
+   say('Le LD2410',"Cible <b>immobile</b> à 0,70 m : la poitrine bouge de quelques millimètres à chaque respiration.",880,500,420)}},
+ {p:0,sub:"Elle se lève et part : plus personne dans la zone du fauteuil. Verrouillage en [environ 20 s], au lieu de 15 min.",run:async()=>{
+   sayHide();breath('mart',false);await walk('mart',[[300,560],[260,700,0]],900);VIDE();
+   await count(1,20,'zone vide depuis # s / 20',90);rd('aucune','—','—','ABSENTE','abs');
+   await go('ETAT=ABSENT','','Usb',1600);lockPC('10:47');tl(T('10:47')+'Absence confirmée · session verrouillée','hi')}},
+ {p:0,sub:"Ce qui existe déjà : le radar ne remplace pas la stratégie Windows, il la [complète] et verrouille [plus tôt].",run:async()=>{
+   await card('exist');await rows('#exist .tb .r',180);$('#exist .foot').classList.add('on')}},
+ /* ===== LE PASSANT ===== */
+ {p:1,sub:"Martine est partie. Un collègue [passe derrière] le fauteuil : le radar détecte un mouvement. La session va-t-elle rester ouverte ?",run:async()=>{
+   await uncard();screen('desk');$('#tl').innerHTML='';VIDE();cd('zone vide depuis 3 s / 20');
+   place('coll',516,760,0);await wait(100);await walk('coll',[[516,640,1],[516,470]],900);
+   rd('en mouvement','2,10 m','—','zone vide','');say('Le LD2410',"Cible <b>en mouvement</b> à 2,10 m.",880,500,360)}},
+ {p:1,sub:"Le LD2410 donne la [distance], par tranches de [0,75 m]. On ne retient que la [zone du fauteuil] : de 0 à 1,5 m.",run:async()=>{
+   sayHide();$('#zoneF').classList.add('on');$('#cone').classList.add('gates-dim');await wait(600);
+   await walk('coll',[[516,300],[516,120,0]],900);await count(6,20,'zone vide depuis # s / 20',70);
+   rd('aucune','—','—','ABSENTE','abs');await go('ETAT=ABSENT','','Usb',1500);lockPC('10:48')}},
+ {p:1,sub:"Et s'il passe [tout près] ? Il bouge et ne reste pas. La règle exige une cible [immobile] dans la zone pendant quelques secondes.",run:async()=>{
+   screen('desk');VIDE();cd('zone vide depuis 4 s / 20');place('coll',430,800,0);await wait(100);
+   await walk('coll',[[430,640,1],[430,420]],800);rd('en mouvement','1,50 m','—','zone vide','');cd('mouvement seul : ignoré');
+   await walk('coll',[[430,220],[430,110,0]],800);await count(9,20,'zone vide depuis # s / 20',70);
+   rd('aucune','—','—','ABSENTE','abs');lockPC('10:49')}},
+ {p:1,sub:"Le LD2410 sait-il qui est qui ? [Non]. On s'appuie sur la [géométrie] et le [temps], et on [mesure] les erreurs.",run:async()=>{
+   await card('ld');await rows('#ld .rw',500);$('#ld .foot').classList.add('on')}},
+ /* ===== LE FAUTEUIL ===== */
+ {p:2,sub:"Martine part sans verrouiller. Huit secondes plus tard, son collègue vient [s'asseoir] dans son fauteuil…",run:async()=>{
+   await uncard();screen('desk');place('mart',...SEAT);PRES();await wait(300);
+   await walk('mart',[[300,560],[260,700,0]],800);VIDE();await count(1,8,'zone vide depuis # s / 20',110);
+   place('coll',516,700,0);await wait(80);await walk('coll',[[516,560,1],[...SEAT]],800);breath('coll',true);PRES();cd('');
+   say('Règle simple',"« Quelqu'un est assis » : la session <b>reste ouverte</b>. C'est la faille soulevée par le jury.",880,500,420)}},
+ {p:2,sub:"Mais la stratégie Windows ne ferait pas mieux : s'il touche le clavier, le compteur repart à zéro. Personne ne sait [qui] est assis.",run:async()=>{
+   sayHide();await card('ident');await rows('#ident .rw',550)}},
+ {p:2,sub:"La parade : un fauteuil [vide] plus de 5 s, puis [réoccupé] = verrouiller. Le collègue s'assoit devant un écran verrouillé.",run:async()=>{
+   await uncard();breath('coll',false);place('coll',516,800,0);place('mart',...SEAT);PRES();await wait(400);
+   await walk('mart',[[300,560],[260,700,0]],800);VIDE();await count(1,5,'trou de # s',140);cd('trou > 5 s : départ suspect');
+   place('coll',516,700,0);await wait(80);await walk('coll',[[516,560,1],[...SEAT]],800);PRES();cd('réoccupé après un trou');
+   await go('ETAT=ABSENT','','Usb',1300);lockPC('10:51');tl(T('10:51')+'Fauteuil vide puis réoccupé · verrouillage','hi');
+   say('Écran de verrouillage',"Pour continuer, il faut le mot de passe ou Windows Hello <b>de Martine</b>.",880,500,420)}},
+ {p:2,sub:"Ce qui reste : un échange en [quelques secondes]. Le projet [réduit] la fenêtre d'exposition, il ne prétend pas la supprimer.",run:async()=>{
+   sayHide();await card('reste');await rows('#reste .rw',500);$('#reste .foot').classList.add('on')}},
+ /* ===== LE CIRCUIT ===== */
+ {p:3,sub:"Le circuit. Le radar émet en [24 GHz] et mesure les échos. Il envoie ses mesures à l'ESP32 par [UART], plusieurs fois par seconde.",run:async()=>{
+   await uncard();breath('coll',false);place('coll',516,800,0);place('mart',...SEAT);breath('mart',true);PRES();cd('');screen('desk');$('#tl').innerHTML='';
+   for(let i=0;i<3;i++){await go('trame','uart','Uart',600)}}},
+ {p:3,sub:"L'ESP32 applique la [zone] et le [délai], et décide : présente ou absente. Chaque seconde, il envoie un message [signé] au PC par USB.",run:async()=>{
+   breath('mart',false);await walk('mart',[[300,560],[260,700,0]],800);VIDE();await count(15,20,'zone vide depuis # s / 20',100);rd('aucune','—','—','ABSENTE','abs');
+   await go('ETAT=ABSENT;N=1844;HMAC=2659…23b8','','Usb',2400)}},
+ {p:3,sub:"Sur le PC, l'agent [PowerShell] vérifie la signature et le compteur, puis appelle [LockWorkStation] : verrouillage sur place, sans réseau.",run:async()=>{
+   tl(T('10:55')+'COM5 : ETAT=ABSENT;N=1844');tl(T('10:55')+'HMAC valide · compteur 1844 > 1843','ok');tl(T('10:55')+'LockWorkStation()','hi');lockPC('10:55')}},
+ {p:3,sub:"Ensuite seulement, il envoie un [événement] au serveur Ubuntu en HTTPS. Pour le tableau de bord, [pas pour décider].",run:async()=>{
+   await go('POST /api/evenements','evt','Net',1600);dadd('10:55 poste-54 verrouillé');tl(T('10:55')+'Événement envoyé à Ubuntu : 201','ok')}},
+ {p:3,sub:"Ubuntu tombe en panne : le verrouillage [continue]. Les événements attendent dans une [file] et repartent quand le serveur revient.",run:async()=>{
+   $('#srvX').classList.add('on');screen('desk');place('mart',...SEAT);PRES();await wait(400);
+   await walk('mart',[[300,560],[260,700,0]],700);VIDE();await count(16,20,'zone vide depuis # s / 20',90);rd('aucune','—','—','ABSENTE','abs');
+   await go('ETAT=ABSENT','','Usb',1300);lockPC('11:02');tl(T('11:02')+'LockWorkStation()','hi');
+   await go('POST','ko','Net',1000);tl(T('11:02')+'Ubuntu injoignable · événement en file (1)','ko');await wait(700);
+   $('#srvX').classList.remove('on');await wait(400);await go('file : 1 événement','evt','Net',1400);dadd('11:02 poste-54 verrouillé (différé)');tl(T('11:06')+'File vidée : 1 événement rejoué','ok')}},
+ {p:3,sub:"Le radar [mesure], l'ESP32 [propose], PowerShell [décide], Ubuntu [observe]. Seul le poste décide, donc il marche seul.",run:async()=>{
+   await card('roles');await rows('#roles .tb .r',140)}},
+ /* ===== UART · USB · HTTPS ===== */
+ {p:4,sub:"Pourquoi l'UART ? Le [LD2410 ne propose que ça]. Deux fils croisés, pas d'horloge, et des trames d'octets toutes les fractions de seconde.",run:async()=>{
+   await uncard();await card('wiring');await wait(300);
+   for(const s of $$('#frame span')){s.classList.add('on');await wait(140)}$('#fexp').classList.add('on')}},
+ {p:4,sub:"UART, I²C et SPI : trois façons de relier des composants. Le choix est [imposé par le module], et l'UART lui convient bien.",run:async()=>{
+   await uncard();await card('bus');await rows('#bus .tb .r',150);$('#bus .foot').classList.add('on')}},
+ {p:4,sub:"UART, USB série et HTTPS ne sont pas au même niveau. Seul [HTTPS] passe par le réseau, avec une [adresse IP] et un [port].",run:async()=>{
+   await uncard();await go('octets','uart','Uart',900);await go('COM5','','Usb',1500);await go('IP + port 443','evt','Net',1300);
+   await card('couches');await rows('#couches .tb .r',160);$('#couches .foot').classList.add('on')}},
+ /* ===== FAUX BOÎTIER ===== */
+ {p:5,sub:"Un attaquant débranche l'ESP32 et branche un [faux boîtier] qui répète [PRESENCE=1]. Windows lui donne… le même port COM5.",run:async()=>{
+   await uncard();screen('desk');place('mart',...SEAT);PRES();$('#tl').innerHTML='';
+   $('#esp').classList.add('gone');$('#fake').classList.add('on');await wait(500);
+   for(let i=0;i<2;i++){await go('PRESENCE=1','ko','Usb',1300)}tl(T('11:10')+'Nouveau périphérique série : COM5');tl(T('11:10')+'COM5 : PRESENCE=1')}},
+ {p:5,sub:"Vérifier le numéro de port COM ne suffit pas : Windows le donne à [n'importe quel adaptateur], et l'identifiant USB [se copie].",run:async()=>{
+   await card('com');await rows('#com .rw',500)}},
+ {p:5,sub:"La parade : une [clé secrète] partagée. L'ESP32 calcule un [HMAC-SHA256] de chaque message ; le PC refait le calcul et compare.",run:async()=>{
+   await uncard();await card('msg');ml('m1');await wait(400);ml('m2');await wait(400);ml('m3');await wait(400);
+   ml('m4','le PC recalcule : 9969d63a…8ed9 = identique','ok','accepté');
+   await wait(700);$('#msgT').textContent='Le message du faux boîtier';ml('m1','PRESENCE=1;N=1844');ml('m3','HMAC = ????? (sans la clé)');ml('m4','attendu : 901a83db…b3eb · reçu : faux','ko','refusé');
+   mfoot("Sans la clé, impossible de fabriquer le bon HMAC. Changer <b>un seul caractère</b> du message change tout le résultat.")}},
+ {p:5,sub:"Et s'il [rejoue] un vrai message enregistré ? Le [compteur] doit toujours augmenter : un vieux message, même bien signé, est refusé.",run:async()=>{
+   $('#msgT').textContent='Un vrai message, rejoué';ml('m1','ETAT=PRESENT;N=1843');ml('m3','HMAC = 9969d63a…8ed9 (vrai)');ml('m4','compteur 1843, dernier reçu 1844','ko','rejoué');
+   mfoot("Compteur + <b>défi</b> envoyé par le PC au branchement : un message d'une autre session ne sert à rien. La clé reste dans l'ESP32 (chiffrement de la mémoire en V2).")}},
+ {p:5,sub:"Message faux, rejoué ou [silence de plus de 3 s] : l'agent ne fait plus confiance au boîtier et [verrouille]. La stratégie Windows reste le filet.",run:async()=>{
+   await uncard();await go('PRESENCE=1','ko','Usb',1200);tl(T('11:10')+'HMAC invalide · message rejeté','ko');tl(T('11:10')+'Boîtier non fiable · LockWorkStation()','hi');lockPC('11:10');
+   await go('POST alerte','evt','Net',1300);dadd('11:10 poste-54 boîtier refusé');await stamp(1090,260,'faux boîtier refusé',true);stampHide()}},
+ /* ===== RETENIR ===== */
+ {p:6,sub:"Les six réponses au jury : [plus tôt], [la zone], [vide puis réoccupé], [le poste décide], [seul HTTPS a une IP], [une signature].",run:async()=>{
+   await card('rec');await rows('#rec .rc',380)}}
+];
+const N=STEPS.length;
+
+function ui(){$('#num').textContent=`${step} / ${N-1}`;$('#prev').disabled=step===0;$('#next').disabled=step===N-1;$('#next').textContent=step===0?'Commencer →':'Suivant →';
+ $$('#parts span').forEach((s,i)=>s.classList.toggle('on',step>0&&STEPS[step].p===i))}
+function setSub(i){const s=$('#sub');s.innerHTML=K(STEPS[i].sub);if(!fast)s.animate([{opacity:0,transform:'translateY(6px)'},{opacity:1,transform:'none'}],{duration:350})}
+async function play(i){running=true;fast=RM;setSub(i);ui();pui();try{await STEPS[i].run()}catch(e){console.error(e)}running=false;fast=RM;pui()}
+async function next(){if(paused){resume();return}if(nav)return;if(running){skip();return}if(step>=N-1)return;step++;await play(step)}
+async function goto(n){
+ if(nav)return;nav=true;
+ resume();if(running){skip();while(running)await new Promise(r=>setTimeout(r,20))}
+ stage.classList.add('instant');fast=true;reset();running=true;
+ for(let i=1;i<=n;i++){try{await STEPS[i].run()}catch(e){console.error(e)}}
+ running=false;step=n;setSub(n);fast=RM;ui();pui();
+ requestAnimationFrame(()=>requestAnimationFrame(()=>stage.classList.remove('instant')));nav=false;
+}
+const prev=()=>{if(step>0)goto(step-1)};
+$('#next').addEventListener('click',e=>{e.stopPropagation();next()});
+$('#prev').addEventListener('click',e=>{e.stopPropagation();prev()});
+$('#pause').addEventListener('click',e=>{e.stopPropagation();paused?resume():pause()});
+$('#restart').addEventListener('click',e=>{e.stopPropagation();goto(0)});
+function full(){try{const d=document;if(d.fullscreenElement)d.exitFullscreen();else d.documentElement.requestFullscreen().catch(()=>{})}catch(e){}}
+$('#fs').addEventListener('click',e=>{e.stopPropagation();full()});
+stage.addEventListener('click',e=>{if(!e.target.closest('button'))next()});
+addEventListener('keydown',e=>{
+ const k=e.key;
+ if(['ArrowRight','PageDown',' ','Enter'].includes(k)){e.preventDefault();next()}
+ else if(['ArrowLeft','PageUp','Backspace'].includes(k)){e.preventDefault();prev()}
+ else if(k==='Home'){e.preventDefault();goto(0)}
+ else if(k==='f'||k==='F')full();
+ else if(k==='p'||k==='P'||k==='Pause'||k==='MediaPlayPause'){e.preventDefault();paused?resume():pause()}
+});
+reset();setSub(0);ui();
+window.__goto=goto;window.__state=()=>({step,running,N});
+}
+</script>
+</body>
+</html>

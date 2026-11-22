@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Le leurre ESP32</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900;1000&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../../theme.css">
+<style>
+/* Animation de cours : le leurre (fausse imprimante) du projet CyberSentinel de Lorenzo.
+   Couleurs, polices, ombres : theme.css uniquement (variables). Scène 1600×900, un clic = une étape. */
+html,body{margin:0;height:100%;overflow:hidden;background:var(--papier);line-height:1.3}
+#stage{position:absolute;left:50%;top:50%;width:1600px;height:900px;transform-origin:center;background:var(--papier);user-select:none;font-family:var(--police);color:var(--encre)}
+.instant,.instant *{transition:none!important}
+.mono{font-family:var(--police-mono)}
+/* classes de remplissage SVG */
+.fi{fill:var(--encre)}.fi2{fill:var(--encre-2)}.fi3{fill:var(--encre-3)}.fc{fill:var(--contour)}.fc2{fill:var(--contour-2)}.fp{fill:var(--papier)}.fp2{fill:var(--papier-2)}.fw{fill:var(--blanc)}.fj{fill:var(--jaune)}.fjf{fill:var(--jaune-fonce)}.fb{fill:var(--bleu)}.fr{fill:var(--rouge)}.fv{fill:var(--vert)}.fn{fill:none}
+.si{stroke:var(--encre)}.si2{stroke:var(--encre-2)}.sc{stroke:var(--contour)}.sj{stroke:var(--jaune)}.sjf{stroke:var(--jaune-fonce)}.sb{stroke:var(--bleu)}.sr{stroke:var(--rouge)}.sv{stroke:var(--vert)}.sw{stroke:var(--blanc)}
+/* en-tête */
+.top{position:absolute;left:40px;right:40px;top:18px;height:84px;display:flex;align-items:flex-end;justify-content:space-between}
+.sur{font-weight:800;text-transform:uppercase;letter-spacing:.14em;font-size:14px;color:var(--encre-3)}
+.titre{font-weight:1000;font-size:46px;margin:4px 0 0;text-transform:uppercase;line-height:1}
+.legende{display:flex;gap:8px;padding-bottom:6px}
+.legende span{border:2px solid var(--encre);border-radius:99px;padding:5px 14px;font-weight:900;font-size:15px}
+.lg-j{background:var(--jaune)}.lg-b{background:var(--bleu)}.lg-v{background:var(--vert-pale)}
+/* câbles */
+#wires{position:absolute;left:0;top:0;width:1600px;height:900px;overflow:visible;max-width:none}
+#wires .base{fill:none;stroke:var(--encre-2);stroke-width:6;stroke-linecap:round}
+#wires .flow{fill:none;stroke:var(--jaune);stroke-width:3;stroke-dasharray:10 14;opacity:0}
+#wires .flow.live{opacity:1;animation:flow .6s linear infinite}
+/* appareils */
+.dev{position:absolute;transform:translateX(-50%);display:flex;gap:10px;align-items:center;font-size:17px;font-weight:700;color:var(--encre-2);white-space:nowrap}
+.dev b{border:2px solid var(--encre);border-radius:99px;padding:3px 14px;color:var(--encre);font-weight:1000;background:var(--blanc);letter-spacing:.06em}
+.dev .ip{font-family:var(--police-mono);font-weight:800;color:var(--encre)}
+.moni{position:absolute;background:var(--encre);border-radius:16px;padding:12px 12px 24px;box-shadow:var(--ombre-douce)}
+.moni::after{content:"";position:absolute;bottom:8px;left:50%;width:8px;height:8px;margin-left:-4px;border-radius:50%;background:var(--encre-2)}
+.neck{position:absolute;background:var(--contour);clip-path:polygon(14% 0,86% 0,100% 100%,0 100%)}
+.pied{position:absolute;height:12px;border-radius:8px 8px 4px 4px;background:var(--contour-2);box-shadow:var(--ombre-douce)}
+.screen{width:100%;height:100%;background:var(--blanc);border-radius:4px;overflow:hidden;position:relative}
+.pane{position:absolute;inset:0;display:flex;flex-direction:column;opacity:0;transition:opacity .35s}
+.pane.on{opacity:1}
+/* PC de test : navigateur */
+#monitor{left:40px;top:124px;width:540px;height:400px}
+.tabs{height:38px;background:var(--papier-2);display:flex;align-items:flex-end;padding:0 10px;flex:none}
+.onglet{background:var(--blanc);height:30px;border-radius:10px 10px 0 0;padding:0 12px;display:flex;align-items:center;gap:8px;width:300px;font-size:15px;font-weight:800}
+.onglet span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fav{width:14px;height:14px;border-radius:4px;background:var(--encre);flex:none;box-shadow:inset -4px -4px 0 var(--jaune)}
+.toolbar{height:46px;display:flex;align-items:center;gap:8px;padding:0 10px;border-bottom:1px solid var(--papier-2);flex:none}
+.addr{flex:1;height:34px;border-radius:99px;background:var(--papier-2);display:flex;align-items:center;padding:0 12px;gap:6px;font-size:18px;font-weight:800;white-space:nowrap;overflow:hidden;transition:box-shadow .3s}
+.addr.flash{box-shadow:0 0 0 3px var(--jaune-fonce)}
+.nsec{font-size:13px;font-weight:900;border-radius:99px;padding:2px 8px;background:var(--rouge-pale);color:var(--rouge-texte);flex:none}
+.view{flex:1;position:relative;overflow:hidden}
+.bp{position:absolute;inset:0;opacity:0;transition:opacity .35s}
+.bp.on{opacity:1}
+#pDesk{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:var(--papier)}
+#pDesk h3{margin:0;font-weight:1000;font-size:26px;text-transform:uppercase}
+#pDesk p{margin:0;font-size:17px;font-weight:700;color:var(--encre-2)}
+#pPrint .ph{background:var(--encre-2);color:var(--papier);display:flex;align-items:center;gap:10px;padding:8px 16px;font-weight:900;font-size:17px}
+#pPrint .ph svg{width:28px;height:28px}
+#pPrint .lc{margin:16px auto 0;width:330px;border:1.5px solid var(--contour);border-radius:14px;padding:12px 18px}
+#pPrint h4{margin:0 0 6px;font-size:20px;font-weight:1000}
+#pPrint label{display:block;font-size:15px;font-weight:800;color:var(--encre-2);margin:6px 0 3px}
+#pPrint .fld{height:32px;border:2px solid var(--contour);border-radius:8px}
+#pPrint .bt{display:inline-block;margin-top:10px;background:var(--jaune);border:2px solid var(--encre);border-radius:99px;padding:3px 16px;font-weight:900;font-size:16px}
+/* PC de test : terminal */
+#term{background:var(--encre);color:var(--papier);padding:10px 14px;justify-content:flex-end;font:700 15px/1.4 var(--police-mono)}
+#term .tl{overflow-wrap:anywhere;white-space:pre-wrap}
+#term .pr{color:var(--jaune)}
+#term .ok{color:var(--bleu)}
+#term .dim{color:var(--contour-2)}
+#term .hi{background:var(--jaune);color:var(--encre);border-radius:3px;padding:0 3px}
+.car{display:inline-block;width:9px;height:17px;background:var(--papier);vertical-align:-3px;animation:blink 1s steps(2) infinite}
+#role{position:absolute;left:310px;top:614px;transform:translateX(-50%);background:var(--rouge-pale);color:var(--rouge-texte);border:2px solid var(--rouge);border-radius:99px;padding:3px 14px;font-weight:900;font-size:14px;letter-spacing:.06em;opacity:0;transition:opacity .3s;z-index:3;white-space:nowrap}
+#role.on{opacity:1}
+/* switch */
+#sw{position:absolute;left:690px;top:380px;width:330px;height:66px;overflow:visible;filter:drop-shadow(0 10px 10px rgba(22,21,15,.25))}
+#sw .lk{animation:blink 1.9s steps(2) infinite}
+#sw.busy .lk{animation-duration:.15s}
+#mirror{position:absolute;left:855px;top:342px;transform:translateX(-50%);background:var(--jaune);border:2px solid var(--encre);border-radius:99px;padding:3px 14px;font-weight:900;font-size:14px;white-space:nowrap;opacity:0;transition:opacity .3s;z-index:3}
+#mirror.on{opacity:1}
+/* PC Windows */
+#winmon{left:653px;top:500px;width:210px;height:140px;padding:8px 8px 18px;border-radius:12px}
+#winmon .screen{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;background:var(--bleu-pale);font-weight:900;font-size:15px;transition:background .4s}
+#winmon .screen svg{width:34px;height:34px}
+#winmon.lock .screen{background:var(--encre-2);color:var(--papier)}
+#winmon .lk-on{display:none}#winmon.lock .lk-on{display:block}#winmon.lock .lk-off{display:none}
+/* leurre */
+#leurre{position:absolute;left:1150px;top:128px;width:410px;height:170px;overflow:visible}
+#leurre .act{transition:fill .15s}
+#leurre.hit .act{fill:var(--jaune)}
+#leurre .jk{animation:blink 1.3s steps(2) infinite}
+#leurre.net .jk{animation-duration:.15s}
+#costume{position:absolute;left:1360px;top:112px;transform:translateX(-50%);display:flex;align-items:center;gap:8px;background:var(--blanc);border:2px solid var(--encre);border-radius:99px;padding:4px 14px 4px 8px;font-weight:900;font-size:15px;box-shadow:var(--ombre-decalee);opacity:0;transition:opacity .4s;white-space:nowrap;z-index:3}
+#costume.on{opacity:1}
+#costume svg{width:26px;height:26px}
+#costume small{font-size:13px;color:var(--encre-3);letter-spacing:.08em}
+#jr{position:absolute;left:1150px;top:336px;width:420px;background:var(--blanc);border:2px solid var(--encre);border-radius:14px;padding:8px 12px;box-shadow:var(--ombre-decalee)}
+#jr .jh{display:flex;align-items:center;justify-content:space-between;font-weight:900;font-size:14px;letter-spacing:.1em;color:var(--encre-2);text-transform:uppercase}
+#jn{background:var(--encre);color:var(--jaune);border-radius:99px;padding:1px 10px;font-size:14px;letter-spacing:0;text-transform:none}
+#jl{min-height:46px}
+#jl .jv{color:var(--encre-3);font-weight:700;font-size:14px;padding-top:6px}
+#jl .je{font:800 14px/1.35 var(--police-mono);padding:3px 6px;border-radius:6px;background:var(--jaune-pale);margin-top:4px;overflow-wrap:anywhere}
+/* serveur Ubuntu */
+#tower{position:absolute;left:1140px;top:478px;width:76px;height:200px;filter:drop-shadow(0 12px 10px rgba(22,21,15,.3))}
+#tower .act{animation:blink 1.6s steps(2) infinite}
+#tower.busy .act{animation-duration:.15s}
+#dmon{left:1228px;top:468px;width:352px;height:198px;padding:9px 9px 20px;border-radius:12px}
+.dh{display:flex;align-items:center;gap:8px;background:var(--encre-2);color:var(--papier);font-weight:900;font-size:14px;padding:5px 10px;flex:none}
+.dh em{margin-left:auto;font-style:normal;color:var(--jaune);font-size:13px}
+#drows{padding:4px 8px;display:flex;flex-direction:column;gap:4px}
+.dr{border-left:5px solid var(--bleu);background:var(--papier);border-radius:4px;padding:3px 8px}
+.dr .d1{display:flex;align-items:center;gap:6px;font-weight:800;font-size:14px}
+.dr .d2{font:800 14px var(--police-mono);color:var(--encre-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lv{margin-left:auto;font-size:13px;font-weight:1000;border-radius:99px;padding:0 8px;border:1.5px solid var(--encre)}
+.dr.i{border-left-color:var(--bleu)}.dr.i .lv{background:var(--bleu)}
+.dr.q{border-left-color:var(--jaune-fonce)}.dr.q .lv{background:var(--jaune)}
+.dr.p{border-left-color:var(--rouge)}.dr.p .lv{background:var(--rouge);color:var(--blanc);border-color:var(--rouge)}
+.dvide{color:var(--encre-3);font-weight:700;font-size:14px;padding:6px 2px}
+#ws .wf{font:800 13px var(--police-mono);padding:3px 8px;border-bottom:1px solid var(--papier-2);color:var(--encre-2);flex:none;display:flex;justify-content:space-between}
+#wrows{flex:1;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-start}
+.wr{display:grid;grid-template-columns:84px 84px 44px 1fr;column-gap:4px;font:700 13px/1.45 var(--police-mono);padding:0 6px;white-space:nowrap}
+.wr span{overflow:hidden;text-overflow:ellipsis}
+.wr.hd{font-weight:900;background:var(--papier-2)}
+.wr.t{background:var(--bleu-pale)}.wr.u{background:var(--vert-pale)}.wr.a{background:var(--jaune-pale)}
+.wr.x{background:var(--rouge);color:var(--blanc);font-weight:900}
+/* paquets */
+#fx{position:absolute;inset:0;pointer-events:none;z-index:7}
+.pk{position:absolute;left:0;top:0;font:800 15px var(--police-mono);border:2px solid var(--encre);border-radius:10px;padding:3px 10px;box-shadow:var(--ombre-decalee);white-space:nowrap;background:var(--jaune);opacity:0}
+.pk.rep{background:var(--bleu)}.pk.arp{background:var(--blanc)}.pk.evt{background:var(--vert-pale)}.pk.rst{background:var(--rouge-pale)}.pk.bruit{background:var(--papier-2);border-color:var(--contour);box-shadow:none;font-size:13px;padding:1px 6px}
+.pk.dot{width:16px;height:16px;padding:0;border-radius:50%;background:var(--blanc);box-shadow:none}
+.pk.dot.rep{background:var(--bleu)}.pk.dot.rst{background:var(--rouge-pale)}.pk.dot.req{background:var(--jaune)}
+.fly{position:absolute;left:0;top:0;font:800 17px var(--police-mono);background:var(--blanc);border:2px solid var(--encre);border-radius:8px;padding:3px 9px;box-shadow:var(--ombre-decalee);white-space:nowrap}
+.fly.y{background:var(--jaune)}.fly.b{background:var(--bleu-pale)}.fly.g{background:var(--vert-pale)}
+#cur{position:absolute;left:0;top:0;width:30px;height:30px;z-index:9;opacity:0;pointer-events:none}
+#cur svg{width:30px;height:30px}
+#ring{position:absolute;left:-14px;top:-14px;width:28px;height:28px;border-radius:50%;border:3px solid var(--jaune-fonce);opacity:0}
+/* bulle */
+#say{position:absolute;width:380px;background:var(--blanc);border:2px solid var(--encre);border-radius:16px;padding:10px 16px;font-weight:800;font-size:19px;line-height:1.35;box-shadow:var(--ombre-decalee-forte);opacity:0;transform:scale(.94);transition:opacity .3s,transform .3s;z-index:6}
+#say.on{opacity:1;transform:none}
+#say small{display:block;font-size:13px;letter-spacing:.12em;color:var(--encre-3);font-weight:900;text-transform:uppercase}
+#say code{font:800 16px var(--police-mono);background:var(--papier-2);border-radius:5px;padding:0 4px}
+/* cartes */
+.cardc{position:absolute;left:592px;top:118px;width:538px;background:var(--blanc);border:2px solid var(--encre);border-radius:20px;box-shadow:6px 6px 0 var(--encre);padding:18px 22px;opacity:0;transform:scale(.95);transition:opacity .4s,transform .4s;z-index:5;pointer-events:none}
+.cardc.open{opacity:1;transform:none}
+.cardc.wide{left:40px;width:1520px}
+.cardc h2{margin:0 0 12px;font-weight:1000;font-size:28px;text-transform:uppercase;line-height:1.05}
+.cardc .intro{margin:0 0 10px;font-size:19px;font-weight:700;color:var(--encre-2)}
+.rw{display:flex;gap:12px;align-items:flex-start;padding:8px 0;border-top:1px solid var(--papier-2);opacity:0;transform:translateX(8px);transition:opacity .35s,transform .35s}
+.rw.on{opacity:1;transform:none}
+.rw .n{flex:none;width:34px;height:34px;border-radius:50%;border:2px solid var(--encre);display:grid;place-items:center;font-weight:1000;font-size:17px;background:var(--jaune)}
+.rw .tg{flex:none;width:122px;text-align:center;border:2px solid var(--encre);border-radius:99px;padding:2px 0;font-weight:1000;font-size:14px}
+.tg.i{background:var(--bleu)}.tg.q{background:var(--jaune)}.tg.p{background:var(--rouge);color:var(--blanc);border-color:var(--rouge)}.tg.v1{background:var(--vert-pale)}.tg.v2{background:var(--papier-2)}.tg.ext{background:var(--blanc);border-style:dashed}
+.rw h3{margin:0;font-size:20px;font-weight:900;line-height:1.2}
+.rw p{margin:2px 0 0;font-size:18px;font-weight:700;color:var(--encre-2);line-height:1.3}
+.rw code,.foot code{font:800 16px var(--police-mono);background:var(--papier-2);border-radius:5px;padding:0 4px}
+.foot{margin:10px 0 0;background:var(--encre);color:var(--papier);border-radius:14px;padding:11px 16px;font-size:19px;font-weight:700;line-height:1.35;opacity:0;transition:opacity .4s}
+.foot.on{opacity:1}.foot b{color:var(--jaune);font-weight:1000}
+.inv{display:grid;grid-template-columns:118px 1fr 1fr;gap:0;font-size:18px;font-weight:700}
+.inv>div{padding:7px 8px;border-top:1px solid var(--papier-2);opacity:0;transition:opacity .3s}
+.inv>div.on{opacity:1}
+.inv .h{font-weight:900;font-size:14px;letter-spacing:.1em;color:var(--encre-3);text-transform:uppercase;border-top:0}
+.inv .ipc{font-family:var(--police-mono);font-weight:800}
+.inv .lr{background:var(--jaune);font-weight:900}
+/* lettre HTTP */
+#mc{padding:0}
+.mhead{display:flex;align-items:center;gap:10px;padding:11px 18px;border-bottom:2px solid var(--encre);border-radius:18px 18px 0 0;background:var(--jaune)}
+#mc.rep .mhead{background:var(--bleu)}#mc.evt .mhead{background:var(--vert-pale)}
+.mhead b{font-weight:1000;font-size:21px}
+.mhead span{font-weight:800;font-size:15px;color:var(--encre-2)}
+#lines{padding:12px 12px 2px}
+.ln{display:flex;align-items:center;gap:10px;min-height:38px;border-radius:9px;padding:4px 8px;margin-bottom:6px;font:700 17px/1.3 var(--police-mono);opacity:0;transform:translateY(4px);transition:opacity .3s,transform .3s}
+.ln.on{opacity:1;transform:none}
+.ln i{font:1000 13px var(--police);font-style:normal;width:22px;height:22px;border-radius:50%;border:1.5px solid var(--encre);display:grid;place-items:center;flex:none;background:var(--blanc)}
+.ln.m{background:var(--jaune)}.ln.h{background:var(--bleu-pale)}.ln.b{background:var(--rouge-pale)}.ln.d{background:var(--vert-pale)}
+.ln .tx{flex:1;overflow-wrap:anywhere}
+.ln .lab{margin-left:auto;font:900 13px var(--police);letter-spacing:.08em;color:var(--encre-2);text-transform:uppercase;white-space:nowrap}
+.tok{opacity:0;transition:opacity .25s}.tok.on{opacity:1}
+#mnote{margin:6px 12px 12px;background:var(--encre);color:var(--papier);border-radius:14px;padding:11px 16px;font-size:18px;font-weight:700;line-height:1.38;opacity:0;transition:opacity .3s}
+#mnote.on{opacity:1}#mnote b{color:var(--jaune);font-weight:1000}
+/* table MAC */
+#mac{left:620px;top:140px;width:480px}
+#mac .mr{display:grid;grid-template-columns:62px 1fr 92px;gap:6px;font:800 17px var(--police-mono);padding:5px 8px;border-radius:8px}
+#mac .mr.h{font:900 14px var(--police);letter-spacing:.1em;color:var(--encre-3);text-transform:uppercase}
+#mac .mr.sel{background:var(--jaune)}
+/* tableaux larges */
+.tb{display:grid;gap:6px 10px;align-items:stretch}
+.tb .hd{font-weight:1000;font-size:21px;border-radius:12px;padding:6px 12px;border:2px solid var(--encre);text-align:center}
+.tb .k{font-weight:900;font-size:15px;letter-spacing:.06em;color:var(--encre-2);text-transform:uppercase;align-self:center}
+.tb .v{background:var(--papier);border-radius:10px;padding:7px 12px;font-weight:700;font-size:18px;line-height:1.3}
+.tb .v b{font-weight:900}
+.tb code{font:800 17px var(--police-mono);text-transform:none}
+.tb .r{opacity:0;transition:opacity .35s}.tb .r.on{opacity:1}
+.tb .v.bon{background:var(--vert-pale)}.tb .v.mal{background:var(--rouge-pale)}.tb .v.moy{background:var(--jaune-pale)}
+#v2box{margin-top:12px;display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+#v2box>div{border:2px solid var(--encre);border-radius:14px;padding:10px 14px;font-size:18px;font-weight:700;line-height:1.3;background:var(--papier);opacity:0;transition:opacity .35s}
+#v2box>div.on{opacity:1}
+#v2box b{display:block;font-weight:1000;font-size:14px;letter-spacing:.1em;color:var(--encre-2);margin-bottom:2px}
+#rec{background:var(--jaune)}
+.rg{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.rc{background:var(--blanc);border:2px solid var(--encre);border-radius:16px;padding:12px 16px;opacity:0;transition:opacity .4s}
+.rc.on{opacity:1}
+.rc h3{margin:0 0 4px;font-size:21px;font-weight:1000}
+.rc p{margin:0;font-size:18px;font-weight:700;color:var(--encre-2);line-height:1.35}
+.rc p b{color:var(--encre);font-weight:900}
+/* bandeau */
+#subbar{position:absolute;left:40px;right:40px;top:780px;height:100px;background:var(--encre);border-radius:18px;display:flex;align-items:center;padding:0 20px 0 32px;gap:22px;z-index:8}
+#sub{flex:1;color:var(--papier);font-size:29px;font-weight:700;line-height:1.28;margin:0}
+#sub .k{color:var(--jaune);font-weight:1000}
+.ctl{display:flex;align-items:center;gap:10px;flex:none}
+.ctl button{height:52px;min-width:52px;border-radius:99px;border:2px solid var(--papier);background:transparent;color:var(--papier);font:900 17px var(--police);cursor:pointer;padding:0 16px}
+.ctl button:disabled{opacity:.3;cursor:default}
+.ctl #next{background:var(--jaune);color:var(--encre);border-color:var(--jaune);box-shadow:4px 4px 0 var(--papier);padding:0 22px}
+.ctl button:focus-visible{outline:3px solid var(--jaune);outline-offset:3px}
+.num{color:var(--contour-2);font-weight:900;font-size:15px;min-width:64px;text-align:center}
+.part{position:absolute;left:40px;top:742px;display:flex;gap:6px}
+.part span{font-size:14px;font-weight:900;letter-spacing:.08em;border-radius:99px;padding:3px 10px;color:var(--encre-2);border:1.5px solid var(--contour)}
+.part span.on{background:var(--encre);color:var(--jaune);border-color:var(--encre)}
+.hint{position:absolute;right:44px;top:884px;font-size:13px;color:var(--encre-2);font-weight:700}
+#pausebadge{position:absolute;left:58%;top:740px;transform:translateX(-50%);background:var(--jaune);border:2px solid var(--encre);border-radius:99px;padding:5px 18px;font-weight:1000;font-size:15px;box-shadow:var(--ombre-decalee);z-index:9;opacity:0;transition:opacity .2s}
+#pausebadge.show{opacity:1}
+#pause{font-size:15px!important;letter-spacing:-2px}
+@keyframes blink{50%{opacity:.15}}
+@keyframes flow{to{stroke-dashoffset:-24}}
+@media (prefers-reduced-motion:reduce){#wires .flow.live,#sw .lk,#leurre .jk,#tower .act,.car{animation:none}}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="top">
+    <div><div class="sur">BTS CIEL · E6 · Projet de Lorenzo · CyberSentinel</div><h1 class="titre">Le leurre ESP32</h1></div>
+    <div class="legende"><span class="lg-j">JAUNE · le PC demande</span><span class="lg-b">BLEU · on lui répond</span><span class="lg-v">VERT · événement de supervision</span></div>
+  </div>
+
+  <!-- câbles (coordonnées de scène) -->
+  <svg id="wires" viewBox="0 0 1600 900" aria-hidden="true">
+    <path class="base" id="wPC" d="M580 300C650 300 718 320 718 380"/>
+    <path class="base" id="wWin" d="M758 500V446"/>
+    <path class="base" id="wLeu" d="M1150 211C1040 211 908 290 908 380"/>
+    <path class="base" id="wUbu" d="M1140 600C1030 600 928 530 928 446"/>
+    <path class="flow" id="fPC" d="M580 300C650 300 718 320 718 380"/>
+    <path class="flow" id="fWin" d="M758 500V446"/>
+    <path class="flow" id="fLeu" d="M1150 211C1040 211 908 290 908 380"/>
+    <path class="flow" id="fUbu" d="M1140 600C1030 600 928 530 928 446"/>
+  </svg>
+
+  <!-- PC de test -->
+  <div id="role">RÔLE JOUÉ : POSTE PIRATÉ (simulation)</div>
+  <div class="moni" id="monitor"><div class="screen">
+    <div class="pane on" id="br">
+      <div class="tabs"><div class="onglet"><i class="fav"></i><span id="tabT">Nouvel onglet</span></div></div>
+      <div class="toolbar"><div class="addr" id="addr"><span class="nsec" id="nsec" style="display:none">⚠ Non sécurisé</span><span id="upath"></span></div></div>
+      <div class="view">
+        <div class="bp on" id="pDesk"><h3>Labo réseau</h3><p>PC de test · LAN isolé, sans Internet</p></div>
+        <div class="bp" id="pPrint">
+          <div class="ph"><svg viewBox="0 0 32 32"><rect x="8" y="3" width="16" height="9" class="fw"/><rect x="3" y="11" width="26" height="12" rx="3" class="fc2"/><rect x="8" y="19" width="16" height="10" class="fw si" stroke-width="1.5"/><circle cx="24" cy="15" r="1.6" class="fv"/></svg>IMP-RDC-02 · Serveur web intégré</div>
+          <div class="lc"><h4>Administration</h4><label>Utilisateur</label><div class="fld"></div><label>Mot de passe</label><div class="fld"></div><span class="bt">Connexion</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="pane" id="term"><div id="tlines"></div></div>
+  </div></div>
+  <div class="neck" style="left:262px;top:524px;width:96px;height:32px"></div><div class="pied" style="left:190px;top:554px;width:240px"></div>
+  <div class="dev" style="left:310px;top:578px"><b>PC DE TEST</b><span class="ip" id="pcIp">10.10.0.73</span></div>
+
+  <!-- switch -->
+  <svg id="sw" viewBox="0 0 330 66" role="img" aria-label="Switch 24 ports"></svg>
+  <div class="dev" style="left:925px;top:454px"><b>SWITCH</b>du labo</div>
+  <div id="mirror">PORT MIROIR → port 22</div>
+
+  <!-- PC Windows -->
+  <div class="moni" id="winmon"><div class="screen">
+    <svg class="lk-off" viewBox="0 0 34 34"><rect x="3" y="5" width="12" height="11" class="fb"/><rect x="18" y="5" width="13" height="11" class="fb"/><rect x="3" y="19" width="12" height="11" class="fb"/><rect x="18" y="19" width="13" height="11" class="fb"/></svg>
+    <span class="lk-off">Session de Martine</span>
+    <svg class="lk-on" viewBox="0 0 34 34"><rect x="7" y="15" width="20" height="15" rx="3" class="fj"/><path d="M11 15V11a6 6 0 0 1 12 0v4" class="fn sj" stroke-width="3"/></svg>
+    <span class="lk-on">Verrouillé</span>
+  </div></div>
+  <div class="neck" style="left:735px;top:640px;width:46px;height:20px"></div><div class="pied" style="left:700px;top:658px;width:116px;height:9px"></div>
+  <div class="dev" style="left:758px;top:676px"><b>PC WINDOWS</b><span class="ip">10.10.0.54</span></div>
+
+  <!-- leurre -->
+  <div id="costume"><svg viewBox="0 0 32 32"><rect x="8" y="3" width="16" height="9" class="fw si" stroke-width="1.5"/><rect x="3" y="11" width="26" height="12" rx="3" class="fc2 si" stroke-width="1.5"/><rect x="8" y="19" width="16" height="10" class="fw si" stroke-width="1.5"/></svg><span><small>SE FAIT PASSER POUR </small>IMP-RDC-02</span></div>
+  <svg id="leurre" viewBox="0 0 410 170" role="img" aria-label="Carte ESP32 reliée à un module Ethernet W5500"></svg>
+  <div class="dev" style="left:1360px;top:298px"><b>LEURRE</b>ESP32 + W5500 <span class="ip">10.10.0.80</span></div>
+  <div id="jr"><div class="jh"><span>Journal du leurre</span><span id="jn">0 visite</span></div><div id="jl"></div></div>
+
+  <!-- serveur Ubuntu -->
+  <svg id="tower" viewBox="0 0 76 200" role="img" aria-label="Serveur tour"></svg>
+  <div class="moni" id="dmon"><div class="screen">
+    <div class="pane on" id="dash"><div class="dh">Supervision · tableau de bord <em id="dcount"></em></div><div id="drows"></div></div>
+    <div class="pane" id="ws"><div class="dh">Wireshark · capture sur enp1s0 <em id="wcount"></em></div><div class="wf"><span>filtre : (aucun)</span><span id="wfn"></span></div><div id="wrows"></div></div>
+  </div></div>
+  <div class="neck" style="left:1376px;top:666px;width:56px;height:18px"></div><div class="pied" style="left:1334px;top:682px;width:140px;height:9px"></div>
+  <div class="dev" style="left:1360px;top:700px"><b>SERVEUR UBUNTU</b><span class="ip">10.10.0.20</span></div>
+
+  <div id="say"><small id="sayW"></small><div id="sayT"></div></div>
+
+  <!-- cartes -->
+  <div class="cardc" id="inv">
+    <h2>L'inventaire du labo</h2>
+    <div class="inv" id="invg">
+      <div class="h">Adresse</div><div class="h">Appareil</div><div class="h">Qui s'en sert ?</div>
+      <div class="ipc">10.10.0.20</div><div>Serveur Ubuntu</div><div>la supervision</div>
+      <div class="ipc">10.10.0.54</div><div>PC Windows</div><div>Martine</div>
+      <div class="ipc">10.10.0.73</div><div>PC de test</div><div>le technicien</div>
+      <div class="ipc lr">10.10.0.80</div><div class="lr">« Imprimante » IMP-RDC-02</div><div class="lr">personne !</div>
+    </div>
+    <p class="foot">Visites normales attendues sur le leurre : <b>zéro</b>. Une seule visite mérite donc qu'on regarde.</p>
+  </div>
+
+  <div class="cardc" id="why">
+    <h2>Pourquoi l'attaquant viendrait ?</h2>
+    <p class="intro">Entré sur un poste, il ne connaît pas le réseau. Il fait sa <b>reconnaissance</b> : il cherche des cibles faciles.</p>
+    <div class="rw"><span class="n">1</span><div><h3>Une imprimante est souvent oubliée</h3><p>Rarement mise à jour, parfois avec le mot de passe d'usine.</p></div></div>
+    <div class="rw"><span class="n">2</span><div><h3>Sa page <code>/admin</code> attire</h3><p>Réglages, carnet d'adresses, documents scannés…</p></div></div>
+    <div class="rw"><span class="n">3</span><div><h3>C'est un tremplin</h3><p>Allumée jour et nuit, rarement surveillée : idéale pour rebondir.</p></div></div>
+    <p class="foot">Il peut aussi <b>ne jamais venir</b> : le leurre est un filet en plus, pas un mur.</p>
+  </div>
+
+  <div class="cardc" id="how">
+    <h2>Comment la découvre-t-il ?</h2>
+    <div class="rw"><span class="tg v1">V1</span><div><h3>Il balaie les adresses</h3><p>Nmap essaie 10.10.0.1 à .254 : le leurre répond comme les autres.</p></div></div>
+    <div class="rw"><span class="tg v2">V2</span><div><h3>Il lit les noms du DNS</h3><p>Le nom <code>imp-rdc-02</code> est inscrit dans le DNS, comme une vraie imprimante.</p></div></div>
+    <div class="rw"><span class="tg ext">EXTENSION</span><div><h3>Il écoute les annonces</h3><p>Les imprimantes s'annoncent (mDNS, WSD). À tester avec la W5500.</p></div></div>
+    <p class="foot">Un bon leurre ressemble à <b>ce que l'attaquant cherche</b>, là où il cherche.</p>
+  </div>
+
+  <div class="cardc" id="tri">
+    <h2>Visiteur = pirate&nbsp;? Pas forcément</h2>
+    <div class="rw"><span class="tg i">INFO</span><div><h3>Le scanner d'inventaire autorisé</h3><p>Son adresse est connue : elle est sur une liste blanche.</p></div></div>
+    <div class="rw"><span class="tg q">À QUALIFIER</span><div><h3>Une visite isolée</h3><p>Faute de frappe dans l'adresse ? Simple curiosité ?</p></div></div>
+    <div class="rw"><span class="tg p">PRIORITAIRE</span><div><h3>Balayage, puis /admin, puis re-visite</h3><p>En quelques minutes, depuis un poste ordinaire.</p></div></div>
+    <p class="foot">Le leurre <b>ne prouve pas</b> une attaque : il lève un signal. C'est le <b>technicien</b> qui qualifie.</p>
+  </div>
+
+  <div class="cardc" id="mac">
+    <h2>Table MAC du switch</h2>
+    <div class="mr h"><span>Port</span><span>Adresse MAC</span><span>Appareil</span></div>
+    <div class="mr" data-m="pc"><span>1</span><span>3c:52:82:1a:0b:73</span><span>PC test</span></div>
+    <div class="mr" data-m="win"><span>6</span><span>3c:52:82:1a:0b:54</span><span>PC Win.</span></div>
+    <div class="mr" data-m="leu"><span>19</span><span>02:00:0a:0a:00:50</span><span>leurre</span></div>
+    <div class="mr" data-m="ubu"><span>22</span><span>3c:52:82:1a:0b:20</span><span>Ubuntu</span></div>
+  </div>
+
+  <div class="cardc" id="mc">
+    <div class="mhead"><b id="mT">REQUÊTE HTTP</b><span id="mBy"></span></div>
+    <div id="lines"></div>
+    <div id="mnote"></div>
+  </div>
+
+  <div class="cardc wide" id="nm">
+    <h2>Nmap : ce qu'il apprend, ce que le leurre voit</h2>
+    <div class="tb" style="grid-template-columns:300px 1fr 1fr">
+      <span></span><div class="hd" style="background:var(--papier-2)">Nmap apprend…</div><div class="hd" style="background:var(--jaune)">Le leurre voit…</div>
+      <span class="k r"><code>nmap -sn 10.10.0.0/24</code></span><div class="v r">« 10.10.0.80 est allumé »</div><div class="v r mal"><b>rien</b> : la W5500 répond seule à l'ARP</div>
+      <span class="k r"><code>sudo nmap 10.10.0.80</code><br>(scan SYN)</span><div class="v r">« port 80 ouvert, 999 fermés »</div><div class="v r mal"><b>sans doute rien</b> : connexion jamais terminée (à mesurer)</div>
+      <span class="k r"><code>nmap 10.10.0.80</code><br>(sans root : scan connect)</span><div class="v r">la même chose</div><div class="v r moy">une connexion ouverte puis coupée, <b>sans requête</b> : vue seulement si le programme note chaque connexion</div>
+      <span class="k r"><code>nmap -sV -p 80</code></span><div class="v r">« c'est un serveur web »</div><div class="v r bon"><b>enregistré</b> : <code>GET /</code> sans User-Agent</div>
+    </div>
+    <div id="v2box">
+      <div><b>V2 · IDÉE 1</b>Noter chaque connexion TCP, même sans requête HTTP.</div>
+      <div><b>V2 · IDÉE 2</b>Ouvrir aussi le port 9100 (impression directe) : une vraie imprimante l'a.</div>
+      <div><b>V2 · IDÉE 3</b>Vérifier tout cela par une capture Wireshark (compétence C10).</div>
+    </div>
+  </div>
+
+  <div class="cardc wide" id="cmp">
+    <h2>Wireshark ou leurre : la différence</h2>
+    <div class="tb" style="grid-template-columns:230px 1fr 1fr">
+      <span></span><div class="hd" style="background:var(--bleu)">Wireshark · il OBSERVE</div><div class="hd" style="background:var(--jaune)">Leurre · il ATTEND</div>
+      <span class="k r">Son rôle</span><div class="v r">regarder passer les paquets</div><div class="v r">être une cible-piège</div>
+      <span class="k r">Ce qu'il voit</span><div class="v r">ce qui passe par sa carte réseau (ou par un port miroir)</div><div class="v r">seulement ce qui vient vers lui</div>
+      <span class="k r">Le bruit</span><div class="v r mal">énorme : surtout du trafic normal</div><div class="v r bon">presque nul : aucune visite légitime</div>
+      <span class="k r">Pour trouver l'attaque</span><div class="v r mal">il faut savoir quoi chercher (filtres, règles)</div><div class="v r bon">la visite elle-même est le signal</div>
+      <span class="k r">Les données</span><div class="v r moy">tout le contenu, y compris celui des collègues</div><div class="v r bon">quelques lignes : IP, heure, chemin</div>
+      <span class="k r">Sa limite</span><div class="v r">ne dit pas ce qui est grave</div><div class="v r">aveugle aux attaques qui l'ignorent</div>
+    </div>
+    <p class="foot">Les deux sont <b>complémentaires</b> : Lorenzo utilise Wireshark pour <b>prouver</b> que son leurre voit bien ce qu'il annonce.</p>
+  </div>
+
+  <div class="cardc wide" id="rec">
+    <h2>À retenir : les réponses au jury</h2>
+    <div class="rg">
+      <div class="rc"><h3>Pourquoi irait-il la voir ?</h3><p>En <b>reconnaissance</b>, l'attaquant cherche des cibles faciles ; une imprimante en est une. <b>Rien ne garantit</b> qu'il vienne : c'est un filet en plus.</p></div>
+      <div class="rc"><h3>Comment la découvre-t-il ?</h3><p>Par <b>balayage</b> (Nmap) en V1 ; par le <b>nom DNS</b> en V2 ; par des annonces mDNS/WSD en extension.</p></div>
+      <div class="rc"><h3>Visite = malveillance ?</h3><p><b>Non.</b> Personne n'a de raison d'y aller : toute visite est <b>anormale</b>, donc <b>à qualifier</b> (liste blanche, regroupement par IP).</p></div>
+      <div class="rc"><h3>Pourquoi pas Wireshark ?</h3><p>Wireshark <b>observe</b> tout et noie l'attaque dans le bruit. Le leurre <b>attend</b> : chez lui, chaque visite est un signal.</p></div>
+    </div>
+    <p class="foot">Le trajet : <b>PC</b> → <b>switch</b> (table MAC) → <b>W5500</b> (TCP/IP) → <b>ESP32</b> (SPI, journal) → événement signé → <b>API Ubuntu</b> (SQLite) → <b>tableau de bord</b>.</p>
+  </div>
+
+  <div id="fx"></div>
+  <div id="cur"><svg viewBox="0 0 24 24"><path d="M4 2l15 11-6.5 1 3.8 7.4-2.6 1.3-3.8-7.4L5 20z" class="fw si" stroke-width="1.6" stroke-linejoin="round"/></svg><i id="ring"></i></div>
+
+  <div class="part" id="parts"><span>POURQUOI ?</span><span>LE TRAJET</span><span>NMAP</span><span>WIRESHARK</span><span>RETENIR</span></div>
+  <div id="subbar">
+    <p id="sub" aria-live="polite"></p>
+    <div class="ctl">
+      <button id="restart" title="Recommencer (touche Début)" aria-label="Recommencer">↺</button>
+      <button id="prev" title="Étape précédente (←)" aria-label="Étape précédente">←</button>
+      <button id="pause" title="Pause (P)" aria-label="Pause (P)" disabled>❚❚</button>
+      <span class="num" id="num"></span>
+      <button id="next" title="Étape suivante (→, espace)">Suivant →</button>
+      <button id="fs" title="Plein écran (F)" aria-label="Plein écran">⛶</button>
+    </div>
+  </div>
+  <div class="hint">Maquette sur LAN isolé · adresses d'exemple · → / espace : suivant · P : pause · ← : retour · F : plein écran</div>
+  <div id="pausebadge">❚❚ PAUSE · appuie sur P ou → pour reprendre</div>
+</div>
+
+<script>
+{
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const stage=$('#stage');
+let scale=1;
+function fit(){scale=Math.min(innerWidth/1600,innerHeight/900);stage.style.transform=`translate(-50%,-50%) scale(${scale})`}
+addEventListener('resize',fit);fit();
+const esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
+/* ---------- dessins du matériel ---------- */
+(function(){
+ // switch 24 ports
+ const o=[`<rect x="0" y="0" width="330" height="66" rx="6" class="fc2 si" stroke-width="2"/><rect x="8" y="7" width="314" height="52" rx="4" class="fi2"/>`];
+ for(let r=0;r<2;r++)for(let c=0;c<12;c++){const x=20+c*20+(c>5?10:0),y=12+r*24;
+  o.push(`<rect x="${x}" y="${y}" width="16" height="16" rx="1.5" class="fi"/><rect x="${x+5}" y="${y+(r?11:1)}" width="6" height="4" class="fi3"/><rect x="${x+1}" y="${y+(r?1:12)}" width="4" height="3" class="fv lk" style="animation-delay:-${((r*12+c)*.37%1.9).toFixed(2)}s"/>`)}
+ o.push(`<rect x="276" y="14" width="38" height="14" rx="2" class="fc"/><rect x="276" y="38" width="38" height="14" rx="2" class="fc"/><circle cx="268" cy="30" r="2.5" class="fv"/>`);
+ $('#sw').innerHTML=o.join('');
+ // ESP32 + W5500
+ const L=[];
+ L.push(`<rect x="22" y="34" width="112" height="108" rx="6" class="fb si" stroke-width="2"/>`); // carte W5500
+ L.push(`<rect x="70" y="72" width="36" height="36" rx="2" class="fi"/><circle cx="76" cy="78" r="2" class="fi3"/>`);
+ for(let i=0;i<9;i++){L.push(`<rect x="${68+i*4.4}" y="68" width="2" height="4" class="fc2"/><rect x="${68+i*4.4}" y="108" width="2" height="4" class="fc2"/>`)}
+ L.push(`<rect x="44" y="118" width="14" height="10" rx="2" class="fi2"/><circle cx="40" cy="50" r="3" class="fc2"/><circle cx="118" cy="128" r="3" class="fc2"/>`);
+ L.push(`<rect x="0" y="52" width="58" height="62" rx="3" class="fc2 si" stroke-width="2"/><rect x="5" y="64" width="34" height="38" rx="2" class="fi"/><rect x="12" y="64" width="20" height="8" class="fi3"/>`);
+ L.push(`<rect x="44" y="57" width="9" height="6" class="fv jk"/><rect x="44" y="103" width="9" height="6" class="fjf jk" style="animation-delay:-.6s"/>`);
+ for(let i=0;i<6;i++)L.push(`<rect x="122" y="${50+i*14}" width="8" height="8" class="fi"/>`);
+ const wc=['sj','sr','si2','sv','sjf','sb'];
+ for(let i=0;i<6;i++){const y=54+i*14,x2=176+i*12;L.push(`<path d="M128 ${y}C150 ${y} ${x2} 20 ${x2} 40" class="fn ${wc[i]}" stroke-width="3" stroke-linecap="round"/>`)}
+ L.push(`<rect x="150" y="38" width="250" height="100" rx="6" class="fi"/>`); // carte ESP32
+ for(let i=0;i<19;i++){L.push(`<rect x="${164+i*12}" y="42" width="7" height="7" class="fc2"/><rect x="${164+i*12}" y="127" width="7" height="7" class="fc2"/>`)}
+ L.push(`<rect x="140" y="76" width="16" height="24" rx="2" class="fc2 si" stroke-width="1"/>`); // USB
+ L.push(`<rect x="182" y="64" width="12" height="9" rx="2" class="fc"/><rect x="182" y="104" width="12" height="9" rx="2" class="fc"/>`);
+ L.push(`<circle cx="214" cy="112" r="4.5" class="fr"/><circle class="act fb" id="aled" cx="230" cy="112" r="4.5"/>`);
+ L.push(`<rect x="262" y="56" width="134" height="66" rx="3" class="fi2"/><rect x="266" y="60" width="92" height="58" rx="3" class="fc2"/><text x="312" y="95" text-anchor="middle" style="font:900 15px var(--police);fill:var(--encre-2)">ESP32</text>`);
+ L.push(`<path d="M364 64h26v8h-22v8h22v8h-22v8h22v8h-22v8h22" class="fn sjf" stroke-width="2.5"/>`);
+ $('#leurre').innerHTML=L.join('');
+ // tour Ubuntu
+ const T=[`<rect x="2" y="2" width="72" height="196" rx="6" class="fi2 si" stroke-width="2"/><rect x="10" y="12" width="56" height="30" rx="3" class="fi"/><rect x="10" y="48" width="56" height="12" rx="2" class="fi"/><rect x="10" y="64" width="56" height="12" rx="2" class="fi"/>`];
+ for(let r=0;r<8;r++)for(let c=0;c<6;c++)T.push(`<circle cx="${16+c*9}" cy="${96+r*9}" r="2.2" class="fi"/>`);
+ T.push(`<circle cx="38" cy="180" r="7" class="fc si" stroke-width="1.5"/><circle cx="20" cy="27" r="3" class="fv act"/><circle cx="30" cy="27" r="3" class="fjf act" style="animation-delay:-.7s"/>`);
+ $('#tower').innerHTML=T.join('');
+})();
+
+/* ---------- moteur d'animation (repris du modèle) ---------- */
+const RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
+let fast=RM,running=false,step=0,nav=false;
+const pend=new Set();
+const D=ms=>fast?1:ms;
+let paused=false,frozen=[];
+function startT(o){o.t0=performance.now();o.t=setTimeout(()=>{pend.delete(o);o.r()},o.rem)}
+const wait=ms=>fast?Promise.resolve():new Promise(r=>{const o={r,rem:ms,t:null};pend.add(o);if(!paused)startT(o)});
+function pause(){if(paused||!running)return;paused=true;pend.forEach(o=>{if(o.t!=null){clearTimeout(o.t);o.t=null;o.rem=Math.max(0,o.rem-(performance.now()-o.t0))}});
+ frozen=document.getAnimations().filter(a=>a.playState==='running');frozen.forEach(a=>{try{a.pause()}catch(e){}});pui()}
+function resume(){if(!paused)return;paused=false;frozen.forEach(a=>{try{a.play()}catch(e){}});frozen=[];pend.forEach(o=>{if(o.t==null)startT(o)});pui()}
+function pui(){const b=$('#pause');b.textContent=paused?'▶':'❚❚';b.title=paused?'Reprendre (P)':'Pause (P)';b.setAttribute('aria-label',b.title);b.disabled=!running&&!paused;$('#pausebadge').classList.toggle('show',paused)}
+const isCss=a=>(typeof CSSAnimation!=='undefined'&&a instanceof CSSAnimation)||(typeof CSSTransition!=='undefined'&&a instanceof CSSTransition);
+function skip(){resume();fast=true;pend.forEach(o=>{clearTimeout(o.t);o.r()});pend.clear();document.getAnimations().forEach(a=>{if(!isCss(a))try{a.finish()}catch(e){}})}
+function pos(el){const r=el.getBoundingClientRect(),s=stage.getBoundingClientRect();return{x:(r.left+r.width/2-s.left)/scale,y:(r.top+r.height/2-s.top)/scale}}
+async function anim(el,kf,ms,o={}){const a=el.animate(kf,{duration:D(ms),easing:o.easing||'ease-in-out',fill:'forwards'});try{await a.finished}catch(e){}return a}
+
+/* curseur */
+let cp={x:310,y:420};const cur=$('#cur');
+async function moveCur(el,dx=0,dy=0){const p=pos(el),f=cp;cp={x:p.x+dx,y:p.y+dy};cur.style.opacity=1;cur.style.transform=`translate(${cp.x}px,${cp.y}px)`;await anim(cur,[{transform:`translate(${f.x}px,${f.y}px)`},{transform:`translate(${cp.x}px,${cp.y}px)`}],650)}
+async function click(){anim($('#ring'),[{opacity:1,transform:'scale(.4)'},{opacity:0,transform:'scale(1.8)'}],500);await wait(320)}
+async function typeInto(el,txt,ms=80){el.textContent='';for(const ch of txt){el.textContent+=ch;await wait(ms)}}
+
+/* mots qui volent */
+async function fly(text,from,to,cls='',morph=null,ms=1000){
+ if(fast)return;const c=document.createElement('div');c.className='fly '+cls;c.textContent=text;$('#fx').append(c);
+ const w=c.offsetWidth,h=c.offsetHeight,a=pos(from),b=pos(to);
+ if(morph)setTimeout(()=>{c.textContent=morph},D(ms)*.45);
+ await anim(c,[{transform:`translate(${a.x-w/2}px,${a.y-h/2}px) scale(.7)`,opacity:0},{transform:`translate(${a.x-w/2}px,${a.y-h/2-20}px) scale(1.05)`,opacity:1,offset:.2},{transform:`translate(${b.x-w/2}px,${b.y-h/2}px) scale(1)`,opacity:1}],ms);
+ c.remove();
+}
+
+/* ---------- réseau : paquets le long des câbles ---------- */
+const W={pc:'PC',win:'Win',leu:'Leu',ubu:'Ubu'};
+function seg(k,rev){const p=$('#w'+W[k]),L=p.getTotalLength(),a=[];for(let i=0;i<=24;i++){const q=p.getPointAtLength(L*i/24);a.push({x:q.x,y:q.y})}return rev?a.reverse():a}
+const liveN={};
+function live(k,on){liveN[k]=Math.max(0,(liveN[k]||0)+(on?1:-1));$('#f'+W[k]).classList.toggle('live',liveN[k]>0)}
+function swBusy(ms){const s=$('#sw');s.classList.add('busy');setTimeout(()=>s.classList.remove('busy'),D(ms))}
+function leuNet(ms){const s=$('#leurre');s.classList.add('net');setTimeout(()=>s.classList.remove('net'),D(ms))}
+async function travel(el,pts,ms){
+ const w=el.offsetWidth,h=el.offsetHeight,Ls=[0];
+ for(let i=1;i<pts.length;i++)Ls.push(Ls[i-1]+Math.max(1,Math.hypot(pts[i].x-pts[i-1].x,pts[i].y-pts[i-1].y)));
+ const T=Ls[Ls.length-1];
+ await anim(el,pts.map((p,i)=>({transform:`translate(${p.x-w/2}px,${p.y-h/2}px)`,opacity:(i===0||i===pts.length-1)?0:1,offset:Ls[i]/T})),ms,{easing:'linear'});
+}
+function mkpk(label,cls){const p=document.createElement('div');p.className='pk '+cls;p.textContent=label;$('#fx').append(p);return p}
+async function go(label,cls,a,b,ms=1600){
+ if(fast)return;const p=mkpk(label,cls);live(a,1);live(b,1);swBusy(ms);if(a==='leu'||b==='leu')leuNet(ms);
+ if(b==='ubu'||a==='ubu')$('#tower').classList.add('busy');
+ await travel(p,[...seg(a),...seg(b,true)],ms);p.remove();live(a,0);live(b,0);$('#tower').classList.remove('busy');
+}
+async function bcast(label,cls,a,ms=1800,onArrive){
+ if(fast){return}
+ const p=mkpk(label,cls);live(a,1);swBusy(ms);
+ await travel(p,[...seg(a),seg(a).pop()],ms*.45);p.remove();live(a,0);
+ const others=Object.keys(W).filter(k=>k!==a);
+ await Promise.all(others.map(async k=>{const c=mkpk(label,cls);live(k,1);if(k==='leu')leuNet(ms);await travel(c,[seg(a).pop(),...seg(k,true)],ms*.55);c.remove();live(k,0);if(onArrive)onArrive(k)}));
+}
+
+/* ---------- PC de test ---------- */
+function pane(id){$$('#monitor .pane').forEach(p=>p.classList.toggle('on',p.id===id))}
+function page(id){$$('.bp').forEach(p=>p.classList.toggle('on',p.id===id))}
+function flashAddr(){const a=$('#addr');a.classList.add('flash');setTimeout(()=>a.classList.remove('flash'),D(1400))}
+function tl(html,cls=''){const d=document.createElement('div');d.className='tl '+cls;d.innerHTML=html;$('#tlines').append(d);const all=$$('#tlines .tl');while(all.length>15){all.shift().remove()}return d}
+async function cmd(c){$$('#tlines .car').forEach(e=>e.remove());const d=tl(`<span class="pr">lab@pc-test:~$</span> <span class="c"></span><span class="car"></span>`);await typeInto(d.querySelector('.c'),c,55);d.querySelector('.car').remove();await wait(250)}
+function prompt(){$$('#tlines .car').forEach(e=>e.remove());tl(`<span class="pr">lab@pc-test:~$</span> <span class="car"></span>`)}
+
+/* ---------- journal, tableau de bord, Wireshark ---------- */
+let jcount=0;
+function jreset(){jcount=0;$('#jl').innerHTML='<div class="jv">aucune visite</div>';$('#jn').textContent='0 visite'}
+function jadd(t){const v=$('#jl .jv');if(v)v.remove();const d=document.createElement('div');d.className='je';d.textContent=t;$('#jl').append(d);const all=$$('#jl .je');if(all.length>2)all[0].remove();jcount++;$('#jn').textContent=jcount+(jcount>1?' visites':' visite');if(!fast)d.animate([{background:'var(--jaune)'},{background:'var(--jaune-pale)'}],{duration:900})}
+function dreset(){$('#drows').innerHTML='<div class="dvide">aucun événement</div>';$('#dcount').textContent=''}
+function dadd(time,title,detail,lvl,lab){const v=$('#drows .dvide');if(v)v.remove();const d=document.createElement('div');d.className='dr '+lvl;d.innerHTML=`<div class="d1"><b>${time}</b> ${title}<span class="lv">${lab}</span></div><div class="d2">${esc(detail)}</div>`;$('#drows').prepend(d);const all=$$('#drows .dr');if(all.length>3)all[all.length-1].remove();$('#dcount').textContent=$$('#drows .dr').length+' évén.';if(!fast)d.animate([{transform:'translateX(30px)',opacity:0},{transform:'none',opacity:1}],{duration:500})}
+function dpane(id){$$('#dmon .pane').forEach(p=>p.classList.toggle('on',p.id===id))}
+let wn=0;
+function wreset(){wn=0;$('#wrows').innerHTML='<div class="wr hd"><span>Source</span><span>Dest.</span><span>Proto</span><span>Info</span></div>';$('#wcount').textContent='';$('#wfn').textContent='0 paquet'}
+function wadd(s,d,p,i,cls){const r=document.createElement('div');r.className='wr '+cls;r.innerHTML=`<span>${s}</span><span>${d}</span><span>${p}</span><span>${esc(i)}</span>`;$('#wrows').append(r);const all=$$('#wrows .wr:not(.hd)');if(all.length>7)all[0].remove();wn++;$('#wfn').textContent=wn.toLocaleString('fr-FR')+(wn>1?' paquets':' paquet')}
+
+/* ---------- bulle, cartes, lettre ---------- */
+function say(who,html,x,y,w=380){const s=$('#say');$('#sayW').textContent=who;$('#sayT').innerHTML=html;s.style.left=x+'px';s.style.top=y+'px';s.style.width=w+'px';s.classList.add('on')}
+const sayHide=()=>$('#say').classList.remove('on');
+async function card(id){$('#'+id).classList.add('open');await wait(400)}
+async function uncard(){$$('.cardc.open').forEach(c=>c.classList.remove('open'));await wait(350)}
+async function rows(sel,ms=420){for(const r of $$(sel)){r.classList.add('on');await wait(ms)}}
+const mc=$('#mc');
+function letter(kind,title,by,spec){
+ mc.className='cardc '+kind;$('#mT').textContent=title;$('#mBy').textContent=by;
+ $('#lines').innerHTML=spec.map((l,i)=>`<div class="ln ${l[0]}"><i>${i+1}</i><div class="tx">${l[1].replace(/\{(\w+):([^}]*)\}/g,(m,k,t)=>`<span class="tok" data-t="${k}">${esc(t)}</span>`)}</div>${l[2]?`<span class="lab">${l[2]}</span>`:''}</div>`).join('');
+ $('#mnote').className='';$('#mnote').innerHTML='';
+}
+const tk=k=>$(`#lines .tok[data-t="${k}"]`);
+async function put(k,from,cls='',ms=900){const t=tk(k);t.closest('.ln').classList.add('on');if(from)await fly(t.textContent,from,t,cls,null,ms);t.classList.add('on')}
+async function putLine(i){$$('#lines .ln')[i].classList.add('on');await wait(250)}
+function mnote(h){const n=$('#mnote');n.innerHTML=h;n.className='on'}
+function hit(){const l=$('#leurre');l.classList.add('hit');setTimeout(()=>l.classList.remove('hit'),D(900))}
+function macSel(k){$$('#mac .mr').forEach(r=>r.classList.toggle('sel',r.dataset.m===k))}
+
+/* ---------- données ---------- */
+const REQ=[['m','{m:GET} {p:/admin} {v:HTTP/1.1}','méthode · chemin'],['h','{h1:Host:} {h1v:10.10.0.80}','en-tête'],['h','{h2:User-Agent:} {h2v:Mozilla/5.0 (X11; Ubuntu; Linux x86_64) Firefox/128.0}',''],['b','','ligne vide · pas de corps']];
+const EVT=[['m','{m:POST} {p:/api/evenements} {v:HTTP/1.1}','vers l\'API'],['h','{h1:Host:} {h1v:10.10.0.20}','en-tête'],['h','{h2:X-Signature:} {h2v:hmac-sha256=9c41…e07b}','preuve d\'origine'],['b','','ligne vide'],['d','{d:{"capteur":"leurre-01", "ip":"10.10.0.73", "port":80, "chemin":"/admin", "heure":"2026-11-22T10:42:07+01:00", "compteur":118}}','corps JSON']];
+const BRUIT=[['10.10.0.54','10.10.0.20','TLS','Application Data','t'],['10.10.0.54','10.10.0.20','DNS','Standard query A','u'],['10.10.0.20','10.10.0.54','TCP','443 → 52114 [ACK]','t'],['10.10.0.54','224.0.0.251','MDNS','Standard query PTR','u'],['3c:52:82…','Broadcast','ARP','Who has 10.10.0.20?','a'],['10.10.0.54','10.10.0.20','SMB2','Read Request','t'],['10.10.0.73','10.10.0.20','SSH','Encrypted packet','t'],['10.10.0.20','10.10.0.54','NTP','NTP Version 4','u'],['10.10.0.20','10.10.0.54','TLS','Application Data','t'],['10.10.0.54','10.10.0.20','TCP','52114 → 443 [ACK]','t']];
+
+/* ---------- état initial ---------- */
+function reset(){
+ document.getAnimations().forEach(a=>{if(!isCss(a))a.cancel()});
+ pend.forEach(o=>clearTimeout(o.t));pend.clear();paused=false;frozen=[];
+ $('#fx').innerHTML='';for(const k in W){liveN[k]=0;$('#f'+W[k]).classList.remove('live')}
+ cp={x:310,y:420};cur.style.opacity=0;cur.style.transform=`translate(${cp.x}px,${cp.y}px)`;
+ pane('br');page('pDesk');$('#upath').textContent='';$('#nsec').style.display='none';$('#tabT').textContent='Nouvel onglet';$('#addr').classList.remove('flash');
+ $('#tlines').innerHTML='';$('#role').classList.remove('on');$('#costume').classList.remove('on');$('#mirror').classList.remove('on');
+ $('#winmon').classList.remove('lock');$('#sw').classList.remove('busy');$('#leurre').className.baseVal='';$('#tower').classList.remove('busy');
+ jreset();dreset();wreset();dpane('dash');sayHide();
+ $$('.cardc').forEach(c=>c.classList.remove('open'));mc.className='cardc';$('#lines').innerHTML='';$('#mnote').className='';
+ $$('.rw,.inv>div,.foot,.tb .r,#v2box>div,.rc').forEach(e=>e.classList.remove('on'));$$('.inv .h').forEach(e=>e.classList.add('on'));macSel('');
+}
+
+const K=s=>s.replace(/\[([^\]]+)\]/g,'<span class="k">$1</span>');
+const STEPS=[
+ /* 0 */ {p:0,sub:"Sur le [LAN isolé] du labo : un PC de test, un PC Windows, un serveur Ubuntu… et un petit [ESP32] qui joue l'imprimante.",run:async()=>{}},
+ /* ===== POURQUOI ? ===== */
+ {p:0,sub:"Un [leurre], c'est un appât : un faux appareil dont [personne n'a besoin]. Ici, une fausse imprimante.",run:async()=>{
+   $('#costume').classList.add('on');await wait(500);await card('inv');await rows('#invg>div:not(.h)',110);await wait(300);$('#inv .foot').classList.add('on')}},
+ {p:0,sub:"Pourquoi un attaquant viendrait-il ? Une fois entré, il [ne connaît pas le réseau] : il cherche des [cibles faciles].",run:async()=>{
+   await uncard();$('#role').classList.add('on');say('Le pirate pense…',"Qu'y a-t-il sur ce réseau ? Une imprimante, peut-être ?",130,250,340);await wait(900);sayHide();
+   await card('why');await rows('#why .rw',500);$('#why .foot').classList.add('on')}},
+ {p:0,sub:"Comment la trouve-t-il ? Il [balaie les adresses] une par une. Le leurre répond, comme un appareil normal.",run:async()=>{
+   await uncard();
+   for(let i=0;i<2;i++){await bcast('?','dot','pc',1300)}
+   await Promise.all([go('','dot rep','ubu','pc',1200),go('','dot rep','win','pc',1200),go('','dot rep','leu','pc',1200)]);
+   await card('how');await rows('#how .rw',500);$('#how .foot').classList.add('on')}},
+ {p:0,sub:"Un visiteur est-il malveillant ? [Pas forcément]. Mais personne n'a de raison d'y aller : toute visite est [anormale], donc [à qualifier].",run:async()=>{
+   await uncard();await card('tri');await rows('#tri .rw',550);$('#tri .foot').classList.add('on')}},
+ /* ===== LE TRAJET ===== */
+ {p:1,sub:"Le PC ouvre [http://10.10.0.80/admin]. D'abord, il demande à tout le réseau l'adresse [MAC] du leurre : c'est l'[ARP].",run:async()=>{
+   await uncard();await moveCur($('#addr'),-120,4);await click();$('#nsec').style.display='';await typeInto($('#upath'),'10.10.0.80/admin',70);await wait(300);
+   $('#tabT').textContent='Chargement…';cur.style.opacity=0;
+   await bcast('ARP : qui a 10.10.0.80 ?','arp','pc',2200);
+   say('La puce W5500',"C'est moi ! Ma MAC : <code>02:00:0a:0a:00:50</code>",1150,336,400);
+   await go('ARP : c\'est moi','rep','leu','pc',1700);await wait(400);sayHide()}},
+ {p:1,sub:"Puis la poignée de main [TCP] sur le port 80 : SYN, SYN-ACK, ACK. C'est la puce [W5500] qui répond, toute seule.",run:async()=>{
+   await go('SYN · port 80','',  'pc','leu',1300);await go('SYN-ACK','rep','leu','pc',1300);await go('ACK','','pc','leu',1300);
+   say('La puce W5500',"Je gère TCP/IP moi-même. L'ESP32 n'a plus qu'à lire et écrire les données.",1150,336,400);await wait(600)}},
+ {p:1,sub:"La requête HTTP part. Le [switch] lit la MAC de destination dans sa table et l'envoie [seulement] sur le port du leurre.",run:async()=>{
+   sayHide();await card('mac');macSel('pc');await wait(500);
+   const g=go('GET /admin','','pc','leu',2600);await wait(D(1000));macSel('leu');await g;hit()}},
+ {p:1,sub:"La W5500 passe la requête à l'[ESP32] par le bus [SPI]. L'ESP32 la lit et note [qui], [quand], [quoi].",run:async()=>{
+   await uncard();letter('req','REQUÊTE HTTP','reçue par le leurre',REQ);await card('mc');
+   await put('m',$('#leurre'),'y');await put('p',$('#upath'),'y');await put('v');
+   await put('h1');await put('h1v',$('#upath'),'b');await put('h2');await put('h2v',$('#pcIp'),'b');await putLine(3);
+   await fly('10.10.0.73',$('#pcIp'),$('#jl'),'y');await fly('/admin',tk('p'),$('#jl'),'y');
+   jadd('10:42:07  10.10.0.73  GET /admin');
+   mnote("<b>QUI ?</b> l'IP source vient de l'en-tête IP du paquet, pas du texte HTTP. <b>QUAND ?</b> heure réglée par NTP. <b>QUOI ?</b> le chemin demandé.")}},
+ {p:1,sub:"Le leurre répond une [fausse page de connexion]. Derrière, il n'y a [rien] : aucun vrai réglage, aucune donnée.",run:async()=>{
+   await uncard();await go('HTTP/1.1 200 OK','rep','leu','pc',1800);page('pPrint');$('#tabT').textContent='IMP-RDC-02 · Administration';flashAddr();
+   say('Le leurre',"Leurre à <b>faible interaction</b> : une façade, sans vraie application vulnérable derrière.",1150,336,400);await wait(500)}},
+ {p:1,sub:"L'ESP32 envoie un [événement] au serveur Ubuntu : un petit message [signé], pour qu'on ne puisse pas le falsifier.",run:async()=>{
+   sayHide();letter('evt','ÉVÉNEMENT','écrit par l\'ESP32',EVT);await card('mc');
+   await put('m',$('#leurre'),'g');await put('p');await put('v');await put('h1');await put('h1v',$('#dmon'),'b');await put('h2');await put('h2v',$('#leurre'),'b');await putLine(3);await put('d',$('#jl'),'g');
+   mnote("<b>HTTPS</b> si l'ESP32 le supporte bien (à mesurer) ; sinon <b>signature HMAC + compteur</b>, comme pour le radar.");
+   await wait(D(1400));await uncard();await go('POST /api/evenements','evt','leu','ubu',2200)}},
+ {p:1,sub:"Ubuntu vérifie la signature, range l'événement dans [SQLite] et l'affiche. Le technicien voit : [à qualifier].",run:async()=>{
+   $('#winmon').classList.add('lock');dadd('10:38:15','Poste 10.10.0.54','verrouillé (absence radar)','i','INFO');await wait(700);
+   $('#tower').classList.add('busy');await wait(700);$('#tower').classList.remove('busy');
+   dadd('10:42:07','Leurre leurre-01','10.10.0.73 → GET /admin','q','À QUALIFIER');await wait(500);
+   say('Le tableau de bord',"Deux événements <b>séparés</b>. On ne relie pas la visite du leurre à l'absence de Martine.",770,236,360)}},
+ /* ===== NMAP ===== */
+ {p:2,sub:"L'attaquant lance [nmap -sn 10.10.0.0/24] : « qui est allumé ? ». Tout le monde répond… le leurre aussi.",run:async()=>{
+   sayHide();pane('term');await wait(300);await cmd('sudo nmap -sn 10.10.0.0/24');
+   for(let i=0;i<3;i++)await bcast('?','dot','pc',1100);
+   await Promise.all([go('','dot rep','ubu','pc',1100),go('','dot rep','win','pc',1100),go('','dot rep','leu','pc',1100)]);
+   tl('Nmap scan report for 10.10.0.20','ok');tl('Nmap scan report for 10.10.0.54','ok');tl('Nmap scan report for <span class="hi">10.10.0.80</span>','ok');tl('MAC Address: 02:00:0A:0A:00:50 (Unknown)','dim');tl('Nmap scan report for 10.10.0.73','ok');tl('Nmap done: 256 IP addresses (4 hosts up)');prompt();
+   say('Le leurre',"Mon programme n'a <b>rien vu</b> : la W5500 a répondu seule à l'ARP. Journal inchangé.",770,120,360)}},
+ {p:2,sub:"Puis [sudo nmap 10.10.0.80] : 1 000 ports testés. Port 80 : SYN, SYN-ACK… puis [RST]. La connexion n'est jamais finie.",run:async()=>{
+   sayHide();await cmd('sudo nmap 10.10.0.80');
+   const sw=[];for(let i=0;i<6;i++){sw.push((async()=>{await wait(i*180);await go('','dot req','pc','leu',1000);await go('','dot rst','leu','pc',1000)})())}await Promise.all(sw);
+   await go('SYN · port 80','','pc','leu',1200);await go('SYN-ACK','rep','leu','pc',1200);await go('RST','rst','pc','leu',1200);
+   tl('Not shown: 999 closed tcp ports (reset)','dim');tl('PORT   STATE SERVICE');tl('<span class="hi">80/tcp open  http</span>','ok');prompt();
+   say('Le leurre',"Connexion jamais ouverte : mon programme <b>ne la voit sans doute pas</b>. À vérifier avec Wireshark.",770,120,360)}},
+ {p:2,sub:"Avec [nmap -sV], Nmap ouvre vraiment la connexion et envoie [GET /] pour reconnaître le service : là, le leurre [l'enregistre].",run:async()=>{
+   sayHide();await cmd('sudo nmap -sV -p 80 10.10.0.80');
+   await go('SYN','','pc','leu',1000);await go('SYN-ACK','rep','leu','pc',1000);await go('ACK','','pc','leu',1000);
+   await go('GET / HTTP/1.0','','pc','leu',1500);hit();jadd('10:51:30  10.10.0.73  GET /  (sans User-Agent)');await go('200 OK','rep','leu','pc',1300);
+   tl('PORT   STATE SERVICE VERSION');tl('<span class="hi">80/tcp open  http</span>','ok');tl('Service detection performed.','dim');prompt();
+   await go('POST /api/evenements','evt','leu','ubu',1700);
+   dadd('10:51:30','Leurre leurre-01','10.10.0.73 → GET / · 2ᵉ visite','p','PRIORITAIRE');
+   say('Le tableau de bord',"Même IP, 2ᵉ visite en 10 min, sans navigateur : la priorité <b>monte</b>. Une règle simple, explicable.",770,236,360)}},
+ {p:2,sub:"Leçon : un scan discret peut passer [inaperçu]. Et un scan poussé révèle qu'il manque les ports d'une [vraie imprimante].",run:async()=>{
+   sayHide();await card('nm');await rows('#nm .tb .r',260);await rows('#v2box>div',350)}},
+ /* ===== WIRESHARK ===== */
+ {p:3,sub:"Et Wireshark ? Lancé sur Ubuntu, il ne voit que ce qui arrive à [sa carte réseau]. Le switch ne lui envoie pas la requête !",run:async()=>{
+   await uncard();dpane('ws');await wait(400);await cmd('curl http://10.10.0.80/admin');
+   await bcast('ARP : qui a 10.10.0.80 ?','arp','pc',1800,k=>{if(k==='ubu')wadd('3c:52:82…','Broadcast','ARP','Who has 10.10.0.80?','a')});
+   if(fast)wadd('3c:52:82…','Broadcast','ARP','Who has 10.10.0.80?','a');
+   await go('ARP : c\'est moi','rep','leu','pc',1200);await go('GET /admin','','pc','leu',1600);hit();jadd('10:55:02  10.10.0.73  GET /admin  (curl)');
+   tl('&lt;html&gt;…IMP-RDC-02 · Administration…&lt;/html&gt;','dim');prompt();
+   say('Wireshark (sur Ubuntu)',"Je n'ai vu que la question ARP. La requête HTTP <b>n'est pas passée par mon port</b>.",770,236,360)}},
+ {p:3,sub:"Avec un [port miroir], Wireshark voit [tout]… des milliers de paquets. La visite suspecte est [noyée] dans le trafic normal.",run:async()=>{
+   sayHide();$('#mirror').classList.add('on');await wait(500);
+   const flood=async()=>{for(let i=0;i<46;i++){const b=BRUIT[i%BRUIT.length];if(i===40)wadd('10.10.0.73','10.10.0.80','HTTP','GET /admin HTTP/1.1','x');else wadd(...b);if(!fast)wn+=97;await wait(110)}};
+   const bg=async()=>{for(let i=0;i<6;i++){await Promise.all([go('','dot','win','ubu',900),go('','dot rep','ubu','win',900)])}};
+   await Promise.all([flood(),bg()]);
+   wn=4812;$('#wfn').textContent='4 812 paquets en 1 min';
+   say('Le leurre',"Moi, je n'ai reçu <b>qu'une visite</b> pendant ce temps. Elle est forcément intéressante.",770,120,360)}},
+ {p:3,sub:"Différence fondamentale : Wireshark [observe] le trafic ; le leurre [attend] qu'on vienne à lui. Chez lui, [chaque visite compte].",run:async()=>{
+   sayHide();await card('cmp');await rows('#cmp .tb .r',200);$('#cmp .foot').classList.add('on')}},
+ /* ===== RETENIR ===== */
+ {p:4,sub:"Les quatre réponses au jury, en une image : [appât], [balayage], [à qualifier], [observer ou attendre].",run:async()=>{
+   await uncard();cur.style.opacity=0;await card('rec');await rows('#rec .rc',450);$('#rec .foot').classList.add('on')}}
+];
+const N=STEPS.length;
+
+function ui(){$('#num').textContent=`${step} / ${N-1}`;$('#prev').disabled=step===0;$('#next').disabled=step===N-1;$('#next').textContent=step===0?'Commencer →':'Suivant →';
+ $$('#parts span').forEach((s,i)=>s.classList.toggle('on',step>0&&STEPS[step].p===i))}
+function setSub(i){const s=$('#sub');s.innerHTML=K(STEPS[i].sub);if(!fast)s.animate([{opacity:0,transform:'translateY(6px)'},{opacity:1,transform:'none'}],{duration:350})}
+async function play(i){running=true;fast=RM;setSub(i);ui();pui();try{await STEPS[i].run()}catch(e){console.error(e)}running=false;fast=RM;pui()}
+async function next(){if(paused){resume();return}if(nav)return;if(running){skip();return}if(step>=N-1)return;step++;await play(step)}
+async function goto(n){
+ if(nav)return;nav=true;
+ resume();if(running){skip();while(running)await new Promise(r=>setTimeout(r,20))}
+ stage.classList.add('instant');fast=true;reset();running=true;
+ for(let i=1;i<=n;i++){try{await STEPS[i].run()}catch(e){console.error(e)}}
+ running=false;step=n;setSub(n);fast=RM;ui();pui();
+ requestAnimationFrame(()=>requestAnimationFrame(()=>stage.classList.remove('instant')));nav=false;
+}
+const prev=()=>{if(step>0)goto(step-1)};
+$('#next').addEventListener('click',e=>{e.stopPropagation();next()});
+$('#prev').addEventListener('click',e=>{e.stopPropagation();prev()});
+$('#pause').addEventListener('click',e=>{e.stopPropagation();paused?resume():pause()});
+$('#restart').addEventListener('click',e=>{e.stopPropagation();goto(0)});
+function full(){try{const d=document;if(d.fullscreenElement)d.exitFullscreen();else d.documentElement.requestFullscreen().catch(()=>{})}catch(e){}}
+$('#fs').addEventListener('click',e=>{e.stopPropagation();full()});
+stage.addEventListener('click',e=>{if(!e.target.closest('button'))next()});
+addEventListener('keydown',e=>{
+ const k=e.key;
+ if(['ArrowRight','PageDown',' ','Enter'].includes(k)){e.preventDefault();next()}
+ else if(['ArrowLeft','PageUp','Backspace'].includes(k)){e.preventDefault();prev()}
+ else if(k==='Home'){e.preventDefault();goto(0)}
+ else if(k==='f'||k==='F')full();
+ else if(k==='p'||k==='P'||k==='Pause'||k==='MediaPlayPause'){e.preventDefault();paused?resume():pause()}
+});
+reset();setSub(0);ui();
+window.__goto=goto;window.__state=()=>({step,running,N});
+}
+</script>
+</body>
+</html>
