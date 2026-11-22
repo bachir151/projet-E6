@@ -1,0 +1,109 @@
+/* =====================================================================
+   schema-2d.css — mise en page des « schémas réseau à plat, pas à pas ».
+   Utilisé par les pages architecture-2d.html des apprentis, avec theme.css.
+   Couleurs : variables de theme.css uniquement.
+   ===================================================================== */
+.tete{padding-top:clamp(18px,3vw,30px);display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:14px 24px}
+.tete h1{margin:0}
+.tete .lead{color:var(--encre-2);margin:8px 0 0;max-width:62ch}
+.liens{display:flex;gap:10px;flex-wrap:wrap}
+.wrap.large{max-width:1560px}
+.grille{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:28px;align-items:start;padding-block:22px 40px}
+
+.scene-cadre{margin:0;position:relative;border:3px solid var(--encre);border-radius:6px;background:var(--blanc);box-shadow:8px 8px 0 var(--encre);overflow:hidden}
+.defile{overflow-x:auto;overscroll-behavior-x:contain}
+#schema{display:block;width:100%;height:auto;background-image:radial-gradient(var(--contour-2) 1px,transparent 1px);background-size:22px 22px}
+.outils{position:absolute;right:10px;top:10px;display:flex;gap:8px}
+.outils .btn{min-height:34px;padding:4px 14px;font-size:.8rem;text-transform:none;letter-spacing:0}
+.glisse{display:none;font-size:.8rem;font-weight:700;color:var(--encre-2);padding:6px 12px;border-top:2px solid var(--encre)}
+
+/* matériel dessiné (vu de face) */
+#schema{--m-alu:color-mix(in srgb,var(--contour-2) 40%,var(--blanc));--m-alu-2:var(--contour-2);--m-noir:var(--encre);--m-noir-2:color-mix(in srgb,var(--encre) 78%,var(--blanc));
+  --m-pcb:color-mix(in srgb,var(--focus) 80%,var(--encre));--m-pcb-vert:color-mix(in srgb,var(--vert) 55%,var(--encre));--m-ecran:color-mix(in srgb,var(--encre) 82%,var(--focus));
+  --m-peau:color-mix(in srgb,var(--jaune-pale) 60%,var(--rouge-pale));--led-off:color-mix(in srgb,var(--encre) 45%,var(--blanc))}
+#schema text{font-family:var(--police);fill:var(--encre)}
+#schema .tr{stroke:var(--encre);stroke-width:1.6;stroke-linejoin:round}
+#schema .fin{stroke:var(--encre);stroke-width:.8}
+#schema .ns{stroke:none}
+#schema .mono{font-family:var(--police-mono)}
+#schema .led{fill:var(--led-off)}
+#schema .led.vert{fill:var(--vert)} #schema .led.rouge{fill:var(--rouge)} #schema .led.orange{fill:var(--jaune-fonce)} #schema .led.bleu{fill:var(--bleu)}
+#schema .led.alt{animation:ledAlt 1s steps(1) infinite}
+@keyframes ledAlt{0%{fill:var(--vert)}50%{fill:var(--rouge)}}
+
+/* liens */
+#schema .lien{fill:none;stroke:var(--encre);stroke-width:3;stroke-linecap:round;transition:opacity .45s,stroke .3s}
+#schema .lien.wifi{stroke:var(--focus);stroke-width:2.4;stroke-dasharray:2 7}
+#schema .lien.usb{stroke:var(--encre-2);stroke-width:2.2}
+#schema .lien.fixe{stroke:var(--encre-3);stroke-width:2;stroke-dasharray:8 5}
+#schema .lien.coupe{stroke:var(--rouge);stroke-dasharray:10 7}
+#schema .lien-txt{font-size:11.5px;font-weight:800;fill:var(--encre-2)}
+#schema .lien-fond{fill:var(--blanc)}
+
+/* nœuds */
+#schema .noeud{transition:opacity .45s}
+#schema.focus .noeud:not(.on),#schema.focus .lien-g:not(.on){opacity:.22}
+#schema .noeud.cache,#schema .lien-g.cache{display:none}
+#schema .nom rect.fond{fill:var(--blanc);stroke:var(--encre);stroke-width:2}
+#schema .nom rect.ombre{fill:var(--encre)}
+#schema .nom .p1{font-weight:900;font-size:14.5px}
+#schema .nom .p2{font-weight:600;font-size:11.5px;fill:var(--encre-2)}
+#schema.sans-lab .nom{display:none}
+#schema .etat rect{stroke:var(--encre);stroke-width:1.6;fill:var(--papier-2)}
+#schema .etat text{font-size:11.5px;font-weight:900}
+#schema .etat.ok rect{fill:var(--vert-pale)} #schema .etat.alerte rect{fill:var(--rouge-pale)} #schema .etat.info rect{fill:var(--bleu-pale)} #schema .etat.accent rect{fill:var(--jaune)}
+#schema .etat.alerte text{fill:var(--rouge-texte)}
+#schema .onde{fill:none;stroke:var(--focus);stroke-width:2.2}
+#schema .flash{animation:flash .5s ease-in-out 3}
+@keyframes flash{50%{opacity:.25}}
+
+/* bulles, messages */
+#schema .bulle rect.fond{fill:var(--jaune-pale);stroke:var(--encre);stroke-width:2}
+#schema .bulle.alerte rect.fond{fill:var(--rouge-pale)}
+#schema .bulle.ok rect.fond{fill:var(--vert-pale)}
+#schema .bulle text{font-size:13px;font-weight:700}
+#schema .bulle text.mono{font-size:12px;font-weight:600}
+#schema .bulle text.titre{font-weight:900;font-size:13.5px}
+#schema .bulle .attache{stroke:var(--encre);stroke-width:1.5}
+#schema .bulle{animation:surgit .3s cubic-bezier(.2,.9,.3,1.3) both}
+@keyframes surgit{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+#schema .tok circle{stroke:var(--encre);stroke-width:2}
+#schema .tok rect{stroke:var(--encre);stroke-width:1.8}
+#schema .tok text{font-size:12px;font-weight:800}
+#schema .tok.perdu{animation:perdu .7s ease-out forwards}
+@keyframes perdu{to{opacity:0;transform:scale(1.8)}}
+#schema .trace{fill:none;stroke-width:6;stroke-linecap:round;stroke-linejoin:round;opacity:.55;transition:opacity .6s}
+#schema .trace.fini{opacity:0}
+.k-bleu circle,.k-bleu .fond-tok{fill:var(--bleu)} .k-bleu.trace{stroke:var(--focus)}
+.k-vert circle{fill:var(--vert)} .k-vert .fond-tok{fill:var(--vert-pale)} .k-vert.trace{stroke:var(--vert)}
+.k-jaune circle,.k-jaune .fond-tok{fill:var(--jaune)} .k-jaune.trace{stroke:var(--jaune-fonce)}
+.k-blanc circle,.k-blanc .fond-tok{fill:var(--blanc)} .k-blanc.trace{stroke:var(--encre-3)}
+.k-rouge circle{fill:var(--rouge)} .k-rouge .fond-tok{fill:var(--rouge-pale)} .k-rouge.trace{stroke:var(--rouge)}
+.k-rouge text{fill:var(--rouge-texte)!important}
+
+/* carte de l'étape */
+.carte-etape{position:sticky;top:16px;background:var(--blanc);border:3px solid var(--encre);border-radius:6px;box-shadow:8px 8px 0 var(--jaune),8px 8px 0 3px var(--encre);padding:18px 20px 16px}
+#eTitre{font-size:1.38rem;font-weight:900;line-height:1.15;letter-spacing:-.01em;margin:4px 0 10px;text-transform:none}
+#eTexte{min-height:9.5em}
+#eTexte p{margin:0 0 .6em;font-size:.98rem}
+#eTexte code{font-family:var(--police-mono);font-size:.86em;background:var(--papier-2);padding:0 4px;border-radius:4px}
+.commandes{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.commandes .btn{min-height:42px;padding:6px 15px;font-size:.9rem;text-transform:none;letter-spacing:0}
+#bNext{flex:1;justify-content:center}
+#points{display:flex;gap:6px;margin-top:14px;flex-wrap:wrap}
+#points button{width:26px;height:26px;border-radius:50%;border:2px solid var(--encre);background:var(--blanc);font-size:.72rem;font-weight:900;color:var(--encre);padding:0;cursor:pointer}
+#points button.vu{background:var(--papier-2)}
+#points button[aria-current="step"]{background:var(--jaune);box-shadow:2px 2px 0 var(--encre)}
+.legende{list-style:none;padding:12px 0 0;margin:14px 0 0;border-top:2px dashed var(--contour-2);display:grid;grid-template-columns:1fr 1fr;gap:4px 10px;font-size:.82rem;color:var(--encre-2)}
+.legende i{display:inline-block;width:12px;height:12px;border-radius:50%;border:2px solid var(--encre);margin-right:6px;vertical-align:-1px}
+.legende s{display:inline-block;width:22px;height:0;border-top:3px solid var(--encre);margin-right:6px;vertical-align:3px;text-decoration:none}
+.legende s.wifi{border-top:3px dotted var(--focus)} .legende s.usb{border-top-width:2px;border-color:var(--encre-2)} .legende s.fixe{border-top:2px dashed var(--encre-3)}
+.aide{font-size:.8rem;color:var(--encre-2);margin:10px 0 0}
+.aide kbd{font-size:.72rem}
+.regles ol{margin:10px 0 0;padding-left:1.3em}
+.regles li{margin:.35em 0}
+
+@media (max-width:1060px){.grille{grid-template-columns:1fr}.carte-etape{position:static}}
+@media (max-width:720px){#schema{min-width:760px}.glisse{display:block}.legende{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:reduce){#schema .bulle{animation:none}#schema .led.alt{animation:none}}
+@media print{.outils,.commandes,#points,.aide,.liens,.glisse{display:none!important}.scene-cadre,.carte-etape{box-shadow:none;position:static}}

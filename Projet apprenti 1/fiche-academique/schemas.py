@@ -86,10 +86,10 @@ def save(name, content):
 # ---------------------------------------------------------------- synoptique
 def synoptique():
     b = [text(30, 34, "Synoptique de la maquette au lycée (réseau exploité tel quel, aucune connexion à l’hôpital, aucune donnée réelle)", 16, "bold", anchor="start")]
-    b.append(box(30, 60, 270, 160, "Boîtier de l’imprimante", ["ESP32 (C++), Wi-Fi", "accéléromètre : vibration", "infrarouge : feuilles qui sortent", "bouton, écran à encre", "lecteur RFID (V2)"], hl=True))
+    b.append(box(30, 60, 270, 160, "Boîtier de l’imprimante", ["ESP32 (C++), Wi-Fi", "accéléromètre : vibration", "bouton, écran à encre", "SHT31 : humidité (V2)", "lecteur RFID (V2)"], hl=True))
     b.append(box(400, 60, 340, 190, "Serveur – PC Ubuntu", ["Mosquitto (MQTT sur TLS)", "CUPS : serveur d’impression", "service Python : compare les témoins", "PostgreSQL, tableau de bord", "interroge l’imprimante (SNMP),", "le PC (JEA) et l’AD (LDAP)"], hl=True))
     b.append(arrow(300, 140, 398, 140, "MQTT / TLS", ly=132, both=True))
-    b.append(box(30, 260, 270, 100, "Imprimante réseau", ["du lycée ou de récupération", "SNMP (état, encre), IPP"]))
+    b.append(box(30, 260, 270, 100, "Imprimante réseau", ["du lycée ou de récupération", "SNMP (état, encre, compteur), IPP"]))
     b.append(arrow(400, 230, 302, 290, "SNMP, IPP", lx=352, ly=250, anchor="end"))
     b.append(box(30, 400, 270, 100, "Station des PC neufs (V2)", ["ESP32, lecteur RFID", "écran, LED, bouton"], dashed=True, hl=True))
     b.append(arrow(302, 440, 430, 252, "MQTT / TLS", lx=324, ly=424, dashed=True, anchor="start", size=11))
@@ -135,7 +135,7 @@ def exigences():
         ("E1 – Bonne cause", ["10 pannes provoquées :", "cause juste dans", "au moins 9 cas"], "campagne d’essai"),
         ("E2 – Pas de fausse alerte", ["1 h d’impressions", "normales :", "aucun ticket"], "essai d’1 h"),
         ("E3 – Rapide", ["Moins d’1 minute entre", "l’impression ratée", "et le ticket"], "chronométrage"),
-        ("E4 – Feuilles comptées", ["100 feuilles : au plus", "1 erreur ; 10 pages de", "test vues sur 10"], "comptage"),
+        ("E4 – Pages comptées", ["compteur SNMP : au plus", "1 écart sur 100 pages ;", "10 pages de test sur 10"], "comptage"),
         ("E5 – Diagnostic borné", ["JEA : commande hors liste", "refusée et tracée ;", "lecture seule du PC"], "démonstration"),
         ("E6 – Retour au terrain", ["Écran du boîtier à jour", "en moins d’1 minute ;", "témoins dans le ticket"], "chronométrage"),
         ("E7 – Bon réseau", ["Imprimante hors du réseau", "attendu par l’AD :", "signalée 5 fois sur 5"], "essai, capture"),
@@ -177,8 +177,8 @@ def contexte():
 
     def ext(x, y, w, title, sub, dashed=False):
         return box(x, y, w, 64, title, [sub], dashed=dashed, stereo="«external»", tsize=14, lsize=12)
-    b.append(ext(430, 60, 260, "Imprimante réseau", "vibre, sort les feuilles"))
-    b.append(arrow(560, 126, 560, sy - 2, "vibration, feuilles, état", lx=570, ly=180, anchor="start", both=True))
+    b.append(ext(430, 60, 260, "Imprimante réseau", "vibre, imprime, compte ses pages"))
+    b.append(arrow(560, 126, 560, sy - 2, "vibration, état, compteur", lx=570, ly=180, anchor="start", both=True))
     b.append(text(570, 196, "(SNMP)", 12, fill=GREY, anchor="start"))
     b.append(ext(880, 60, 230, "PC de la secrétaire", "Windows 11, file d’impression"))
     b.append(arrow(880, 110, sx + sw + 2, sy + 30, "file d’impression", lx=842, ly=212, both=True, anchor="start"))
@@ -207,7 +207,7 @@ def cas():
         o = f'<ellipse cx="{cx}" cy="{cy}" rx="{rx}" ry="27" fill="#fff" stroke="{BLUE}" stroke-width="1.5"{d}/>'
         return o + text(cx, cy - 3, t1, 13) + text(cx, cy + 14, t2, 13)
     G = [
-        (400, 105, "Surveiller l’impression", "(vibration, feuilles)", False),
+        (400, 105, "Surveiller l’impression", "(vibration, compteur)", False),
         (400, 185, "Signaler une panne", "(bouton)", False),
         (400, 265, "Lire le ticket et", "le tableau de bord", False),
         (400, 345, "Valider une action", "proposée (palier 2)", False),
@@ -249,7 +249,7 @@ def cas():
     b.append(Lk(970, 315, 845, 305))
     b.append(Lk(970, 445, 845, 385))
     b.append(Lk(970, 565, 845, 545))
-    b.append(text(30, 680, "Pointillés : V2. Le système ne supprime aucun ticket ; il ne le ferme qu’avec une preuve (page de test vue, ou feuilles qui ressortent).", 12.5, fill=GREY, anchor="start"))
+    b.append(text(30, 680, "Pointillés : V2. Le système ne supprime aucun ticket ; il ne le ferme qu’avec une preuve (page de test comptée, ou compteur qui repart).", 12.5, fill=GREY, anchor="start"))
     save("3_cas_utilisation", svg(1090, 695, "".join(b)))
 
 
@@ -292,9 +292,9 @@ def sequence():
     b.append(msg("pcs", "srv", y + 65, "2. travail d’impression (IPP)"))
     b.append(msg("srv", "imp", y + 100, "3. les 5 pages"))
     b.append(note(y + 140, "9:10:30 – rien ne sort"))
-    b.append(msg("brt", "srv", y + 165, "4. vibration : non ; feuilles : 0 (MQTT)"))
-    b.append(msg("srv", "imp", y + 200, "5. état ? (SNMP)"))
-    b.append(msg("imp", "srv", y + 235, "6. « prête, aucune erreur »", ret=True))
+    b.append(msg("brt", "srv", y + 165, "4. vibration : non (MQTT)"))
+    b.append(msg("srv", "imp", y + 200, "5. état, compteur ? (SNMP)"))
+    b.append(msg("imp", "srv", y + 235, "6. « prête », compteur +0", ret=True))
     b.append(msg("srv", "pcs", y + 270, "7. file ? (JEA)"))
     b.append(msg("pcs", "srv", y + 305, "8. 0 document", ret=True))
     b.append(self_("srv", y + 325, "9. envoyé, rien ne bouge, elle dit « ça va »", "→ imprimante figée"))
@@ -304,7 +304,7 @@ def sequence():
     b.append(msg("tech", "srv", y + 485, "12. valide le redémarrage", lx=840))
     b.append(msg("srv", "imp", y + 520, "13. redémarrage"))
     b.append(note(y + 560, "9:14:00"))
-    b.append(msg("brt", "srv", y + 580, "14. vibration ; 5 feuilles comptées"))
+    b.append(msg("imp", "srv", y + 580, "14. compteur +5 (SNMP)", ret=True))
     b.append(msg("srv", "glpi", y + 615, "15. résolu, preuve jointe"))
     b.append(msg("srv", "brt", y + 650, "16. écran « Réparé »", lx=690))
     b.append(text(30, 860, "Palier 1 : le système conseille seulement. Palier 3 (V2) : il redémarre seul, la nuit, et le note dans le ticket.", 12.5, fill=GREY, anchor="start"))
@@ -325,8 +325,8 @@ def gantt():
         ("1. Besoin, cahier des charges, planning (12 h)", (D(2027, 1, 4), D(2027, 1, 22)), "c3"),
         ("V1 – voir la panne, trouver la cause, ouvrir le ticket", None),
         ("2. Maquette : GLPI, CUPS, VM Windows 11, imprimante (12 h)", (D(2027, 1, 11), D(2027, 1, 29)), "c10"),
-        ("3. Boîtier : vibration, feuilles, bouton, écran (27 h)", (D(2027, 1, 18), D(2027, 3, 5)), "c8"),
-        ("4. Physique : vibration, feuilles, humidité (12 h)", (D(2027, 2, 1), D(2027, 3, 12)), "phy"),
+        ("3. Boîtier : vibration, bouton, écran (27 h)", (D(2027, 1, 18), D(2027, 3, 5)), "c8"),
+        ("4. Physique : vibration, délai, humidité (12 h)", (D(2027, 2, 1), D(2027, 3, 12)), "phy"),
         ("5. Serveur : règles, SNMP, vérifications réseau (22 h)", (D(2027, 2, 8), D(2027, 3, 19)), "c8"),
         ("7. Réseau : DHCP, DNS, NTP, SNMP, captures (8 h)", (D(2027, 2, 8), D(2027, 4, 9)), "c10"),
         ("6. PowerShell : file d’impression (JEA), AD (14 h)", (D(2027, 2, 22), D(2027, 3, 26)), "c8"),

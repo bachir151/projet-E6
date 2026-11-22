@@ -113,10 +113,7 @@ async function printSheets(n) {
       else { const q = (k - 0.75) / 0.25; s.scale.z = 1; s.position.lerpVectors(SHEET_IN, end, q); s.rotation.x = 0.035 * (1 - q); }
       if (!counted && k > 0.3) {
         counted = true; world.count++;
-        ir.userData.obs.material.color.setRGB(0.15, 1, 0.35).multiplyScalar(4);
-        setTimeout(() => ir.userData.obs.material.color.setRGB(0.15, 1, 0.35).multiplyScalar(0.1), 220);
-        setRead(readCnt, `feuilles : <b>${world.count}/${n}</b>`); beep(1800, 0.04, 0.03);
-        go('w_ir', { kind: 'sens', size: 0.18, noTrail: true }).catch(() => {});
+        setRead(readCnt, `compteur de pages : <b>+${world.count}</b> / ${n}`);
       }
     }, k => k);
     await sleep(150);
@@ -176,7 +173,7 @@ const steps = [
 {
   title: '1. Le boîtier, de près',
   text: `<p>Un boîtier en plexiglas, <b>collé de façon rigide</b> sur l'imprimante (sinon la vibration se perd). Dedans, des modules du commerce :</p>
-         <p>• <b>ESP32 DevKit</b> : le petit ordinateur, en Wi-Fi.<br>• <b>MPU6050</b> (carte bleue GY-521) : sent la <b>vibration</b>, bus I²C.<br>• <b>SHT31</b> (carte violette, V2) : <b>température et humidité</b>, même bus I²C, près des trous d'aération.<br>• <b>FC-51</b> : capteur infrarouge sur une équerre, au-dessus de la sortie : il <b>compte les feuilles</b>.<br>• <b>Écran e-paper</b>, <b>bouton d'arcade</b> rouge, <b>LED RGB</b>, et le lecteur <b>RC522</b> (V2).</p>`,
+         <p>• <b>ESP32 DevKit</b> : le petit ordinateur, en Wi-Fi.<br>• <b>MPU6050</b> (carte bleue GY-521) : sent la <b>vibration</b>, bus I²C.<br>• <b>SHT31</b> (carte violette, V2) : <b>température et humidité</b>, même bus I²C, près des trous d'aération.<br>• <b>Écran e-paper</b>, <b>bouton d'arcade</b> rouge, <b>LED RGB</b>, et le lecteur <b>RC522</b> (V2).</p>`,
   cam: [[-33, 55, -5], [-51, 34, -33]], labels: 'boitier',
   async run() {
     setRead(readVib, 'vibration : <b>0,01 g</b> (au repos)'); setRead(readHum, 'SHT31 : <b>46 %</b> · 22,4 °C');
@@ -191,18 +188,18 @@ const steps = [
 {
   title: '2. Une impression normale',
   text: `<p>La secrétaire imprime 5 pages. Le travail passe par <b>CUPS</b> sur le serveur, qui sait donc combien de pages sont demandées, puis part vers l'imprimante (<b>IPP</b>, port 631).</p>
-         <p>L'imprimante <b>vibre</b> (MPU6050) et le capteur infrarouge <b>compte 5 feuilles</b>. Le boîtier l'envoie en <b>MQTT</b> (chiffré TLS) par le Wi-Fi.</p>
-         <p>Le serveur interroge aussi l'imprimante en <b>SNMP</b> : « prête, encre 64 % ». Les témoins sont d'accord : <b>aucun ticket</b>.</p>`,
+         <p>L'imprimante <b>vibre</b> (MPU6050). Le boîtier l'envoie en <b>MQTT</b> (chiffré TLS) par le Wi-Fi.</p>
+         <p>Le serveur interroge aussi l'imprimante en <b>SNMP</b> : « prête, encre 64 % », et son <b>compteur de pages</b> a avancé de 5. Les témoins sont d'accord : <b>aucun ticket</b>.</p>`,
   cam: [[34, 96, 112], [-22, 18, -26]], labels: 'overview',
   async run() {
     await normalPrint();
     setRead(readVib, 'vibration : <b>0,42 g</b>');
     await printSheets(5);
     setRead(readVib, 'vibration : <b>0,01 g</b>');
-    await route(UP, { kind: 'mqtt', label: 'MQTT · vib 0,42 g · 5/5 feuilles' });
-    await route(TO_PRN, { kind: 'snmp', label: 'SNMP GET état ?' });
-    await route(FROM_PRN, { kind: 'snmp', label: '« prête » · encre 64 %' });
-    world.temoins = [['Vibration', 'oui'], ['Feuilles', '5 / 5'], ['Imprimante (SNMP)', '« prête »'], ['PC (file)', 'vide']];
+    await route(UP, { kind: 'mqtt', label: 'MQTT · vib 0,42 g' });
+    await route(TO_PRN, { kind: 'snmp', label: 'SNMP GET état, compteur ?' });
+    await route(FROM_PRN, { kind: 'snmp', label: '« prête » · compteur +5 · encre 64 %' });
+    world.temoins = [['Vibration', 'oui'], ['Compteur (SNMP)', '+5 / 5'], ['Imprimante (SNMP)', '« prête »'], ['PC (file)', 'vide']];
     srv('4 témoins d\'accord → <b>tout va bien</b>');
     await route(TO_TEC, { kind: 'glpi', label: 'tableau de bord : vert' }); drawTech();
     await route(DOWN, { kind: 'mqtt', label: 'écran : PRÊTE' });
@@ -212,35 +209,35 @@ const steps = [
 {
   title: '3. La panne : l\'imprimante figée',
   text: `<p>La secrétaire relance une impression. Le travail arrive… mais <b>rien ne vibre</b> et <b>aucune feuille ne sort</b>.</p>
-         <p>Pourtant, en SNMP, l'imprimante répond « <b>prête</b> » : elle se trompe. Le serveur demande aussi au PC, par un point d'accès PowerShell limité (<b>JEA</b>), si des documents y sont bloqués : non.</p>
+         <p>Pourtant, en SNMP, l'imprimante répond « <b>prête</b> » : elle se trompe. Son <b>compteur de pages</b>, lui, n'a pas bougé. Le serveur demande aussi au PC, par un point d'accès PowerShell limité (<b>JEA</b>), si des documents y sont bloqués : non.</p>
          <p>Conclusion : <b>imprimante figée</b>. Le ticket GLPI s'ouvre avec la cause, et l'écran du boîtier prévient sur place.</p>`,
   cam: [[34, 96, 112], [-22, 18, -26]], labels: 'overview',
   async run() {
     await normalPrint();
-    setRead(readVib, 'vibration : <b>0,00 g</b>'); setRead(readCnt, 'feuilles : <b>0/5</b>');
-    for (let s = 5; s <= 30; s += 5) { srv(`attente des feuilles : <b>${s} s</b>`); await sleep(420); }
-    await route(UP, { kind: 'mqtt', label: 'MQTT · vib 0,00 g · 0/5 en 30 s' });
-    await route(TO_PRN, { kind: 'snmp', label: 'SNMP GET état ?' });
-    await route(FROM_PRN, { kind: 'snmp', label: '« prête » (faux)' });
+    setRead(readVib, 'vibration : <b>0,00 g</b>'); setRead(readCnt, 'compteur de pages : <b>+0</b> / 5');
+    for (let s = 5; s <= 30; s += 5) { srv(`attente de l'impression : <b>${s} s</b>`); await sleep(420); }
+    await route(UP, { kind: 'mqtt', label: 'MQTT · vib 0,00 g pendant 30 s' });
+    await route(TO_PRN, { kind: 'snmp', label: 'SNMP GET état, compteur ?' });
+    await route(FROM_PRN, { kind: 'snmp', label: '« prête » (faux) · compteur +0' });
     await route(TO_LAP, { kind: 'jea', label: 'WinRM 5986 · Get-PrintJob (JEA)' });
     await route(FROM_LAP, { kind: 'jea', label: '0 document bloqué' });
-    world.temoins = [['Vibration', 'non', '#c2382e'], ['Feuilles', '0 / 5', '#c2382e'], ['Imprimante (SNMP)', '« prête »'], ['PC (file)', 'vide']];
+    world.temoins = [['Vibration', 'non', '#c2382e'], ['Compteur (SNMP)', '+0 / 5', '#c2382e'], ['Imprimante (SNMP)', '« prête »'], ['PC (file)', 'vide']];
     srv('conclusion : <b style="color:#ff8a80">imprimante figée</b>');
     world.pastille = 'bad';
     await route(TO_TEC, { kind: 'glpi', label: 'API GLPI · ticket 1234' });
-    ticket('1234', 'Imprimante cardio-2 figée', 'nouveau', '#c2382e', 'aucune vibration, 0/5 feuilles, SNMP « prête »');
+    ticket('1234', 'Imprimante cardio-2 figée', 'nouveau', '#c2382e', 'aucune vibration, compteur +0/5, SNMP « prête »');
     setRGB(0xff2a1a); prnLedMat.color.setRGB(1, 0.6, 0.1).multiplyScalar(3);
     await route(DOWN, { kind: 'mqtt', label: 'écran : BLOQUÉE' });
     await einkShow('BLOQUÉE', 'ticket 1234 · Wassim prévenu');
   }
 },
 {
-  title: '4. Palier 2 : le technicien valide, la feuille prouve',
+  title: '4. Palier 2 : le technicien valide, le compteur prouve',
   text: `<p>Le système <b>propose</b> de redémarrer l'imprimante. Il n'agit pas seul : le technicien <b>valide d'un clic</b> (palier 2).</p>
-         <p>L'imprimante redémarre, les 5 feuilles sortent, le capteur les <b>compte</b>. Cette mesure est la <b>preuve</b> : le ticket est fermé « résolu, preuve : 5/5 feuilles ». Personne ne s'est déplacé.</p>`,
+         <p>L'imprimante redémarre et imprime les 5 pages : elle <b>vibre</b> et son <b>compteur</b> avance de 5. Ces deux mesures sont la <b>preuve</b> : le ticket est fermé « résolu, preuve : compteur +5/5 et vibration ». Personne ne s'est déplacé.</p>`,
   cam: [[70, 70, 120], [10, 18, -14]], labels: 'overview',
   async run() {
-    world.pastille = 'bad'; ticket('1234', 'Imprimante cardio-2 figée', 'nouveau', '#c2382e', 'aucune vibration, 0/5 feuilles, SNMP « prête »');
+    world.pastille = 'bad'; ticket('1234', 'Imprimante cardio-2 figée', 'nouveau', '#c2382e', 'aucune vibration, compteur +0/5, SNMP « prête »');
     setRGB(0xff2a1a); drawEink('BLOQUÉE', 'ticket 1234 · Wassim prévenu');
     world.offer = true; drawTech(); await sleep(1600);
     world.clicked = true; drawTech(); beep(1200, 0.06);
@@ -252,13 +249,15 @@ const steps = [
     setRead(readVib, 'vibration : <b>0,41 g</b>');
     await printSheets(5);
     setRead(readVib, 'vibration : <b>0,01 g</b>');
-    await route(UP, { kind: 'mqtt', label: 'MQTT · 5/5 feuilles : preuve' });
-    world.pastille = 'ok'; world.temoins = [['Vibration', 'oui'], ['Feuilles', '5 / 5'], ['Imprimante (SNMP)', '« prête »'], ['PC (file)', 'vide']];
+    await route(UP, { kind: 'mqtt', label: 'MQTT · vib 0,41 g' });
+    await route(TO_PRN, { kind: 'snmp', label: 'SNMP GET compteur ?' });
+    await route(FROM_PRN, { kind: 'snmp', label: 'compteur +5 : preuve' });
+    world.pastille = 'ok'; world.temoins = [['Vibration', 'oui'], ['Compteur (SNMP)', '+5 / 5'], ['Imprimante (SNMP)', '« prête »'], ['PC (file)', 'vide']];
     await route(TO_TEC, { kind: 'glpi', label: 'ticket 1234 résolu' });
-    ticket('1234', 'Imprimante cardio-2 figée', 'résolu', '#23824f', 'preuve : 5/5 feuilles vues par le capteur');
+    ticket('1234', 'Imprimante cardio-2 figée', 'résolu', '#23824f', 'preuve : compteur +5/5 et vibration');
     setRGB(0x22ff55);
     await route(DOWN, { kind: 'mqtt', label: 'écran : RÉPARÉ' });
-    await einkShow('RÉPARÉ', 'preuve : 5/5 feuilles');
+    await einkShow('RÉPARÉ', 'preuve : 5 pages imprimées');
   }
 },
 {

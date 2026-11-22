@@ -122,7 +122,7 @@ function makeSHT31() {
   header(4, 0.254, g, 0, 0.205, 0.45);
   return g;
 }
-/** Capteur infrarouge FC-51 (LM393) : 3,1 × 1,45 cm, LED émettrice et réceptrice à l'avant (+x). */
+/** Capteur infrarouge FC-51 (LM393) : 3,1 × 1,45 cm, LED émettrice et réceptrice à l'avant (+x). V2 : modèle gardé, non affiché. */
 function makeFC51() {
   const g = new THREE.Group();
   mesh(BOX(3.1, 0.16, 1.45), M.pcbBlue, 0, 0, 0, g);
@@ -232,12 +232,7 @@ const btn = makeArcade(); btn.position.set(4.5, BX.h + 0.3, 4.5); box.add(btn);
 /* il pend sous le couvercle, tenu par ses 4 entretoises de 12 mm vissées dans le plexiglas (antenne à 1,5 cm de la carte posée dessus) */
 const rc = makeRC522(true); rc.rotation.y = Math.PI / 2; rc.position.set(-5.2, BX.h - 1.28, 5.5); box.add(rc);
 
-/* capteur infrarouge au-dessus de la sortie du papier, sur une équerre */
-const brk = new THREE.Group(); brk.position.set(-13, PRD.h + 7.4, -13.2); prn.add(brk);
-mesh(BOX(4.2, 0.25, 3.2), M.alu, 0, 0, 0.6, brk);
-mesh(BOX(4.2, 4.0, 0.25), M.alu, 0, -1.9, -1.0, brk);                 // collée sur la face avant de la barre
-for (const x of [-1.4, 1.4]) mesh(new THREE.CylinderGeometry(0.22, 0.22, 0.12, 12), M.steel, x, -2.9, -0.86, brk).rotation.x = Math.PI / 2;  // vis
-const ir = makeFC51(); ir.rotation.z = -Math.PI / 2; ir.position.set(0, -1.7, 1.2); brk.add(ir);  // carte sous l'équerre, LED vers le bas
+/* capteur de feuilles FC-51 : retiré de la V1 le 22/11/2026 (le serveur lit le compteur de pages en SNMP) ; il revient en V2 pour contrôler ce compteur */
 /* bloc USB 5 V + multiprise sur le bureau */
 const strip = new THREE.Group(); strip.position.set(-22, 0, -60); scene.add(strip);
 mesh(RB(30, 3.6, 5.5, 0.6), M.plWhite, 0, 1.8, 0, strip);
@@ -256,7 +251,6 @@ const pA = (k, o = 0.55) => W(esp, espHole('A', ESPA[k], o));
 const pB = (k, o = 0.55) => W(esp, espHole('B', ESPB[k], o));
 const gyPin = i => W(mpu, V(-0.889 + i * 0.254, 0.42, 0.67));
 const shPin = i => W(sht, V(-0.381 + i * 0.254, 0.42, 0.45));
-const irPin = i => W(ir, V(-1.4, 0.42, -0.254 + i * 0.254));
 const ekPin = i => W(eink, V(4.25, -0.4, -0.889 + i * 0.254));
 const rcP = k => W(rc, rcPin(RC[k]));
 const btnP = W(btn, V(0.5, -3.9, 0));
@@ -269,17 +263,6 @@ wire(gyPin(0), pB('V33', 0.8), 0xe74c3c, 1.4); wire(gyPin(1), pB('GND', 0.8), 0x
 wires.shtSCL = wire(shPin(2), pB('D22', 0.8), 0xf4d03f, 2.0);
 wires.shtSDA = wire(shPin(3), pB('D21', 0.8), 0x3498db, 2.2);
 wire(shPin(0), pB('V33', 1.05), 0xe74c3c, 1.8); wire(shPin(1), pB('GND', 1.05), 0x222222, 1.7);
-/* capteur infrarouge (long fil à travers une encoche du boîtier) : sortie sur D27 */
-{
-  const a = irPin(0), b = pA('D27');
-  const ent = W(box, V(-BX.w / 2, 2.2, -4));
-  const pts = [a, a.clone().add(V(0, 2.5, 0)), V(a.x + 4, a.y + 3, a.z + 1), ent.clone().add(V(-3, 1.5, 0)), ent, b.clone().add(V(-1.5, 1, 0)), b];
-  wires.ir = new THREE.CatmullRomCurve3(pts);
-  for (const [col, dz] of [[0x2ecc71, 0], [0x222222, 0.14], [0xe74c3c, 0.28]]) {
-    const c = new THREE.CatmullRomCurve3(pts.map(p => p.clone().add(V(0, 0, dz))));
-    const t = new THREE.Mesh(new THREE.TubeGeometry(c, 80, 0.045, 8), wireMat(col)); t.castShadow = true; scene.add(t);
-  }
-}
 /* bouton : D26 */
 wires.btn = wire(btnP, pA('D26'), 0xff8c1a, 1.2);
 /* LED RGB : D25 (R), D14 (V), D12 (B) */
@@ -346,7 +329,7 @@ addPath('srvLink', cSrv, { port: P_SRV, srv: true });
 addPath('prnLink', cPrn, { port: P_PRN });
 addPath('lapLink', cLap, { port: P_LAP });
 addPath('tecLink', cTec, { port: P_TEC });
-for (const k in wires) addPath('w_' + k, wires[k], { speed: k === 'ir' ? 22 : 9, size: 0.14 });
+for (const k in wires) addPath('w_' + k, wires[k], { speed: 9, size: 0.14 });
 const UP = ['boxToAP', 'apToSw', 'srvLink'], DOWN = ['-srvLink', '-apToSw', '-boxToAP'];
 const TO_PRN = ['-srvLink', 'prnLink'], FROM_PRN = ['-prnLink', 'srvLink'];
 const TO_LAP = ['-srvLink', 'lapLink'], FROM_LAP = ['-lapLink', 'srvLink'];
@@ -366,7 +349,7 @@ function label(group, pos, title, sub, cls = '') {
   const o = new CSS2DObject(d); o.position.copy(pos); scene.add(o); labelGroups[group].push(o); return o;
 }
 label('overview', W(prn, V(-14, 13, PRD.d / 2 + 1)), 'Imprimante réseau', 'SNMP 161 · IPP 631 · RAW 9100');
-label('overview', W(box, V(0, 12, 0)), 'Boîtier ESP32', 'vibration · feuilles · humidité · bouton · écran');
+label('overview', W(box, V(0, 12, 0)), 'Boîtier ESP32', 'vibration · humidité · bouton · écran');
 label('overview', V(-2, 24, -58), 'Point d\'accès Wi-Fi', 'réseau en place');
 label('overview', V(24, 9, -62), 'Switch du lycée', 'réseau en place');
 label('overview', V(92, 50, -42), 'Serveur Ubuntu', 'Mosquitto · Python · CUPS · PostgreSQL · GLPI · Grafana');
@@ -376,7 +359,6 @@ label('overview', V(-22, 10, -60), 'Bloc USB 5 V', 'aucun câblage 230 V', 'smal
 label('boitier', W(esp, V(0.9, 0.7, 0)), 'ESP32 DevKit', 'Wi-Fi · MQTT/TLS · heure NTP', 'small');
 label('boitier', W(mpu, V(0, 0.5, 0)), 'MPU6050 (GY-521)', 'vibration · I²C 0x68', 'small');
 label('boitier', W(sht, V(0, 0.5, 0)), 'SHT31 (V2)', 'température, humidité · I²C 0x44', 'small');
-label('boitier', W(ir, V(2, 0.2, 0)), 'FC-51 infrarouge', 'compte les feuilles · GPIO 27', 'small');
 label('boitier', W(eink, V(-2.5, 0.4, 2.6)), 'Écran e-paper 2,9″', 'SPI · garde l\'image sans courant', 'small');
 label('boitier', W(btn, V(0, 1.6, 0)), 'Bouton d\'arcade', '« ça ne marche pas » · GPIO 26', 'small');
 label('boitier', W(rgb, V(0, 1.4, 0)), 'LED RGB', 'état du boîtier', 'small');
@@ -384,7 +366,7 @@ label('boitier', W(rc, V(0, 0.4, 0)), 'Lecteur RC522 (V2)', 'carte du technicien
 function mkRead(pos, col) { const d = document.createElement('div'); d.className = 'read'; d.style.borderLeftColor = col; const o = new CSS2DObject(d); o.position.copy(pos); o.visible = false; scene.add(o); return o; }
 const readVib = mkRead(W(mpu, V(0, 2.6, -1)), '#c18cff');
 const readHum = mkRead(W(sht, V(0, 3.2, -1)), '#c18cff');
-const readCnt = mkRead(W(ir, V(2.5, 2.5, 0)), '#c18cff');
+const readCnt = mkRead(W(prn, V(14, 13, PRD.d / 2 + 1)), '#ffb020');   // compteur de pages de l'imprimante (lu en SNMP)
 const readSrv = mkRead(V(92, 62, -42), '#ffb020');
 
 let showLabels = true, labelMode = 'overview';

@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Schéma réseau pas à pas</title>
+<meta name="description" content="Projet de Aziza : le schéma réseau à plat de la maquette, avec le trajet des messages, étape par étape.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="../../../../theme.css">
+<link rel="stylesheet" href="../../../../commun/schema-2d.css">
+</head>
+<body>
+<header class="wrap large tete">
+  <div>
+    <span class="label">Projet 4 · Aziza · le kit de maintenance</span>
+    <h1>Le schéma réseau pas à pas</h1>
+    <p class="lead">La maquette du lycée, à plat : le matériel vu de face et les liens réseau. Chaque point qui circule est un message. Clique sur <b>Suivant</b> pour suivre leur trajet, étape par étape.</p>
+  </div>
+  <nav class="liens" aria-label="Autres pages du projet"><a class="btn petit" href="vue-ensemble.html">Vue d'ensemble</a><a class="btn petit" href="architecture-2-5d.html">Version 2,5D</a><a class="btn petit" href="../animation-3d/maquette-3d.html">Maquette 3D ↗</a></nav>
+</header>
+
+<main class="wrap large grille">
+  <figure class="scene-cadre">
+    <div class="defile"><svg id="schema" class="focus" role="img" aria-label="Schéma réseau de la maquette de Aziza, matériel vu de face, avec le trajet des messages"></svg></div>
+    <div class="outils"><button class="btn petit" id="bLab" type="button" aria-pressed="true">Étiquettes</button></div>
+    <figcaption class="glisse">← Glisse pour voir tout le schéma →</figcaption>
+  </figure>
+
+  <aside class="carte-etape" aria-live="polite">
+    <div class="label" id="eNum"></div>
+    <h2 id="eTitre"></h2>
+    <div id="eTexte"></div>
+    <div class="commandes">
+      <button class="btn" id="bPrev" type="button" aria-label="Étape précédente">◀</button>
+      <button class="btn" id="bReplay" type="button">↻ Rejouer</button>
+      <button class="btn principal" id="bNext" type="button">Suivant ▶</button>
+    </div>
+    <div id="points" role="group" aria-label="Aller à une étape"></div>
+    <p class="aide"><kbd>←</kbd> <kbd>→</kbd> étapes · <kbd>R</kbd> rejouer · <kbd>E</kbd> étiquettes</p>
+    <ul class="legende" aria-label="Légende"><li><i style="background:var(--bleu)"></i>demande</li><li><i style="background:var(--vert)"></i>kit, fichier, réponse</li><li><i style="background:var(--jaune)"></i>rapport, sortie</li><li><i style="background:var(--rouge)"></i>refus, panne</li><li><i style="background:var(--blanc)"></i>capteur, SPI</li><li><s class="wifi"></s>Wi-Fi</li><li><s></s>Ethernet</li><li><s class="usb"></s>USB</li></ul>
+  </aside>
+</main>
+
+<section class="section-finale regles">
+  <div class="wrap">
+    <span class="label">Le fil de la soutenance</span>
+    <h2>Les 5 règles du projet</h2>
+    <ol>
+      <li><b>Avoir un fichier ne prouve pas qu'il est le bon</b> : l'empreinte SHA-256 est comparée au catalogue.</li>
+      <li><b>Le réseau n'est pas de confiance</b> (4G, Internet) : seul le catalogue signé fait foi.</li>
+      <li><b>Un PC éteint ne peut rien affirmer</b> : la borne lit le dernier rapport. Serveur muet = « vérification impossible », jamais « à jour ».</li>
+      <li><b>Sur le terrain, le réseau manque</b> : seuls les fichiers modifiés voyagent, BITS reprend après une coupure.</li>
+      <li><b>Chaque version a une valeur</b> : rien n'est écrasé, l'historique sert d'archive.</li>
+    </ol>
+  </div>
+</section>
+
+<script>
+/* Titres et textes des étapes : les mêmes que la version 2,5D (architecture-2-5d.html). */
+var TXT = [
+{
+"t": "Vue d'ensemble",
+"x": "<p>La maquette du lycée, vue de biais. Au fond, le <b>réseau en place</b> : serveur Ubuntu, switch, borne Wi-Fi et PC du lycée (tableau de bord).</p><p>Devant : le <b>poste du référent</b>, le <b>PC de maintenance</b> et son téléphone, la <b>borne de sortie</b> (ESP32 + lecteur RFID) et le <b>banc de physique</b>.</p><p>Les points qui circulent sont des <b>messages</b>. Clique sur <b>Suivant</b>.</p>"
+},
+{
+"t": "1. Le référent signe et publie le kit",
+"x": "<p>Le référent prépare la <b>version 13</b> du kit (fichiers, paramètres, documents).</p><p>PowerShell calcule l'<b>empreinte SHA-256</b> de chaque fichier : c'est comme une empreinte digitale. Si un seul octet change, l'empreinte change.</p><p>Il <b>signe</b> le catalogue avec son certificat, puis l'envoie au serveur par <b>SFTP</b>.</p>"
+},
+{
+"t": "2. Le PC demande s'il y a du nouveau",
+"x": "<p>C'est <b>toujours le PC qui demande</b> : au démarrage, à l'ouverture de session et toutes les 30 min. Le serveur ne peut pas joindre un PC en 4G.</p><p>Au lycée, <code>tc netem</code> ralentit le serveur pour <b>imiter la 4G</b> du téléphone.</p><p>Le PC vérifie la <b>signature</b> (c'est bien le référent) et le <b>numéro de version</b> (13 &gt; 12). Un ancien kit, même bien signé, est refusé.</p>"
+},
+{
+"t": "3. Seuls les fichiers modifiés arrivent",
+"x": "<p>Le PC télécharge <b>seulement les 3 fichiers modifiés</b>, avec <b>BITS</b> (outil de Windows). Ils arrivent dans un dossier « préparation ».</p><p>La 4G coupe ? BITS <b>attend, puis reprend</b> là où il s'était arrêté.</p><p>Ensuite <code>Test-FileCatalog</code> revérifie chaque empreinte, puis le PC bascule : l'ancien kit devient « précédent » (retour arrière en moins de 2 min).</p>"
+},
+{
+"t": "4. Le PC envoie son rapport",
+"x": "<p>Le PC envoie un <b>rapport</b> : « PC-04, kit v13, vérifié à 08:42 ». Il joint son <b>jeton</b>, une clé propre à ce PC.</p><p>Le tableau de bord passe PC-04 au vert.</p><p>Un faux rapport <b>sans jeton</b> est refusé : personne ne peut faire croire qu'un PC est à jour (test T15).</p>"
+},
+{
+"t": "5. Départ en intervention : la borne",
+"x": "<p>L'agent passe son <b>badge</b> (« qui part »), puis l'<b>étiquette RFID</b> collée sur le PC (« quel PC part »). Le lecteur RC522 transmet les numéros à l'ESP32 par le <b>bus SPI</b>.</p><p>L'ESP32 demande au serveur, en Wi-Fi et HTTPS : « PC-04 est-il à jour ? ». Oui → <b>LED verte</b> et bip. La sortie est enregistrée.</p><p>Le badge <b>identifie</b>, il ne prouve pas : il trace une sortie, il ne contrôle pas un accès.</p>"
+},
+{
+"t": "6. Et si quelque chose ne va pas ?",
+"x": "<p><b>PC-07</b> n'a pas envoyé de rapport depuis 3 jours : le serveur répond « rapport ancien » → <b>LED rouge</b> et long bip.</p><p>Ensuite, on <b>arrête le serveur</b>. La borne n'a pas de réponse : les LED <b>clignotent en alternance</b> = « vérification impossible ». La sortie est gardée en mémoire.</p><p>Règle d'or : un serveur muet ne veut <b>jamais</b> dire « à jour ».</p>"
+},
+{
+"t": "7. Le banc de physique",
+"x": "<p>Question : un PC qui sort du froid, combien de temps attendre avant de l'allumer, pour éviter la <b>buée</b> à l'intérieur ?</p><p>Un bloc d'aluminium refroidi à 0 °C imite le PC. Le <b>DS18B20</b> (fil 1-Wire) mesure le bloc, le <b>SHT40</b> (bus I²C) mesure l'air : 20 °C et 50 % d'humidité, donc un point de rosée d'environ 9,3 °C.</p><p>Tant que le bloc est sous 9,3 °C, la buée se forme. Le modèle prévoit une attente d'environ <b>0,62 τ</b>. On le compare aux mesures.</p>"
+},
+{
+"t": "8. Le tableau de bord, et tout ensemble",
+"x": "<p>Le tableau de bord montre l'état de chaque PC : kit installé, dernier rapport, dernière sortie. Un bouton <b>exporte un fichier CSV</b> pour les tableaux Excel du service.</p><p>Pour finir, tout fonctionne en même temps : les PC demandent, le serveur répond, la borne vérifie, le banc mesure.</p>"
+}
+];
+TXT[0].x = '<p>Le schéma réseau de la maquette, à plat. En haut, le <b>réseau en place</b> : poste du référent, switch, serveur Ubuntu (avec <code>tc netem</code> qui imite la 4G) et borne Wi-Fi.</p><p>En bas : le <b>PC de maintenance</b> et son téléphone, la <b>borne de sortie</b> (ESP32 + lecteur RFID), le <b>PC du lycée</b> (tableau de bord) et le <b>banc de physique</b>.</p><p>Les points qui circulent sont des <b>messages</b>. Clique sur <b>Suivant</b>.</p>';
+var VERS_SRV = ['lap', 'sw', 'netem', 'srv'], DU_SRV = VERS_SRV.slice().reverse();
+var BORNE_UP = ['borne', 'ap', 'sw', 'netem', 'srv'], BORNE_DOWN = BORNE_UP.slice().reverse();
+function tab(S, rows, sortie) {
+  var L = [['Parc des PC de maintenance', 'var(--focus)']];
+  [['PC-01', 0], ['PC-02', 1], ['PC-04', 2], ['PC-07', 3]].forEach(function (p) { var e = rows[p[1]]; L.push([(e === 'ok' ? '● ' : e === 'old' ? '✖ ' : '◐ ') + p[0] + (e === 'ok' ? ' à jour' : e === 'old' ? ' rapport ancien' : ' en retard'), e === 'ok' ? 'var(--vert)' : e === 'old' ? 'var(--rouge)' : 'var(--jaune-fonce)']); });
+  if (sortie) L.push([sortie, 'var(--encre)']);
+  S.ecran('lyc', L, 'clair');
+}
+function agent(S, lines) { S.ecran('lap', [['Agent du kit · PC-04', 'var(--jaune)']].concat(lines)); }
+window.SCHEMA = {
+  noeuds: [
+    { id: 'ap', k: 'ap', x: 560, y: 60, nom: 'Borne Wi-Fi', sous: 'Wi-Fi du bureau', cote: 'droite' },
+    { id: 'sw', k: 'switch', x: 560, y: 210, nom: 'Switch du lycée', sous: 'réseau en place', cote: 'bas' },
+    { id: 'netem', k: 'netem', x: 800, y: 210, nom: 'tc netem', sous: '4G simulée', cote: 'bas' },
+    { id: 'srv', k: 'serveur', x: 1010, y: 210, nom: 'Serveur Ubuntu', sous: 'nginx · Flask · SQLite' },
+    { id: 'ref', k: 'pc', x: 180, y: 210, nom: 'Poste du référent', sous: 'Windows 11 · signe le kit' },
+    { id: 'lap', k: 'portable', x: 330, y: 500, nom: 'PC de maintenance', sous: 'agent PowerShell · BITS' },
+    { id: 'phone', k: 'telephone', x: 130, y: 500, nom: 'Téléphone', sous: '4G sur le terrain' },
+    { id: 'borne', k: 'borne', x: 680, y: 500, nom: 'Borne de sortie', sous: 'ESP32 + lecteur RC522' },
+    { id: 'lyc', k: 'pc', x: 1010, y: 500, nom: 'PC du lycée', sous: 'tableau de bord' },
+    { id: 'banc', k: 'banc-froid', x: 330, y: 700, nom: 'Banc de physique', sous: 'ESP32 + DS18B20 + SHT40', cote: 'droite' }
+  ],
+  liens: [
+    ['ref', 'sw', 'eth', 'Ethernet'],
+    ['sw', 'netem', 'eth', ''],
+    ['netem', 'srv', 'eth', ''],
+    ['ap', 'sw', 'eth', ''],
+    ['lap', 'sw', 'eth', 'Ethernet (au lycée)', { via: [[330, 340], [520, 340]], t: 0.3 }],
+    ['lyc', 'sw', 'eth', '', { via: [[1010, 360], [600, 360]] }],
+    ['borne', 'ap', 'wifi', 'Wi-Fi · HTTPS', { via: [[680, 60]], t: 0.2 }],
+    ['phone', 'lap', 'usb', 'partage 4G'],
+    ['banc', 'lap', 'usb', 'USB']
+  ],
+  init: function (S) {
+    S.ecran('ref', [['PowerShell', 'var(--bleu)']]);
+    agent(S, [['kit actif : v12']]);
+    tab(S, ['ok', 'ok', 'ok', 'old']);
+  },
+  etapes: [
+    { t: TXT[0].t, x: TXT[0].x, all: true,
+      run: async function (S) {
+        for (;;) {
+          var r = Math.random();
+          if (r < 0.4) S.bg(S.go(VERS_SRV, 'jaune', null, { size: 6 }));
+          else if (r < 0.7) S.bg(S.go(BORNE_UP, 'bleu', null, { size: 6 }));
+          else S.bg(S.go(DU_SRV, 'vert', null, { size: 6 }));
+          await S.sleep(1500);
+        }
+      } },
+    { t: TXT[1].t, x: TXT[1].x, on: ['ref', 'sw', 'srv', 'netem', 'lyc'],
+      run: async function (S) {
+        var L = [['PowerShell', 'var(--bleu)'], ['New-FileCatalog'], ['→ empreintes SHA-256', 'var(--jaune)'], ['Set-Authenticode…'], ['→ catalogue signé ✔', 'var(--vert)']];
+        for (var i = 2; i <= L.length; i++) { S.ecran('ref', L.slice(0, i)); await S.sleep(550); }
+        await S.go(['ref', 'sw', 'netem', 'srv'], 'vert', 'SFTP · kit v13 signé');
+        S.bulle('srv', ['#Serveur', 'kit v13 publié', 'v12 gardée dans l\'historique'], { cote: 'haut', dx: -40, dy: -10, cls: 'ok' });
+        await S.go(['srv', 'netem', 'sw', 'lyc'], 'vert', null, { size: 6 });
+        tab(S, ['warn', 'warn', 'warn', 'old']);
+        S.bulle('lyc', ['#Tableau de bord', 'les PC en v12 passent en retard'], { cote: 'gauche', dy: -30 });
+      } },
+    { t: TXT[2].t, x: TXT[2].x, on: ['lap', 'sw', 'srv', 'netem'],
+      init: function (S) { tab(S, ['warn', 'warn', 'warn', 'old']); },
+      run: async function (S) {
+        S.etat('netem', 'retard · débit limité · pertes', 'accent');
+        await S.sleep(600);
+        await S.go(VERS_SRV, 'bleu', 'GET /kit/catalogue (HTTPS)', { speed: 160 });
+        await S.go(DU_SRV, 'vert', 'catalogue v13 + signature', { speed: 160 });
+        agent(S, [['✔ signé par le référent', 'var(--vert)']]); await S.sleep(900);
+        agent(S, [['✔ signé par le référent', 'var(--vert)'], ['✔ v13 > v12 installée', 'var(--vert)']]);
+        S.bulle('lap', ['#Agent du PC-04', '✔ signé par le référent', '✔ version 13 > 12'], { cote: 'droite', dx: 30, dy: -30, cls: 'ok' });
+      } },
+    { t: TXT[3].t, x: TXT[3].x, on: ['lap', 'sw', 'srv', 'netem'],
+      init: function (S) { tab(S, ['warn', 'warn', 'warn', 'old']); S.etat('netem', '4G simulée', 'accent'); },
+      run: async function (S) {
+        agent(S, [['BITS · préparation'], ['■□□ 0 / 3']]);
+        await S.go(DU_SRV, 'vert', 'fichier 1/3 · 2,1 Mo', { speed: 180 }); agent(S, [['BITS · préparation'], ['■■□ 1 / 3']]);
+        await S.go(DU_SRV, 'vert', 'fichier 2/3', { speed: 180, dropAt: 0.45 });
+        S.etat('netem', 'coupure 4G !', 'alerte');
+        S.bulle('lap', ['#Coupure 4G !', 'BITS attend, sans rien perdre'], { cote: 'droite', dx: 30, dy: -30, cls: 'alerte' });
+        await S.sleep(2200);
+        S.etat('netem', '4G simulée', 'accent'); S.sans('lap');
+        await S.go(DU_SRV, 'vert', 'reprise · fichier 2/3', { speed: 180 }); agent(S, [['BITS · préparation'], ['■■■ 2 / 3']]);
+        await S.go(DU_SRV, 'vert', 'fichier 3/3 · 0,4 Mo', { speed: 180 });
+        agent(S, [['Test-FileCatalog 3/3 ✔', 'var(--vert)'], ['actif     = v13'], ['précédent = v12']]);
+        S.bulle('lap', ['#Agent du PC-04', '>Test-FileCatalog : 3/3 ✔', '>actif = v13 · précédent = v12'], { cote: 'droite', dx: 30, dy: -30, cls: 'ok' });
+      } },
+    { t: TXT[4].t, x: TXT[4].x, on: ['lap', 'sw', 'srv', 'netem', 'lyc', 'ap'],
+      init: function (S) { tab(S, ['warn', 'warn', 'warn', 'old']); agent(S, [['kit actif : v13', 'var(--vert)']]); },
+      run: async function (S) {
+        await S.go(VERS_SRV, 'jaune', 'POST /pc/04/rapport · jeton 🔑');
+        await S.go(['srv', 'netem', 'sw', 'lyc'], 'jaune', null, { size: 6 });
+        tab(S, ['warn', 'warn', 'ok', 'old']); S.etat('lyc', 'PC-04 · v13 · 08:42 ✔', 'ok');
+        await S.sleep(1500);
+        await S.go(['ap', 'sw', 'netem', 'srv'], 'rouge', 'faux rapport « à jour » · sans jeton');
+        S.bulle('srv', ['#Serveur', 'pas de jeton → 401 refusé'], { cote: 'haut', dx: -40, dy: -10, cls: 'alerte' });
+        await S.go(['srv', 'netem', 'sw', 'ap'], 'rouge', '✖ 401 refusé');
+      } },
+    { t: TXT[5].t, x: TXT[5].x, on: ['borne', 'ap', 'sw', 'netem', 'srv', 'lyc'],
+      init: function (S) { tab(S, ['warn', 'warn', 'ok', 'old']); },
+      run: async function (S) {
+        S.etat('borne', 'badge A-12 posé', 'info'); await S.sleep(900);
+        S.etat('borne', 'étiquette PC-04 posée', 'info'); await S.sleep(900);
+        await S.go(BORNE_UP, 'bleu', 'GET /pc/04/etat · jeton 🔑');
+        await S.go(BORNE_DOWN, 'vert', 'à jour · v13 · rapport 08:42');
+        S.led('borne', 'vert'); S.etat('borne', 'LED verte + bip', 'ok');
+        await S.sleep(900);
+        await S.go(BORNE_UP, 'jaune', 'POST /sorties (A-12, PC-04, v13)');
+        await S.go(['srv', 'netem', 'sw', 'lyc'], 'jaune', null, { size: 6 });
+        tab(S, ['warn', 'warn', 'ok', 'old'], 'sortie : PC-04 · A-12 · 08:47');
+        S.bulle('borne', ['#Le badge identifie,', 'il ne prouve pas :', 'il trace une sortie'], { cote: 'droite', dx: 20 });
+      } },
+    { t: TXT[6].t, x: TXT[6].x, on: ['borne', 'ap', 'sw', 'netem', 'srv'],
+      run: async function (S) {
+        S.etat('borne', 'étiquette PC-07 posée', 'info'); await S.sleep(800);
+        await S.go(BORNE_UP, 'bleu', 'GET /pc/07/etat · jeton 🔑');
+        await S.go(BORNE_DOWN, 'rouge', 'rapport ancien (3 jours)');
+        S.led('borne', 'rouge'); S.etat('borne', 'LED rouge : PC-07 pas à jour', 'alerte');
+        await S.sleep(2000);
+        S.led('borne', ''); S.etat('borne', null);
+        S.etat('srv', 'serveur arrêté', 'alerte'); S.led('srv', '');
+        await S.sleep(1000);
+        await S.go(BORNE_UP, 'bleu', 'GET /pc/07/etat', { dropAt: 0.94 });
+        await S.sleep(800);
+        S.led('borne', 'alt'); S.etat('borne', 'vérification impossible', 'alerte');
+        S.bulle('borne', ['#Serveur muet', 'jamais « à jour » par défaut', 'sortie gardée en mémoire'], { cote: 'droite', dx: 20, cls: 'alerte' });
+      } },
+    { t: TXT[7].t, x: TXT[7].x, on: ['banc', 'lap'],
+      run: async function (S) {
+        var N = 20, bloc = S.q('banc', '.bloc'), tt = S.q('banc', '.temp');
+        for (var i = 0; i <= N; i++) {
+          var t = i / N * 3, T = 20 - 20 * Math.exp(-t);
+          tt.textContent = T.toFixed(1).replace('.', ',') + ' °C';
+          bloc.style.fill = 'color-mix(in srgb,var(--bleu) ' + Math.round((1 - T / 20) * 80) + '%,var(--m-alu))';
+          S.etat('banc', T < 9.3 ? 'buée : bloc sous la rosée' : 'plus de buée', T < 9.3 ? 'alerte' : 'ok');
+          S.bg(S.go(['banc', 'lap'], 'blanc', i % 5 === 0 ? 'USB · T = ' + T.toFixed(1).replace('.', ',') + ' °C' : null, { size: 5, speed: 300, noTrace: true }));
+          await S.sleep(420);
+        }
+        S.bulle('banc', ['#Résultat (modèle)', 'rosée ≈ 9,3 °C (20 °C, 50 % HR)', 'attendre ≈ 0,62 τ avant d\'allumer', 'à comparer aux mesures'], { cote: 'droite', dx: 150, dy: -60, cls: 'ok' });
+      } },
+    { t: TXT[8].t, x: TXT[8].x, all: true,
+      init: function (S) { tab(S, ['warn', 'warn', 'ok', 'old'], 'sortie : PC-04 · A-12 · 08:47'); },
+      run: async function (S) {
+        await S.go(['lyc', 'sw', 'netem', 'srv'], 'bleu', 'GET /export.csv');
+        await S.go(['srv', 'netem', 'sw', 'lyc'], 'vert', 'parc.csv → Excel');
+        S.etat('lyc', 'export CSV pour Excel ✔', 'ok');
+        for (;;) {
+          var r = Math.random();
+          if (r < 0.3) S.bg(S.go(VERS_SRV, 'bleu', null, { size: 6 }).then(function () { return S.go(DU_SRV, 'vert', null, { size: 6 }); }));
+          else if (r < 0.55) S.bg(S.go(BORNE_UP, 'bleu', null, { size: 6 }).then(function () { return S.go(BORNE_DOWN, 'vert', null, { size: 6 }); }));
+          else if (r < 0.8) S.bg(S.go(['banc', 'lap'], 'blanc', null, { size: 5 }));
+          else S.bg(S.go(['ref', 'sw', 'netem', 'srv'], 'vert', null, { size: 6 }));
+          await S.sleep(1200);
+        }
+      } }
+  ]
+};
+
+</script>
+<script src="../../../../commun/schema-2d.js"></script>
+</body>
+</html>

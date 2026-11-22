@@ -1,0 +1,302 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Schéma réseau pas à pas</title>
+<meta name="description" content="Projet de Lorenzo : le schéma réseau à plat de la maquette, avec le trajet des messages, étape par étape.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="../../../theme.css">
+<link rel="stylesheet" href="../../../commun/schema-2d.css">
+</head>
+<body>
+<header class="wrap large tete">
+  <div>
+    <span class="label">Projet 3 · Lorenzo · CyberSentinel</span>
+    <h1>Le schéma réseau pas à pas</h1>
+    <p class="lead">La maquette du lycée, à plat : le matériel vu de face et les liens réseau. Chaque point qui circule est un message. Clique sur <b>Suivant</b> pour suivre leur trajet, étape par étape.</p>
+  </div>
+  <nav class="liens" aria-label="Autres pages du projet"><a class="btn petit" href="poste-attentif.html">Le projet</a><a class="btn petit" href="architecture-2-5d.html">Version 2,5D</a><a class="btn petit" href="../animation-3d/maquette-3d.html">Maquette 3D ↗</a></nav>
+</header>
+
+<main class="wrap large grille">
+  <figure class="scene-cadre">
+    <div class="defile"><svg id="schema" class="focus" role="img" aria-label="Schéma réseau de la maquette de Lorenzo, matériel vu de face, avec le trajet des messages"></svg></div>
+    <div class="outils"><button class="btn petit" id="bLab" type="button" aria-pressed="true">Étiquettes</button></div>
+    <figcaption class="glisse">← Glisse pour voir tout le schéma →</figcaption>
+  </figure>
+
+  <aside class="carte-etape" aria-live="polite">
+    <div class="label" id="eNum"></div>
+    <h2 id="eTitre"></h2>
+    <div id="eTexte"></div>
+    <div class="commandes">
+      <button class="btn" id="bPrev" type="button" aria-label="Étape précédente">◀</button>
+      <button class="btn" id="bReplay" type="button">↻ Rejouer</button>
+      <button class="btn principal" id="bNext" type="button">Suivant ▶</button>
+    </div>
+    <div id="points" role="group" aria-label="Aller à une étape"></div>
+    <p class="aide"><kbd>←</kbd> <kbd>→</kbd> étapes · <kbd>R</kbd> rejouer · <kbd>E</kbd> étiquettes</p>
+    <ul class="legende" aria-label="Légende"><li><i style="background:var(--blanc)"></i>USB signé</li><li><i style="background:var(--bleu)"></i>HTTPS, API</li><li><i style="background:var(--jaune)"></i>HTTP vers le leurre</li><li><i style="background:var(--vert)"></i>DHCP, DNS, NTP</li><li><i style="background:var(--rouge)"></i>refusé, perdu</li><li><s></s>Ethernet</li><li><s class="usb"></s>USB, sonde</li></ul>
+  </aside>
+</main>
+
+<section class="section-finale regles">
+  <div class="wrap">
+    <span class="label">Le fil de la soutenance</span>
+    <h2>Les 5 règles du projet</h2>
+    <ol>
+      <li><b>Inactif ne veut pas dire absent</b> : le radar voit la respiration, le clavier non.</li>
+      <li><b>Le verrou reste local</b> : il ne dépend ni du serveur ni du réseau. Une panne ne laisse jamais le poste ouvert.</li>
+      <li><b>Chaque message est signé</b> (HMAC + compteur + défi) : un faux boîtier ou un message rejoué est refusé.</li>
+      <li><b>Une connexion au leurre n'est pas une intrusion</b> : c'est un signal à qualifier.</li>
+      <li><b>L'absence n'est pas une identité</b> : la supervision n'attribue jamais un événement réseau à une personne absente.</li>
+    </ol>
+  </div>
+</section>
+
+<script>
+/* Titres et textes des étapes : les mêmes que la version 2,5D (architecture-2-5d.html). */
+var TXT = [
+{
+"t": "Vue d'ensemble",
+"x": "<p><b>CyberSentinel</b> réunit deux défenses. À gauche, un <b>radar LD2410</b> et un ESP32 verrouillent le poste de Martine quand elle s'absente. À droite, un <b>second ESP32 Ethernet (W5500)</b> joue une <b>fausse imprimante</b> et note qui consulte son faux service web.</p><p>Au fond, le <b>réseau isolé du labo</b> : routeur, switch, serveur Ubuntu et poste de supervision.</p><p>Scénario simulé, adresses d'exemple. Clique sur <b>Suivant</b>.</p>"
+},
+{
+"t": "1. Le boîtier, pièce par pièce",
+"x": "<p>Le <b>radar LD2410</b> (24 GHz) regarde Martine à travers la face avant du boîtier. Il envoie ses mesures à l'<b>ESP32</b> par une liaison série (256 000 bauds).</p><p>L'ESP32 décide, <b>signe chaque message</b> et commande la <b>LED RVB</b>. Tout est alimenté par le câble <b>USB 5 V</b> : pas de 230 V.</p><p>Aucune caméra : le radar ne fait <b>aucune image</b>.</p>"
+},
+{
+"t": "2. Le radar voit la respiration",
+"x": "<p>Martine <b>lit un dossier papier</b>, sans toucher au clavier. Windows se croit seul : « inactif depuis 4 minutes ».</p><p>Le radar envoie une onde (λ = 12,5 mm) et écoute l'écho. En respirant, la poitrine bouge de quelques millimètres : l'écho change, et la <b>porte 0</b> (0 à 0,75 m) garde de l'énergie. Résultat : <b>présente</b>.</p><p><b>Inactif ne veut pas dire absent.</b></p>"
+},
+{
+"t": "3. Chaque message est signé",
+"x": "<p>Chaque seconde, le boîtier envoie « présente » ou « absente ». Il ajoute un <b>compteur</b> et une <b>preuve calculée avec un code secret</b> (HMAC-SHA256).</p><p>Le service PowerShell du poste vérifie la preuve et que le compteur a bien avancé. Un message modifié ou <b>rejoué</b> est <b>refusé</b>.</p>"
+},
+{
+"t": "4. Martine part : orange, puis blocage",
+"x": "<p>Martine se lève. Dès que le radar ne la voit plus : message signé « absente », <b>lumière orange</b> et avertissement pendant 3 secondes. Si elle revient pendant l'orange, <b>rien ne se passe</b>.</p><p>Sinon, le poste <b>verrouille la session</b>. Ensuite seulement, il prévient le serveur.</p><p><b>Le verrou ne dépend ni du serveur ni du réseau.</b></p>"
+},
+{
+"t": "5. Le réseau en place (C10)",
+"x": "<p>Lorenzo <b>exploite</b> le réseau isolé du labo : <b>DHCP</b> donne les adresses, <b>DNS</b> permet de joindre Ubuntu par son nom, <b>NTP</b> met tout le monde à la même heure (pour dater les événements), <b>HTTPS</b> chiffre les journaux.</p><p>Le leurre a sa propre adresse IP. <b>Wireshark</b> sur le PC de test montre les échanges.</p><p>Adresses d'exemple. Le routeur fournit déjà DHCP, DNS et NTP : <b>aucun VLAN ni ACL à créer</b>.</p>"
+},
+{
+"t": "6. Quand ça tombe en panne",
+"x": "<p><b>Le réseau est coupé</b> : Martine part, le poste se verrouille quand même et garde l'événement en attente. Quand le réseau revient, il l'envoie.</p><p>Puis le <b>boîtier est débranché</b> : plus aucun message. Le <b>filet de sécurité</b> de Windows (blocage après 10 minutes sans clavier ni souris, réglé par une stratégie locale) continue de protéger.</p><p>Une panne ne laisse <b>jamais</b> le poste ouvert.</p>"
+},
+{
+"t": "7. Le faux boîtier",
+"x": "<p>Quelqu'un branche un <b>faux boîtier</b> qui dit toujours « Martine est là ». Mais il ne connaît pas le <b>code secret</b> : ses messages n'ont pas de preuve valable.</p><p>Le poste envoie aussi un <b>défi</b> (un nombre au hasard). Seul le vrai boîtier sait calculer la bonne réponse. Le faux est <b>refusé</b>, et le blocage normal continue de jouer son rôle.</p>"
+},
+{
+"t": "8. La physique : régler le radar avec des mesures",
+"x": "<p>Le radar découpe l'espace en <b>portes</b> de 0,75 m. Martine est dans la porte 0. Un collègue qui passe dans l'allée est dans la porte 2 : la <b>zone retenue</b> (portes 0 et 1) l'ignore.</p><p>Lorenzo mesure les seuils et la zone (R1 à R3), puis le <b>délai</b> entre le départ et le blocage (R4, à l'oscilloscope), avec des incertitudes.</p><p>λ = c/f = 12,5 mm · ΔR = c/2B = 0,6 m (B = 250 MHz). Valeurs d'exemple : les vraies viendront des essais.</p>"
+},
+{
+"t": "9. Leurre réseau : une fausse imprimante",
+"x": "<p>Le second module ne pilote <b>aucune vraie imprimante</b>. Un <b>ESP32 + W5500</b> (Ethernet) répond sur l'adresse 10.10.0.80 comme une imprimante : un petit site web en lecture seule, avec une page d'administration volontairement fausse et <b>sans identifiants réels</b>.</p><p>En pointillés : ce que le réseau croit voir. Les consultations sont notées pour produire un <b>signal de sécurité complémentaire</b>. Le réseau reste limité au labo.</p>"
+},
+{
+"t": "10. Un PC interroge la fausse imprimante",
+"x": "<p>Le <b>PC de test</b> du labo consulte l'adresse du leurre, puis un chemin <code>/admin</code>. L'ESP32 enregistre l'<b>heure</b>, l'<b>adresse IP source</b> et la <b>page demandée</b>.</p><p>Il ne collecte <b>ni mots de passe ni documents</b>.</p><p>Une connexion <b>ne prouve pas une attaque</b> : ce peut être un inventaire réseau ou un outil de supervision autorisé.</p>"
+},
+{
+"t": "11. L'alerte Ubuntu et ses limites",
+"x": "<p>Ubuntu reçoit l'événement du leurre et l'affiche avec celui du <b>verrouillage Windows</b>. Ce sont <b>deux événements distincts</b> : l'absence de Martine ne prouve <b>aucun lien</b> avec l'accès au leurre.</p><p>L'alerte est « <b>à qualifier</b> » par le technicien. Les essais comparent le délai d'alerte, les faux positifs (scans autorisés) et le comportement si le serveur est arrêté.</p><p><b>Pas de détection magique</b> : seuls les accès dirigés vers le leurre sont vus.</p>"
+}
+];
+TXT[0].x = '<p><b>CyberSentinel</b> réunit deux défenses. À gauche, le <b>boîtier radar</b> (LD2410 + ESP32) branché en USB sur le <b>poste de Martine</b> : il verrouille la session quand elle s\'absente. Au centre, un <b>second ESP32 Ethernet (W5500)</b> joue une <b>fausse imprimante</b>.</p><p>En haut et à droite, le <b>réseau isolé du labo</b> : routeur, switch, serveur Ubuntu, poste de supervision et PC de test.</p><p>Scénario simulé, adresses d\'exemple. Clique sur <b>Suivant</b>.</p>';
+TXT[9].x = TXT[9].x.replace('En pointillés : ce que le réseau croit voir. ', '');
+function ps(S, lines) { S.ecran('pc', [['Service CyberSentinel', 'var(--bleu)']].concat(lines)); }
+function sup(S, rows) { S.ecran('sup', [['Supervision · événements', 'var(--focus)']].concat(rows.length ? rows : [['aucun événement', 'var(--encre-2)']]), 'clair'); }
+async function radar(S) { for (;;) { S.bg(S.onde('radar', 'droite', 150)); await S.sleep(1100); } }
+var USB = ['radar', 'pc'];
+async function partir(S) {
+  var g = S.N.mar.g, x0 = S.N.mar.n.x, y0 = S.N.mar.n.y, t0 = performance.now();
+  S.etat('mar', 'se lève et part', 'info');
+  for (var k = 0; k <= 1; k = (performance.now() - t0) / 1400) { g.setAttribute('transform', 'translate(' + (x0 + 160 * k) + ' ' + y0 + ')'); g.style.opacity = 1 - k; await S.sleep(30); }
+  S.montre('mar', false); g.style.opacity = ''; g.setAttribute('transform', 'translate(' + x0 + ' ' + y0 + ')');
+}
+async function verrou(S, txt) {
+  S.led('radar', 'orange');
+  for (var k = 3; k > 0; k--) { S.ecran('pc', [['Absence détectée'], ['verrouillage dans ' + k + ' s']], 'jaune'); await S.sleep(750); }
+  S.ecran('pc', [['08:47'], [txt || 'Session verrouillée']]); S.led('radar', ''); S.etat('pc', 'verrouillé en local', 'ok');
+}
+window.SCHEMA = {
+  noeuds: [
+    { id: 'rt', k: 'routeur', x: 600, y: 60, nom: 'Routeur Cisco ISR 4331', sous: 'DHCP · DNS · NTP', cote: 'droite' },
+    { id: 'sw', k: 'switch', x: 600, y: 210, nom: 'Switch HP', sous: 'réseau isolé du labo', cote: 'droite' },
+    { id: 'srv', k: 'serveur', x: 1040, y: 230, nom: 'Serveur Ubuntu', sous: 'API · SQLite · 10.10.0.20' },
+    { id: 'sup', k: 'pc', x: 1040, y: 520, nom: 'Poste de supervision', sous: 'tableau de bord Ubuntu' },
+    { id: 'pc', k: 'pc', x: 210, y: 250, nom: 'Poste de Martine', sous: 'Windows 11 · 10.10.0.54' },
+    { id: 'radar', k: 'radar', x: 210, y: 500, nom: 'Boîtier radar', sous: 'LD2410 + ESP32' },
+    { id: 'mar', k: 'personne', x: 380, y: 500, nom: 'Martine', sous: 'personnage fictif' },
+    { id: 'fake', k: 'radar', x: 50, y: 420, nom: 'Faux boîtier', sous: 'sans le code secret', cache: true },
+    { id: 'osc', k: 'oscillo', x: 210, y: 690, nom: 'Oscilloscope', sous: 'mesure du délai (R4)', cote: 'droite' },
+    { id: 'leu', k: 'leurre', x: 650, y: 480, nom: 'Leurre ESP32 + W5500', sous: 'fausse imprimante · 10.10.0.80' },
+    { id: 'test', k: 'portable', x: 760, y: 680, nom: 'PC de test', sous: 'Wireshark · 10.10.0.73', cote: 'droite' },
+    { id: 'col', k: 'personne', x: 540, y: 680, nom: 'Collègue', sous: 'dans l\'allée (porte 2)', cache: true }
+  ],
+  liens: [
+    ['rt', 'sw', 'eth', ''],
+    ['sw', 'srv', 'eth', ''],
+    ['sw', 'sup', 'eth', '', { via: [[840, 210], [840, 520]] }],
+    ['pc', 'sw', 'eth', 'Ethernet'],
+    ['sw', 'leu', 'eth', '', { via: [[650, 300]] }],
+    ['sw', 'test', 'eth', '', { via: [[760, 210], [760, 600]] }],
+    ['radar', 'pc', 'usb', 'USB série · HMAC', { t: 0.3 }],
+    ['fake', 'pc', 'usb', ''],
+    ['osc', 'radar', 'usb', 'sonde']
+  ],
+  init: function (S) { S.ecran('pc', [['dossier-2026-118.pdf', 'var(--focus)'], ['…'], ['…']], 'clair'); sup(S, []); S.ecran('test', [['Wireshark · eth0', 'var(--focus)']], 'clair'); S.ecran('osc', []); },
+  etapes: [
+    { t: TXT[0].t, x: TXT[0].x, all: true,
+      run: async function (S) {
+        S.bg(radar(S));
+        for (var n = 1; ; n++) {
+          S.bg(S.go(USB, 'blanc', null, { size: 6, speed: 120 }));
+          if (n % 4 === 0) S.bg(S.go(['test', 'sw', 'leu'], 'jaune', null, { size: 6 }));
+          if (n % 5 === 0) S.bg(S.go(['pc', 'sw', 'srv'], 'bleu', null, { size: 6 }));
+          await S.sleep(1200);
+        }
+      } },
+    { t: TXT[1].t, x: TXT[1].x, on: ['radar', 'pc', 'mar'],
+      run: async function (S) {
+        S.bg(radar(S));
+        S.bulle('radar', ['#Boîtier radar', '>LD2410 · 24 GHz · série 256 000 bauds', '>ESP32 · signe chaque message', '>LED RVB · alimentation USB 5 V', 'aucune image, aucune caméra'], { cote: 'droite', dx: 160, dy: 40 });
+        for (;;) { await S.go(USB, 'blanc', 'USB · présente', { speed: 90 }); await S.sleep(600); }
+      } },
+    { t: TXT[2].t, x: TXT[2].x, on: ['radar', 'pc', 'mar'],
+      run: async function (S) {
+        S.bg(radar(S));
+        S.etat('mar', 'lit un dossier, immobile', 'info');
+        S.bulle('radar', ['#Radar', 'porte 0 : la respiration bouge l\'écho', '→ présente'], { cote: 'droite', dx: 160, dy: 40, cls: 'ok' });
+        for (var s = 0; ; s++) { S.ecran('pc', [['dossier-2026-118.pdf', 'var(--focus)'], ['…'], ['inactif depuis 04:' + String(s % 60).padStart(2, '0'), 'var(--encre-2)']], 'clair'); S.bg(S.go(USB, 'blanc', null, { size: 6, speed: 120, noTrace: true })); await S.sleep(1000); }
+      } },
+    { t: TXT[3].t, x: TXT[3].x, on: ['radar', 'pc'],
+      run: async function (S) {
+        var L = [];
+        for (var n = 41; n < 44; n++) {
+          await S.go(USB, 'blanc', '#' + n + ' présente · HMAC', { speed: 70 });
+          L.push(['#' + n + ' HMAC ✔ compteur ✔', 'var(--vert)']); ps(S, L.slice(-4)); await S.sleep(250);
+        }
+        await S.go(USB, 'rouge', '#42 rejoué (copie)', { speed: 70 });
+        L.push(['#42 compteur ✘ REFUSÉ', 'var(--rouge)']); ps(S, L.slice(-4));
+        S.bulle('pc', ['#Service du poste', 'message rejoué → refusé'], { cote: 'droite', dx: 30, cls: 'alerte' });
+      } },
+    { t: TXT[4].t, x: TXT[4].x, on: ['radar', 'pc', 'mar', 'sw', 'srv', 'sup'],
+      run: async function (S) {
+        await S.sleep(500);
+        await partir(S);
+        await S.go(USB, 'blanc', 'absente · HMAC', { speed: 70 });
+        await verrou(S);
+        S.bulle('pc', ['#Poste', 'verrouillé en local,', 'sans attendre le serveur'], { cote: 'droite', dx: 30, dy: -40, cls: 'ok' });
+        await S.sleep(600);
+        await S.go(['pc', 'sw', 'srv'], 'bleu', 'HTTPS · événement : verrouillage');
+        await S.go(['srv', 'sw', 'sup'], 'bleu', null, { size: 6 });
+        sup(S, [['08:47:12 PC-04 verrouillage', 'var(--encre)'], ['  (absence)', 'var(--encre-2)']]);
+      } },
+    { t: TXT[5].t, x: TXT[5].x, on: ['pc', 'rt', 'sw', 'srv', 'leu', 'test'],
+      run: async function (S) {
+        var W = [['Wireshark · eth0', 'var(--focus)']];
+        function ws(t, c) { W.push([t, c]); S.ecran('test', W.slice(-5), 'clair'); }
+        await S.go(['pc', 'sw', 'rt'], 'vert', 'DHCP · une adresse ?');
+        await S.go(['rt', 'sw', 'pc'], 'vert', 'DHCP · 10.10.0.54'); ws('DHCP ACK 10.10.0.54');
+        await S.go(['pc', 'sw', 'rt'], 'vert', 'DNS · ubuntu.labo ?');
+        await S.go(['rt', 'sw', 'pc'], 'vert', 'DNS · 10.10.0.20'); ws('DNS ubuntu.labo → .20');
+        await S.go(['pc', 'sw', 'rt'], 'vert', 'NTP · quelle heure ?');
+        await S.go(['rt', 'sw', 'pc'], 'vert', 'NTP · 08:42:10,123'); ws('NTP 08:42:10,123');
+        await S.go(['pc', 'sw', 'srv'], 'bleu', 'HTTPS (TLS) · journal'); ws('TLS .54 → .20:443', 'var(--focus)');
+        S.bulle('rt', ['#Réseau en place', 'DHCP · DNS · NTP fournis par le routeur', 'aucun VLAN ni ACL à créer'], { cote: 'gauche', dx: -130, cls: 'ok' });
+      } },
+    { t: TXT[6].t, x: TXT[6].x, on: ['radar', 'pc', 'mar', 'sw', 'srv', 'sup'],
+      run: async function (S) {
+        S.lien('pc', 'sw', 'coupe'); S.etat('pc', 'câble réseau débranché', 'alerte');
+        await S.sleep(1000);
+        await partir(S);
+        await S.go(USB, 'blanc', 'absente · HMAC', { speed: 70 });
+        await verrou(S);
+        await S.go(['pc', 'sw', 'srv'], 'rouge', 'événement', { dropAt: 0.2 });
+        S.bulle('pc', ['#Poste verrouillé', 'événement gardé en attente'], { cote: 'droite', dx: 30, dy: -40, cls: 'ok' });
+        await S.sleep(1400);
+        S.lien('pc', 'sw', 'coupe', false); S.sans('pc');
+        await S.go(['pc', 'sw', 'srv'], 'bleu', 'reprise · événement en retard');
+        await S.go(['srv', 'sw', 'sup'], 'bleu', null, { size: 6 });
+        sup(S, [['08:47:12 PC-04 verrouillage', 'var(--jaune-fonce)'], ['  (reçu en retard)', 'var(--encre-2)']]);
+        await S.sleep(1400);
+        /* deuxième panne : le boîtier est débranché */
+        S.montre('mar', true); S.etat('mar', null); S.etat('pc', null); S.lien('radar', 'pc', 'coupe'); S.led('radar', ''); S.etat('radar', 'débranché', 'alerte');
+        for (var m = 0; m <= 10; m++) { S.ecran('pc', [['dossier-2026-118.pdf', 'var(--focus)'], ['…'], ['inactif depuis ' + String(m).padStart(2, '0') + ':00', 'var(--encre-2)']], 'clair'); S.etat('pc', 'plus aucun message du boîtier', 'alerte'); await S.sleep(380); }
+        S.ecran('pc', [['08:57'], ['Verrouillé'], ['10 min sans activité']]); S.etat('pc', 'filet de sécurité Windows', 'ok');
+      } },
+    { t: TXT[7].t, x: TXT[7].x, on: ['radar', 'pc', 'fake'],
+      init: function (S) { S.montre('fake', true); S.etat('fake', '?', 'alerte'); },
+      run: async function (S) {
+        var L = [];
+        function log(t, c) { L.push([t, c]); ps(S, L.slice(-4)); }
+        await S.go(USB, 'blanc', 'B1 · #57 · HMAC', { speed: 70 }); log('B1 #57 HMAC ✔ accepté', 'var(--vert)');
+        await S.go(['fake', 'pc'], 'rouge', '« présente » · HMAC faux', { speed: 70 }); log('? HMAC ✘ REFUSÉ', 'var(--rouge)');
+        await S.go(['pc', 'radar'], 'blanc', 'défi : 83 120 417', { speed: 70 });
+        await S.go(USB, 'blanc', 'bonne réponse', { speed: 70 }); log('défi B1 ✔', 'var(--vert)');
+        await S.go(['pc', 'fake'], 'blanc', 'défi : 51 004 962', { speed: 70 });
+        await S.go(['fake', 'pc'], 'rouge', 'mauvaise réponse', { speed: 70 }); log('défi ? ✘ non authentifié', 'var(--rouge)');
+        S.bulle('fake', ['#Faux boîtier refusé', 'sans le code secret,', 'pas de preuve valable'], { cote: 'haut', dx: 60, cls: 'alerte' });
+      } },
+    { t: TXT[8].t, x: TXT[8].x, on: ['radar', 'pc', 'mar', 'osc', 'col'],
+      init: function (S) { S.montre('col', true); },
+      run: async function (S) {
+        S.bg(radar(S));
+        S.etat('mar', 'porte 0 · 0,5 m → présente', 'ok');
+        S.etat('col', 'porte 2 · ignoré', '');
+        S.bulle('radar', ['#Portes de 0,75 m', '>λ = c/f = 12,5 mm', '>ΔR = c/2B = 0,6 m', 'zone retenue : portes 0 et 1'], { cote: 'droite', dx: 160, dy: -60 });
+        var g = S.N.col.g, x0 = S.N.col.n.x, y0 = S.N.col.n.y, t0 = performance.now();
+        for (var k = 0; k <= 1; k = (performance.now() - t0) / 3000) { g.setAttribute('transform', 'translate(' + (x0 + 260 * k) + ' ' + y0 + ')'); await S.sleep(30); }
+        S.montre('col', false); S.sans('radar');
+        /* R4 : Martine part, l'oscilloscope chronomètre */
+        var pl = S.q('osc', '.trace-osc'), p0 = performance.now();
+        S.bg(partir(S));
+        for (var t = 0; t <= 1; t = (performance.now() - p0) / 2600) {
+          var x = -44 + 52 * t, pts = '-44,-10 ' + Math.min(x, -30) + ',-10';
+          if (x > -30) pts += ' -30,8 ' + Math.min(x, -4) + ',8';
+          if (x > -4) pts += ' -4,-10 ' + x + ',-10';
+          pl.setAttribute('points', pts); await S.sleep(30);
+        }
+        S.ecran('pc', [['08:47'], ['Session verrouillée']]);
+        S.bulle('osc', ['#R4 : délai départ → blocage', '>Δt = 3,2 s ± 0,1 s (exemple)'], { cote: 'droite', dx: 150, dy: -30, cls: 'ok' });
+      } },
+    { t: TXT[9].t, x: TXT[9].x, on: ['leu', 'sw'],
+      run: async function (S) {
+        S.bulle('leu', ['#Leurre · 10.10.0.80', '>HTTP · port 80 · lecture seule', '>page /admin fictive', 'aucun mot de passe, aucune donnée'], { cote: 'droite', dx: 20 });
+        for (;;) { S.led('leu', 'orange'); await S.sleep(500); S.led('leu', 'vert'); await S.sleep(900); }
+      } },
+    { t: TXT[10].t, x: TXT[10].x, on: ['leu', 'sw', 'test'],
+      run: async function (S) {
+        var W = [['Wireshark · eth0', 'var(--focus)']];
+        function ws(t, c) { W.push([t, c]); S.ecran('test', W.slice(-5), 'clair'); }
+        await S.go(['test', 'sw', 'leu'], 'jaune', 'GET / (.73 → .80)'); ws('HTTP .73→.80 GET /');
+        S.led('leu', 'orange');
+        await S.go(['leu', 'sw', 'test'], 'jaune', '200 · page « imprimante »'); S.led('leu', 'vert');
+        await S.sleep(400);
+        await S.go(['test', 'sw', 'leu'], 'jaune', 'GET /admin'); ws('HTTP .73→.80 GET /admin', 'var(--jaune-fonce)');
+        S.led('leu', 'orange');
+        S.bulle('leu', ['#Journal du leurre', '>08:51:03 · 10.10.0.73 · GET /admin', 'signal à examiner, pas une preuve'], { cote: 'droite', dx: 20 });
+        await S.go(['leu', 'sw', 'test'], 'jaune', '200 · formulaire fictif');
+      } },
+    { t: TXT[11].t, x: TXT[11].x, on: ['leu', 'sw', 'srv', 'sup', 'pc'],
+      init: function (S) { sup(S, [['08:47:12 PC-04 verrouillage', 'var(--encre)']]); },
+      run: async function (S) {
+        S.led('leu', 'orange');
+        await S.go(['leu', 'sw', 'srv'], 'bleu', 'API authentifiée · accès au leurre');
+        await S.go(['srv', 'sw', 'sup'], 'bleu', null, { size: 6 });
+        sup(S, [['08:47:12 PC-04 verrouillage', 'var(--encre)'], ['08:51:03 .73→.80 GET /admin', 'var(--jaune-fonce)'], ['ALERTE : leurre · à qualifier', 'var(--rouge)']]);
+        S.bulle('sup', ['#Deux événements distincts', 'absence ≠ identité', 'accès au leurre = signal à qualifier'], { cote: 'haut', dx: -80, dy: -10, cls: 'alerte' });
+      } }
+  ]
+};
+
+</script>
+<script src="../../../commun/schema-2d.js"></script>
+</body>
+</html>
