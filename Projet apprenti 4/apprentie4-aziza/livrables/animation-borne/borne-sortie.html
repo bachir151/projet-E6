@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>La borne de sortie</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900;1000&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../../../theme.css">
+<style>
+/* Animation de cours : la borne RFID de sortie du projet d'Aziza (partie 2 : « un parc tracé »).
+   Couleurs, polices, ombres : theme.css uniquement (variables). Scène 1600×900, un clic = une étape. */
+html,body{margin:0;height:100%;overflow:hidden;background:var(--papier);line-height:1.3}
+#stage{position:absolute;left:50%;top:50%;width:1600px;height:900px;transform-origin:center;background:var(--papier);user-select:none;font-family:var(--police);color:var(--encre)}
+.instant,.instant *{transition:none!important}
+.fi{fill:var(--encre)}.fi2{fill:var(--encre-2)}.fc{fill:var(--contour)}.fc2{fill:var(--contour-2)}.fp{fill:var(--papier)}.fp2{fill:var(--papier-2)}.fw{fill:var(--blanc)}.fj{fill:var(--jaune)}.fjp{fill:var(--jaune-pale)}.fjf{fill:var(--jaune-fonce)}.fb{fill:var(--bleu)}.fbp{fill:var(--bleu-pale)}.fr{fill:var(--rouge)}.fv{fill:var(--vert)}.fn{fill:none}
+.si{stroke:var(--encre)}.si2{stroke:var(--encre-2)}.sc{stroke:var(--contour)}.sc2{stroke:var(--contour-2)}.sjf{stroke:var(--jaune-fonce)}.sr{stroke:var(--rouge)}
+.top{position:absolute;left:40px;right:40px;top:18px;height:84px;display:flex;align-items:flex-end;justify-content:space-between}
+.sur{font-weight:800;text-transform:uppercase;letter-spacing:.14em;font-size:14px;color:var(--encre-3)}
+.titre{font-weight:1000;font-size:46px;margin:4px 0 0;text-transform:uppercase;line-height:1}
+.legende{display:flex;gap:8px;padding-bottom:6px}
+.legende span{border:2px solid var(--encre);border-radius:99px;padding:5px 14px;font-weight:900;font-size:15px}
+.lg-j{background:var(--jaune)}.lg-b{background:var(--bleu-pale)}.lg-v{background:var(--vert-pale)}
+/* le bureau */
+#room{position:absolute;left:40px;top:118px;width:780px;height:610px;background:var(--papier-2);border-radius:22px;overflow:hidden;border:2px solid var(--contour-2)}
+#room svg{position:absolute;left:0;top:0;width:780px;height:610px;max-width:none}
+#roomT{position:absolute;left:58px;top:128px;font-weight:1000;font-size:14px;letter-spacing:.12em;text-transform:uppercase;color:var(--encre-2);z-index:2}
+.glab{font:800 13px var(--police);fill:var(--encre-2)}
+.gbig{font:1000 15px var(--police);fill:var(--encre);letter-spacing:.06em}
+#ledG,#ledR{fill:var(--contour-2);transition:fill .2s}
+#haloG,#haloR{opacity:0;transition:opacity .2s}
+#borne.g #ledG{fill:var(--vert)}#borne.g #haloG{opacity:.35}
+#borne.r #ledR{fill:var(--rouge)}#borne.r #haloR{opacity:.35}
+#borne.alt #ledG{animation:altG 1s steps(1) infinite}#borne.alt #ledR{animation:altR 1s steps(1) infinite}
+@keyframes altG{0%{fill:var(--vert)}50%{fill:var(--contour-2)}}
+@keyframes altR{0%{fill:var(--contour-2)}50%{fill:var(--rouge)}}
+#field circle{transform-box:view-box;transform-origin:300px 425px;opacity:0}
+#field.on circle{animation:wave 1.5s linear infinite}
+#field.on circle:nth-child(2){animation-delay:-.5s}#field.on circle:nth-child(3){animation-delay:-1s}
+@keyframes wave{0%{transform:scale(.5);opacity:.8}100%{transform:scale(1.8);opacity:0}}
+#wAtt,#attL{opacity:0;transition:opacity .4s}#stage.att #wAtt,#stage.att #attL{opacity:1}
+.obj{position:absolute;left:0;top:0;transform:translate(-50%,-50%);transition:left 1s ease-in-out,top 1s ease-in-out,opacity .4s;z-index:4;pointer-events:none}
+.obj svg{display:block}
+.obj b{position:absolute;left:50%;bottom:-12px;transform:translateX(-50%);font-size:14px;font-weight:900;background:var(--blanc);border:1.5px solid var(--encre);border-radius:99px;padding:0 8px;white-space:nowrap}
+.obj.bad b{color:var(--rouge-texte);border-color:var(--rouge)}
+#bip{position:absolute;left:300px;top:612px;transform:translate(-50%,-50%);font-weight:1000;font-size:18px;background:var(--jaune);border:2px solid var(--encre);border-radius:99px;padding:1px 12px;opacity:0;z-index:5;white-space:nowrap}
+/* appareils de droite */
+.dev{position:absolute;transform:translateX(-50%);display:flex;gap:3px;flex-direction:column;align-items:center;font-size:17px;font-weight:700;color:var(--encre-2);white-space:nowrap}
+.dev b{border:2px solid var(--encre);border-radius:99px;padding:3px 14px;color:var(--encre);font-weight:1000;background:var(--blanc);letter-spacing:.06em}
+.dev .ip{font-family:var(--police-mono);font-weight:800;color:var(--encre)}
+#srv{position:absolute;left:1440px;top:140px;width:70px;height:170px}
+#srv .act{animation:blink 1.6s steps(2) infinite}
+#srvX{position:absolute;left:1440px;top:170px;width:70px;text-align:center;font-size:70px;font-weight:1000;color:var(--rouge);opacity:0;transition:opacity .3s;z-index:3}
+#srvX.on{opacity:1}
+#db{position:absolute;left:880px;top:118px;width:420px;height:300px;box-sizing:border-box;background:var(--blanc);border:2px solid var(--encre);border-radius:14px;padding:8px 12px;box-shadow:var(--ombre-decalee)}
+#db h4{margin:0;font:900 13px var(--police);letter-spacing:.1em;color:var(--encre-2);text-transform:uppercase;display:flex;justify-content:space-between;align-items:center}
+#db h4 span{font:900 13px var(--police);letter-spacing:0;text-transform:none;background:var(--jaune);border:1.5px solid var(--encre);border-radius:99px;padding:0 8px;color:var(--encre)}
+#db h5{margin:8px 0 2px;font:900 13px var(--police-mono);color:var(--encre-2)}
+.dt{display:grid;font:800 14px/1.5 var(--police-mono)}
+.dt div{border-top:1px dashed var(--contour-2);padding:0 4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:background .3s}
+.dt .h{color:var(--encre-2);border-top:none;font-size:13px}
+.dt .hi{background:var(--jaune-pale)}.dt .ok{color:var(--vert)}.dt .ko{color:var(--rouge-texte)}
+#dtP{grid-template-columns:70px 70px 1fr}
+#dtS{grid-template-columns:62px 58px 62px 46px 1fr}
+.dv{font-size:13px;font-weight:700;color:var(--encre-2);border-top:1px dashed var(--contour-2);padding:2px 4px}
+#dash{position:absolute;left:1316px;top:378px;width:246px;box-sizing:border-box;background:var(--blanc);border:2px solid var(--encre);border-radius:12px;padding:6px 10px;box-shadow:var(--ombre-decalee)}
+#dash h4{margin:0 0 2px;font:900 13px var(--police);letter-spacing:.1em;color:var(--encre-2);text-transform:uppercase}
+#dash .r{display:flex;justify-content:space-between;font-size:14px;font-weight:800;border-top:1px dashed var(--contour-2)}
+#dash .r span:last-child{font-family:var(--police-mono)}
+#term{position:absolute;left:880px;top:494px;width:680px;height:234px;background:var(--encre);border-radius:14px;overflow:hidden;box-shadow:var(--ombre-douce)}
+#term .hd{background:var(--encre-2);color:var(--papier);font-weight:900;font-size:15px;padding:5px 14px}
+#tl{padding:6px 14px;font:700 15px/1.42 var(--police-mono);color:var(--papier)}
+.tl{white-space:nowrap;overflow:hidden}.tl .t{color:var(--contour-2)}.tl.ok{color:var(--vert-pale)}.tl.ko{color:var(--rouge-pale)}.tl.hi{color:var(--jaune)}
+/* câbles et paquets */
+#wires{position:absolute;left:0;top:0;width:1600px;height:900px;overflow:visible;max-width:none;pointer-events:none;z-index:3}
+#wires .base{fill:none;stroke:var(--encre-2);stroke-width:4;stroke-linecap:round;stroke-linejoin:round}
+#wires .wifi{stroke-dasharray:2 9;stroke-width:5}
+#wires .flow{fill:none;stroke:var(--jaune);stroke-width:3;stroke-dasharray:10 14;opacity:0}
+#wires .flow.live{opacity:1;animation:flow .6s linear infinite}
+#wires .wl{font:900 14px var(--police);fill:var(--encre-2)}
+#fx{position:absolute;inset:0;pointer-events:none;z-index:7}
+.pk{position:absolute;left:0;top:0;font:800 15px var(--police-mono);border:2px solid var(--encre);border-radius:10px;padding:3px 10px;box-shadow:var(--ombre-decalee);white-space:nowrap;background:var(--jaune);opacity:0}
+.pk.resp{background:var(--bleu-pale)}.pk.evt{background:var(--vert-pale)}.pk.ko{background:var(--rouge-pale)}.pk.net{background:var(--blanc)}
+#stamp{position:absolute;left:0;top:0;width:150px;height:150px;margin:-75px 0 0 -75px;border-radius:50%;border:6px solid var(--rouge);color:var(--rouge-texte);background:var(--blanc);display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:1000;z-index:8;opacity:0;text-align:center;line-height:1.05;box-shadow:var(--ombre-douce)}
+#stamp b{font-size:40px}#stamp span{font-size:16px;padding:0 10px}
+/* bulle */
+#say{position:absolute;width:380px;background:var(--blanc);border:2px solid var(--encre);border-radius:16px;padding:10px 16px;font-weight:800;font-size:19px;line-height:1.35;box-shadow:var(--ombre-decalee-forte);opacity:0;transform:scale(.94);transition:opacity .3s,transform .3s;z-index:6}
+#say.on{opacity:1;transform:none}
+#say small{display:block;font-size:13px;letter-spacing:.12em;color:var(--encre-3);font-weight:900;text-transform:uppercase}
+#say code{font:800 16px var(--police-mono);background:var(--papier-2);border-radius:5px;padding:0 4px}
+/* cartes */
+.cardc{position:absolute;left:880px;top:118px;width:680px;box-sizing:border-box;background:var(--blanc);border:2px solid var(--encre);border-radius:20px;box-shadow:6px 6px 0 var(--encre);padding:18px 22px;opacity:0;transform:scale(.95);transition:opacity .4s,transform .4s;z-index:6;pointer-events:none}
+.cardc.open{opacity:1;transform:none}
+.cardc.wide{left:40px;width:1520px}
+.cardc h2{margin:0 0 12px;font-weight:1000;font-size:28px;text-transform:uppercase;line-height:1.05}
+.rw{display:flex;gap:12px;align-items:flex-start;padding:8px 0;border-top:1px solid var(--papier-2);opacity:0;transform:translateX(8px);transition:opacity .35s,transform .35s}
+.rw.on{opacity:1;transform:none}
+.rw .n{flex:none;width:34px;height:34px;border-radius:50%;border:2px solid var(--encre);display:grid;place-items:center;font-weight:1000;font-size:17px;background:var(--jaune)}
+.rw .n.r{background:var(--rouge-pale)}.rw .n.v{background:var(--vert-pale)}.rw .n.b{background:var(--bleu-pale)}
+.rw h3{margin:0;font-size:20px;font-weight:900;line-height:1.2}
+.rw p{margin:2px 0 0;font-size:18px;font-weight:700;color:var(--encre-2);line-height:1.3}
+.rw code,.cardc p code{font:800 16px var(--police-mono)}
+.foot{margin:10px 0 0;background:var(--encre);color:var(--papier);border-radius:14px;padding:11px 16px;font-size:19px;font-weight:700;line-height:1.35;opacity:0;transition:opacity .4s}
+.foot.on{opacity:1}.foot b{color:var(--jaune);font-weight:1000}
+.foot code{font:800 16px var(--police-mono);color:var(--jaune);background:none}
+.tb{display:grid;gap:6px 10px;align-items:stretch}
+.tb .hd{font-weight:1000;font-size:19px;border-radius:12px;padding:6px 10px;border:2px solid var(--encre);text-align:center;background:var(--papier-2)}
+.tb .k{font-weight:900;font-size:15px;letter-spacing:.06em;color:var(--encre-2);text-transform:uppercase;align-self:center}
+.tb .v{background:var(--papier);border-radius:10px;padding:7px 12px;font-weight:700;font-size:18px;line-height:1.3}
+.tb .v b{font-weight:900}
+.tb code{font:800 16px var(--police-mono)}
+.tb .r{opacity:0;transition:opacity .35s}.tb .r.on{opacity:1}
+.tb .v.bon{background:var(--vert-pale)}.tb .v.mal{background:var(--rouge-pale)}.tb .v.moy{background:var(--jaune-pale)}
+.tb .v.choix{outline:3px solid var(--encre)}
+.puce{display:inline-block;width:16px;height:16px;border-radius:50%;border:2px solid var(--encre);vertical-align:-2px;margin-right:6px}
+.puce.g{background:var(--vert)}.puce.r{background:var(--rouge)}.puce.a{background:linear-gradient(90deg,var(--vert) 50%,var(--rouge) 50%)}
+#spi svg{width:100%;height:250px}
+.bars{display:grid;grid-template-columns:250px 1fr;gap:10px 14px;align-items:center;margin:4px 0 6px}
+.bars .lb{font-weight:800;font-size:17px;line-height:1.2}
+.bars .bt{height:30px;background:var(--papier-2);border-radius:8px;position:relative}
+.bars .bf{position:absolute;left:0;top:0;bottom:0;width:0;border-radius:8px;border:2px solid var(--encre);box-sizing:border-box;transition:width .8s ease-out;display:flex;align-items:center;justify-content:flex-end;padding-right:8px;font:900 16px var(--police-mono);white-space:nowrap}
+.bars .bf.on{width:var(--w)}
+.bars .bf.b1{background:var(--bleu-pale)}.bars .bf.b2{background:var(--rouge-pale)}.bars .bf.b3{background:var(--vert-pale)}
+.cardc .note2{margin:4px 0 0;font-size:15px;font-weight:700;color:var(--encre-2)}
+#rec{background:var(--jaune)}
+.rg{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+.rc{background:var(--blanc);border:2px solid var(--encre);border-radius:16px;padding:12px 14px;opacity:0;transition:opacity .4s}
+.rc.on{opacity:1}
+.rc h3{margin:0 0 4px;font-size:20px;font-weight:1000;line-height:1.15}
+.rc p{margin:0;font-size:17px;font-weight:700;color:var(--encre-2);line-height:1.35}
+.rc p b{color:var(--encre);font-weight:900}
+/* bandeau */
+#subbar{position:absolute;left:40px;right:40px;top:780px;height:100px;background:var(--encre);border-radius:18px;display:flex;align-items:center;padding:0 20px 0 32px;gap:22px;z-index:8}
+#sub{flex:1;color:var(--papier);font-size:29px;font-weight:700;line-height:1.28;margin:0}
+#sub .k{color:var(--jaune);font-weight:1000}
+.ctl{display:flex;align-items:center;gap:10px;flex:none}
+.ctl button{height:52px;min-width:52px;border-radius:99px;border:2px solid var(--papier);background:transparent;color:var(--papier);font:900 17px var(--police);cursor:pointer;padding:0 16px}
+.ctl button:disabled{opacity:.3;cursor:default}
+.ctl #next{background:var(--jaune);color:var(--encre);border-color:var(--jaune);box-shadow:4px 4px 0 var(--papier);padding:0 22px}
+.ctl button:focus-visible{outline:3px solid var(--jaune);outline-offset:3px}
+.num{color:var(--contour-2);font-weight:900;font-size:15px;min-width:64px;text-align:center}
+.part{position:absolute;left:40px;top:742px;display:flex;gap:6px}
+.part span{font-size:14px;font-weight:900;letter-spacing:.06em;border-radius:99px;padding:3px 10px;color:var(--encre-2);border:1.5px solid var(--contour)}
+.part span.on{background:var(--encre);color:var(--jaune);border-color:var(--encre)}
+.hint{position:absolute;right:44px;top:884px;font-size:13px;color:var(--encre-2);font-weight:700}
+#pausebadge{position:absolute;left:62%;top:740px;transform:translateX(-50%);background:var(--jaune);border:2px solid var(--encre);border-radius:99px;padding:5px 18px;font-weight:1000;font-size:15px;box-shadow:var(--ombre-decalee);z-index:9;opacity:0;transition:opacity .2s}
+#pausebadge.show{opacity:1}
+#pause{font-size:15px!important;letter-spacing:-2px}
+@keyframes blink{50%{opacity:.15}}
+@keyframes flow{to{stroke-dashoffset:-24}}
+@media (prefers-reduced-motion:reduce){#wires .flow.live,#field.on circle,#srv .act,#borne.alt #ledG,#borne.alt #ledR{animation:none}}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="top">
+    <div><div class="sur">BTS CIEL · E6 · Projet d'Aziza · partie 2 : un parc tracé</div><h1 class="titre">La borne de sortie</h1></div>
+    <div class="legende"><span class="lg-j">JAUNE · la borne demande</span><span class="lg-b">BLEU · le serveur répond</span><span class="lg-v">VERT · enregistré</span></div>
+  </div>
+
+  <!-- le bureau du service -->
+  <div id="room"><svg viewBox="40 118 780 610" aria-label="Bureau du service : borne de sortie, étagère des PC">
+    <rect x="40" y="118" width="780" height="610" class="fp2"/>
+    <!-- étagère -->
+    <rect x="440" y="492" width="364" height="156" rx="12" class="fp sc2" stroke-width="2"/>
+    <text x="622" y="668" text-anchor="middle" class="glab">étagère des PC de maintenance</text>
+    <!-- borne -->
+    <g id="borne">
+      <rect x="232" y="660" width="136" height="22" rx="6" class="fc si2" stroke-width="2"/>
+      <rect x="190" y="330" width="220" height="334" rx="20" class="fw si" stroke-width="3"/>
+      <rect x="214" y="352" width="172" height="146" rx="12" class="fp2 sc" stroke-width="2"/>
+      <rect x="268" y="392" width="64" height="44" rx="6" class="fn si2" stroke-width="2.5"/>
+      <path d="M346 404a22 22 0 0 1 0 22M354 396a34 34 0 0 1 0 38M362 388a46 46 0 0 1 0 54" class="fn si2" stroke-width="2.5" stroke-linecap="round"/>
+      <text x="300" y="480" text-anchor="middle" class="gbig">BADGE, PUIS PC</text>
+      <g id="field"><circle cx="300" cy="425" r="60" class="fn sjf" stroke-width="3"/><circle cx="300" cy="425" r="60" class="fn sjf" stroke-width="3"/><circle cx="300" cy="425" r="60" class="fn sjf" stroke-width="3"/></g>
+      <circle id="haloG" cx="255" cy="545" r="30" class="fv"/><circle id="haloR" cx="345" cy="545" r="30" class="fr"/>
+      <circle id="ledG" cx="255" cy="545" r="17" class="si" stroke-width="2.5"/><circle id="ledR" cx="345" cy="545" r="17" class="si" stroke-width="2.5"/>
+      <text x="255" y="583" text-anchor="middle" class="glab">vert</text><text x="345" y="583" text-anchor="middle" class="glab">rouge</text>
+      <circle cx="300" cy="620" r="15" class="fc2 si2" stroke-width="2"/><circle cx="295" cy="616" r="2" class="fi"/><circle cx="305" cy="616" r="2" class="fi"/><circle cx="295" cy="625" r="2" class="fi"/><circle cx="305" cy="625" r="2" class="fi"/><circle cx="300" cy="620" r="2" class="fi"/>
+      <text x="300" y="702" text-anchor="middle" class="gbig">BORNE DE SORTIE</text>
+      <text x="300" y="717" text-anchor="middle" class="glab">ESP32 + lecteur RC522</text>
+    </g>
+  </svg></div>
+  <div id="roomT">Le bureau du service · 8 h du matin</div>
+
+  <div class="obj" id="badge"><svg width="116" height="74" viewBox="0 0 116 74"><rect x="2" y="2" width="112" height="70" rx="10" class="fw si" stroke-width="2.5"/><rect x="2" y="2" width="112" height="18" rx="9" class="fb"/><rect x="12" y="30" width="22" height="18" rx="3" class="fjf si" stroke-width="1.5"/><circle cx="90" cy="44" r="14" class="fc2"/><rect x="44" y="34" width="34" height="5" rx="2" class="fc"/><rect x="44" y="44" width="24" height="5" rx="2" class="fc"/></svg><b>badge de Sami</b></div>
+  <div class="obj" id="pc4"><svg width="150" height="100" viewBox="0 0 150 100"><rect x="3" y="3" width="144" height="94" rx="12" class="fc2 si" stroke-width="2.5"/><circle cx="75" cy="50" r="9" class="fc"/><rect x="112" y="12" width="26" height="26" rx="4" class="fjp si" stroke-width="1.5"/><rect x="117" y="17" width="16" height="16" rx="2" class="fn sjf" stroke-width="1.5"/><rect x="121" y="21" width="8" height="8" rx="1" class="fn sjf" stroke-width="1.5"/></svg><b>PC-04 · éteint</b></div>
+  <div class="obj" id="pc7"><svg width="150" height="100" viewBox="0 0 150 100"><rect x="3" y="3" width="144" height="94" rx="12" class="fc2 si" stroke-width="2.5"/><circle cx="75" cy="50" r="9" class="fc"/><rect x="112" y="12" width="26" height="26" rx="4" class="fjp si" stroke-width="1.5"/><rect x="117" y="17" width="16" height="16" rx="2" class="fn sjf" stroke-width="1.5"/><rect x="121" y="21" width="8" height="8" rx="1" class="fn sjf" stroke-width="1.5"/></svg><b>PC-07 · éteint</b></div>
+  <div class="obj bad" id="pirate"><svg width="120" height="80" viewBox="0 0 120 80"><rect x="10" y="4" width="100" height="58" rx="6" class="fi"/><rect x="16" y="10" width="88" height="46" rx="3" class="fr"/><rect x="2" y="62" width="116" height="12" rx="4" class="fc si" stroke-width="1.5"/></svg><b>quelqu'un</b></div>
+  <div class="obj bad" id="clone"><svg width="116" height="74" viewBox="0 0 116 74"><rect x="2" y="2" width="112" height="70" rx="10" class="fw sr" stroke-width="3" stroke-dasharray="8 5"/><rect x="12" y="30" width="22" height="18" rx="3" class="fjf si" stroke-width="1.5"/><text x="70" y="47" text-anchor="middle" style="font:900 13px var(--police);fill:var(--rouge-texte)">copie</text></svg><b>badge copié</b></div>
+  <div id="bip">bip</div>
+
+  <!-- serveur -->
+  <div id="db"><h4>Serveur · base SQLite <span>version publiée : 12</span></h4>
+    <h5>table pc</h5><div class="dt" id="dtP"></div>
+    <h5>table sorties</h5><div class="dt" id="dtS"></div>
+  </div>
+  <svg id="srv" viewBox="0 0 70 170" role="img" aria-label="Serveur Ubuntu"></svg>
+  <div id="srvX">✕</div>
+  <div class="dev" style="left:1475px;top:314px"><b>SERVEUR UBUNTU</b><span class="ip">192.168.1.10</span></div>
+  <div id="dash"><h4>Tableau de bord</h4>
+    <div class="r"><span>PC à jour</span><span id="dA">—</span></div>
+    <div class="r"><span>Sorties ce matin</span><span id="dS">—</span></div>
+    <div class="r"><span>dont PC périmé</span><span id="dP">—</span></div>
+  </div>
+  <div id="term"><div class="hd">Moniteur série · borne ESP32</div><div id="tl"></div></div>
+
+  <svg id="wires" viewBox="0 0 1600 900" aria-hidden="true">
+    <path class="base wifi" id="wNet" d="M410 345H850V108H1475V140"/>
+    <path class="base wifi" id="wDhcp" d="M410 345H828" style="stroke:none"/>
+    <path class="base" id="wLap" d="M520 622V705H850V108H1475V140" style="stroke-width:3;stroke-dasharray:4 6"/>
+    <path class="base" id="wAtt" d="M110 558V160H850V108H1475V140" style="stroke:var(--rouge)"/>
+    <path class="flow" id="fNet" d="M410 345H850V108H1475V140"/>
+    <path class="flow" id="fDhcp" d="M410 345H828"/>
+    <path class="flow" id="fLap" d="M520 622V705H850V108H1475V140"/>
+    <path class="flow" id="fAtt" d="M110 558V160H850V108H1475V140"/>
+    <g transform="translate(850 345)"><rect x="-22" y="-12" width="44" height="24" rx="7" class="fw si" stroke-width="2.5"/><path d="M-12-12v-14M12-12v-14" class="fn si" stroke-width="3" stroke-linecap="round"/><circle cx="-8" cy="0" r="3" class="fv"/><circle cx="2" cy="0" r="3" class="fc"/></g>
+    <text x="560" y="334" class="wl">Wi-Fi du bureau</text><text x="836" y="383" class="wl" text-anchor="middle">point</text><text x="836" y="399" class="wl" text-anchor="middle">d'accès</text>
+        <text x="620" y="698" class="wl">rapport de l'agent (hier soir)</text>
+    <text id="attL" x="122" y="300" class="wl" style="fill:var(--rouge-texte)">faux rapport</text>
+  </svg>
+
+  <div id="say"><small id="sayW"></small><div id="sayT"></div></div>
+  <div id="stamp"><b id="stB">401</b><span id="stampT"></span></div>
+
+  <!-- ===== cartes ===== -->
+  <div class="cardc wide" id="exist">
+    <h2>Savoir si un PC est à jour avant qu'il parte</h2>
+    <div class="tb" style="grid-template-columns:330px 1fr 1fr">
+      <span></span><div class="hd">Ce que ça fait bien</div><div class="hd">Ce qui manque</div>
+      <span class="k r">Allumer le PC et regarder</span><div class="v r bon">la réponse vient du PC lui-même</div><div class="v r mal">plusieurs minutes chaque matin ; buée si le PC sort du froid</div>
+      <span class="k r">Ligne dans un tableau Excel</span><div class="v r bon">déjà utilisé par le service</div><div class="v r mal">rempli à la main, oublié les jours chargés ; ne connaît pas la version</div>
+      <span class="k r">Borne RFID (projet)</span><div class="v r bon choix">2 secondes ; PC éteint ; qui, quel PC, quelle version</div><div class="v r moy">dépend du dernier rapport : un rapport ancien donne rouge</div>
+    </div>
+    <p class="foot">Un PC <b>éteint</b> ne peut rien affirmer. C'est le <b>serveur</b> qui sait (le dernier rapport de l'agent) ; la borne lui <b>demande</b>.</p>
+  </div>
+
+  <div class="cardc" id="puces">
+    <h2>Badge et étiquette : deux puces RFID</h2>
+    <div class="rw"><span class="n b">1</span><div><h3>Le badge, dans la poche</h3><p>Il dit <b>qui</b> part : « je suis l'agent A-12 ».</p></div></div>
+    <div class="rw"><span class="n">2</span><div><h3>L'étiquette, collée sur le PC</h3><p>Un autocollant fin, anti-métal. Il dit <b>quel PC</b> part : « je suis le PC-04 ».</p></div></div>
+    <div class="rw"><span class="n v">✓</span><div><h3>Sans pile</h3><p>Une puce et une antenne. Elle renvoie un <b>numéro unique</b> gravé en usine (UID) ; le serveur sait à quoi il correspond.</p></div></div>
+  </div>
+
+  <div class="cardc" id="spi">
+    <h2>Dans la borne : RC522 + ESP32</h2>
+    <svg viewBox="0 0 640 250" aria-label="Câblage du RC522 vers l'ESP32">
+      <rect x="20" y="30" width="180" height="200" rx="10" class="fbp si" stroke-width="2.5"/><text x="110" y="22" text-anchor="middle" style="font:900 16px var(--police);fill:var(--encre)">RC522 · 13,56 MHz</text>
+      <rect x="440" y="30" width="180" height="200" rx="10" class="fi"/><text x="530" y="22" text-anchor="middle" style="font:900 16px var(--police);fill:var(--encre)">ESP32</text>
+      <g id="pins"></g>
+    </svg>
+    <p class="foot">Liaison <b>SPI</b> (horloge SCK donnée par l'ESP32). Alimentation en <b>3,3 V, jamais 5 V</b>. LED verte GPIO 25, rouge GPIO 26 (220 Ω), buzzer GPIO 27.</p>
+  </div>
+
+  <div class="cardc wide" id="etats">
+    <h2>Trois états, jamais « vert » par défaut</h2>
+    <div class="tb" style="grid-template-columns:360px 1fr 1fr 1fr 110px">
+      <div class="hd">Ce que répond le serveur</div><div class="hd">LED et bip</div><div class="hd">Ce que ça veut dire</div><div class="hd">La sortie</div><div class="hd">Test</div>
+      <div class="v r">rapport récent <b>et</b> version = version publiée</div><div class="v r bon"><span class="puce g"></span>vert · bip court</div><div class="v r">kit vérifié, on peut partir</div><div class="v r">enregistrée</div><div class="v r"><b>T06</b></div>
+      <div class="v r">rapport ancien <b>ou</b> version dépassée</div><div class="v r mal"><span class="puce r"></span>rouge · bip long</div><div class="v r">brancher le PC au bureau avant de partir</div><div class="v r">enregistrée (rouge)</div><div class="v r"><b>T07</b></div>
+      <div class="v r">rien (serveur injoignable)</div><div class="v r moy"><span class="puce a"></span>vert et rouge alternent</div><div class="v r">vérification impossible</div><div class="v r">mémorisée, envoyée plus tard</div><div class="v r"><b>T08</b></div>
+    </div>
+    <p class="foot">Le silence du serveur ne donne <b>jamais</b> « à jour ». « Rapport récent » : seuil à fixer avec le tuteur (par exemple 7 jours). Les bips sont des propositions.</p>
+  </div>
+
+  <div class="cardc" id="tls">
+    <h2>HTTPS : la borne vérifie le serveur</h2>
+    <div class="rw"><span class="n v">1</span><div><h3>L'autorité du labo est dans le programme</h3><p>Le certificat de l'autorité du labo est copié dans le code de la borne (<code>setCACert</code>). Un faux serveur est refusé.</p></div></div>
+    <div class="rw"><span class="n r">✕</span><div><h3><code>setInsecure()</code> est interdit</h3><p>Il ferait accepter n'importe quel serveur. Liste rouge de la charte IA, cherché par le test T10.</p></div></div>
+    <div class="rw"><span class="n b">W</span><div><h3>Dans Wireshark</h3><p>On voit les IP, le port 443, le nom du serveur, les tailles. On ne voit pas l'UID, le jeton, ni la réponse.</p></div></div>
+  </div>
+
+  <div class="cardc wide" id="proto">
+    <h2>Ce que la borne utilise sur le réseau (C10 : exploiter, pas configurer)</h2>
+    <div class="tb" style="grid-template-columns:150px 1fr 220px 1fr">
+      <div class="hd">Protocole</div><div class="hd">À quoi il sert ici</div><div class="hd">Transport · port</div><div class="hd">Qui répond</div>
+      <div class="v r"><b>DHCP</b></div><div class="v r">donne une adresse à la borne (192.168.1.57)</div><div class="v r"><code>UDP 67 / 68</code></div><div class="v r">le réseau du bureau (pas le serveur Ubuntu)</div>
+      <div class="v r"><b>DNS</b></div><div class="v r">traduit <code>kit.labo.lan</code> en 192.168.1.10</div><div class="v r"><code>UDP 53</code></div><div class="v r">le serveur DNS du réseau</div>
+      <div class="v r"><b>NTP</b></div><div class="v r">donne l'heure : dater les sorties, vérifier le certificat</div><div class="v r"><code>UDP 123</code></div><div class="v r">le serveur Ubuntu (chrony)</div>
+      <div class="v r"><b>HTTPS</b></div><div class="v r">demander l'état du PC, enregistrer la sortie</div><div class="v r"><code>TCP 443</code></div><div class="v r">le serveur Ubuntu (nginx + Flask)</div>
+    </div>
+    <p class="foot">Preuves pour l'oral : le <b>bail DHCP</b> de la borne, une <b>capture Wireshark</b> du démarrage, l'heure juste dans la table des sorties. Adresses et nom : valeurs d'exemple.</p>
+  </div>
+
+  <div class="cardc" id="jeton">
+    <h2>Le jeton : pas de jeton, pas de rapport</h2>
+    <div class="rw"><span class="n">1</span><div><h3>Un jeton par appareil</h3><p>Chaque PC et la borne ont le leur, dans l'en-tête <code>Authorization</code>. Flask refuse tout <code>POST</code> sans jeton valide.</p></div></div>
+    <div class="rw"><span class="n b">2</span><div><h3>Bien rangé</h3><p>PC : <code>C:\ProgramData\agent\</code>, lisible par les administrateurs. Borne : mémoire NVS (<code>Preferences</code>), <b>jamais dans le code</b>.</p></div></div>
+    <div class="rw"><span class="n r">!</span><div><h3>Un jeton volé ?</h3><p>On ne peut mentir que pour <b>ce PC-là</b>. Le jeton se révoque dans la base SQLite.</p></div></div>
+    <p class="foot">Test <b>T15</b> : rapport sans jeton valide → refusé, la borne ne passe pas au vert.</p>
+  </div>
+
+  <div class="cardc" id="copie">
+    <h2>Le badge identifie, il ne prouve pas</h2>
+    <div class="rw"><span class="n v">✓</span><div><h3>Ce que fait la borne</h3><p>Elle <b>trace</b> une sortie : qui, quel PC, quelle version, à quelle heure.</p></div></div>
+    <div class="rw"><span class="n r">✕</span><div><h3>Ce qu'elle ne fait pas</h3><p>Elle ne bloque personne et ne contrôle pas un accès. Un numéro de badge simple se lit et se recopie.</p></div></div>
+    <div class="rw"><span class="n b">→</span><div><h3>Pour prouver, il faudrait…</h3><p>des cartes avec authentification cryptographique. Les MIFARE Classic, très répandues, sont cassées depuis 2008.</p></div></div>
+    <p class="foot">Limite <b>écrite</b> dans le dossier : la borne sert à la <b>traçabilité</b>, pas à la sécurité d'accès.</p>
+  </div>
+
+  <div class="cardc" id="rfid">
+    <h2>Le test de physique&nbsp;: quelle étiquette&nbsp;?</h2>
+    <div class="bars">
+      <span class="lb">étiquette normale, sur plastique</span><div class="bt"><div class="bf b1" style="--w:83%">5 cm</div></div>
+      <span class="lb">étiquette normale, sur coque métal</span><div class="bt"><div class="bf b2" style="--w:17%">1 cm</div></div>
+      <span class="lb">étiquette anti-métal, sur coque métal</span><div class="bt"><div class="bf b3" style="--w:67%">4 cm</div></div>
+    </div>
+    <p class="note2">Valeurs d'exemple : à mesurer (répétitions, incertitude, orientation).</p>
+    <p class="foot">Le lecteur alimente la puce par <b>induction</b> (13,56 MHz). Le métal crée des courants qui <b>affaiblissent</b> le champ ; la couche de <b>ferrite</b> le guide. Décision : quelle étiquette acheter, où la coller.</p>
+  </div>
+
+  <div class="cardc wide" id="tdb">
+    <h2>Un parc tracé : le tableau de bord</h2>
+    <div class="tb" style="grid-template-columns:120px 150px 1fr 1fr 170px">
+      <div class="hd">PC</div><div class="hd">Version</div><div class="hd">Dernier rapport de l'agent</div><div class="hd">Dernière sortie</div><div class="hd">État</div>
+      <div class="v r"><b>PC-04</b></div><div class="v r">12</div><div class="v r">hier 18:40</div><div class="v r">aujourd'hui 08:05 · A-12</div><div class="v r bon"><span class="puce g"></span>à jour</div>
+      <div class="v r"><b>PC-07</b></div><div class="v r">11</div><div class="v r">il y a 9 jours</div><div class="v r">aujourd'hui 08:09 · A-12</div><div class="v r mal"><span class="puce r"></span>périmé</div>
+      <div class="v r"><b>PC-09</b></div><div class="v r">12</div><div class="v r">hier 17:55</div><div class="v r">aujourd'hui 08:14 · A-12</div><div class="v r moy"><span class="puce a"></span>non vérifié</div>
+    </div>
+    <p class="foot">Indicateurs : part des PC à jour, âge du kit sur chaque PC, sorties avec un PC périmé. <b>Export CSV</b> : le tableau Excel du service est alimenté, pas remplacé.</p>
+  </div>
+
+  <div class="cardc" id="vie">
+    <h2>Tracer des PC, pas surveiller des agents</h2>
+    <div class="rw"><span class="n v">✓</span><div><h3>Le minimum</h3><p>Badge, PC, version, heure. Rien sur le trajet ni sur le travail de l'agent.</p></div></div>
+    <div class="rw"><span class="n b">§</span><div><h3>En vrai déploiement</h3><p>Information préalable des salariés (Code du travail, L1222-4), consultation du CSE (L2312-38), registre RGPD, durée de conservation fixée.</p></div></div>
+    <div class="rw"><span class="n">⌂</span><div><h3>Sur la maquette</h3><p>Badges et PC fictifs, au lycée : aucune donnée réelle.</p></div></div>
+  </div>
+
+  <div class="cardc wide" id="rec">
+    <h2>À retenir : six réponses au jury</h2>
+    <div class="rg">
+      <div class="rc"><h3>Pourquoi une borne ?</h3><p>Un PC <b>éteint</b> ne peut rien affirmer. La borne demande au serveur le <b>dernier rapport</b> de l'agent : pas besoin d'allumer le PC (ni de buée).</p></div>
+      <div class="rc"><h3>Comment elle lit ?</h3><p>RC522 à <b>13,56 MHz</b>, relié à l'ESP32 en <b>SPI</b>. Badge = <b>qui</b>, étiquette anti-métal = <b>quel PC</b>. Puces sans pile, numéro unique.</p></div>
+      <div class="rc"><h3>Vert, rouge, ou ?</h3><p>Vert = rapport récent et bonne version (T06). Rouge = rapport ancien (T07). Serveur muet = <b>vérification impossible</b>, jamais vert (T08).</p></div>
+      <div class="rc"><h3>Le réseau ?</h3><p><b>DHCP</b>, <b>DNS</b>, <b>NTP</b> puis <b>HTTPS</b> (TCP 443), certificat vérifié par l'autorité du labo, <code>setInsecure()</code> interdit. On exploite le réseau, on ne le configure pas.</p></div>
+      <div class="rc"><h3>Un faux rapport ?</h3><p>Refusé sans le <b>jeton</b> du PC (401, T15). Jeton de la borne dans la NVS, jamais dans le code. Un jeton volé se révoque.</p></div>
+      <div class="rc"><h3>Un badge copié ?</h3><p>Le badge <b>identifie</b>, il ne <b>prouve</b> pas. La borne trace, elle ne contrôle pas un accès. Limite écrite. Données minimales, CSE informé.</p></div>
+    </div>
+  </div>
+
+  <div id="fx"></div>
+
+  <div class="part" id="parts"><span>POURQUOI UNE BORNE ?</span><span>LIRE LES PUCES</span><span>VERT · ROUGE · ?</span><span>LE RÉSEAU</span><span>LES TRICHES</span><span>LE PARC</span><span>RETENIR</span></div>
+  <div id="subbar">
+    <p id="sub" aria-live="polite"></p>
+    <div class="ctl">
+      <button id="restart" title="Recommencer (touche Début)" aria-label="Recommencer">↺</button>
+      <button id="prev" title="Étape précédente (←)" aria-label="Étape précédente">←</button>
+      <button id="pause" title="Pause (P)" aria-label="Pause (P)" disabled>❚❚</button>
+      <span class="num" id="num"></span>
+      <button id="next" title="Étape suivante (→, espace)">Suivant →</button>
+      <button id="fs" title="Plein écran (F)" aria-label="Plein écran">⛶</button>
+    </div>
+  </div>
+  <div class="hint">Maquette · adresses, seuils et mesures d'exemple · → / espace : suivant · P : pause · ← : retour · F : plein écran</div>
+  <div id="pausebadge">❚❚ PAUSE · appuie sur P ou → pour reprendre</div>
+</div>
+
+<script>
+{
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const stage=$('#stage');
+let scale=1;
+function fit(){scale=Math.min(innerWidth/1600,innerHeight/900);stage.style.transform=`translate(-50%,-50%) scale(${scale})`}
+addEventListener('resize',fit);fit();
+
+/* ---------- dessins ---------- */
+(function(){
+ const T=[`<rect x="2" y="2" width="66" height="166" rx="6" class="fi2 si" stroke-width="2"/><rect x="9" y="12" width="52" height="26" rx="3" class="fi"/><rect x="9" y="44" width="52" height="10" rx="2" class="fi"/>`];
+ for(let r=0;r<8;r++)for(let c=0;c<5;c++)T.push(`<circle cx="${15+c*10}" cy="${74+r*9}" r="2.2" class="fi"/>`);
+ T.push(`<circle cx="35" cy="152" r="6" class="fc si" stroke-width="1.5"/><circle cx="18" cy="25" r="3" class="fv act"/>`);
+ $('#srv').innerHTML=T.join('');
+ const P=[['SDA','GPIO 5','jaune-fonce'],['SCK','GPIO 18','bleu'],['MOSI','GPIO 23','vert'],['MISO','GPIO 19','encre-2'],['RST','GPIO 22','contour'],['3.3V','3V3','rouge'],['GND','GND','encre']],o=[];
+ P.forEach(([a,b,c],i)=>{const y=52+i*26;
+  o.push(`<circle cx="200" cy="${y}" r="5" class="fc2 si" stroke-width="2"/><text x="188" y="${y+5}" text-anchor="end" style="font:900 15px var(--police-mono);fill:var(--encre)">${a}</text><circle cx="440" cy="${y}" r="5" class="fc2 si" stroke-width="2"/><text x="454" y="${y+5}" style="font:800 15px var(--police-mono);fill:var(--papier)">${b}</text>`);
+  o.push(`<path class="fn" d="M205 ${y}H435" style="stroke:var(--${c});stroke-width:4"/>`)});
+ $('#pins').innerHTML=o.join('');
+})();
+
+/* ---------- moteur (repris du modèle) ---------- */
+const RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
+let fast=RM,running=false,step=0,nav=false;
+const pend=new Set();
+const D=ms=>fast?1:ms;
+let paused=false,frozen=[];
+function startT(o){o.t0=performance.now();o.t=setTimeout(()=>{pend.delete(o);o.r()},o.rem)}
+const wait=ms=>fast?Promise.resolve():new Promise(r=>{const o={r,rem:ms,t:null};pend.add(o);if(!paused)startT(o)});
+function pause(){if(paused||!running)return;paused=true;pend.forEach(o=>{if(o.t!=null){clearTimeout(o.t);o.t=null;o.rem=Math.max(0,o.rem-(performance.now()-o.t0))}});
+ frozen=document.getAnimations().filter(a=>a.playState==='running');frozen.forEach(a=>{try{a.pause()}catch(e){}});pui()}
+function resume(){if(!paused)return;paused=false;frozen.forEach(a=>{try{a.play()}catch(e){}});frozen=[];pend.forEach(o=>{if(o.t==null)startT(o)});pui()}
+function pui(){const b=$('#pause');b.textContent=paused?'▶':'❚❚';b.title=paused?'Reprendre (P)':'Pause (P)';b.setAttribute('aria-label',b.title);b.disabled=!running&&!paused;$('#pausebadge').classList.toggle('show',paused)}
+const isCss=a=>(typeof CSSAnimation!=='undefined'&&a instanceof CSSAnimation)||(typeof CSSTransition!=='undefined'&&a instanceof CSSTransition);
+function skip(){resume();fast=true;pend.forEach(o=>{clearTimeout(o.t);o.r()});pend.clear();document.getAnimations().forEach(a=>{if(!isCss(a))try{a.finish()}catch(e){}})}
+async function anim(el,kf,ms,o={}){const a=el.animate(kf,{duration:D(ms),easing:o.easing||'ease-in-out',fill:'forwards'});try{await a.finished}catch(e){}return a}
+
+/* ---------- réseau et paquets ---------- */
+function seg(id){const p=$('#w'+id),L=p.getTotalLength(),a=[];const n=Math.max(8,Math.round(L/30));for(let i=0;i<=n;i++){const q=p.getPointAtLength(L*i/n);a.push({x:q.x,y:q.y})}return a}
+const liveN={};
+function live(id,on){liveN[id]=Math.max(0,(liveN[id]||0)+(on?1:-1));$('#f'+id).classList.toggle('live',liveN[id]>0)}
+async function travel(el,P,ms){
+ const w=el.offsetWidth,h=el.offsetHeight,Ls=[0];
+ for(let i=1;i<P.length;i++)Ls.push(Ls[i-1]+Math.max(.5,Math.hypot(P[i].x-P[i-1].x,P[i].y-P[i-1].y)));
+ const T=Ls[Ls.length-1];
+ await anim(el,P.map((p,i)=>({transform:`translate(${p.x-w/2}px,${p.y-h/2}px)`,opacity:(i===0||i===P.length-1)?0:1,offset:Ls[i]/T})),ms,{easing:'linear'});
+}
+async function go(label,cls,id,ms=1800,rev=false){
+ if(fast)return;const p=document.createElement('div');p.className='pk '+cls;p.textContent=label;$('#fx').append(p);live(id,1);
+ let P=seg(id);if(rev)P.reverse();await travel(p,P,ms);p.remove();live(id,0);
+}
+async function stamp(x,y,b,t){const s=$('#stamp');s.style.left=x+'px';s.style.top=y+'px';$('#stB').textContent=b;$('#stampT').textContent=t;await anim(s,[{opacity:0,transform:'scale(2) rotate(-20deg)'},{opacity:1,transform:'scale(1) rotate(-8deg)'}],450,{easing:'cubic-bezier(.3,1.4,.5,1)'});await wait(900)}
+const stampHide=()=>$('#stamp').getAnimations().forEach(a=>a.cancel());
+
+/* ---------- objets, borne ---------- */
+const HOME={badge:[640,250],pc4:[520,570],pc7:[712,570],pirate:[110,600],clone:[640,420]};
+const READ={badge:[300,425],pc4:[300,430],pc7:[300,430],clone:[300,425]};
+function place(id,x,y,o){const e=$('#'+id);e.style.left=x+'px';e.style.top=y+'px';if(o!==undefined)e.style.opacity=o}
+const home=id=>place(id,...HOME[id]);
+async function toReader(id){place(id,...READ[id],1);await wait(1100);field(true);await wait(900);field(false)}
+async function back(id){home(id);await wait(900)}
+function field(on){$('#field').classList.toggle('on',on)}
+function led(s){const b=$('#borne');b.classList.remove('g','r','alt');if(s)b.classList.add(s)}
+async function bip(t,ms=500){const e=$('#bip');e.textContent=t;await anim(e,[{opacity:0,transform:'translate(-50%,-30%)'},{opacity:1,transform:'translate(-50%,-50%)',offset:.2},{opacity:1,offset:.8},{opacity:0,transform:'translate(-50%,-90%)'}],ms+600)}
+function tl(html,cls=''){const d=document.createElement('div');d.className='tl '+cls;d.innerHTML=html;$('#tl').append(d);const a=$$('#tl .tl');if(a.length>9)a[0].remove();return d}
+const T=t=>`<span class="t">${t}</span> `;
+
+/* ---------- base SQLite et tableau de bord ---------- */
+let DB;
+function dbInit(){DB={pc:{'PC-04':{v:11,r:'lun. 17:10'},'PC-07':{v:11,r:'il y a 9 j'},'PC-09':{v:12,r:'hier 17:55'}},s:[],hi:null}}
+function dbr(){
+ const P=['<div class="h">pc</div><div class="h">version</div><div class="h">dernier rapport</div>'];
+ for(const k in DB.pc){const r=DB.pc[k],c=k===DB.hi?' hi':'',ok=r.v===12&&!/j$/.test(r.r);P.push(`<div class="${c}">${k}</div><div class="${c} ${ok?'ok':'ko'}">${r.v}</div><div class="${c}">${r.r}</div>`)}
+ $('#dtP').innerHTML=P.join('');
+ const S=['<div class="h">heure</div><div class="h">badge</div><div class="h">pc</div><div class="h">vers.</div><div class="h">état</div>'];
+ if(!DB.s.length)S.push('<div class="dv" style="grid-column:1/-1">aucune sortie ce matin</div>');
+ DB.s.slice(-3).reverse().forEach(x=>S.push(`<div>${x[0]}</div><div>A-12</div><div>${x[1]}</div><div>${x[2]}</div><div class="${x[3]==='vert'?'ok':'ko'}">${x[3]}</div>`));
+ $('#dtS').innerHTML=S.join('');
+ const up=Object.values(DB.pc).filter(r=>r.v===12&&!/j$/.test(r.r)).length;
+ $('#dA').textContent=`${up} / 3`;$('#dS').textContent=DB.s.length;$('#dP').textContent=DB.s.filter(x=>x[3]==='rouge').length;
+}
+function dbPc(k,v,r){DB.pc[k]={v,r};DB.hi=k;dbr()}
+function dbHi(k){DB.hi=k;dbr()}
+function dbS(h,pc,v,e){DB.s.push([h,pc,v,e]);dbr()}
+
+/* ---------- bulle, cartes ---------- */
+function say(who,html,x,y,w=380){const s=$('#say');$('#sayW').textContent=who;$('#sayT').innerHTML=html;s.style.left=x+'px';s.style.top=y+'px';s.style.width=w+'px';s.classList.add('on')}
+const sayHide=()=>$('#say').classList.remove('on');
+async function card(id){$('#'+id).classList.add('open');await wait(400)}
+async function uncard(){$$('.cardc.open').forEach(c=>c.classList.remove('open'));await wait(350)}
+async function rows(sel,ms=420){for(const r of $$(sel)){r.classList.add('on');await wait(ms)}}
+const foot=id=>$('#'+id+' .foot').classList.add('on');
+
+/* ---------- état initial ---------- */
+function reset(){
+ document.getAnimations().forEach(a=>{if(!isCss(a))a.cancel()});
+ pend.forEach(o=>clearTimeout(o.t));pend.clear();paused=false;frozen=[];
+ $('#fx').innerHTML='';for(const k in liveN)liveN[k]=0;$$('#wires .flow').forEach(f=>f.classList.remove('live'));
+ home('badge');home('pc4');home('pc7');place('pirate',...HOME.pirate,0);place('clone',...HOME.clone,0);
+ ['badge','pc4','pc7'].forEach(i=>$('#'+i).style.opacity=1);
+ field(false);led(null);stage.classList.remove('att');$('#pc4 b').textContent='PC-04 · éteint';
+ $('#tl').innerHTML='';dbInit();dbr();$('#srvX').classList.remove('on');
+ sayHide();$$('.cardc').forEach(c=>c.classList.remove('open'));
+ $$('.rw,.foot,.tb .r,.rc,.bars .bf').forEach(e=>e.classList.remove('on'));
+}
+
+const K=s=>s.replace(/\[([^\]]+)\]/g,'<span class="k">$1</span>');
+const STEPS=[
+ /* 0 */ {p:0,sub:"8 h. Sami part en intervention avec le [PC-04], éteint, rangé sur l'étagère. Son kit de maintenance est-il [à jour] ?",run:async()=>{}},
+ /* ===== POURQUOI UNE BORNE ? ===== */
+ {p:0,sub:"Pour le savoir, il faudrait l'[allumer] : Windows, session, agent… plusieurs minutes. Et un PC qui sort du froid risque la [buée].",run:async()=>{
+   say('Le PC-04',"Éteint, je ne peux <b>rien affirmer</b>. Ni que je suis à jour, ni le contraire.",70,165,440)}},
+ {p:0,sub:"Mais hier soir, avant d'être éteint, son agent a vérifié le kit et envoyé un [rapport] au serveur : « version 12 ».",run:async()=>{
+   sayHide();await go('POST rapport · v12 · jeton','evt','Lap',2200);dbPc('PC-04',12,'hier 18:40')}},
+ {p:0,sub:"La borne lit ce [dernier rapport], sans allumer le PC. Et elle note [qui] part avec [quel PC] : une ligne d'Excel en moins.",run:async()=>{
+   await card('exist');await rows('#exist .tb .r',200);foot('exist')}},
+ /* ===== LIRE LES PUCES ===== */
+ {p:1,sub:"Deux puces RFID : le [badge] dit qui part, l'[étiquette] collée sur le PC dit quel PC part.",run:async()=>{
+   await uncard();DB.hi=null;dbr();await card('puces');await rows('#puces .rw',550)}},
+ {p:1,sub:"Sami pose son badge. Le lecteur crée un [champ magnétique] qui alimente la puce ; elle renvoie son [numéro unique].",run:async()=>{
+   await uncard();await toReader('badge');tl(T('08:05:02')+'Badge lu : UID 7B:2C:91:E4');await bip('bip',300);await back('badge')}},
+ {p:1,sub:"Puis il passe le PC devant la borne. L'étiquette répond [04:A3:7F:12] : dans la base, ce numéro = PC-04.",run:async()=>{
+   await toReader('pc4');tl(T('08:05:04')+'Étiquette lue : UID 04:A3:7F:12');await back('pc4')}},
+ {p:1,sub:"Dedans : un lecteur [RC522] à [13,56 MHz], relié à l'ESP32 par [SPI]. Il lit le numéro de la puce, rien d'autre.",run:async()=>{
+   await card('spi');foot('spi')}},
+ /* ===== VERT · ROUGE · ? ===== */
+ {p:2,sub:"La borne demande l'état du PC-04 : version 12 = version publiée, rapport d'hier. [Vert], bip court, [sortie enregistrée].",run:async()=>{
+   await uncard();await go('GET /pc/PC-04/etat','','Net',1500);dbHi('PC-04');
+   await go('v12 · hier 18:40','resp','Net',1500,true);led('g');tl(T('08:05:05')+'PC-04 : v12, rapport hier 18:40 → VERT','ok');
+   await bip('bip',300);await go('POST /sorties','evt','Net',1300);dbS('08:05','PC-04',12,'vert');tl(T('08:05:06')+'Sortie enregistrée : 201','ok')}},
+ {p:2,sub:"Le PC-07, lui : dernier rapport il y a [9 jours], version 11. [Rouge], bip long : on le branche au bureau avant de partir.",run:async()=>{
+   led(null);await toReader('pc7');tl(T('08:09:11')+'Étiquette lue : UID 04:5E:21:B8');
+   await go('GET /pc/PC-07/etat','','Net',1300);dbHi('PC-07');await go('v11 · il y a 9 j','resp','Net',1300,true);
+   led('r');tl(T('08:09:12')+'PC-07 : v11, rapport il y a 9 j → ROUGE','ko');await bip('biiiiip',900);back('pc7');
+   await go('POST /sorties','evt','Net',1200);dbS('08:09','PC-07',11,'rouge');
+   say('Rouge',"La borne <b>ne bloque pas</b> : elle prévient. Branché au bureau, l'agent du PC-07 se met à jour.",70,165,440)}},
+ {p:2,sub:"Et si le serveur ne répond pas ? La borne ne sait rien : [vert et rouge alternent] = vérification impossible. [Jamais vert].",run:async()=>{
+   sayHide();led(null);DB.hi=null;dbr();$('#srvX').classList.add('on');await wait(300);
+   $('#pc4 b').textContent='PC-09 · éteint';await toReader('pc4');tl(T('08:14:30')+'Étiquette lue : UID 04:C1:66:0A (PC-09)');
+   await go('GET /pc/PC-09/etat','','Net',1400);tl(T('08:14:35')+'Pas de réponse en 5 s','ko');led('alt');
+   tl(T('08:14:35')+'Vérification impossible · sortie mémorisée (1)','hi');await back('pc4');$('#pc4 b').textContent='PC-04 · éteint';await wait(1200);
+   $('#srvX').classList.remove('on');await wait(500);await go('POST /sorties (en attente : 1)','evt','Net',1500);dbS('08:14','PC-09',12,'non vérifié');tl(T('08:21:02')+'Sortie mémorisée envoyée : 201','ok');led(null)}},
+ {p:2,sub:"Trois états. Le silence du serveur ne veut jamais dire « à jour » : c'est le principe [un PC éteint ne prouve rien].",run:async()=>{
+   await card('etats');await rows('#etats .tb .r',110);foot('etats')}},
+ /* ===== LE RÉSEAU ===== */
+ {p:3,sub:"Au démarrage, la borne rejoint le [Wi-Fi du bureau]. Le [DHCP] lui donne une adresse, le [DNS] trouve le serveur.",run:async()=>{
+   await uncard();$('#tl').innerHTML='';tl(T('07:58:00')+'Démarrage · Wi-Fi « bureau » connecté');
+   await go('DHCP : une adresse ?','net','Dhcp',900);await go('192.168.1.57','resp','Dhcp',900,true);tl(T('07:58:02')+'DHCP : 192.168.1.57 (bail 24 h)');
+   await go('DNS : kit.labo.lan ?','net','Dhcp',900);await go('192.168.1.10','resp','Dhcp',900,true);tl(T('07:58:02')+'DNS : kit.labo.lan → 192.168.1.10')}},
+ {p:3,sub:"Puis l'[heure] par NTP : sans elle, la borne ne peut ni dater les sorties, ni vérifier la date de validité du certificat.",run:async()=>{
+   await go('NTP : quelle heure ?','net','Net',1300);await go('07:58:03','resp','Net',1300,true);tl(T('07:58:03')+'NTP : heure réglée (192.168.1.10)','ok')}},
+ {p:3,sub:"Enfin [HTTPS] : la borne vérifie le certificat du serveur avec l'autorité du labo inscrite dans son programme. [setInsecure()] est interdit.",run:async()=>{
+   await go('TLS : bonjour','','Net',1200);await go('certificat','resp','Net',1200,true);tl(T('07:58:04')+'TLS : certificat vérifié (AC du labo)','ok');
+   await card('tls');await rows('#tls .rw',550)}},
+ {p:3,sub:"Quatre protocoles du réseau [en place] : la borne les [utilise], elle ne configure rien. C'est exactement C10.",run:async()=>{
+   await uncard();await card('proto');await rows('#proto .tb .r',110);foot('proto')}},
+ /* ===== LES TRICHES ===== */
+ {p:4,sub:"Quelqu'un envoie un [faux rapport] : « PC-07 à jour ». Sans le [jeton] du PC-07, Flask répond [401]. La borne reste rouge.",run:async()=>{
+   await uncard();$('#tl').innerHTML='';stage.classList.add('att');place('pirate',...HOME.pirate,1);await wait(500);
+   await go('POST rapport PC-07 · v12 · sans jeton','ko','Att',2400);await stamp(1475,230,'401','refusé');stampHide();
+   dbHi('PC-07');await toReader('pc7');await go('GET /pc/PC-07/etat','','Net',1100);await go('v11 · il y a 9 j','resp','Net',1100,true);
+   led('r');tl(T('08:30:40')+'PC-07 : v11, rapport il y a 9 j → ROUGE','ko');back('pc7')}},
+ {p:4,sub:"Chaque appareil a son [jeton]. Celui de la borne est dans sa mémoire [NVS], jamais écrit dans le code.",run:async()=>{
+   await card('jeton');await rows('#jeton .rw',500);foot('jeton')}},
+ {p:4,sub:"Un badge simple se [copie] : on lit son numéro, on l'écrit sur une carte vierge. La borne note « A-12 »… sans pouvoir vérifier.",run:async()=>{
+   await uncard();led(null);place('clone',...HOME.clone,1);await wait(600);await toReader('clone');
+   tl(T('08:32:15')+'Badge lu : UID 7B:2C:91:E4 → A-12 (Sami)','hi');back('clone');
+   say('La borne',"Même numéro, même réponse : elle <b>ne voit pas</b> la différence.",70,165,440)}},
+ {p:4,sub:"Le badge [identifie], il ne [prouve] pas. La borne trace une sortie ; elle ne contrôle pas un accès. Limite assumée et écrite.",run:async()=>{
+   sayHide();await card('copie');await rows('#copie .rw',500);foot('copie')}},
+ /* ===== LE PARC ===== */
+ {p:5,sub:"La coque du PC est souvent en [métal], qui affaiblit le champ. D'où le test de physique et l'étiquette [anti-métal].",run:async()=>{
+   await uncard();stage.classList.remove('att');place('pirate',...HOME.pirate,0);place('clone',...HOME.clone,0);
+   await card('rfid');for(const b of $$('#rfid .bf')){b.classList.add('on');await wait(500)}foot('rfid')}},
+ {p:5,sub:"Le serveur en tire un [tableau de bord] : version, dernier rapport, dernière sortie. [Export CSV] pour les tableaux Excel du service.",run:async()=>{
+   await uncard();await card('tdb');await rows('#tdb .tb .r',90);foot('tdb')}},
+ {p:5,sub:"On garde le [minimum] : badge, PC, version, heure. En vrai déploiement : information des salariés et [consultation du CSE].",run:async()=>{
+   await uncard();await card('vie');await rows('#vie .rw',500)}},
+ /* ===== RETENIR ===== */
+ {p:6,sub:"Six réponses : [PC éteint], [RC522 en SPI], [jamais vert par défaut], [DHCP DNS NTP HTTPS], [jeton], [identifier ≠ prouver].",run:async()=>{
+   await uncard();await card('rec');await rows('#rec .rc',380)}}
+];
+const N=STEPS.length;
+
+function ui(){$('#num').textContent=`${step} / ${N-1}`;$('#prev').disabled=step===0;$('#next').disabled=step===N-1;$('#next').textContent=step===0?'Commencer →':'Suivant →';
+ $$('#parts span').forEach((s,i)=>s.classList.toggle('on',step>0&&STEPS[step].p===i))}
+function setSub(i){const s=$('#sub');s.innerHTML=K(STEPS[i].sub);if(!fast)s.animate([{opacity:0,transform:'translateY(6px)'},{opacity:1,transform:'none'}],{duration:350})}
+async function play(i){running=true;fast=RM;setSub(i);ui();pui();try{await STEPS[i].run()}catch(e){console.error(e)}running=false;fast=RM;pui()}
+async function next(){if(paused){resume();return}if(nav)return;if(running){skip();return}if(step>=N-1)return;step++;await play(step)}
+async function goto(n){
+ if(nav)return;nav=true;
+ resume();if(running){skip();while(running)await new Promise(r=>setTimeout(r,20))}
+ stage.classList.add('instant');fast=true;reset();running=true;
+ for(let i=1;i<=n;i++){try{await STEPS[i].run()}catch(e){console.error(e)}}
+ running=false;step=n;setSub(n);fast=RM;ui();pui();
+ requestAnimationFrame(()=>requestAnimationFrame(()=>stage.classList.remove('instant')));nav=false;
+}
+const prev=()=>{if(step>0)goto(step-1)};
+$('#next').addEventListener('click',e=>{e.stopPropagation();next()});
+$('#prev').addEventListener('click',e=>{e.stopPropagation();prev()});
+$('#pause').addEventListener('click',e=>{e.stopPropagation();paused?resume():pause()});
+$('#restart').addEventListener('click',e=>{e.stopPropagation();goto(0)});
+function full(){try{const d=document;if(d.fullscreenElement)d.exitFullscreen();else d.documentElement.requestFullscreen().catch(()=>{})}catch(e){}}
+$('#fs').addEventListener('click',e=>{e.stopPropagation();full()});
+stage.addEventListener('click',e=>{if(!e.target.closest('button'))next()});
+addEventListener('keydown',e=>{
+ const k=e.key;
+ if(['ArrowRight','PageDown',' ','Enter'].includes(k)){e.preventDefault();next()}
+ else if(['ArrowLeft','PageUp','Backspace'].includes(k)){e.preventDefault();prev()}
+ else if(k==='Home'){e.preventDefault();goto(0)}
+ else if(k==='f'||k==='F')full();
+ else if(k==='p'||k==='P'||k==='Pause'||k==='MediaPlayPause'){e.preventDefault();paused?resume():pause()}
+});
+reset();setSub(0);ui();
+window.__goto=goto;window.__state=()=>({step,running,N});
+}
+</script>
+</body>
+</html>
