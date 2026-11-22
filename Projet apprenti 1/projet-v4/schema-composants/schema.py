@@ -37,7 +37,7 @@ r(185, 400, 140, 120, "#fff", BLUE, 2); t(255, 425, "ESP32", 16, "bold"); t(255,
 t(255, 461, "heure NTP", 11.5, c="#374151"); t(255, 477, "seuils, comptage", 11.5, c="#374151"); t(255, 493, "énergie vibration / s", 11.5, c="#374151")
 sens = [  # x,y,w,titre,ligne,bus,couleur,ancrage
     (55, 325, "MPU6050", "vibration 3 axes, 1 kHz", "I²C", INK),
-    (55, 395, "Capteur infrarouge", "compte les feuilles", "GPIO interruption", INK),
+    (55, 395, "Infrarouge (V2)", "contrôle le compteur", "GPIO interruption", ORA),
     (55, 465, "Gros bouton", "« ça ne marche pas »", "GPIO", INK),
     (55, 535, "SHT31 (V2)", "température, humidité", "I²C", ORA),
     (340, 325, "Écran à encre 2,9″", "« BAC VIDE », « RÉPARÉ »", "SPI", INK),
@@ -57,7 +57,7 @@ r(55, 608, 400, 34, "#fff", "#9ca3af", 1, True); t(255, 630, "Alimentation : blo
 ln([(255, 606), (255, 522)], GREY, 1.2, True)
 # physique : capteurs vers imprimante
 ln([(110, 268), (110, 234)], GREY, 1.2, True); lab(104, 256, "vibrations", GREY, "end", 10.5)
-ln([(200, 268), (200, 234)], GREY, 1.2, True); lab(206, 256, "feuilles qui sortent", GREY, "start", 10.5)
+ln([(200, 268), (200, 234)], ORA, 1.2, True); lab(206, 256, "feuilles qui sortent (V2)", ORA, "start", 10.5)
 t(380, 145, "papier humide ?", 11, ORA, it=True); ln([(330, 150), (245, 165)], ORA, 1, True)
 t(380, 160, "→ mesuré par le SHT31 (V2)", 10.5, ORA, it=True)
 
@@ -100,8 +100,8 @@ ln([(838, 515), (810, 515), (810, 82), (1365, 82), (1365, 110)], INK, 1.3, dash=
 r(20, 795, 1460, 150, "#fff", "#d1d5db", 1, rx=10)
 t(36, 820, "Ce qui se passe quand une impression rate", 14, "bold", a="start")
 steps = ["1. La secrétaire imprime : CUPS sur le serveur sait combien de pages sont demandées.",
-         "2. Le boîtier envoie en MQTT ce qu’il sent : vibration (MPU6050), feuilles comptées (infrarouge), humidité (SHT31, V2).",
-         "3. Le serveur interroge l’imprimante en SNMP (« prête », « plus de papier », encre) et le PC par JEA (documents bloqués ?).",
+         "2. Le boîtier envoie en MQTT ce qu’il sent : vibration (MPU6050), humidité (SHT31, V2), feuilles comptées (infrarouge, V2).",
+         "3. Le serveur interroge l’imprimante en SNMP (« prête », « plus de papier », encre, compteur de pages) et le PC par JEA (documents bloqués ?).",
          "4. Il compare les 4 témoins et trouve la cause (imprimante figée, papier, bourrage, PC, réseau).",
          "5. Il ouvre le ticket GLPI (API REST), met à jour Grafana et renvoie un message à l’écran du boîtier (« BLOQUÉE », « RÉPARÉ »)."]
 for i, s in enumerate(steps):

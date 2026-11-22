@@ -268,31 +268,30 @@ R.tableau(
     ["Solution", "Ce qu’elle apporte", "Pourquoi elle ne suffit pas"],
     [
         ["Page web de l’imprimante", "État, niveau d’encre", "Une imprimante à la fois ; peut dire « tout va bien » alors qu’elle est figée"],
-        ["Supervision (Centreon, Zabbix…)", "Toutes les imprimantes du réseau", "Ne voit pas si une feuille sort vraiment ; ne regarde pas le PC qui imprime"],
+        ["Supervision (Centreon, Zabbix…)", "Toutes les imprimantes du réseau", "Lit l’état et le compteur de pages sans les comparer à ce qui a été envoyé ; ne sent pas si la machine travaille ; ne regarde pas le PC qui imprime"],
         ["Prise en main à distance", "Le technicien voit le PC", "Vérifications manuelles, ticket après ticket"],
         ["Outil de tickets (GLPI)", "Suivi, historique, liste du matériel", "Le ticket ne contient que la phrase de l’utilisateur ; aucune preuve de réparation"],
         ["Script d’installation actuel", "Installe vite les applications", "Service et profil choisis à la main ; GLPI non mis à jour"],
     ],
     [4.2, 5.0, 8.8])
 R.texte(("Constat : ", "g"), "aucun outil ne compare ce que dit l’imprimante avec ce qui se passe physiquement "
-        "(vibration, feuilles), ni avec ce que le PC a envoyé. C’est pourtant cette comparaison qui donne la cause.")
+        "(vibration, pages vraiment imprimées), ni avec ce que le PC a envoyé. C’est pourtant cette comparaison qui donne la cause.")
 R.titre("Principe de la solution")
-R.puce(("Le boîtier", "g"), " (ESP32), collé sur l’imprimante : un accéléromètre sent si elle vibre, un capteur "
-       "infrarouge compte les feuilles qui sortent, un gros bouton « ça ne marche pas » ouvre un ticket, un écran à "
+R.puce(("Le boîtier", "g"), " (ESP32), collé sur l’imprimante : un accéléromètre sent si elle vibre, un gros bouton « ça ne marche pas » ouvre un ticket, un écran à "
        "encre électronique donne des nouvelles (« Bac 2 vide », « Wassim arrive », « Réparé »).")
-R.puce(("Le serveur", "g"), " (Ubuntu) compare quatre témoins : la vibration, les feuilles, ce que dit l’imprimante "
-       "(SNMP) et ce que dit le PC (script PowerShell en lecture seule). Il lit l’annuaire AD pour connaître le "
+R.puce(("Le serveur", "g"), " (Ubuntu) compare quatre témoins : la vibration, le compteur de pages et l’état "
+       "de l’imprimante (SNMP), et ce que dit le PC (script PowerShell en lecture seule). Il lit l’annuaire AD pour connaître le "
        "réseau attendu. Il écrit la cause probable dans GLPI et met à jour un tableau de bord.")
 R.puce(("La station des PC neufs", "g"), " (V2) : le technicien pose trois cartes RFID (la sienne, celle du profil, "
        "celle du PC) ; un script PowerShell met le PC dans le domaine, directement dans le bon service, installe "
        "les applications du profil et met à jour GLPI.")
 R.image(IMG("0_synoptique"), 17.6, "Synoptique de l’architecture (maquette de démonstration).")
 R.titre("Progression du projet")
-R.puce(("V1 (obligatoire) : ", "g"), "boîtier (vibration, feuilles, bouton, écran), serveur, comparaison des "
+R.puce(("V1 (obligatoire) : ", "g"), "boîtier (vibration, bouton, écran), lecture SNMP (état, compteur de pages), serveur, comparaison des "
        "quatre témoins, vérifications réseau, ticket GLPI aux paliers 1 et 2, retour sur l’écran, tableau de bord.")
 R.puce(("V2 (visée) : ", "g"), "carte RFID du technicien (arrivée, départ, durée) et preuve de réparation par page "
        "de test ; encre surveillée avant la panne ; humidité du local croisée avec les bourrages ; station des PC "
-       "neufs ; palier 3.")
+       "neufs ; palier 3 ; capteur de feuilles pour contrôler le compteur de l’imprimante.")
 R.puce(("Extensions : ", "g"), "redémarrage de l’imprimante figée à distance ; fausse imprimante servant de piège ; "
        "cartes RFID sécurisées ; SNMP version 3 ; étagère des cartouches.")
 R.titre("Limites de l’étude")
@@ -344,8 +343,8 @@ R.tableau(
     ["Témoin", "Matériel ou outil", "Ce qu’il dit"],
     [
         ["Vibration", "Accéléromètre (MPU6050) dans le boîtier", "« Les moteurs tournent » : l’imprimante travaille"],
-        ["Feuilles", "Capteur infrarouge au-dessus de la sortie", "« 3 feuilles sont sorties »"],
-        ["Imprimante", "SNMP (lecture seule)", "« Prête », « plus de papier », « bourrage », niveau d’encre"],
+        ["Compteur de pages", "SNMP (Printer MIB), lu avant et après", "« J’ai imprimé 3 pages » (comparé aux pages envoyées)"],
+        ["État de l’imprimante", "SNMP (lecture seule)", "« Prête », « plus de papier », « bourrage », niveau d’encre"],
         ["PC", "Script PowerShell par un point d’accès JEA", "« 5 documents attendent chez moi » (le nombre, jamais le nom)"],
     ],
     [3.0, 6.2, 8.8])
@@ -353,10 +352,10 @@ R.titre("Règles : le serveur compare les témoins")
 R.tableau(
     ["Ce qui est vu (5 pages envoyées)", "Cause probable", "Écran du boîtier"],
     [
-        ["Vibration, 5 feuilles, « prête »", "Tout va bien", "PRÊTE"],
+        ["Vibration, compteur +5, « prête »", "Tout va bien", "PRÊTE"],
         ["Rien ne bouge, « plus de papier »", "Elle le dit elle-même", "BAC 2 VIDE"],
-        ["Vibration puis arrêt, 2 feuilles, « bourrage »", "Feuille coincée", "FEUILLE COINCÉE"],
-        ["Rien ne bouge, 0 feuille, « prête »", "Imprimante figée", "BLOQUÉE"],
+        ["Vibration puis arrêt, compteur +2, « bourrage »", "Feuille coincée", "FEUILLE COINCÉE"],
+        ["Rien ne bouge, compteur +0, « prête »", "Imprimante figée", "BLOQUÉE"],
         ["Rien ne bouge, documents bloqués dans le PC", "Problème dans le PC", "PRÊTE"],
         ["Pas de réponse, ou hors du réseau attendu par l’AD", "Câble, adresse ou VLAN", "HORS RÉSEAU"],
     ],
@@ -368,7 +367,7 @@ R.tableau(
         ["E1 – Bonne cause", "10 pannes provoquées (papier retiré, feuille bloquée, câble, mauvais réseau, imprimante figée, file bloquée)", "Cause juste dans au moins 9 cas", "V1"],
         ["E2 – Pas de fausse alerte", "1 h d’impressions normales", "Aucun ticket", "V1"],
         ["E3 – Rapide", "Temps entre l’impression ratée et le ticket", "Moins d’1 minute", "V1"],
-        ["E4 – Feuilles comptées", "100 feuilles ; 10 pages de test", "Au plus 1 erreur ; 10 sur 10", "V1"],
+        ["E4 – Pages comptées", "Compteur SNMP sur 100 pages ; 10 pages de test", "Au plus 1 écart ; 10 sur 10", "V1"],
         ["E5 – Diagnostic borné", "Commande hors de la liste JEA", "Refusée et tracée", "V1"],
         ["E6 – Retour au terrain", "Mise à jour de l’écran du boîtier ; contenu du ticket", "Moins d’1 minute ; les 4 témoins dans le ticket", "V1"],
         ["E7 – Bon réseau", "Imprimante placée hors du réseau attendu par l’AD", "Signalée 5 fois sur 5", "V1"],
@@ -400,17 +399,17 @@ R.image(IMG("4_sequence"), 17.6, "Figure 4 – Diagramme de séquence : l’impr
 # ================================================================== 2.2 CONTRAINTES
 R = Redac(P[55])
 R.puce("Matériel à acheter : ", ("75 à 125 € environ", "g"), " (à confirmer sur devis) : 2 ESP32, accéléromètre, "
-       "capteur infrarouge, capteur de température et d’humidité SHT31 (V2), 2 écrans à encre électronique, bouton, LED, 2 lecteurs RFID, cartes RFID, boîtiers.")
+       "capteur de température et d’humidité SHT31 (V2), capteur infrarouge (V2), 2 écrans à encre électronique, bouton, LED, 2 lecteurs RFID, cartes RFID, boîtiers.")
 R.puce("PC Ubuntu, réseau, imprimante réseau (du lycée ou de récupération) : fournis par le lycée. Les PC Windows sont "
        "des machines virtuelles Windows 11 Entreprise (évaluation gratuite de 90 jours) ou des PC sous Windows 11 Pro.")
 R.puce("Tous les logiciels sont libres ou gratuits (Samba, GLPI, CUPS, Mosquitto, PostgreSQL, Grafana).")
 
 R = Redac(P[60])
 R.puce(("Boîtier : ", "g"), "ESP32 programmé en C++ ; accéléromètre lu en continu, énergie de vibration calculée "
-       "chaque seconde ; capteur infrarouge sur interruption (comptage des feuilles) ; bouton ; écran à encre ; "
-       "alimentation par bloc USB 5 V ; MQTT sur TLS ; capteur SHT31 (température, humidité, I²C) et lecteur RFID en V2.")
+       "chaque seconde ; bouton ; écran à encre ; "
+       "alimentation par bloc USB 5 V ; MQTT sur TLS ; capteur SHT31 (température, humidité, I²C), lecteur RFID et capteur infrarouge de feuilles en V2.")
 R.puce(("Serveur : ", "g"), "PC Ubuntu ; CUPS (serveur d’impression : il connaît les travaux envoyés) ; Mosquitto ; "
-       "service Python (règles, SNMP avec pysnmp, pilotage du PC avec pywinrm, LDAP avec ldap3, API REST de GLPI) ; "
+       "service Python (règles, SNMP avec pysnmp : état et compteur de pages, pilotage du PC avec pywinrm, LDAP avec ldap3, API REST de GLPI) ; "
        "PostgreSQL ; tableau de bord Grafana.")
 R.puce(("PC Windows : ", "g"), "machines virtuelles Windows 11 Entreprise dans le domaine de la maquette ; WinRM en "
        "HTTPS (port 5986) ; point d’accès JEA (Get-PrintJob, Get-Printer, Restart-Service Spooler au palier 2).")
@@ -436,7 +435,7 @@ R.puce(("Point d’accès JEA : ", "g"), "liste fermée de commandes, compte san
        "Démonstration : une commande hors liste est refusée et tracée.")
 R.puce(("Flux chiffrés : ", "g"), "MQTT en TLS avec un identifiant par boîtier ; WinRM en HTTPS ; API de GLPI en HTTPS.")
 R.puce(("Comptes limités : ", "g"), "lecture seule pour LDAP et SNMP ; le compte GLPI ajoute des tickets et des suivis, "
-       "ne supprime rien et ne ferme un ticket qu’avec une preuve (page de test vue, ou feuilles qui ressortent).")
+       "ne supprime rien et ne ferme un ticket qu’avec une preuve (page de test comptée, ou compteur qui repart).")
 R.puce(("Cartes RFID (V2) : ", "g"), "les cartes bon marché se copient ; le numéro de carte ne suffit donc pas, l’écran "
        "demande une confirmation. Cartes sécurisées en extension.")
 R.puce(("Secrets et données : ", "g"), "mots de passe et clés hors du code ; compte de jonction demandé à l’exécution ; "
@@ -445,11 +444,11 @@ R.titre("Risques et parades")
 R.tableau(
     ["Risque", "Parade"],
     [
-        ["La vibration ne distingue pas assez « imprime » et « attend »", "Essai dès la tâche 3 ; le capteur de feuilles et SNMP restent des témoins suffisants"],
-        ["Capteur de feuilles difficile à placer sans démonter l’imprimante", "Essai de fixation au-dessus du bac de sortie dès la tâche 3"],
+        ["La vibration ne distingue pas assez « imprime » et « attend »", "Essai dès la tâche 3 ; le compteur de pages et l’état SNMP restent des témoins suffisants"],
+        ["Compteur de pages absent ou faux sur l’imprimante du lycée", "Lecture SNMP testée dès la tâche 2 ; sinon, le capteur de feuilles (V2) passe en V1"],
         ["Windows 11 Famille ne rejoint pas un domaine", "Machines virtuelles Windows 11 Entreprise (évaluation) ou Windows 11 Pro"],
         ["WinRM avec JEA difficile à piloter depuis Linux", "Test dès les premières semaines ; repli : script local planifié qui envoie en HTTPS"],
-        ["Nombre de pages d’un travail mal connu de CUPS", "Compteur de pages de l’imprimante lu en SNMP"],
+        ["Nombre de pages d’un travail mal connu de CUPS", "Comparer au nombre annoncé par la file du PC ; sinon, comparer seulement « a imprimé / n’a rien imprimé »"],
         ["Pas de bourrage observé avec le papier humide", "Le volet physique repose d’abord sur la prise d’eau du papier, mesurable à coup sûr ; le lien avec les bourrages est un résultat, pas une condition"],
         ["Retard sur la V2", "La V1 forme un projet complet ; la station des PC neufs peut être réduite"],
     ],
@@ -460,7 +459,7 @@ R = Redac(P[73])
 R.puce(("Matériel du lycée : ", "g"), "ESP32, PC Ubuntu (serveur, Samba, GLPI dans Docker, machines virtuelles), "
        "imprimante réseau, réseau de la maquette (Wi-Fi, switchs HP ProCurve, routeur Cisco ISR 4331), multimètre ; "
        "laboratoire de physique (hygromètre de référence, balance au centigramme).")
-R.puce(("Matériel à commander (décembre 2026) : ", "g"), "accéléromètre, capteur infrarouge, capteur SHT31, "
+R.puce(("Matériel à commander (décembre 2026) : ", "g"), "accéléromètre, capteur SHT31, capteur infrarouge (V2), "
        "écrans à encre, bouton, LED, lecteurs et cartes RFID, boîtiers, connectique.")
 R.puce(("Logiciels : ", "g"), "PlatformIO ou Arduino IDE, Samba, CUPS, Mosquitto, Python (paho-mqtt, pysnmp, pywinrm, "
        "ldap3), PostgreSQL, Docker, GLPI, Grafana, PowerShell, Wireshark, Git, Visual Studio Code.")
@@ -476,9 +475,9 @@ r.bold = True
 c1 = t.cell(1, 1)
 lst = [
     "Projet individuel : toutes les fonctions.",
-    "F1 Sentir la vibration, compter les feuilles",
+    "F1 Sentir la vibration de l’imprimante",
     "F2 Signaler une panne (bouton)",
-    "F3 Interroger l’imprimante (SNMP)",
+    "F3 Interroger l’imprimante (SNMP : état, compteur)",
     "F4 Lire la file d’impression du PC (JEA)",
     "F5 Comparer les témoins, trouver la cause",
     "F6 Ouvrir et compléter le ticket GLPI (paliers)",
@@ -495,7 +494,7 @@ for i, s in enumerate(lst):
 textes = {
     "Installation": "serveur Ubuntu (CUPS, Mosquitto, PostgreSQL, service Python, Grafana), GLPI dans Docker avec "
                     "données fictives, machines virtuelles Windows 11 dans le domaine Samba, outils de capture.",
-    "Mise en œuvre": "boîtier (ESP32, accéléromètre, capteur infrarouge, bouton, écran) fixé sur l’imprimante ; "
+    "Mise en œuvre": "boîtier (ESP32, accéléromètre, bouton, écran) fixé sur l’imprimante ; "
                      "seuils réglés à partir des mesures de physique ; station des PC neufs (V2).",
     "Configuration": "TLS de Mosquitto et identifiant par boîtier, WinRM HTTPS et point d’accès JEA, comptes de "
                      "lecture SNMP et LDAP, compte GLPI limité ; exploitation du réseau en place (DHCP, DNS, NTP).",
@@ -535,10 +534,10 @@ R.tableau(
     ["Étape", "Mesure", "Modèle, exploitation"],
     [
         ["Étalonnage", "Accéléromètre posé dans 6 positions", "Doit lire ± 1 g ; on en tire décalage et gain de chaque axe"],
-        ["Vibration", "Enregistrement à 1 kHz, imprimante en veille puis en impression, 20 essais", "Énergie de vibration et fréquences des moteurs (transformée de Fourier) ; seuil = moyenne en veille + k écarts-types ; taux de fausses détections mesuré"],
+        ["Vibration", "Enregistrement à 1 kHz, imprimante en veille puis en impression, 20 essais", "Énergie de vibration et fréquences des moteurs (transformée de Fourier) ; seuil = moyenne en veille + k écarts-types ; taux de fausses détections mesuré ; délai entre l’envoi et le début de la vibration mesuré : il justifie le délai d’alerte « rien ne bouge »"],
         ["Échantillonnage", "Même vibration vue à plusieurs fréquences d’échantillonnage", "Condition de Shannon : choix de la fréquence la plus basse qui garde l’information"],
-        ["Vitesse des feuilles", "Durée de passage d’une feuille A4 devant le capteur, 30 feuilles", "v = L / Δt (L = 297 mm) ; moyenne, écart-type, incertitude s/√N ; cadence mesurée comparée à celle du fabricant ; délai d’alerte « aucune feuille » justifié"],
-        ["Humidité et papier (V2)", "SHT31 comparé à un hygromètre de référence ; feuilles pesées après 48 h en boîte fermée à humidité basse, puis au-dessus d’une solution saturée de sel (≈ 75 %), 10 feuilles par condition", "Prise d’eau du papier (variation de masse en %) en fonction de l’humidité, avec incertitudes ; impression des deux lots et bourrages comptés par le boîtier ; seuil d’alerte « local trop humide » justifié par la mesure"],
+        ["Vitesse des feuilles (V2)", "Durée de passage d’une feuille A4 devant le capteur infrarouge, 30 feuilles", "v = L / Δt (L = 297 mm) ; moyenne, écart-type, incertitude s/√N ; cadence mesurée comparée à celle du fabricant"],
+        ["Humidité et papier (V2)", "SHT31 comparé à un hygromètre de référence ; feuilles pesées après 48 h en boîte fermée à humidité basse, puis au-dessus d’une solution saturée de sel (≈ 75 %), 10 feuilles par condition", "Prise d’eau du papier (variation de masse en %) en fonction de l’humidité, avec incertitudes ; impression des deux lots et bourrages relevés ; seuil d’alerte « local trop humide » justifié par la mesure"],
     ],
     [3.2, 6.6, 8.2])
 
@@ -564,9 +563,9 @@ R.tableau(
     [
         ["1", "Analyse du besoin, cahier des charges, planification", "12", "C03, C01 · revue 1"],
         ["2", "Maquette : GLPI, CUPS, machines virtuelles Windows 11 dans le domaine Samba, imprimante", "12", "C10"],
-        ["3", "Boîtier : vibration, capteur de feuilles, bouton, écran, MQTT", "27", "C08"],
-        ["4", "Physique : étalonnage, vibration, vitesse des feuilles, humidité (V2), incertitudes", "12", "physique"],
-        ["5", "Serveur : règles de comparaison, SNMP, vérifications réseau", "22", "C08 · revue 2"],
+        ["3", "Boîtier : vibration, bouton, écran, MQTT", "27", "C08"],
+        ["4", "Physique : étalonnage, vibration, délai de démarrage, humidité (V2), incertitudes", "12", "physique"],
+        ["5", "Serveur : règles de comparaison, SNMP (état, compteur), vérifications réseau", "22", "C08 · revue 2"],
         ["6", "PowerShell : file d’impression par JEA ; lecture de l’AD", "14", "C08, C10"],
         ["7", "Exploitation du réseau : DHCP, DNS, NTP, SNMP, captures", "8", "C10"],
         ["8", "GLPI : tickets à paliers, retour sur l’écran, tableau de bord", "16", "C08"],
@@ -589,10 +588,10 @@ rr.font.size = Pt(9.5)
 
 R = Redac(P[129])
 R.texte("Lors d’une démonstration sur la maquette, devant le tuteur et le jury :")
-R.puce("On fige l’imprimante, puis on imprime : rien ne vibre, aucune feuille ne sort, l’imprimante répond « prête ». "
+R.puce("On fige l’imprimante, puis on imprime : rien ne vibre, le compteur n’avance pas, l’imprimante répond « prête ». "
        "En moins d’une minute, ", ("le ticket GLPI indique « imprimante figée »", "g"), " et l’écran du boîtier "
        "affiche « Bloquée ».")
-R.puce("Le technicien valide le redémarrage (palier 2) ; les feuilles sortent, le capteur les compte, le ticket est "
+R.puce("Le technicien valide le redémarrage (palier 2) ; l’imprimante vibre et son compteur avance, le ticket est "
        "résolu avec la preuve et l’écran affiche « Réparé ».")
 R.puce("Autres pannes provoquées : papier retiré, feuille bloquée, câble débranché, imprimante dans le mauvais réseau, "
        "documents bloqués dans le PC. À chaque fois, la bonne cause est écrite dans le ticket.")
@@ -601,7 +600,7 @@ R.puce("Une commande hors de la liste JEA est ", ("refusée et tracée", "g"), "
 R.puce("(V2) Trois cartes posées sur la station : le PC neuf entre dans le domaine, directement dans le bon service, "
        "reçoit ses applications, et sa fiche GLPI se met à jour.")
 R.puce("Les indicateurs sont présentés : causes justes sur 10 pannes, fausses alertes en 1 h, délai jusqu’au ticket, "
-       "feuilles comptées sur 100, PC préparés sur 5.")
+       "pages comptées sur 100, PC préparés sur 5.")
 R.puce("L’apprenti conclut « je recommande » ou « je ne recommande pas » l’adoption, chiffres à l’appui.")
 R.puce("Le tuteur confirme que la solution répond au besoin du service.")
 

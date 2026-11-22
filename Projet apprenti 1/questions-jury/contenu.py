@@ -12,7 +12,7 @@ META = {
         "<b>Deux publics.</b> Partie A : questions <b>à l'enseignant</b> (commission, jury). Parties B à G : questions <b>à l'apprenti</b> pendant l'oral (C01, C03, C08, C10, physique, sécurité).",
         "<b>Règle d'or pour l'oral :</b> une phrase de réponse, puis la preuve (essai, mesure, capture). Dire ce que le système ne sait pas faire fait partie de la réponse.",
     ],
-    "fin": "Document de préparation pédagogique. Points non vérifiés sur le matériel : distinction vibration impression/veille, placement du capteur de feuilles, redémarrage SNMP selon le modèle d'imprimante.",
+    "fin": "Document de préparation pédagogique. Points non vérifiés sur le matériel : distinction vibration impression/veille, compteur de pages lu en SNMP sur l'imprimante du lycée, redémarrage SNMP selon le modèle d'imprimante.",
 }
 
 TOP = ["B1", "B2", "F1", "D2", "A2", "E1", "C2"]
@@ -46,8 +46,8 @@ SECTIONS = [
 {"id": "B1", "niv": 3,
  "q": "Une imprimante réseau dit déjà son état. Pourquoi ajouter un boîtier ?",
  "piege": "Si l'apprenti ne sait pas répondre, tout le matériel paraît décoratif.",
- "rep": "Parce qu'elle peut se tromper : figée, elle répond « prête » alors que rien ne sort. Le boîtier dit ce qui se passe vraiment (vibration, feuilles). C'est la comparaison des deux qui trouve la cause.",
- "preuve": "Démonstration de l'imprimante figée : SNMP dit « prête », 0 feuille, ticket « imprimante figée ».",
+ "rep": "Parce qu'elle peut se tromper : figée, elle répond « prête » alors que rien ne sort. Le boîtier sent si la machine travaille vraiment (vibration), et le compteur de pages dit ce qu'elle a réellement imprimé. C'est la comparaison avec ce qui a été envoyé qui trouve la cause.",
+ "preuve": "Démonstration de l'imprimante figée : SNMP dit « prête », aucune vibration, compteur +0, ticket « imprimante figée ».",
 },
 {"id": "B2", "niv": 3,
  "q": "Que gagne concrètement le service ?",
@@ -64,7 +64,7 @@ SECTIONS = [
 "questions": [
 {"id": "C1", "niv": 2,
  "q": "Quel a été votre plus gros risque et comment l'avez-vous traité ?",
- "rep": "Que la vibration ne distingue pas « imprime » et « attend ». Testé dès la tâche 3 ; si c'était raté, le capteur de feuilles et SNMP suffisaient comme témoins.",
+ "rep": "Que la vibration ne distingue pas « imprime » et « attend ». Testé dès la tâche 3 ; si c'était raté, le compteur de pages et l'état SNMP suffisaient comme témoins.",
 },
 {"id": "C2", "niv": 3,
  "q": "Comment décidez-vous de passer du palier 2 au palier 3 ?",
@@ -75,12 +75,14 @@ SECTIONS = [
 "titre": "D. Coder", "qui": "Apprenti · C08",
 "questions": [
 {"id": "D1", "niv": 2,
- "q": "Comment l'ESP32 compte-t-il les feuilles sans en rater ?",
- "rep": "Capteur infrarouge sur interruption : chaque front montant compte une feuille ; un temps mort, réglé d'après la durée de passage mesurée en physique, évite de compter deux fois la même feuille.",
+ "q": "Pourquoi ne pas compter les feuilles avec un capteur, plutôt que de croire le compteur de l'imprimante ?",
+ "piege": "Le jury teste si l'apprenti sait justifier un choix de conception.",
+ "rep": "Dans les 10 pannes de test, aucune n'a besoin d'un capteur de feuilles : la vibration et le compteur suffisent. Le compteur se lit par le réseau (SNMP, Printer MIB), sans rien fixer sur l'imprimante. Un capteur infrarouge est difficile à placer (sortie cachée, pile qui monte, feuilles serrées). Il est prévu en V2 pour vérifier que le compteur dit vrai.",
+ "relance": "Et si le compteur se trompe ? → c'est justement la mesure de la V2 : 100 pages et 10 bourrages, compteur comparé au capteur.",
 },
 {"id": "D2", "niv": 3,
  "q": "Montrez la règle qui conclut « imprimante figée ».",
- "rep": "Travail envoyé (CUPS) ; aucune vibration et 0 feuille après le délai d'alerte ; SNMP répond « prête » sans erreur ; la file du PC est vide. Toutes les conditions vraies → cause « imprimante figée ».",
+ "rep": "Travail envoyé (CUPS) ; aucune vibration et compteur de pages inchangé après le délai d'alerte ; SNMP répond « prête » sans erreur ; la file du PC est vide. Toutes les conditions vraies → cause « imprimante figée ».",
  "preuve": "Extrait du code Python et du ticket produit.",
 },
 {"id": "D3", "niv": 2,
@@ -115,8 +117,8 @@ SECTIONS = [
  "relance": "Pourquoi cette fréquence d'échantillonnage ? → condition de Shannon sur les fréquences des moteurs.",
 },
 {"id": "F2", "niv": 2,
- "q": "À quoi sert la vitesse des feuilles ?",
- "rep": "v = L / Δt avec L = 297 mm, sur 30 feuilles, avec incertitude. Elle fixe le temps mort du comptage et le délai d'alerte « aucune feuille », et se compare à la cadence annoncée par le fabricant.",
+ "q": "Comment avez-vous fixé le délai avant de dire « rien ne bouge » ?",
+ "rep": "Par la mesure : délai entre l'envoi du travail et le début de la vibration (préchauffage, mise en route), sur 20 essais, avec moyenne, écart-type et incertitude. Le délai d'alerte est pris au-dessus de la valeur maximale mesurée, avec une marge.",
 },
 ]},
 {

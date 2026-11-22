@@ -60,7 +60,7 @@
 <p class="lead">Wassim est technicien de support au service informatique d'un centre hospitalier. Ses journées tournent autour de deux choses : <b>des imprimantes qui ne marchent pas</b> et <b>des PC à préparer</b> pour les médecins qui arrivent. Ce projet lui construit deux outils, reliés au même serveur, au même outil de tickets (GLPI) et au même tableau de bord.</p>
 
 <div class="three">
-  <div><b class="t">Le boîtier de l'imprimante</b>Collé sur l'imprimante, il sent si elle travaille, compte les feuilles qui sortent, et prévient le service quand quelque chose ne va pas.</div>
+  <div><b class="t">Le boîtier de l'imprimante</b>Collé sur l'imprimante, il sent si elle travaille vraiment et prévient le service quand quelque chose ne va pas.</div>
   <div><b class="t">La station des PC neufs</b>Wassim pose trois cartes RFID : la sienne, celle du PC, celle du profil. Un script PowerShell prépare le PC tout seul.</div>
   <div><b class="t">Le cerveau commun</b>Un serveur qui compare, décide et écrit dans GLPI. Un tableau de bord qui montre tout d'un coup d'œil.</div>
 </div>
@@ -82,12 +82,12 @@
 <table>
   <tr><th style="width:25%">Outil existant</th><th style="width:35%">Ce qu'il fait bien</th><th>Ce qui lui manque</th></tr>
   <tr><td class="k">Page web de l'imprimante</td><td>Montre son état et son niveau d'encre.</td><td>Une imprimante à la fois. Elle peut dire « tout va bien » alors qu'elle est figée.</td></tr>
-  <tr><td class="k">Supervision (Centreon, Zabbix…)</td><td>Surveille toutes les imprimantes du réseau.</td><td>Ne voit pas si une feuille sort vraiment. Ne regarde pas le PC qui imprime. Lourde à installer.</td></tr>
+  <tr><td class="k">Supervision (Centreon, Zabbix…)</td><td>Surveille toutes les imprimantes du réseau.</td><td>Lit l'état et le compteur de pages, mais ne les compare pas à ce qui a été envoyé. Ne sent pas si la machine travaille. Ne regarde pas le PC qui imprime. Lourde à installer.</td></tr>
   <tr><td class="k">Prise en main à distance</td><td>Wassim voit le PC comme s'il y était.</td><td>Les mêmes vérifications à refaire à la main, ticket après ticket.</td></tr>
   <tr><td class="k">GLPI</td><td>Suit les tickets et la liste du matériel.</td><td>Le ticket ne contient que la phrase de l'utilisateur. Personne ne prouve que la réparation a marché.</td></tr>
   <tr><td class="k">Script d'installation actuel</td><td>Installe les applications rapidement.</td><td>Le choix du service et du profil se fait à la main. GLPI n'est pas mis à jour tout seul.</td></tr>
 </table>
-<div class="box"><p><b>Ce qui manque partout :</b> un témoin physique (« la feuille est-elle sortie ? ») et un lien automatique entre ce qui se passe sur le terrain, l'AD et GLPI.</p></div>
+<div class="box"><p><b>Ce qui manque partout :</b> un témoin physique (« la machine travaille-t-elle vraiment ? »), une comparaison entre les pages envoyées et les pages imprimées, et un lien automatique entre ce qui se passe sur le terrain, l'AD et GLPI.</p></div>
 
 <h2 class="pb"><span class="n">3</span>Vue d'ensemble</h2>
 <figure>
@@ -109,7 +109,7 @@
   <rect x="187" y="102" width="44" height="28" rx="2" stroke-width="1.2" style="fill:var(--papier-2);stroke:var(--encre)"/>
   <circle cx="209" cy="160" r="13" style="fill:var(--rouge)"/>
   <text x="248" y="110" font-size="16" font-weight="700" style="fill:var(--encre)">Le boîtier</text>
-  <text x="248" y="130" font-size="14" style="fill:var(--encre-2)">vibration, feuilles</text>
+  <text x="248" y="130" font-size="14" style="fill:var(--encre-2)">vibration</text>
   <text x="248" y="148" font-size="14" style="fill:var(--encre-2)">bouton, écran</text>
   <text x="248" y="166" font-size="14" style="fill:var(--encre-2)">lecteur RFID</text>
   <rect x="34" y="214" width="92" height="58" rx="5" stroke-width="2" style="fill:var(--blanc);stroke:var(--encre)"/>
@@ -219,12 +219,6 @@
   <text x="270" y="382" font-size="17" font-weight="700" text-anchor="middle" style="fill:var(--encre)">Imprimante</text>
   <rect x="175" y="412" width="190" height="30" rx="4" stroke-width="1.5" style="fill:var(--papier-2);stroke:var(--encre)"/>
   <text x="270" y="433" font-size="14" text-anchor="middle" style="fill:var(--encre-3)">bac 2</text>
-  <!-- Capteur de feuilles -->
-  <rect x="330" y="226" width="40" height="22" rx="4" stroke-width="2" style="fill:var(--papier-2);stroke:var(--encre)"/>
-  <circle cx="350" cy="237" r="5" style="fill:var(--rouge)"/>
-  <line x1="340" y1="250" x2="312" y2="272" stroke-width="2" stroke-dasharray="4 4" style="stroke:var(--rouge)"/>
-  <text x="352" y="216" font-size="14" text-anchor="middle" style="fill:var(--encre-2)">capteur de feuilles</text>
-  <path d="M330,237 C200,200 84,260 84,320" fill="none" stroke-width="2" stroke-dasharray="2 5" stroke-linecap="round" style="stroke:var(--encre-3)"/>
   <!-- Boîtier -->
   <rect x="36" y="320" width="96" height="150" rx="12" stroke-width="2" style="fill:var(--blanc);stroke:var(--encre)"/>
   <rect x="46" y="334" width="76" height="54" rx="3" stroke-width="1.5" style="fill:var(--papier-2);stroke:var(--encre)"/>
@@ -294,15 +288,15 @@
   <g><circle cx="698" cy="471" r="12" style="fill:var(--encre)"/><text x="698" y="476" font-size="13" font-weight="700" text-anchor="middle" style="fill:var(--blanc)">5</text></g>
   <text x="690" y="510" font-size="14" text-anchor="end" style="fill:var(--encre)">réseau attendu</text>
 </svg>
-<div class="legend"><span>━ information envoyée</span><span>╍ question et réponse</span><span>┈ fil entre le capteur de feuilles et le boîtier</span></div>
+<div class="legend"><span>━ information envoyée</span><span>╍ question et réponse</span></div>
 <figcaption>Figure 2 – Le boîtier de l'imprimante. Les numéros suivent les étapes ci-dessous.</figcaption>
 </figure>
 
 <h3>Ce qui se passe, étape par étape</h3>
 <ol class="steps">
   <li><span class="b">1</span><b>La secrétaire imprime 5 pages.</b> L'impression passe par le serveur, qui l'envoie à l'imprimante. Le serveur sait donc combien de pages sont demandées.</li>
-  <li><span class="b">2</span><b>Le boîtier dit ce qu'il sent :</b> l'imprimante vibre-t-elle ? Combien de feuilles sont sorties ?</li>
-  <li><span class="b">3</span><b>Le serveur demande à l'imprimante comment elle va</b> (par le réseau, protocole SNMP) : « tout va bien », « plus de papier », « bourrage », niveau d'encre.</li>
+  <li><span class="b">2</span><b>Le boîtier dit ce qu'il sent :</b> l'imprimante vibre-t-elle, et pendant combien de temps ?</li>
+  <li><span class="b">3</span><b>Le serveur demande à l'imprimante comment elle va</b> (par le réseau, protocole SNMP) : « tout va bien », « plus de papier », « bourrage », niveau d'encre. Il lit aussi son <b>compteur de pages</b>, avant et après l'impression.</li>
   <li><span class="b">4</span><b>Le serveur regarde le PC de la secrétaire</b> avec PowerShell : des documents sont-ils bloqués dans la file d'impression de Windows ?</li>
   <li><span class="b">5</span><b>Le serveur lit l'AD :</b> le PC est rangé dans le service « Cardiologie », donc l'imprimante doit être dans le réseau de la cardiologie.</li>
   <li><span class="b">6</span><b>Le serveur compare et décide.</b> S'il y a un problème, il ouvre un ticket GLPI avec la cause probable, et la pastille passe au rouge sur le tableau de bord.</li>
@@ -316,7 +310,6 @@
   <tr><th style="width:26%">Pièce</th><th>Rôle</th></tr>
   <tr><td class="k">ESP32</td><td>Le petit ordinateur du boîtier. Il lit les capteurs et parle au serveur.</td></tr>
   <tr><td class="k">Accéléromètre</td><td>Sent la vibration. Le boîtier doit être <b>fixé de façon rigide</b> sur l'imprimante (adhésif épais ou vis), sinon la vibration se perd.</td></tr>
-  <tr><td class="k">Capteur infrarouge</td><td>Relié au boîtier par un fil, placé au-dessus de la sortie du papier. Il compte les feuilles.</td></tr>
   <tr><td class="k">Gros bouton rouge</td><td>« Ça ne marche pas » : ouvre un ticket avec le nom exact de l'imprimante.</td></tr>
   <tr><td class="k">Écran à encre électronique</td><td>Donne des nouvelles. Il garde son image même sans courant : le message reste lisible si le boîtier est débranché.</td></tr>
   <tr><td class="k">Lecteur RFID</td><td>Lit la carte de Wassim à son arrivée et à son départ.</td></tr>
@@ -329,14 +322,14 @@
 <table>
   <tr><th style="width:20%">Témoin</th><th style="width:32%">Ce qu'il dit</th><th>Comment</th></tr>
   <tr><td class="k">La vibration</td><td>« Les moteurs tournent. »</td><td>Le boîtier est collé sur l'imprimante. Quand elle imprime, elle tremble ; un petit accéléromètre le sent.</td></tr>
-  <tr><td class="k">Les feuilles</td><td>« 3 feuilles sont sorties. »</td><td>Un capteur à lumière infrarouge, au-dessus de la sortie, voit passer chaque feuille et les compte.</td></tr>
-  <tr><td class="k">L'imprimante</td><td>« Je vais bien », « bourrage »…</td><td>Le serveur l'interroge par le réseau (SNMP). Elle dit ce qu'elle croit savoir. Parfois, elle se trompe.</td></tr>
+  <tr><td class="k">Le compteur de pages</td><td>« J'ai imprimé 3 pages. »</td><td>Le serveur lit le compteur de l'imprimante par SNMP (Printer MIB, RFC 3805), avant et après l'impression. Il compare avec le nombre de pages envoyées. Ce compteur se trompe sans doute moins que le message d'état, mais c'est à vérifier (voir le capteur de feuilles en V2).</td></tr>
+  <tr><td class="k">L'état de l'imprimante</td><td>« Je vais bien », « bourrage »…</td><td>Le serveur l'interroge par le réseau (SNMP). Elle dit ce qu'elle croit savoir. Parfois, elle se trompe.</td></tr>
   <tr><td class="k">Le PC</td><td>« 5 pages attendent chez moi. »</td><td>Un script PowerShell, lancé à distance, compte les documents en attente. Il ne lit jamais leur nom : un nom de fichier peut contenir le nom d'un patient.</td></tr>
 </table>
 
 <h3>Le serveur compare : six situations</h3>
 <table>
-  <tr><th style="width:11%">Vibration</th><th style="width:10%">Feuilles</th><th style="width:16%">Imprimante</th><th style="width:15%">PC</th><th style="width:28%">Ce que ça veut dire</th><th>Écran du boîtier</th></tr>
+  <tr><th style="width:11%">Vibration</th><th style="width:10%">Compteur</th><th style="width:16%">Imprimante</th><th style="width:15%">PC</th><th style="width:28%">Ce que ça veut dire</th><th>Écran du boîtier</th></tr>
   <tr><td>oui</td><td>5 / 5</td><td>« ça va »</td><td>rien en attente</td><td><span class="ok">Tout va bien.</span> Aucun ticket.</td><td><span class="screen">Prête</span></td></tr>
   <tr><td>non</td><td>0 / 5</td><td>« plus de papier »</td><td>rien en attente</td><td><span class="warn">Elle le dit elle-même.</span> Souvent réglé sur place.</td><td><span class="screen">Bac 2 vide</span></td></tr>
   <tr><td>oui, puis arrêt</td><td>2 / 5</td><td>« bourrage »</td><td>rien en attente</td><td><span class="bad">Feuille coincée</span> après la 2ᵉ page.</td><td><span class="screen">Feuille coincée</span></td></tr>
@@ -344,17 +337,20 @@
   <tr><td>non</td><td>0 / 5</td><td>« ça va »</td><td><b>5 pages bloquées</b></td><td><span class="bad">Le problème est dans le PC,</span> pas dans l'imprimante.</td><td><span class="screen">Prête</span></td></tr>
   <tr><td>non</td><td>0 / 5</td><td>ne répond pas</td><td>—</td><td><span class="bad">Plus sur le réseau,</span> ou pas dans le réseau attendu par l'AD (mauvais VLAN).</td><td><span class="screen">Hors réseau</span></td></tr>
 </table>
-<div class="box"><p><b>L'idée clé :</b> l'imprimante dit ce qu'elle croit, les capteurs disent ce qui se passe vraiment, le PC dit ce qu'il a envoyé. Le serveur compare les trois pour écrire la bonne cause dans le ticket.</p></div>
+<div class="box"><p><b>L'idée clé :</b> le PC dit ce qu'il a envoyé, l'imprimante dit ce qu'elle croit (son état) et ce qu'elle a fait (son compteur), la vibration dit si la machine travaille vraiment. Le serveur compare tout pour écrire la bonne cause dans le ticket.</p></div>
+<div class="box"><span class="t">Pourquoi le compteur plutôt qu'un capteur de feuilles ?</span>
+<p>Un capteur infrarouge au-dessus de la sortie était prévu. On l'a retiré de la V1 (décision du 22/11/2026) : dans les 10 pannes de test, aucune n'a besoin de lui pour trouver la bonne cause. La vibration et le compteur suffisent. Le capteur est aussi difficile à placer (sortie cachée sous le scanner, pile de feuilles qui monte, feuilles serrées, lumière du local). Le compteur, lui, se lit par le réseau, sans rien fixer sur l'imprimante. Le capteur revient en V2 pour <b>contrôler</b> le compteur.</p></div>
 
 <h3>Ce qu'on ajoute au boîtier</h3>
 <table>
   <tr><th style="width:24%">Ajout</th><th>Ce que ça fait</th></tr>
   <tr><td class="k">L'encre avant la panne</td><td>À 10 % d'encre, le serveur ouvre un ticket préventif. L'écran affiche <span class="screen">Encre 8 % – cartouche prévue</span>. La panne n'arrive jamais.</td></tr>
-  <tr><td class="k">L'humidité du local (V2)</td><td>Le capteur SHT31 suit l'humidité. Au-dessus d'un seuil (vers 65 %, à fixer par la mesure du volet physique), le serveur ouvre un ticket préventif : <span class="screen">Local humide – papier à ranger</span>. Le serveur croise aussi l'humidité avec les bourrages comptés par le boîtier.</td></tr>
+  <tr><td class="k">L'humidité du local (V2)</td><td>Le capteur SHT31 suit l'humidité. Au-dessus d'un seuil (vers 65 %, à fixer par la mesure du volet physique), le serveur ouvre un ticket préventif : <span class="screen">Local humide – papier à ranger</span>. Le serveur croise aussi l'humidité avec les bourrages relevés.</td></tr>
   <tr><td class="k">Le bon VLAN (AD)</td><td>Le ticket ne dit plus « hors réseau » mais « l'imprimante est dans le réseau de la radiologie, elle devrait être dans celui de la cardiologie ». Le système vérifie, il ne change rien au réseau.</td></tr>
   <tr><td class="k">Les vérifications réseau</td><td>Quand l'imprimante ne répond pas, le serveur cherche où ça bloque : répond-elle au <b>ping</b> ? Son nom est-il connu du <b>DNS</b> ? A-t-elle reçu son adresse du <b>DHCP</b> ? Les ports d'impression <b>9100</b> (impression directe) et <b>631</b> (IPP) sont-ils ouverts ? Le ticket dit lequel bloque.</td></tr>
-  <tr><td class="k">Réglé sur place</td><td>Si la secrétaire règle le problème elle-même (elle remet du papier, elle retire la feuille coincée), les feuilles ressortent et le capteur les compte. Le ticket est marqué « résolu sur place », avec cette preuve. Wassim ne se déplace pas.</td></tr>
-  <tr><td class="k">La preuve de réparation</td><td>Quand Wassim repose sa carte en partant, le serveur envoie une page de test. Le capteur de feuilles la voit sortir : le ticket est fermé avec « page de test sortie à 10 h 42 ». Si elle ne sort pas, le ticket reste ouvert.</td></tr>
+  <tr><td class="k">Réglé sur place</td><td>Si la secrétaire règle le problème elle-même (elle remet du papier, elle retire la feuille coincée), la vibration revient et le compteur de pages repart. Le ticket est marqué « résolu sur place », avec cette preuve. Wassim ne se déplace pas.</td></tr>
+  <tr><td class="k">La preuve de réparation</td><td>Quand Wassim repose sa carte en partant, le serveur envoie une page de test. Le compteur avance de 1 et la vibration le confirme : le ticket est fermé avec « page de test imprimée à 10 h 42 ». Sinon, le ticket reste ouvert.</td></tr>
+  <tr><td class="k">Le capteur de feuilles (V2)</td><td>Un capteur infrarouge (FC-51) au-dessus de la sortie compte les feuilles. Il ne remplace pas le compteur : il le <b>contrôle</b>. Question mesurée : sur 100 pages et 10 bourrages provoqués, le compteur de l'imprimante dit-il la même chose que le capteur ? S'il se trompe, le capteur devient un vrai témoin indépendant. Sinon, on peut le retirer, preuve à l'appui.</td></tr>
   <tr><td class="k">Le redémarrage à distance</td><td>Pour l'imprimante figée : ordre de redémarrage par le réseau si le modèle l'accepte, sinon prise connectée du commerce. On avance en trois niveaux de confiance (voir la partie Sécurité).</td></tr>
   <tr><td class="k">Option : l'étagère des cartouches</td><td>Quand l'encre est basse, la LED de la bonne cartouche s'allume sur l'étagère. Wassim la prend, un capteur de poids le voit, le stock baisse dans GLPI.</td></tr>
 </table>
@@ -490,7 +486,7 @@ Add-Computer -DomainName "maquette.lan" -OUPath $commande.ou `
   <tr><td class="k">Quelqu'un écoute le réseau</td><td>En SNMP version 2, le « mot de passe » (la communauté) circule en clair. On passe en <b>SNMP version 3</b>, chiffré et authentifié, si l'imprimante le permet.</td><td>Deux captures Wireshark : en version 2, la communauté se lit ; en version 3, plus rien de lisible.</td></tr>
   <tr><td class="k">Une réparation automatique se trompe</td><td>Trois niveaux de confiance (ci-dessous).</td><td>Le journal montre chaque décision et qui l'a prise.</td></tr>
   <tr><td class="k">Le mot de passe de l'AD traîne</td><td>Un compte dédié, qui peut seulement ajouter des PC dans les services. Il est demandé à l'exécution, jamais écrit dans le script.</td><td>On montre le script : aucun mot de passe dedans.</td></tr>
-  <tr><td class="k">Le système abîme GLPI</td><td>Son compte ajoute des tickets et des suivis, mais ne supprime rien. Il ne ferme un ticket qu'avec une preuve : la carte de Wassim et la page de test, ou les feuilles qui ressortent quand la secrétaire a réglé le problème elle-même.</td><td>Une suppression demandée par le système est refusée.</td></tr>
+  <tr><td class="k">Le système abîme GLPI</td><td>Son compte ajoute des tickets et des suivis, mais ne supprime rien. Il ne ferme un ticket qu'avec une preuve : la carte de Wassim et la page de test, ou le compteur de pages qui repart quand la secrétaire a réglé le problème elle-même.</td><td>Une suppression demandée par le système est refusée.</td></tr>
 </table>
 
 <h3>Trois niveaux de confiance</h3>
@@ -515,10 +511,10 @@ Add-Computer -DomainName "maquette.lan" -OUPath $commande.ou `
   <tr><th style="width:12%">Heure</th><th>Ce qui se passe</th></tr>
   <tr><td class="time">8 h 40</td><td>Le Dr Martin arrive lundi en cardiologie. Wassim pose sa carte, la carte « Cardiologie – médecin » et l'étiquette du PC sur la station, puis valide. Il lance le script sur le PC neuf et part faire autre chose. Les LED avancent.</td></tr>
   <tr><td class="time">9 h 05</td><td>La dernière LED est verte. Dans GLPI, le PC est « en service – Cardiologie ». Dans l'AD, il est rangé au bon endroit.</td></tr>
-  <tr><td class="time">9 h 10</td><td>En cardiologie, la secrétaire imprime un compte rendu. Rien ne sort. Pas de vibration, aucune feuille, mais l'imprimante répond « tout va bien ». Le serveur conclut : imprimante figée. Ticket ouvert, pastille rouge. L'écran du boîtier : <span class="screen">Bloquée – Wassim arrive</span>.</td></tr>
+  <tr><td class="time">9 h 10</td><td>En cardiologie, la secrétaire imprime un compte rendu. Rien ne sort. Pas de vibration, le compteur n'avance pas, mais l'imprimante répond « tout va bien ». Le serveur conclut : imprimante figée. Ticket ouvert, pastille rouge. L'écran du boîtier : <span class="screen">Bloquée – Wassim arrive</span>.</td></tr>
   <tr><td class="time">9 h 11</td><td>Niveau 2 : le système propose « redémarrer l'imprimante ». Wassim clique depuis son bureau.</td></tr>
-  <tr><td class="time">9 h 14</td><td>L'imprimante repart, les 3 feuilles sortent, le capteur les compte. Le ticket se ferme avec la preuve. Wassim ne s'est pas déplacé.</td></tr>
-  <tr><td class="time">10 h 05</td><td>En pédiatrie, l'écran du boîtier affiche <span class="screen">Bac 2 vide</span>. La secrétaire remet du papier, les feuilles sortent, le capteur les compte. Le ticket est marqué « résolu sur place ». Personne ne s'est déplacé.</td></tr>
+  <tr><td class="time">9 h 14</td><td>L'imprimante repart, elle vibre, son compteur avance de 3. Le ticket se ferme avec la preuve. Wassim ne s'est pas déplacé.</td></tr>
+  <tr><td class="time">10 h 05</td><td>En pédiatrie, l'écran du boîtier affiche <span class="screen">Bac 2 vide</span>. La secrétaire remet du papier, l'imprimante repart, le compteur avance. Le ticket est marqué « résolu sur place ». Personne ne s'est déplacé.</td></tr>
   <tr><td class="time">11 h 30</td><td>L'imprimante de la radiologie passe sous 10 % d'encre. Ticket préventif ; sur l'étagère, la LED de la bonne cartouche s'allume.</td></tr>
   <tr><td class="time">15 h 20</td><td>Un bourrage en pédiatrie. Wassim y va, pose sa carte (arrivée 15 h 26), retire la feuille, repose sa carte. La page de test sort. Durée notée : 7 minutes.</td></tr>
   <tr><td class="time">16 h 02</td><td>Sur la maquette, un « attaquant » scanne le réseau. La fausse imprimante répond… et donne l'alerte.</td></tr>
@@ -530,7 +526,7 @@ Add-Computer -DomainName "maquette.lan" -OUPath $commande.ou `
   <tr><th style="width:34%">Élément</th><th style="width:40%">Rôle</th><th>Prix indicatif</th></tr>
   <tr><td class="k">ESP32 (× 3)</td><td>Boîtier, station, fausse imprimante</td><td>≈ 8 à 15 € l'unité</td></tr>
   <tr><td class="k">Accéléromètre (MPU6050)</td><td>Sentir la vibration</td><td>≈ 3 à 5 €</td></tr>
-  <tr><td class="k">Capteur infrarouge de passage</td><td>Compter les feuilles</td><td>≈ 2 à 5 €</td></tr>
+  <tr><td class="k">Capteur infrarouge de passage (V2)</td><td>Compter les feuilles, pour contrôler le compteur</td><td>≈ 2 à 5 €</td></tr>
   <tr><td class="k">Capteur SHT31 (V2)</td><td>Humidité et température du local</td><td>≈ 5 à 10 € (module)</td></tr>
   <tr><td class="k">Hygromètre de référence, balance au centigramme</td><td>Volet physique humidité et papier</td><td>Laboratoire de physique du lycée</td></tr>
   <tr><td class="k">Écran à encre électronique 2,9 pouces (× 2)</td><td>Écran du boîtier et de la station</td><td>≈ 15 à 25 € l'unité</td></tr>
@@ -558,7 +554,8 @@ Add-Computer -DomainName "maquette.lan" -OUPath $commande.ou `
   <tr><td>10 pannes d'imprimante provoquées (papier retiré, feuille bloquée, câble débranché, mauvais réseau, imprimante figée, file bloquée sur le PC)</td><td>La cause écrite dans le ticket est-elle la bonne ?</td><td>Au moins 9 sur 10</td></tr>
   <tr><td>Panne provoquée, chronomètre en main</td><td>Temps entre l'impression ratée et le ticket</td><td>Moins d'1 minute</td></tr>
   <tr><td>1 heure d'impressions normales</td><td>Fausses alertes</td><td>Aucune</td></tr>
-  <tr><td>10 pages de test après réparation</td><td>Feuilles vues par le capteur</td><td>10 sur 10</td></tr>
+  <tr><td>10 pages de test après réparation</td><td>Compteur de pages lu par SNMP : avance de 1</td><td>10 sur 10</td></tr>
+  <tr><td>Capteur de feuilles (V2) : 100 pages imprimées et 10 bourrages provoqués</td><td>Écart entre le compteur de l'imprimante et le capteur</td><td>Mesuré et expliqué (pas d'objectif fixé)</td></tr>
   <tr><td>Humidité (V2) : SHT31 comparé à l'hygromètre de référence, puis local amené au-dessus du seuil</td><td>Écart entre les deux appareils ; ticket préventif ouvert</td><td>Écart dans la précision annoncée (≈ ± 2 %, à vérifier) ; ticket à chaque fois</td></tr>
   <tr><td>10 essais avec une carte RFID copiée</td><td>Copies refusées et tracées</td><td>10 sur 10</td></tr>
   <tr><td>Commande hors liste envoyée au PC</td><td>Refusée et tracée</td><td>Toujours</td></tr>
@@ -568,8 +565,8 @@ Add-Computer -DomainName "maquette.lan" -OUPath $commande.ou `
 <div style="page-break-inside: avoid"><h2><span class="n">10</span>Dans quel ordre construire</h2>
 <table>
   <tr><th style="width:24%">Étape</th><th>Ce qu'on construit</th></tr>
-  <tr><td class="k">1. Le cœur</td><td>Le boîtier (vibration, feuilles, bouton, écran), le serveur, les tickets GLPI, le tableau de bord.</td></tr>
-  <tr><td class="k">2. Le rendre malin</td><td>Le PC comme quatrième témoin (PowerShell) ; le bon VLAN avec l'AD ; l'encre avant la panne ; l'humidité du local (SHT31) ; la carte de Wassim et la preuve de réparation.</td></tr>
+  <tr><td class="k">1. Le cœur</td><td>Le boîtier (vibration, bouton, écran), la lecture SNMP (état et compteur de pages), le serveur, les tickets GLPI, le tableau de bord.</td></tr>
+  <tr><td class="k">2. Le rendre malin</td><td>Le PC comme quatrième témoin (PowerShell) ; le bon VLAN avec l'AD ; l'encre avant la panne ; l'humidité du local (SHT31) ; la carte de Wassim et la preuve de réparation ; le capteur de feuilles pour contrôler le compteur.</td></tr>
   <tr><td class="k">3. Les PC neufs</td><td>La station RFID, le script PowerShell, le rangement dans l'AD, la mise à jour de GLPI.</td></tr>
   <tr><td class="k">4. Aller loin</td><td>Le redémarrage en trois niveaux ; la fausse imprimante ; la démonstration de la carte copiée et des cartes sécurisées.</td></tr>
   <tr><td class="k">5. Le spectacle (option)</td><td>L'étagère des cartouches ; l'hôpital en miniature (plan en plexiglas, une LED par imprimante ; on touche un service sur le plan, grâce aux broches tactiles de l'ESP32, et l'écran affiche ce service).</td></tr>
@@ -585,13 +582,14 @@ Add-Computer -DomainName "maquette.lan" -OUPath $commande.ou `
 <table>
   <tr><th style="width:36%">Point</th><th>Comment le lever</th></tr>
   <tr><td class="k">La vibration distingue « imprime » et « attend »</td><td>Premier essai sur l'imprimante du lycée, en début de projet.</td></tr>
-  <tr><td class="k">Placer le capteur de feuilles sans démonter l'imprimante</td><td>Essai de fixation au-dessus du bac de sortie, selon le modèle.</td></tr>
+  <tr><td class="k">Le compteur de pages de l'imprimante du lycée</td><td>Le lire en SNMP (<i>snmpget</i>, objet <i>prtMarkerLifeCount</i>) en début de projet. Vérifier qu'il avance à chaque page. Attention : selon le modèle, une feuille recto verso compte pour 1 ou 2.</td></tr>
+  <tr><td class="k">Placer le capteur de feuilles (V2) sans démonter l'imprimante</td><td>Essai de fixation au-dessus du bac de sortie, selon le modèle.</td></tr>
   <tr><td class="k">Redémarrage de l'imprimante par le réseau</td><td>Dépend du modèle ; sinon, prise connectée du commerce.</td></tr>
   <tr><td class="k">Cartes sécurisées avec l'ESP32</td><td>Tester une bibliothèque pour le PN532 avec les NTAG 424 DNA.</td></tr>
   <tr><td class="k">Une imprimante réseau disponible au lycée</td><td>À demander.</td></tr>
   <tr><td class="k">Machines virtuelles Windows 11 sur les PC Ubuntu</td><td>Vérifier la mémoire (environ 4 Go par machine) et la virtualisation dans le BIOS. Une évaluation dure 90 jours : prévoir de la réinstaller pendant le projet.</td></tr>
   <tr><td class="k">Proximité avec le projet de Lorenzo</td><td>Depuis le 20/11, le cœur du projet de Lorenzo est une fausse imprimante qui sert de leurre réseau. Chez Wassim, la fausse imprimante reste une extension : la garder seulement si elle se distingue (elle complète le diagnostic des vraies imprimantes), sinon la couper.</td></tr>
-  <tr><td class="k">Mesures physiques</td><td>Question : « quand peut-on dire que l'imprimante imprime ? ». <b>Vibration</b> : étalonnage de l'accéléromètre (6 positions, ± 1 g), enregistrement à 1 kHz en veille et en impression, fréquences des moteurs, seuil = moyenne en veille + k écarts-types. <b>Vitesse des feuilles</b> : v = L / Δt sur 30 feuilles, avec incertitude, comparée à la cadence du fabricant. <b>Humidité et papier (V2)</b> : SHT31 comparé à un hygromètre de référence ; 10 feuilles pesées après 48 h en boîte fermée sèche, puis au-dessus d'une solution saturée de sel (≈ 75 %) ; prise d'eau du papier (en % de masse) avec incertitudes ; les deux lots imprimés, bourrages comptés par le boîtier ; seuil « local trop humide » justifié par la mesure. <b>Risque</b> : peu ou pas de bourrage avec le papier humide. La prise d'eau du papier se mesure à coup sûr ; le lien avec les bourrages est un résultat possible, pas une condition. À valider avec le professeur de physique.</td></tr>
+  <tr><td class="k">Mesures physiques</td><td>Question : « quand peut-on dire que l'imprimante imprime ? ». <b>Vibration</b> : étalonnage de l'accéléromètre (6 positions, ± 1 g), enregistrement à 1 kHz en veille et en impression, fréquences des moteurs, seuil = moyenne en veille + k écarts-types. <b>Délai de démarrage</b> : temps entre l'envoi du travail et le début de la vibration, sur 20 essais, avec incertitude ; il fixe le délai d'alerte « rien ne bouge ». <b>Vitesse des feuilles (V2, avec le capteur de feuilles)</b> : v = L / Δt sur 30 feuilles, avec incertitude, comparée à la cadence du fabricant. <b>Humidité et papier (V2)</b> : SHT31 comparé à un hygromètre de référence ; 10 feuilles pesées après 48 h en boîte fermée sèche, puis au-dessus d'une solution saturée de sel (≈ 75 %) ; prise d'eau du papier (en % de masse) avec incertitudes ; les deux lots imprimés, bourrages relevés par le serveur ; seuil « local trop humide » justifié par la mesure. <b>Risque</b> : peu ou pas de bourrage avec le papier humide. La prise d'eau du papier se mesure à coup sûr ; le lien avec les bourrages est un résultat possible, pas une condition. À valider avec le professeur de physique.</td></tr>
 </table>
 
 <h2><span class="n">12</span>Questions au tuteur</h2>

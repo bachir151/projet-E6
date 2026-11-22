@@ -72,7 +72,7 @@ Chaque apprenti garde une seule question de sécurité, pour que le jury ne voie
 - Aziza : ce fichier est-il le bon ?
 
 Et chaque volet physique est différent :
-- Wassim : vibrations de l'imprimante, vitesse des feuilles, et humidité du papier.
+- Wassim : vibrations de l'imprimante, délai de démarrage, et humidité du papier.
 - Lorenzo : réglage d'un radar 24 gigahertz et mesure d'un délai à l'oscilloscope.
 - Aziza : refroidissement d'un PC et risque de condensation.
 
@@ -98,12 +98,12 @@ Sa méthode : il prend d'abord la main à distance. Si c'est vraiment bloqué, i
 
 Plusieurs outils existent déjà.
 - La page web de l'imprimante montre son état et son niveau d'encre. Mais une seule imprimante à la fois. Et elle peut dire « tout va bien » alors que l'imprimante est figée.
-- Les outils de supervision comme Centreon ou Zabbix surveillent toutes les imprimantes du réseau. Mais ils ne voient pas si une feuille sort vraiment, ils ne regardent pas le PC qui imprime, et ils sont lourds à installer.
+- Les outils de supervision comme Centreon ou Zabbix surveillent toutes les imprimantes du réseau. Ils lisent l'état et le compteur de pages, mais ne les comparent pas à ce qui a été envoyé. Ils ne sentent pas si la machine travaille, ils ne regardent pas le PC qui imprime, et ils sont lourds à installer.
 - La prise en main à distance permet à Wassim de voir le PC comme s'il y était. Mais il refait les mêmes vérifications, ticket après ticket.
 - GLPI, l'outil de tickets et d'inventaire, suit les demandes et le matériel. Mais le ticket ne contient que la phrase de l'utilisateur, et personne ne prouve que la réparation a marché.
 - Le script d'installation actuel installe les applications vite. Mais le choix du service et du profil se fait à la main, et GLPI n'est pas mis à jour tout seul.
 
-Ce qui manque partout, c'est un témoin physique, qui réponde à la question « la feuille est-elle vraiment sortie ? ». Il manque aussi un lien automatique entre ce qui se passe sur le terrain, l'annuaire et GLPI.
+Ce qui manque partout, c'est un témoin physique, qui réponde à la question « la machine travaille-t-elle vraiment ? », et une comparaison entre les pages envoyées et les pages imprimées. Il manque aussi un lien automatique entre ce qui se passe sur le terrain, l'annuaire et GLPI.
 
 3. LE PROJET EN UNE PHRASE
 
@@ -119,7 +119,6 @@ Le projet a deux outils sur le terrain et un seul cerveau :
 Le boîtier est un petit appareil fixé sur l'imprimante. Il contient :
 - un ESP32, le petit ordinateur qui lit les capteurs et parle au serveur par le Wi-Fi ;
 - un accéléromètre, qui sent la vibration. Il doit être fixé de façon rigide, sinon la vibration se perd ;
-- un capteur infrarouge, placé au-dessus de la sortie du papier, qui compte les feuilles ;
 - un gros bouton rouge « Ça ne marche pas », qui ouvre un ticket avec le nom exact de l'imprimante, sans rien écrire ;
 - un écran à encre électronique, qui garde son message même sans courant ;
 - un lecteur de cartes RFID, pour la carte de Wassim ;
@@ -134,25 +133,27 @@ Une variante est prévue pour la liaison : les boîtiers peuvent parler entre eu
 C'est le cœur du projet. Pour savoir ce qui se passe vraiment, le serveur interroge quatre témoins, comme un enquêteur qui écoute plusieurs versions d'une même histoire.
 
 - La vibration dit : « les moteurs tournent ».
-- Les feuilles disent : « trois feuilles sont sorties ».
-- L'imprimante elle-même, interrogée par le réseau avec le protocole SNMP, dit ce qu'elle croit savoir : « je vais bien », « bourrage », « plus de papier ». Parfois, elle se trompe.
+- Le compteur de pages de l'imprimante, lu par le réseau en SNMP avant et après l'impression, dit : « j'ai imprimé trois pages ». Le serveur le compare au nombre de pages envoyées.
+- L'état de l'imprimante, interrogée par le réseau avec le protocole SNMP, dit ce qu'elle croit savoir : « je vais bien », « bourrage », « plus de papier ». Parfois, elle se trompe.
 - Le PC de la secrétaire, lu par un script PowerShell lancé à distance, dit : « cinq pages attendent chez moi ». Le script compte les documents en attente, mais ne lit jamais leur nom, car un nom de fichier peut contenir le nom d'un patient.
 
-L'idée clé : l'imprimante dit ce qu'elle croit, les capteurs disent ce qui se passe vraiment, le PC dit ce qu'il a envoyé. Le serveur compare les trois pour écrire la bonne cause dans le ticket.
+L'idée clé : le PC dit ce qu'il a envoyé, l'imprimante dit ce qu'elle croit (son état) et ce qu'elle a fait (son compteur), la vibration dit si la machine travaille vraiment. Le serveur compare tout pour écrire la bonne cause dans le ticket.
+
+Pourquoi pas un capteur qui compte les feuilles ? Il était prévu, puis il a été retiré de la V1 le 22 novembre 2026. Dans les dix pannes de test, aucune n'a besoin de lui : la vibration et le compteur suffisent. Il est aussi difficile à placer sur une vraie imprimante. Il revient en V2, pour vérifier que le compteur de l'imprimante dit vrai.
 
 Six situations typiques :
-- Ça vibre, cinq feuilles sur cinq, l'imprimante dit « ça va », rien n'attend sur le PC : tout va bien, aucun ticket.
-- Pas de vibration, aucune feuille, l'imprimante dit « plus de papier » : c'est souvent réglé sur place.
-- Ça vibre puis s'arrête, deux feuilles sur cinq, l'imprimante dit « bourrage » : une feuille est coincée après la deuxième page.
-- Pas de vibration, aucune feuille, mais l'imprimante dit « ça va » : elle est figée. Elle ment sans le savoir. C'est exactement le cas que Wassim a décrit.
-- Pas de vibration, aucune feuille, l'imprimante dit « ça va », mais cinq pages sont bloquées sur le PC : le problème est dans le PC, pas dans l'imprimante.
+- Ça vibre, le compteur avance de cinq, l'imprimante dit « ça va », rien n'attend sur le PC : tout va bien, aucun ticket.
+- Pas de vibration, le compteur ne bouge pas, l'imprimante dit « plus de papier » : c'est souvent réglé sur place.
+- Ça vibre puis s'arrête, le compteur avance de deux seulement, l'imprimante dit « bourrage » : une feuille est coincée après la deuxième page.
+- Pas de vibration, le compteur ne bouge pas, mais l'imprimante dit « ça va » : elle est figée. Elle ment sans le savoir. C'est exactement le cas que Wassim a décrit.
+- Pas de vibration, le compteur ne bouge pas, l'imprimante dit « ça va », mais cinq pages sont bloquées sur le PC : le problème est dans le PC, pas dans l'imprimante.
 - L'imprimante ne répond pas du tout : elle n'est plus sur le réseau, ou elle n'est pas dans le réseau attendu.
 
 6. LE DÉROULÉ D'UNE PANNE, ÉTAPE PAR ÉTAPE
 
 Un : la secrétaire imprime cinq pages. L'impression passe par le serveur, qui sait donc combien de pages sont demandées.
-Deux : le boîtier dit ce qu'il sent. L'imprimante vibre-t-elle ? Combien de feuilles sont sorties ?
-Trois : le serveur demande à l'imprimante comment elle va, en SNMP.
+Deux : le boîtier dit ce qu'il sent. L'imprimante vibre-t-elle, et combien de temps ?
+Trois : le serveur demande à l'imprimante comment elle va, en SNMP, et lit son compteur de pages.
 Quatre : le serveur regarde la file d'impression du PC avec PowerShell.
 Cinq : le serveur lit l'annuaire. Le PC est rangé dans le service « Cardiologie », donc l'imprimante devrait être dans le réseau de la cardiologie.
 Six : le serveur compare et décide. S'il y a un problème, il ouvre un ticket GLPI avec la cause probable, et la pastille passe au rouge.
@@ -164,9 +165,9 @@ Huit : Wassim pose sa carte RFID sur le boîtier en arrivant et en partant. Le t
 - L'encre avant la panne : à 10 % d'encre, le serveur ouvre un ticket préventif. La panne n'arrive jamais.
 - Le bon réseau : le ticket ne dit plus « hors réseau », mais « l'imprimante est dans le réseau de la radiologie, elle devrait être dans celui de la cardiologie ». Le système vérifie ; il ne change rien au réseau.
 - Les vérifications réseau : quand l'imprimante ne répond pas, le serveur cherche où ça bloque. Répond-elle au ping ? Son nom est-il connu du DNS ? A-t-elle reçu son adresse du DHCP ? Les ports d'impression 9100 et 631 sont-ils ouverts ? Le ticket dit lequel bloque. C'est le cœur de la compétence C10 : exploiter le réseau en place.
-- Réglé sur place : si la secrétaire remet du papier ou retire la feuille coincée, les feuilles ressortent, le capteur les compte, et le ticket est marqué « résolu sur place », avec cette preuve. Wassim ne se déplace pas.
-- La preuve de réparation : quand Wassim repose sa carte en partant, le serveur envoie une page de test. Si le capteur la voit sortir, le ticket est fermé avec l'heure de sortie. Sinon, il reste ouvert.
-- L'humidité du local, en V2 : le papier qui a pris l'humidité gondole et se coince plus facilement. Le capteur SHT31 suit l'humidité. Au-dessus d'un seuil, vers 65 % à fixer par les mesures, le serveur ouvre un ticket préventif : « Local humide, papier à ranger ». Il croise aussi l'humidité avec les bourrages comptés.
+- Réglé sur place : si la secrétaire remet du papier ou retire la feuille coincée, la vibration revient et le compteur repart, et le ticket est marqué « résolu sur place », avec cette preuve. Wassim ne se déplace pas.
+- La preuve de réparation : quand Wassim repose sa carte en partant, le serveur envoie une page de test. Si le compteur avance de un, avec la vibration, le ticket est fermé avec l'heure d'impression. Sinon, il reste ouvert.
+- L'humidité du local, en V2 : le papier qui a pris l'humidité gondole et se coince plus facilement. Le capteur SHT31 suit l'humidité. Au-dessus d'un seuil, vers 65 % à fixer par les mesures, le serveur ouvre un ticket préventif : « Local humide, papier à ranger ». Il croise aussi l'humidité avec les bourrages relevés.
 - Le redémarrage à distance, pour l'imprimante figée, par le réseau si le modèle l'accepte, sinon avec une prise connectée du commerce. Il suit les trois paliers de confiance.
 - En option, une étagère de cartouches : la LED de la bonne cartouche s'allume, un capteur de poids voit qu'on la prend, et le stock baisse dans GLPI.
 
@@ -194,7 +195,7 @@ Sa question de sécurité principale : le diagnostic à distance peut-il faire p
 Réponse : un point d'accès PowerShell limité, appelé JEA, pour « Just Enough Administration », c'est-à-dire « juste assez d'administration ». C'est une liste fermée de commandes, avec un compte sans droit d'administrateur. Démonstration : une commande hors liste est refusée et tracée.
 
 Autres protections :
-- Le compte GLPI du système ajoute des tickets mais ne supprime rien. Il ne ferme un ticket qu'avec une preuve : la carte de Wassim et la page de test, ou les feuilles qui ressortent.
+- Le compte GLPI du système ajoute des tickets mais ne supprime rien. Il ne ferme un ticket qu'avec une preuve : la carte de Wassim et la page de test, ou le compteur qui repart.
 - Les cartes RFID bon marché, de type MIFARE Classic, se copient : leur protection est cassée depuis 2008. Le numéro de carte ne suffit donc pas. Le système corrigé demande une confirmation sur l'écran, puis utilise des cartes sécurisées qui prouvent leur identité par chiffrement. Cette démonstration reste secondaire.
 - Une fausse imprimante, un ESP32 qui se fait passer pour une imprimante, sert de piège : personne n'a de raison de lui parler. Si quelqu'un scanne le réseau, elle donne l'alerte. C'est une extension.
 - SNMP version 2 fait circuler son « mot de passe », la communauté, en clair. Deux captures Wireshark le montrent : en version 2, on le lit ; en version 3, chiffrée et authentifiée, on ne lit plus rien.
@@ -211,8 +212,9 @@ La question : quand peut-on dire que l'imprimante imprime ?
 - Étalonnage : l'accéléromètre est posé dans six positions. Il doit lire plus ou moins un g, l'accélération de la pesanteur. On en tire le décalage et le gain de chaque axe.
 - Vibration : enregistrement à 1000 mesures par seconde, imprimante en veille puis en impression, vingt essais. On calcule l'énergie de vibration et on cherche les fréquences des moteurs avec une transformée de Fourier. Le seuil de détection vaut la moyenne en veille plus quelques écarts-types. On mesure le taux de fausses détections.
 - Échantillonnage : la même vibration est observée à plusieurs fréquences d'échantillonnage. Avec la condition de Shannon, on choisit la fréquence la plus basse qui garde l'information.
-- Vitesse des feuilles : on mesure la durée de passage d'une feuille A4 devant le capteur, sur trente feuilles. La vitesse vaut la longueur de la feuille, 297 millimètres, divisée par la durée. On calcule moyenne, écart-type et incertitude, puis on compare la cadence mesurée à celle du fabricant. Cela justifie le délai au bout duquel le système dit « aucune feuille n'est sortie ».
-- Humidité et papier, en V2 : le SHT31 est comparé à un hygromètre de référence. Des feuilles sont pesées après 48 heures en boîte fermée sèche, puis après 48 heures au-dessus d'une solution saturée de sel, qui maintient environ 75 % d'humidité. Dix feuilles par condition, pesées avec une balance au centigramme. On mesure la prise d'eau du papier, en pourcentage de masse, avec ses incertitudes. Puis on imprime les deux lots et le boîtier compte les bourrages. Le seuil d'alerte « local trop humide » est justifié par ces mesures.
+- Délai de démarrage : on mesure le temps entre l'envoi du travail et le début de la vibration, sur vingt essais, avec moyenne, écart-type et incertitude. Cela justifie le délai au bout duquel le système dit « rien ne bouge ».
+- Vitesse des feuilles, en V2 avec le capteur de feuilles : la longueur de la feuille, 297 millimètres, divisée par sa durée de passage, sur trente feuilles, comparée à la cadence du fabricant.
+- Humidité et papier, en V2 : le SHT31 est comparé à un hygromètre de référence. Des feuilles sont pesées après 48 heures en boîte fermée sèche, puis après 48 heures au-dessus d'une solution saturée de sel, qui maintient environ 75 % d'humidité. Dix feuilles par condition, pesées avec une balance au centigramme. On mesure la prise d'eau du papier, en pourcentage de masse, avec ses incertitudes. Puis on imprime les deux lots et on relève les bourrages. Le seuil d'alerte « local trop humide » est justifié par ces mesures.
 
 Un risque est assumé honnêtement : il est possible qu'on n'observe aucun bourrage avec le papier humide. Le volet repose d'abord sur la prise d'eau du papier, qui se mesure à coup sûr. Le lien avec les bourrages est un résultat possible, pas une condition de réussite.
 
@@ -220,9 +222,9 @@ Un risque est assumé honnêtement : il est possible qu'on n'observe aucun bourr
 
 8 h 40. Le docteur Martin arrive en cardiologie. Wassim pose sa carte, la carte « Cardiologie, médecin » et l'étiquette du PC sur la station, puis valide. Il lance le script sur le PC neuf et part faire autre chose.
 9 h 05. La dernière LED est verte. Dans GLPI, le PC est en service en cardiologie. Dans l'annuaire, il est rangé au bon endroit.
-9 h 10. En cardiologie, la secrétaire imprime un compte rendu. Rien ne sort. Pas de vibration, aucune feuille, mais l'imprimante répond « tout va bien ». Le serveur conclut : imprimante figée. Ticket ouvert. L'écran du boîtier affiche « Bloquée, Wassim arrive ».
+9 h 10. En cardiologie, la secrétaire imprime un compte rendu. Rien ne sort. Pas de vibration, le compteur ne bouge pas, mais l'imprimante répond « tout va bien ». Le serveur conclut : imprimante figée. Ticket ouvert. L'écran du boîtier affiche « Bloquée, Wassim arrive ».
 9 h 11. Palier 2 : le système propose de redémarrer l'imprimante. Wassim clique depuis son bureau.
-9 h 14. L'imprimante repart, les trois feuilles sortent, le capteur les compte. Le ticket se ferme avec la preuve. Wassim ne s'est pas déplacé.
+9 h 14. L'imprimante repart, elle vibre, son compteur avance de trois. Le ticket se ferme avec la preuve. Wassim ne s'est pas déplacé.
 10 h 05. En pédiatrie, l'écran affiche « Bac 2 vide ». La secrétaire remet du papier. Ticket « résolu sur place ».
 11 h 30. L'imprimante de la radiologie passe sous 10 % d'encre. Ticket préventif.
 15 h 20. Un bourrage en pédiatrie. Wassim y va, pose sa carte, retire la feuille, repose sa carte. La page de test sort. Durée notée : sept minutes.
@@ -230,8 +232,8 @@ Un risque est assumé honnêtement : il est possible qu'on n'observe aucun bourr
 
 13. V1, V2, EXTENSIONS CHEZ WASSIM
 
-- V1 obligatoire : le boîtier (vibration, feuilles, bouton, écran), le serveur, la comparaison des quatre témoins, les vérifications réseau, les tickets GLPI aux paliers 1 et 2, les nouvelles sur l'écran, le tableau de bord.
-- V2 visée : la carte RFID du technicien et la preuve de réparation ; l'encre avant la panne ; l'humidité du local croisée avec les bourrages ; la station des PC neufs ; le palier 3.
+- V1 obligatoire : le boîtier (vibration, bouton, écran), la lecture du compteur et de l'état en SNMP, le serveur, la comparaison des quatre témoins, les vérifications réseau, les tickets GLPI aux paliers 1 et 2, les nouvelles sur l'écran, le tableau de bord.
+- V2 visée : la carte RFID du technicien et la preuve de réparation ; l'encre avant la panne ; l'humidité du local croisée avec les bourrages ; la station des PC neufs ; le palier 3 ; le capteur de feuilles pour vérifier le compteur.
 - Extensions : le redémarrage à distance de l'imprimante figée ; la fausse imprimante piège ; l'étagère des cartouches ; un hôpital en miniature.
 
 L'ensemble dépasse sans doute 150 heures. C'est voulu : la V1 forme un projet complet, et le reste se garde ou se coupe selon l'avancement.
@@ -250,7 +252,7 @@ Objectifs proposés, à valider avec le tuteur :
 
 15. CE QUI N'EST PAS ENCORE VÉRIFIÉ
 
-La vibration distingue-t-elle vraiment « imprime » et « attend » ? Peut-on placer le capteur de feuilles sans démonter l'imprimante ? L'imprimante accepte-t-elle un redémarrage par le réseau ? Les PC du lycée ont-ils assez de mémoire pour les machines virtuelles ? Ce sont les premiers essais à faire.
+La vibration distingue-t-elle vraiment « imprime » et « attend » ? L'imprimante du lycée donne-t-elle un compteur de pages fiable en SNMP ? L'imprimante accepte-t-elle un redémarrage par le réseau ? Les PC du lycée ont-ils assez de mémoire pour les machines virtuelles ? Ce sont les premiers essais à faire.
 
 Pistes écartées : un réseau de neurones pour reconnaître les pannes. Il faudrait provoquer des dizaines de bourrages, il serait difficile à expliquer, et il faudrait le réentraîner pour chaque modèle. Quatre témoins et des règles simples suffisent.
 
@@ -530,7 +532,7 @@ CINQUIÈME PARTIE : CE QUI RELIE LES TROIS PROJETS
 
 Les trois projets partagent une même philosophie, qu'un podcast peut mettre en avant.
 
-Premièrement, ne jamais croire un seul témoin. Wassim ne croit pas l'imprimante quand elle dit « tout va bien » : il vérifie avec la vibration et les feuilles. Lorenzo ne croit pas Windows quand il dit « inactif » : le radar sait que la personne est là. Aziza ne croit pas un fichier parce qu'il est présent : elle vérifie son empreinte et sa signature.
+Premièrement, ne jamais croire un seul témoin. Wassim ne croit pas l'imprimante quand elle dit « tout va bien » : il vérifie avec la vibration et le compteur de pages. Lorenzo ne croit pas Windows quand il dit « inactif » : le radar sait que la personne est là. Aziza ne croit pas un fichier parce qu'il est présent : elle vérifie son empreinte et sa signature.
 
 Deuxièmement, dire honnêtement ce qu'on ne sait pas. Chez Wassim, l'imprimante qui ne répond pas donne une cause « probable ». Chez Lorenzo, un accès au leurre est « à qualifier », pas une intrusion. Chez Aziza, un serveur muet donne « vérification impossible », jamais « à jour ».
 
