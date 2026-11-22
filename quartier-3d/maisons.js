@@ -7,7 +7,8 @@
    (ou en ajouter une) avec son titre, sa couleur et le chemin `url` de sa
    page (chemin relatif au dossier quartier-3d/), et `url25` celui de sa
    version 2,5D « pas à pas » et `url2d` celui de son schéma réseau à plat
-   (boutons « Version 2,5D » et « Version 2D » ; facultatifs). Les maisons se répartissent
+   (boutons « Version 2,5D » et « Version 2D » ; facultatifs), et `urlPage` celui de
+   sa page HTML interactive (bouton « Page du projet » ; facultatif). Les maisons se répartissent
    seules autour du carrefour (4 places au minimum).
    `prop` = petit objet devant la porte : 'printer', 'radar', 'kit' ou null.
    `color` = couleur d'identité du projet (la même en 2D et en 3D).
@@ -21,7 +22,8 @@ var Q = window.QUARTIER = {
     desc: 'Un boîtier ESP32 écoute l’imprimante. Le serveur compare quatre témoins et ouvre un ticket GLPI quand une panne se prépare.',
     url: '../Projet apprenti 1/livrables/animation-3d/maquette-3d.html',
     url25: '../Projet apprenti 1/livrables/pages-html/architecture-2-5d.html',
-    url2d: '../Projet apprenti 1/livrables/pages-html/architecture-2d.html' },
+    url2d: '../Projet apprenti 1/livrables/pages-html/architecture-2d.html',
+    urlPage: '../Projet apprenti 1/livrables/pages-html/service-augmente.html' },
   { who: 'Lorenzo', n: 3, color: '#c18cff', prop: 'radar',
     title: 'CyberSentinel', sub: 'un radar pour le poste, un leurre pour le réseau',
     desc: 'Un radar LD2410 voit que l’agent est parti et le poste Windows se verrouille seul. Un second ESP32 joue une fausse imprimante : toute connexion devient un signal à examiner.',
@@ -44,6 +46,7 @@ var Q = window.QUARTIER = {
     { k: '3d', champ: 'url', bouton: 'Maquette 3D', court: '3D', suffixe: '' },
     { k: '25', champ: 'url25', bouton: 'Version 2,5D', court: '2,5D', suffixe: ' · version 2,5D' },
     { k: '2d', champ: 'url2d', bouton: 'Version 2D', court: '2D', suffixe: ' · version 2D' },
+    { k: 'page', champ: 'urlPage', bouton: 'Page du projet', court: 'Page', suffixe: ' · page du projet' },
   ],
 };
 /* vignettes dessinées (trait noir épais, aplats, ombre dure décalée) */
