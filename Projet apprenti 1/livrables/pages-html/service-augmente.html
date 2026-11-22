@@ -1,0 +1,903 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Le service informatique augmenté : projet E6 de Wassim. Un boîtier sur l'imprimante, quatre témoins comparés par un serveur, des tickets GLPI avec la cause et la preuve ; en V2, la station des PC neufs.">
+<title>Service informatique augmenté — projet E6 de Wassim</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="../../../theme.css">
+<style>
+/* Mise en page propre à cette page. Couleurs, polices, ombres : theme.css uniquement. */
+header{border-bottom:1.5px solid var(--contour-2);background:var(--papier);position:sticky;top:0;z-index:5}
+header .wrap{min-height:62px;display:flex;align-items:center;justify-content:space-between;gap:14px}
+.brand{font-weight:1000;letter-spacing:-.02em;text-decoration:none;font-size:1.25rem;white-space:nowrap}
+.brand span{color:var(--jaune-fonce)}
+nav{display:flex;gap:16px;flex-wrap:wrap;font-size:.92rem;font-weight:800}
+nav a{text-decoration:none}
+nav a:hover{text-decoration:underline;text-decoration-color:var(--jaune-fonce)}
+section{padding:52px 0;border-bottom:1.5px solid var(--contour-2)}
+.hero{padding-block:56px 46px;display:grid;grid-template-columns:1.1fr .9fr;gap:32px;align-items:center}
+.hero h1 em{font-style:normal;background:linear-gradient(transparent 58%,var(--jaune) 58%)}
+.lead{font-size:1.15rem;color:var(--encre-2);max-width:64ch;margin-top:18px}
+.zone-2 .lead{color:var(--encre-2)}
+.actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:24px}
+.tags{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.illustration{border:1.5px solid var(--contour);border-radius:var(--r-carte);background:var(--blanc);box-shadow:var(--ombre-douce);padding:18px}
+.illustration svg{width:100%;height:auto;display:block}
+.grid2,.grid3,.grid4{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+.grid3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.grid4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.mt{margin-top:24px}
+.card p{color:var(--encre-2)}
+.small{font-size:.9rem;color:var(--encre-3)}
+.zone-2 .small,.panneau .small{color:var(--encre-2)}
+.quote{font-weight:900;font-size:1.1rem;color:var(--encre)}
+.table-defile{overflow-x:auto;margin-top:18px;background:var(--blanc);border:1.5px solid var(--contour);border-radius:var(--r-petit)}
+.table-defile table{min-width:620px}
+.panneau{background:var(--papier-2);border:1.5px solid var(--contour);border-radius:var(--r-carte);padding:22px}
+.zone-2 .panneau{background:var(--blanc)}
+.choix{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px}
+.choix .btn{text-transform:none;letter-spacing:0}
+
+/* ---- simulateur des quatre témoins ---- */
+.temoins{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.temoin{background:var(--blanc);border:1.5px solid var(--contour);border-radius:var(--r-petit);padding:12px 14px;min-height:132px}
+.temoin .eyebrow{margin-bottom:4px}
+.temoin .val{font-weight:900;font-size:1.15rem;line-height:1.25}
+.temoin svg{display:block;width:100%;height:44px;margin-top:6px}
+.vib-trace{fill:none;stroke:var(--encre);stroke-width:1.6;stroke-linejoin:round}
+.jauge{height:10px;border:1.5px solid var(--encre);border-radius:999px;margin-top:10px;overflow:hidden;background:var(--papier)}
+.jauge i{display:block;height:100%;width:0;background:var(--jaune);transition:width .25s}
+.verdict{display:grid;grid-template-columns:1fr 230px;gap:16px;margin-top:16px;align-items:stretch}
+.conclusion{background:var(--blanc);border:1.5px solid var(--contour);border-left:6px solid var(--sens,var(--contour));border-radius:0 var(--r-petit) var(--r-petit) 0;padding:12px 16px}
+.conclusion h3{margin-bottom:6px}
+.eink{background:var(--papier-2);border:10px solid var(--encre-2);border-radius:12px;padding:14px 12px;text-align:center;display:flex;flex-direction:column;justify-content:center;min-height:120px}
+.eink .petit-titre{font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;font-weight:800;color:var(--encre-2)}
+.eink .msg{font-weight:1000;font-size:1.35rem;line-height:1.15;margin-top:6px;text-transform:uppercase}
+.ticket{margin-top:16px;min-height:0}
+
+/* ---- station des PC neufs ---- */
+.station{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start}
+.cartes{display:flex;flex-direction:column;gap:10px}
+.cartes .btn{justify-content:flex-start;text-transform:none;letter-spacing:0;white-space:normal;text-align:left}
+.leds{display:flex;flex-direction:column;gap:9px;margin:12px 0 0;padding:0;list-style:none}
+.leds li{display:flex;gap:10px;align-items:center;color:var(--encre-2)}
+.leds li::before{content:"";flex:none;width:16px;height:16px;border-radius:50%;border:2px solid var(--encre);background:var(--papier-2)}
+.leds li.encours::before{background:var(--jaune);animation:clignote .6s ease-in-out infinite alternate}
+.leds li.ok{color:var(--encre)}
+.leds li.ok::before{background:var(--vert)}
+@keyframes clignote{to{opacity:.35}}
+
+/* ---- journée ---- */
+.journee{display:grid;grid-template-columns:1.2fr .8fr;gap:18px}
+.heure{font-weight:1000;font-size:2.4rem;line-height:1}
+.nav-pas{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:16px}
+.frise{display:flex;gap:6px;margin:16px 0 4px;flex-wrap:wrap}
+.frise button{width:30px;height:30px;border-radius:50%;border:2px solid var(--encre);background:var(--blanc);font-weight:900;font-size:.8rem;padding:0}
+.frise button[aria-current="step"]{background:var(--jaune)}
+.tableau-bord{background:var(--blanc);border:1.5px solid var(--contour);border-radius:var(--r-petit);padding:14px 16px}
+.tableau-bord h3{font-size:1rem;margin-bottom:10px}
+.ligne-tb{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--contour-2)}
+.ligne-tb:last-child{border-bottom:0}
+.pastille{flex:none;width:16px;height:16px;border-radius:50%;border:2px solid var(--encre);background:var(--vert);transition:background .3s}
+.pastille.rouge{background:var(--rouge)}
+.pastille.jaune{background:var(--jaune)}
+.pastille.gris{background:var(--contour-2)}
+.ligne-tb .nom{font-weight:800;flex:1}
+.ligne-tb .etat{font-size:.88rem;color:var(--encre-2);text-align:right}
+
+/* ---- architecture ---- */
+.archi{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:18px;align-items:start}
+.schema-cadre{border:3px solid var(--encre);border-radius:6px;background:var(--blanc);box-shadow:var(--ombre-decalee-forte);overflow-x:auto}
+#archi{display:block;width:100%;min-width:720px;height:auto}
+#archi text{font-family:var(--police);fill:var(--encre)}
+#archi .zone{fill:none;stroke:var(--contour-2);stroke-width:1.5;stroke-dasharray:6 5}
+#archi .zone-t{font-size:11px;font-weight:900;letter-spacing:.12em;fill:var(--encre-2)}
+#archi .nom{font-size:13px;font-weight:900}
+#archi .sous{font-size:11px;fill:var(--encre-2)}
+#archi .proto{font-size:10.5px;font-weight:800;fill:var(--encre-2)}
+#archi .lien{fill:none;stroke:var(--contour);stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;transition:stroke .2s}
+#archi .lien.wifi{stroke-dasharray:3 6}
+#archi .n{transition:opacity .25s}
+#archi[data-flux] .n,#archi[data-flux] .lien,#archi[data-flux] .proto{opacity:.25}
+#archi[data-flux=imp] .f-imp,#archi[data-flux=diag] .f-diag,#archi[data-flux=neuf] .f-neuf,#archi[data-flux=secu] .f-secu{opacity:1}
+#archi[data-flux=imp] .lien.f-imp,#archi[data-flux=diag] .lien.f-diag,#archi[data-flux=neuf] .lien.f-neuf,#archi[data-flux=secu] .lien.f-secu{stroke:var(--jaune-fonce);stroke-width:5;stroke-dasharray:10 8;animation:defile .7s linear infinite}
+#archi[data-flux=secu] .lien.f-secu{stroke:var(--rouge)}
+@keyframes defile{to{stroke-dashoffset:-18}}
+.etapes-flux{margin:10px 0 0;padding-left:22px}
+.etapes-flux li{margin-bottom:8px;color:var(--encre-2)}
+.etapes-flux li b{color:var(--encre)}
+.glisse{display:none;font-size:.82rem;font-weight:700;color:var(--encre-2);margin-top:8px}
+
+/* ---- physique ---- */
+.physique{display:grid;grid-template-columns:minmax(0,1fr) 280px;gap:18px;align-items:start}
+.courbe-cadre{overflow-x:auto}
+#courbe{display:block;width:100%;min-width:560px;height:auto;background:var(--blanc);border:1.5px solid var(--contour);border-radius:var(--r-petit)}
+#courbe text{font-family:var(--police);font-size:11px;fill:var(--encre-2)}
+#courbe .axe{stroke:var(--encre);stroke-width:1.2}
+#courbe .grille-l{stroke:var(--contour-2);stroke-width:1}
+#courbe .signal{fill:none;stroke:var(--encre);stroke-width:1.5}
+#courbe .seuil{stroke:var(--rouge);stroke-width:2;stroke-dasharray:7 5}
+#courbe .envoi{stroke:var(--bleu);stroke-width:2}
+#courbe .detecte{fill:var(--jaune);opacity:.45}
+.reglage label{font-weight:900;display:block}
+.reglage input[type=range]{width:100%;accent-color:var(--encre);margin:8px 0 2px}
+.mesure{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid var(--contour-2)}
+.mesure b{font-size:1.05rem;white-space:nowrap;text-align:right}
+.formule{font-family:var(--police-mono);font-size:.92rem;background:var(--papier-2);border-radius:var(--r-petit);padding:4px 8px;display:inline-block}
+
+/* ---- parcours ---- */
+.version h3{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.version ul{margin:0;padding-left:20px;color:var(--encre-2)}
+.version li{margin-bottom:6px}
+details{margin-top:18px;background:var(--blanc);border:1.5px solid var(--contour);border-radius:var(--r-petit);padding:12px 16px}
+summary{font-weight:900;cursor:pointer}
+
+.bandeau{margin-top:24px}
+.section-finale{border-bottom:0}
+.section-finale .card{background:var(--blanc)}
+.section-finale .small{color:var(--encre-2)}
+.section-finale ul{margin:0;padding-left:20px}
+.section-finale li{margin-bottom:6px}
+footer{padding:30px 0;font-size:.9rem;color:var(--encre-3)}
+
+@media(max-width:980px){.temoins,.grid4{grid-template-columns:repeat(2,minmax(0,1fr))}.archi,.physique{grid-template-columns:minmax(0,1fr)}.glisse{display:block}}
+@media(max-width:820px){.hero,.grid2,.grid3,.station,.journee,.verdict{grid-template-columns:minmax(0,1fr)}nav{gap:10px}}
+@media(max-width:560px){header{position:static}header .wrap{flex-direction:column;align-items:flex-start;padding-block:10px}.temoins,.grid4{grid-template-columns:minmax(0,1fr)}.temoin{min-height:0}.btn{white-space:normal}}
+@media print{header{position:static}.choix,.nav-pas,.frise,.actions{display:none}#archi{min-width:0}}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+ <a href="#" class="brand">SERVICE AUGMENTÉ<span>.</span></a>
+ <nav aria-label="Navigation">
+  <a href="#probleme">Besoin</a><a href="#existant">Existant</a><a href="#solution">Solution</a><a href="#journee">Scénario</a><a href="#architecture">Architecture</a><a href="#securite">Sécurité</a><a href="#physique">Physique</a><a href="#parcours">V1 / V2</a>
+ </nav>
+</div></header>
+
+<main>
+<div class="wrap hero">
+ <div>
+  <div class="eyebrow">BTS CIEL · Épreuve E6 · Projet de Wassim</div>
+  <h1>LE SERVICE INFORMATIQUE <em>AUGMENTÉ.</em></h1>
+  <p class="lead">De l'imprimante muette au PC du nouveau médecin. Un petit boîtier collé sur l'imprimante sent si elle travaille vraiment. Un serveur compare quatre témoins et ouvre le ticket avec <strong>la cause et la preuve</strong>.</p>
+  <div class="tags"><span class="tag jaune">Proposition à faire valider par le tuteur</span><span class="tag papier">Maquette au lycée</span><span class="tag papier">Aucune donnée patient</span></div>
+  <div class="actions">
+   <a class="btn principal" href="#temoins">Tester les quatre témoins</a>
+   <a class="btn" href="../animation-3d/maquette-3d.html">Maquette 3D ↗</a>
+   <a class="btn petit" href="architecture-2-5d.html">Schéma 2,5D ↗</a>
+   <a class="btn petit" href="architecture-2d.html">Schéma 2D ↗</a>
+  </div>
+ </div>
+ <div class="illustration" role="img" aria-label="Dessin : une imprimante qui vibre, avec un boîtier collé sur le côté. L'écran du boîtier affiche « Bac 2 vide ».">
+  <svg viewBox="0 0 420 300" xmlns="http://www.w3.org/2000/svg">
+   <style>
+    .vibre{animation:vibre .12s linear infinite alternate}
+    .onde{animation:onde 1.2s ease-out infinite}
+    @keyframes vibre{to{transform:translate(1.2px,-.8px)}}
+    @keyframes onde{from{opacity:1}to{opacity:0}}
+    @media (prefers-reduced-motion: reduce){.vibre,.onde{animation:none}}
+   </style>
+   <g class="vibre">
+    <rect x="40" y="70" width="230" height="44" rx="8" stroke-width="2.5" style="fill:var(--contour-2);stroke:var(--encre)"/>
+    <rect x="30" y="112" width="250" height="120" rx="10" stroke-width="2.5" style="fill:var(--blanc);stroke:var(--encre)"/>
+    <rect x="60" y="130" width="150" height="10" rx="4" style="fill:var(--encre-2)"/>
+    <rect x="72" y="104" width="120" height="30" stroke-width="1.5" style="fill:var(--blanc);stroke:var(--encre)"/>
+    <path d="M80 114h90M80 121h70" stroke-width="2" style="stroke:var(--contour)"/>
+    <rect x="220" y="124" width="46" height="22" rx="3" stroke-width="1.5" style="fill:var(--bleu-pale);stroke:var(--encre)"/>
+    <circle cx="232" cy="160" r="4" style="fill:var(--vert)"/>
+    <rect x="48" y="186" width="214" height="34" rx="5" stroke-width="2" style="fill:var(--papier-2);stroke:var(--encre)"/>
+    <rect x="130" y="198" width="50" height="8" rx="4" style="fill:var(--encre-2)"/>
+    <rect x="40" y="232" width="18" height="10" style="fill:var(--encre-2)"/><rect x="252" y="232" width="18" height="10" style="fill:var(--encre-2)"/>
+   </g>
+   <g class="onde" fill="none" stroke-width="2.5" stroke-linecap="round" style="stroke:var(--jaune-fonce)">
+    <path d="M18 140c-8 12-8 28 0 40M8 132c-12 18-12 44 0 62"/>
+   </g>
+   <!-- boîtier -->
+   <path d="M280 150h16" stroke-width="3" style="stroke:var(--encre)"/>
+   <rect x="296" y="118" width="110" height="100" rx="12" stroke-width="2.5" style="fill:var(--encre-2);stroke:var(--encre)"/>
+   <rect x="306" y="128" width="90" height="46" rx="4" style="fill:var(--papier-2)"/>
+   <text x="351" y="146" text-anchor="middle" font-size="9" font-weight="800" style="fill:var(--encre-2)">CARDIO-01</text>
+   <text x="351" y="164" text-anchor="middle" font-size="14" font-weight="1000" style="fill:var(--encre)">BAC 2 VIDE</text>
+   <circle cx="330" cy="196" r="13" stroke-width="2.5" style="fill:var(--rouge);stroke:var(--encre)"/>
+   <rect x="356" y="186" width="38" height="20" rx="4" stroke-width="1.5" style="fill:var(--encre);stroke:var(--papier-2)"/>
+   <path d="M364 196h22M368 191c4 3 10 3 14 0M368 201c4-3 10-3 14 0" stroke-width="1.3" fill="none" style="stroke:var(--papier-2)"/>
+   <g text-anchor="middle" font-weight="800" font-size="12" style="fill:var(--encre)">
+    <text x="155" y="270">l'imprimante</text>
+    <text x="351" y="240">le boîtier</text>
+    <text x="351" y="256" font-weight="600" font-size="11" style="fill:var(--encre-2)">vibration · bouton · écran</text>
+   </g>
+   <path d="M345 105l12-32h-30" fill="none" stroke-width="2" style="stroke:var(--encre)"/>
+   <text x="300" y="66" font-size="12" font-weight="800" style="fill:var(--encre)">Wi-Fi → serveur</text>
+  </svg>
+ </div>
+</div>
+
+<!-- ============================================================ 01 -->
+<section id="probleme"><div class="wrap">
+ <div class="eyebrow">01 — Le point de départ</div>
+ <h2>Ce que Wassim fait vraiment.</h2>
+ <p class="lead">Wassim est technicien de support au service informatique d'un centre hospitalier. Tout part de l'entretien du 16 novembre 2026. Voici ce qu'il a dit.</p>
+ <div class="grid4 mt">
+  <article class="card danger"><div class="eyebrow">Panne n° 1</div><p class="quote">« Le plus gros problème, c'est les imprimantes. »</p><p>Allumées, mais elles n'impriment pas. Il vérifie le VLAN, l'encre… toujours les mêmes gestes.</p></article>
+  <article class="card"><div class="eyebrow">Tâche fréquente</div><p class="quote">« Sans le domaine, on ne peut rien faire. »</p><p>Le PC d'un nouveau médecin : domaine, bon service de l'AD, script d'installation. Une erreur de service arrive vite.</p></article>
+  <article class="card"><div class="eyebrow">Les tickets</div><p class="quote">« Il y a trop de tickets. »</p><p>Ils arrivent mal décrits : « l'imprimante ne marche pas ». Certains utilisateurs viennent directement au service.</p></article>
+  <article class="card"><div class="eyebrow">Sa méthode</div><p class="quote">D'abord à distance.</p><p>Il prend la main sur le PC. Il se déplace seulement si c'est vraiment bloqué. Un bon diagnostic évite des déplacements.</p></article>
+ </div>
+ <div class="bandeau"><strong>Question du projet :</strong> si un petit boîtier collé sur l'imprimante voyait ce qui se passe vraiment, et si le ticket arrivait avec <b>sa cause et sa preuve</b>, combien de déplacements et de temps gagnerait-on, <b>sans prendre de risque</b> sur les postes ?</div>
+ <p class="small" style="margin-top:12px">Besoin exprimé par l'apprenti, pas encore validé par l'entreprise. Les chiffres (part des tickets « imprimante », nombre de PC neufs par mois) sont à demander au tuteur.</p>
+</div></section>
+
+<!-- ============================================================ 02 -->
+<section id="existant" class="zone-2"><div class="wrap">
+ <div class="eyebrow">02 — Ce qui existe déjà</div>
+ <h2>De bons outils. Aucun ne compare.</h2>
+ <div class="table-defile"><table>
+  <thead><tr><th>Outil existant</th><th>Ce qu'il fait bien</th><th>Ce qui lui manque</th></tr></thead>
+  <tbody>
+   <tr><td><b>Page web de l'imprimante</b></td><td>Montre son état et son niveau d'encre.</td><td>Une imprimante à la fois. Elle peut dire « tout va bien » alors qu'elle est figée.</td></tr>
+   <tr><td><b>Supervision</b> (Centreon, Zabbix…)</td><td>Surveille toutes les imprimantes du réseau.</td><td>Lit l'état et le compteur de pages, mais ne les compare pas à ce qui a été envoyé. Ne sent pas si la machine travaille. Ne regarde pas le PC. Lourde à installer.</td></tr>
+   <tr><td><b>Prise en main à distance</b></td><td>Wassim voit le PC comme s'il y était.</td><td>Les mêmes vérifications à refaire à la main, ticket après ticket.</td></tr>
+   <tr><td><b>GLPI</b> (outil de tickets)</td><td>Suit les tickets et la liste du matériel.</td><td>Le ticket ne contient que la phrase de l'utilisateur. Personne ne prouve que la réparation a marché.</td></tr>
+   <tr><td><b>Script d'installation actuel</b></td><td>Installe les applications rapidement.</td><td>Le service et le profil se choisissent à la main. GLPI n'est pas mis à jour tout seul.</td></tr>
+  </tbody>
+ </table></div>
+ <div class="callout accent"><strong>Ce qui manque partout :</strong> un témoin physique (« la machine travaille-t-elle vraiment ? »), une comparaison entre les pages envoyées et les pages imprimées, et un lien automatique entre le terrain, l'AD et GLPI.</div>
+</div></section>
+
+<!-- ============================================================ 03 -->
+<section id="solution"><div class="wrap">
+ <div class="eyebrow">03 — La solution de Wassim</div>
+ <h2>Deux outils de terrain. Un seul cerveau.</h2>
+ <div class="grid3 mt">
+  <article class="card accent"><div class="eyebrow">Sur l'imprimante · V1</div><h3>Le boîtier</h3><p>Un ESP32 avec un accéléromètre (la vibration), un gros bouton rouge « ça ne marche pas » et un écran à encre électronique qui donne des nouvelles : <em>Bac 2 vide</em>, <em>Wassim arrive</em>, <em>Réparé</em>.</p></article>
+  <article class="card"><div class="eyebrow">Au centre · V1</div><h3>Le cerveau commun</h3><p>Un serveur Ubuntu reçoit tout, compare les quatre témoins, lit l'AD et écrit la cause probable dans GLPI. Un tableau de bord montre une pastille par imprimante.</p></article>
+  <article class="card"><div class="eyebrow">À l'atelier · V2</div><h3>La station des PC neufs</h3><p>Wassim pose trois cartes RFID : la sienne, celle du profil, celle du PC. Un script PowerShell range le PC dans le bon service de l'AD et met GLPI à jour.</p></article>
+ </div>
+
+ <h3 class="mt" style="margin-bottom:12px">Les quatre témoins</h3>
+ <div class="grid4">
+  <div class="card plate"><div class="eyebrow">1 · Vibration</div><p><b>« Les moteurs tournent. »</b> L'accéléromètre du boîtier sent si l'imprimante travaille.</p></div>
+  <div class="card plate"><div class="eyebrow">2 · Compteur de pages</div><p><b>« J'ai imprimé 3 pages. »</b> Lu par SNMP avant et après, comparé aux pages envoyées.</p></div>
+  <div class="card plate"><div class="eyebrow">3 · État de l'imprimante</div><p><b>« Je vais bien », « bourrage »…</b> Lu par SNMP. Elle dit ce qu'elle croit savoir.</p></div>
+  <div class="card plate"><div class="eyebrow">4 · Le PC</div><p><b>« 5 pages attendent chez moi. »</b> PowerShell limité (JEA) compte les documents, sans lire leur nom.</p></div>
+ </div>
+
+ <div id="temoins" class="panneau mt">
+  <div class="eyebrow">Simulateur · le serveur compare</div>
+  <h3>La secrétaire imprime 5 pages. Choisis ce qui se passe.</h3>
+  <p class="small">Simulation de principe pour comprendre les règles, pas une mesure faite sur le matériel.</p>
+  <div class="choix" role="group" aria-label="Choix de la situation">
+   <button class="btn petit" data-cas="ok" aria-pressed="true">Tout va bien</button>
+   <button class="btn petit" data-cas="papier" aria-pressed="false">Plus de papier</button>
+   <button class="btn petit" data-cas="bourrage" aria-pressed="false">Bourrage</button>
+   <button class="btn petit" data-cas="figee" aria-pressed="false">Imprimante figée</button>
+   <button class="btn petit" data-cas="pc" aria-pressed="false">Bloqué dans le PC</button>
+   <button class="btn petit" data-cas="reseau" aria-pressed="false">Hors réseau</button>
+  </div>
+  <div class="temoins">
+   <div class="temoin"><div class="eyebrow">Vibration</div><div class="val" id="t-vib">…</div><svg viewBox="0 0 200 44" preserveAspectRatio="none" aria-hidden="true"><path class="vib-trace" id="t-vib-trace" d="M0 22H200"/></svg></div>
+   <div class="temoin"><div class="eyebrow">Compteur (SNMP)</div><div class="val" id="t-cpt">0 / 5</div><div class="jauge"><i id="t-cpt-j"></i></div><p class="small" style="margin:8px 0 0">pages imprimées / envoyées</p></div>
+   <div class="temoin"><div class="eyebrow">Imprimante (SNMP)</div><div class="val" id="t-etat">…</div></div>
+   <div class="temoin"><div class="eyebrow">PC (PowerShell JEA)</div><div class="val" id="t-pc">…</div></div>
+  </div>
+  <div class="verdict">
+   <div class="conclusion" id="t-concl" aria-live="polite"><h3 id="t-titre">…</h3><p id="t-texte" style="margin:0"></p></div>
+   <div class="eink" aria-label="Écran du boîtier"><span class="petit-titre">Écran du boîtier</span><span class="msg" id="t-ecran">…</span></div>
+  </div>
+  <pre class="terminal ticket" id="t-ticket" aria-live="polite"></pre>
+ </div>
+
+ <div class="callout info"><strong>Pourquoi le compteur plutôt qu'un capteur de feuilles ?</strong> Un capteur infrarouge au-dessus de la sortie était prévu. Il est retiré de la V1 (décision du 22/11/2026) : dans les 10 pannes de test, aucune n'a besoin de lui pour trouver la bonne cause. Il est aussi difficile à placer (sortie sous le scanner, pile de feuilles qui monte, lumière du local). Le compteur se lit par le réseau, sans rien fixer. Le capteur revient en V2 <b>pour contrôler le compteur</b>.</div>
+
+ <div class="grid2 mt">
+  <div class="card"><div class="eyebrow">Ce que le serveur ajoute</div><h3>Un ticket qui sait déjà</h3><p><b>Les vérifications réseau :</b> ping, nom DNS, bail DHCP, ports 9100 et 631. Le ticket dit lequel bloque.</p><p><b>Le bon VLAN :</b> l'AD dit que le PC est en cardiologie, donc l'imprimante doit être dans le réseau de la cardiologie. Le système vérifie, il ne change rien au réseau.</p><p><b>Réglé sur place :</b> la secrétaire remet du papier, la vibration revient, le compteur repart : ticket « résolu sur place ».</p></div>
+  <div class="card"><div class="eyebrow">Ce qui vient en V2</div><h3>Prévenir et prouver</h3><p><b>La preuve de réparation :</b> Wassim pose sa carte en partant, le serveur envoie une page de test, le compteur avance de 1 : le ticket se ferme avec la preuve.</p><p><b>L'encre avant la panne :</b> ticket préventif à 10 %.</p><p><b>L'humidité du local :</b> capteur SHT31 sur le boîtier ; au-dessus d'environ 65 % (seuil à fixer par la mesure), ticket « papier à ranger ».</p></div>
+ </div>
+
+ <div class="panneau mt" id="station">
+  <div class="eyebrow">La station des PC neufs · V2</div>
+  <h3>Le Dr Martin arrive lundi. Prépare son PC.</h3>
+  <div class="station">
+   <div>
+    <p class="small">Pose les cartes dans l'ordre, puis valide.</p>
+    <div class="cartes">
+     <button class="btn petit" data-carte="0">① Carte de Wassim — qui travaille</button>
+     <button class="btn petit" data-carte="1">② Carte profil « Cardiologie – médecin » — pour qui</button>
+     <button class="btn petit" data-carte="2">③ Étiquette du PC 5CG12 — quel PC</button>
+     <button class="btn petit principal" id="st-valider" disabled>Valider et lancer le script</button>
+     <button class="btn petit" id="st-reset">Recommencer</button>
+    </div>
+   </div>
+   <div>
+    <div class="eink"><span class="petit-titre">Écran de la station</span><span class="msg" id="st-ecran" style="font-size:1.05rem">Posez votre carte</span></div>
+    <ul class="leds" id="st-leds" aria-live="polite">
+     <li>Le script lit le numéro de série et demande sa commande au serveur</li>
+     <li>Le PC entre dans le domaine, directement dans le service « Cardiologie »</li>
+     <li>Les applications du profil s'installent depuis le partage réseau</li>
+     <li>Le script vérifie chaque installation et rend compte</li>
+     <li>GLPI : « en stock » → « en service – Cardiologie »</li>
+    </ul>
+   </div>
+  </div>
+  <p class="small" style="margin-top:14px">Le mot de passe de jonction au domaine est demandé à l'exécution, jamais écrit dans le script. Le compte utilisé peut seulement ajouter des PC dans les services.</p>
+ </div>
+</div></section>
+
+<!-- ============================================================ 04 -->
+<section id="journee" class="zone-2"><div class="wrap">
+ <div class="eyebrow">04 — Scénario concret</div>
+ <h2>Une journée de Wassim, avec le système.</h2>
+ <p class="lead">Scénario fictif, joué sur la maquette du lycée. Personnages : Wassim, le Dr Martin (nouveau médecin en cardiologie) et Nadia, secrétaire de cardiologie.</p>
+ <div class="journee mt">
+  <div class="panneau">
+   <div class="heure" id="j-heure">8 h 40</div>
+   <div class="tags" id="j-tags"></div>
+   <h3 id="j-titre" style="margin-top:12px"></h3>
+   <p id="j-texte" aria-live="polite"></p>
+   <div class="frise" id="j-frise" role="group" aria-label="Moments de la journée"></div>
+   <div class="nav-pas">
+    <button class="btn petit" id="j-prec">← Précédent</button>
+    <button class="btn petit principal" id="j-suiv">Suivant →</button>
+    <button class="btn petit" id="j-auto" aria-pressed="false">Lecture auto</button>
+   </div>
+  </div>
+  <div>
+   <div class="tableau-bord">
+    <h3>Tableau de bord de Wassim (Grafana)</h3>
+    <div class="ligne-tb"><span class="pastille" id="p-cardio"></span><span class="nom">Imprimante cardiologie</span><span class="etat" id="e-cardio"></span></div>
+    <div class="ligne-tb"><span class="pastille" id="p-pedia"></span><span class="nom">Imprimante pédiatrie</span><span class="etat" id="e-pedia"></span></div>
+    <div class="ligne-tb"><span class="pastille" id="p-radio"></span><span class="nom">Imprimante radiologie</span><span class="etat" id="e-radio"></span></div>
+    <div class="ligne-tb"><span class="pastille" id="p-pc"></span><span class="nom">PC du Dr Martin</span><span class="etat" id="e-pc"></span></div>
+    <div class="ligne-tb"><span class="pastille" id="p-leurre"></span><span class="nom">Fausse imprimante (piège)</span><span class="etat" id="e-leurre"></span></div>
+   </div>
+   <div class="eink" style="margin-top:14px"><span class="petit-titre" id="j-ecran-t">Écran du boîtier</span><span class="msg" id="j-ecran" style="font-size:1.1rem"></span></div>
+  </div>
+ </div>
+</div></section>
+
+<!-- ============================================================ 05 -->
+<section id="architecture"><div class="wrap">
+ <div class="eyebrow">05 — Schéma d'architecture</div>
+ <h2>Qui parle à qui, et comment.</h2>
+ <p class="lead">Choisis un flux pour voir le chemin des informations sur la maquette.</p>
+ <div class="choix mt" role="group" aria-label="Choix du flux">
+  <button class="btn petit" data-flux="" aria-pressed="true">Tout voir</button>
+  <button class="btn petit" data-flux="imp" aria-pressed="false">① Une impression</button>
+  <button class="btn petit" data-flux="diag" aria-pressed="false">② Le diagnostic</button>
+  <button class="btn petit" data-flux="neuf" aria-pressed="false">③ Un PC neuf (V2)</button>
+  <button class="btn petit" data-flux="secu" aria-pressed="false">④ Le piège (extension)</button>
+ </div>
+ <div class="archi">
+  <div>
+   <div class="schema-cadre"><svg id="archi" viewBox="0 0 1000 610" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Schéma d'architecture de la maquette : imprimante et boîtier, PC de la secrétaire, borne Wi-Fi, switch, serveur Ubuntu, poste de Wassim, station des PC neufs, PC neuf, fausse imprimante."></svg></div>
+   <p class="glisse">↔ Fais glisser le schéma pour tout voir.</p>
+  </div>
+  <div class="panneau">
+   <h3 id="f-titre">Toute la maquette</h3>
+   <ol class="etapes-flux" id="f-etapes"></ol>
+  </div>
+ </div>
+ <div class="table-defile"><table>
+  <thead><tr><th>Liaison</th><th>Protocole</th><th>Ce qui passe</th></tr></thead>
+  <tbody>
+   <tr><td>Boîtier → serveur</td><td>MQTT sur TLS (port 8883), par le Wi-Fi</td><td>Vibration, bouton, humidité (V2) ; en retour, le message de l'écran</td></tr>
+   <tr><td>PC de la secrétaire → serveur → imprimante</td><td>IPP (631) via CUPS, ou impression directe (9100)</td><td>Le travail d'impression ; CUPS connaît le nombre de pages envoyées</td></tr>
+   <tr><td>Serveur → imprimante</td><td>SNMP (161) ; v3 chiffré si l'imprimante le permet</td><td>État, compteur de pages (<code>prtMarkerLifeCount</code>), encre</td></tr>
+   <tr><td>Serveur → PC de la secrétaire</td><td>PowerShell à distance, point d'accès JEA (WinRM)</td><td>Nombre de documents en attente, jamais leur nom</td></tr>
+   <tr><td>Serveur → annuaire</td><td>LDAP vers Samba (AD simulé)</td><td>Le service du PC, donc le réseau attendu pour l'imprimante</td></tr>
+   <tr><td>Serveur → GLPI, Wassim → tableau de bord</td><td>API REST de GLPI et Grafana, en HTTPS</td><td>Tickets, suivis, fiche du PC ; pastilles</td></tr>
+   <tr><td>Réseau en place</td><td>DHCP, DNS, NTP</td><td>Adresses, noms, heure juste pour dater les événements (C10)</td></tr>
+  </tbody>
+ </table></div>
+ <p class="small" style="margin-top:10px">Plus de détails, pas à pas, avec le matériel dessiné : <a href="architecture-2d.html">schéma 2D</a>, <a href="architecture-2-5d.html">schéma 2,5D</a> et <a href="../animation-3d/maquette-3d.html">maquette 3D</a>.</p>
+</div></section>
+
+<!-- ============================================================ 06 -->
+<section id="securite" class="zone-2"><div class="wrap">
+ <div class="eyebrow">06 — Sécurité</div>
+ <h2>Le système touche des PC. Il reste borné.</h2>
+ <p class="lead">La question de sécurité de Wassim : <b>« le diagnostic à distance peut-il faire plus que ce qu'on lui permet ? »</b> Chaque risque a sa protection et sa démonstration.</p>
+ <div class="table-defile"><table>
+  <thead><tr><th>Risque</th><th>Protection</th><th>Démonstration</th></tr></thead>
+  <tbody>
+   <tr><td><b>Le diagnostic fait plus que prévu</b></td><td>Point d'accès PowerShell limité (JEA) : liste fermée de commandes, compte sans droit d'administrateur.</td><td>Une commande hors liste est refusée et tracée.</td></tr>
+   <tr><td><b>Le système abîme GLPI</b></td><td>Son compte ajoute des tickets et des suivis, ne supprime rien, ne ferme qu'avec une preuve.</td><td>Une suppression demandée par le système est refusée.</td></tr>
+   <tr><td><b>Quelqu'un écoute le réseau</b></td><td>SNMP v2 : la communauté circule en clair. Passage en SNMP v3 si l'imprimante le permet.</td><td>Deux captures Wireshark : en v2 la communauté se lit, en v3 plus rien.</td></tr>
+   <tr><td><b>Le mot de passe de l'AD traîne</b></td><td>Compte dédié, limité ; mot de passe demandé à l'exécution.</td><td>On montre le script : aucun mot de passe dedans.</td></tr>
+   <tr><td><b>Une carte RFID est copiée</b> (V2)</td><td>Les cartes bon marché se copient : confirmation à l'écran ; cartes sécurisées en extension.</td><td>Copie acceptée par un système naïf, refusée par le système corrigé.</td></tr>
+   <tr><td><b>Un pirate cherche les imprimantes</b> (extension)</td><td>Une fausse imprimante (ESP32) à laquelle personne n'a de raison de parler.</td><td>Un scan de test déclenche une alerte.</td></tr>
+  </tbody>
+ </table></div>
+
+ <div class="panneau mt">
+  <div class="eyebrow">Trois niveaux de confiance</div>
+  <h3>L'imprimante de cardiologie est figée. Que fait le système ?</h3>
+  <div class="choix" role="group" aria-label="Niveau de confiance">
+   <button class="btn petit" data-niv="1" aria-pressed="true">1 · Il conseille</button>
+   <button class="btn petit" data-niv="2" aria-pressed="false">2 · Il propose</button>
+   <button class="btn petit" data-niv="3" aria-pressed="false">3 · Il agit seul (V2)</button>
+  </div>
+  <div class="grid2">
+   <div><p id="n-texte"></p><p class="small" id="n-suite"></p></div>
+   <pre class="terminal" id="n-log" style="margin:0" aria-live="polite"></pre>
+  </div>
+ </div>
+</div></section>
+
+<!-- ============================================================ 07 -->
+<section id="physique"><div class="wrap">
+ <div class="eyebrow">07 — Volet physique</div>
+ <h2>Quand peut-on dire que l'imprimante imprime ?</h2>
+ <p class="lead">La règle « rien ne bouge » repose sur un seuil de vibration et un délai. Ces deux valeurs ne se devinent pas : elles se <b>mesurent</b>, avec leurs incertitudes.</p>
+ <div class="physique mt">
+  <div>
+   <div class="courbe-cadre"><svg id="courbe" viewBox="0 0 640 260" role="img" aria-label="Courbe de l'énergie de vibration en fonction du temps, avec le seuil réglable."></svg></div>
+   <p class="small" style="margin-top:8px">Données <b>simulées</b> pour comprendre la méthode. Les vraies valeurs viendront des enregistrements sur l'imprimante du lycée. Zone jaune : moments où le serveur dit « elle imprime ».</p>
+  </div>
+  <div class="panneau reglage">
+   <label for="k">Seuil = moyenne en veille + <span id="k-val">3</span> écarts-types</label>
+   <input type="range" id="k" min="1" max="12" step="0.5" value="3">
+   <div class="mesure"><span>Fausses alertes estimées (veille)</span><b id="m-fa"></b></div>
+   <div class="mesure"><span>Temps d'impression reconnu</span><b id="m-reco"></b></div>
+   <div class="mesure"><span>Délai envoi → « elle imprime »</span><b id="m-retard"></b></div>
+   <p class="small" style="margin-top:10px" id="m-avis"></p>
+  </div>
+ </div>
+ <div class="grid3 mt">
+  <div class="card plate"><div class="eyebrow">1 · Étalonnage</div><h3>Six positions</h3><p>L'accéléromètre posé sur chaque face doit lire ± 1 g. On en tire le décalage et le gain de chaque axe.</p></div>
+  <div class="card plate"><div class="eyebrow">2 · Vibration</div><h3>Veille et impression</h3><p>Enregistrement à 1 kHz, 20 essais. Fréquences des moteurs par transformée de Fourier ; condition de Shannon pour choisir la fréquence d'échantillonnage la plus basse qui garde l'information.</p></div>
+  <div class="card plate"><div class="eyebrow">3 · Délai de démarrage</div><h3>Envoi → vibration</h3><p>Mesuré sur 20 essais : moyenne, écart-type, incertitude <span class="formule">s / √N</span>. Il fixe le délai d'alerte « rien ne bouge ».</p></div>
+ </div>
+ <div class="grid2 mt">
+  <div class="card a-venir"><div class="eyebrow">V2 · Humidité et papier</div><p>SHT31 comparé à un hygromètre de référence. 10 feuilles pesées après 48 h en boîte sèche, puis au-dessus d'une solution saturée de sel (≈ 75 %). Prise d'eau du papier en % de masse, avec incertitudes ; seuil « local trop humide » justifié par la mesure. Le lien avec les bourrages est un résultat possible, pas une condition.</p></div>
+  <div class="card a-venir"><div class="eyebrow">V2 · Vitesse des feuilles</div><p>Avec le capteur infrarouge : <span class="formule">v = L / Δt</span> (L = 297 mm) sur 30 feuilles, avec incertitude, comparée à la cadence annoncée par le fabricant.</p></div>
+ </div>
+ <p class="small" style="margin-top:12px">À valider avec le professeur de physique.</p>
+</div></section>
+
+<!-- ============================================================ 08 -->
+<section id="vie-privee" class="zone-2"><div class="wrap">
+ <div class="eyebrow">08 — Vie privée</div>
+ <h2>On regarde les machines, pas les gens.</h2>
+ <div class="grid3 mt">
+  <div class="card succes"><h3>Aucune donnée patient</h3><p>Le script compte les documents en attente, jamais leur nom : un nom de fichier peut contenir le nom d'un patient.</p></div>
+  <div class="card succes"><h3>Ni micro, ni caméra</h3><p>Le boîtier sent seulement la vibration de la machine. Un micro capterait aussi les conversations : piste écartée.</p></div>
+  <div class="card succes"><h3>La carte mesure les pannes</h3><p>La carte de Wassim (V2) sert à mesurer la durée des interventions, pas à surveiller Wassim. À dire clairement au tuteur.</p></div>
+ </div>
+</div></section>
+
+<!-- ============================================================ 09 -->
+<section id="parcours"><div class="wrap">
+ <div class="eyebrow">09 — Parcours</div>
+ <h2>Une V1 complète, une V2 visée.</h2>
+ <div class="grid3 mt">
+  <div class="card accent version"><h3>V1 <span class="tag jaune">obligatoire</span></h3><ul><li>Boîtier : vibration, bouton, écran</li><li>SNMP : état et compteur de pages</li><li>Serveur : comparaison des quatre témoins</li><li>Vérifications réseau, bon VLAN lu dans l'AD</li><li>Tickets GLPI aux niveaux 1 et 2, retour sur l'écran</li><li>Tableau de bord</li></ul></div>
+  <div class="card version"><h3>V2 <span class="tag papier">visée</span></h3><ul><li>Carte RFID du technicien, preuve de réparation</li><li>Encre surveillée avant la panne</li><li>Humidité du local (SHT31)</li><li>Station des PC neufs</li><li>Niveau 3 (il agit seul, la nuit)</li><li>Capteur de feuilles pour contrôler le compteur</li></ul></div>
+  <div class="card a-venir version"><h3>Extensions</h3><ul><li>Redémarrage à distance de l'imprimante figée</li><li>Fausse imprimante servant de piège</li><li>Cartes RFID sécurisées</li><li>SNMP version 3</li><li>Étagère des cartouches</li></ul></div>
+ </div>
+
+ <h3 class="mt" style="margin-bottom:0">Comment savoir si ça marche</h3>
+ <div class="table-defile"><table>
+  <thead><tr><th>Essai</th><th>Ce qu'on mesure</th><th>Objectif proposé</th><th>Version</th></tr></thead>
+  <tbody>
+   <tr><td>E1 – Bonne cause</td><td>10 pannes provoquées (papier, bourrage, câble, mauvais réseau, figée, file bloquée)</td><td>Cause juste au moins 9 fois sur 10</td><td><span class="tag jaune">V1</span></td></tr>
+   <tr><td>E2 – Pas de fausse alerte</td><td>1 h d'impressions normales</td><td>Aucun ticket</td><td><span class="tag jaune">V1</span></td></tr>
+   <tr><td>E3 – Rapide</td><td>Temps entre l'impression ratée et le ticket</td><td>Moins d'1 minute</td><td><span class="tag jaune">V1</span></td></tr>
+   <tr><td>E4 – Pages comptées</td><td>Compteur SNMP sur 100 pages ; 10 pages de test</td><td>Au plus 1 écart ; 10 sur 10</td><td><span class="tag jaune">V1</span></td></tr>
+   <tr><td>E5 – Diagnostic borné</td><td>Commande hors de la liste JEA</td><td>Refusée et tracée</td><td><span class="tag jaune">V1</span></td></tr>
+   <tr><td>E6 – Retour au terrain</td><td>Écran du boîtier ; contenu du ticket</td><td>Moins d'1 minute ; les 4 témoins dans le ticket</td><td><span class="tag jaune">V1</span></td></tr>
+   <tr><td>E7 – Bon réseau</td><td>Imprimante placée hors du réseau attendu par l'AD</td><td>Signalée 5 fois sur 5</td><td><span class="tag jaune">V1</span></td></tr>
+   <tr><td>E8 – PC neufs</td><td>5 PC préparés avec la station</td><td>Bon service, applications, fiche GLPI : 5 sur 5</td><td><span class="tag papier">V2</span></td></tr>
+  </tbody>
+ </table></div>
+ <p class="small" style="margin-top:8px">Seuils proposés, à valider avec le tuteur.</p>
+
+ <details>
+  <summary>Les 11 tâches et les 150 heures</summary>
+  <div class="table-defile"><table>
+   <thead><tr><th>N°</th><th>Tâche</th><th>Heures</th><th>Compétence</th></tr></thead>
+   <tbody>
+    <tr><td>1</td><td>Analyse du besoin, cahier des charges, planification</td><td>12</td><td>C03, C01</td></tr>
+    <tr><td>2</td><td>Maquette : GLPI, CUPS, machines virtuelles Windows 11 dans le domaine Samba, imprimante</td><td>12</td><td>C10</td></tr>
+    <tr><td>3</td><td>Boîtier : vibration, bouton, écran, MQTT</td><td>27</td><td>C08</td></tr>
+    <tr><td>4</td><td>Physique : étalonnage, vibration, délai de démarrage, humidité (V2), incertitudes</td><td>12</td><td>physique</td></tr>
+    <tr><td>5</td><td>Serveur : règles de comparaison, SNMP (état, compteur), vérifications réseau</td><td>22</td><td>C08</td></tr>
+    <tr><td>6</td><td>PowerShell : file d'impression par JEA ; lecture de l'AD</td><td>14</td><td>C08, C10</td></tr>
+    <tr><td>7</td><td>Exploitation du réseau : DHCP, DNS, NTP, SNMP, captures</td><td>8</td><td>C10</td></tr>
+    <tr><td>8</td><td>GLPI : tickets à paliers, retour sur l'écran, tableau de bord</td><td>16</td><td>C08</td></tr>
+    <tr><td>9</td><td>RFID : carte du technicien, preuve de réparation, station des PC neufs (V2)</td><td>12</td><td>C08</td></tr>
+    <tr><td>10</td><td>Campagne d'essai, indicateurs, bilan « adopter ou non »</td><td>7</td><td>C03</td></tr>
+    <tr><td>11</td><td>Dossier technique et préparation de la soutenance</td><td>8</td><td>C01</td></tr>
+    <tr><th></th><th>Total</th><th>150</th><th></th></tr>
+   </tbody>
+  </table></div>
+ </details>
+
+ <details>
+  <summary>Ce qui n'est pas encore vérifié</summary>
+  <ul style="margin:10px 0 0;padding-left:20px;color:var(--encre-2)">
+   <li><b>La vibration distingue « imprime » et « attend »</b> : premier essai sur l'imprimante du lycée, en début de projet.</li>
+   <li><b>Le compteur de pages</b> : le lire en SNMP (<code>snmpget</code>, objet <code>prtMarkerLifeCount</code>) et vérifier qu'il avance à chaque page. Selon le modèle, une feuille recto verso compte pour 1 ou 2. S'il est absent ou faux, le capteur de feuilles repasse en V1.</li>
+   <li><b>Une imprimante réseau disponible au lycée</b> : à demander.</li>
+   <li><b>Machines virtuelles Windows 11</b> : environ 4 Go de mémoire chacune ; version d'évaluation de 90 jours, à réinstaller pendant le projet. Windows 11 Famille ne rejoint aucun domaine : AD simulé par Samba.</li>
+   <li><b>Proximité avec Lorenzo</b> : son cœur de projet est une fausse imprimante leurre. Chez Wassim, elle reste une extension, gardée seulement si elle se distingue.</li>
+  </ul>
+ </details>
+</div></section>
+
+<!-- ============================================================ EN BREF -->
+<section id="en-bref" class="section-finale"><div class="wrap">
+ <div class="eyebrow">10 — En bref</div>
+ <h2>L'imprimante ne ment plus.</h2>
+ <div class="grid2 mt">
+  <div class="card">
+   <h3>Le projet en une phrase</h3>
+   <p>Quand une imprimante tombe en panne, le système le voit, trouve la cause, aide à réparer et prouve que c'est réparé ; quand un médecin arrive, son PC se prépare en posant trois cartes.</p>
+   <ul>
+    <li><b>C08</b> : ESP32, service Python, PowerShell, API GLPI</li>
+    <li><b>C10</b> : SNMP, DHCP, DNS, NTP, captures Wireshark sur le réseau en place</li>
+    <li><b>Physique</b> : étalonnage, seuil de vibration, délai de démarrage, incertitudes</li>
+    <li><b>Matériel à acheter</b> : de l'ordre de 100 à 150 €, hors imprimante et PC (à confirmer)</li>
+   </ul>
+  </div>
+  <div class="card">
+   <h3>Le cadre</h3>
+   <p>Le besoin vient du service où Wassim travaille ; il reste à faire valider par le tuteur. La réalisation se fait <b>au lycée, sur maquette</b>, sans accès à la production ni donnée réelle, contexte anonymisé.</p>
+   <p class="small">L'arrêté du 25 janvier 2023 indique que les projets des apprentis doivent être développés dans l'entreprise : cette organisation doit être <b>validée par l'académie</b>.</p>
+  </div>
+ </div>
+</div></section>
+</main>
+
+<footer><div class="wrap">Le service informatique augmenté · Projet de Wassim · BTS CIEL option A, épreuve E6, session 2027 · Maquette pédagogique, contexte anonymisé. Version du 22 novembre 2026 (compteur de pages en V1, capteur de feuilles en V2).</div></footer>
+
+<script>
+(function () {
+'use strict';
+var REDUIT = matchMedia('(prefers-reduced-motion: reduce)').matches;
+function $(id) { return document.getElementById(id); }
+function presse(groupe, attr, val) {
+  [].forEach.call(document.querySelectorAll('[' + attr + ']'), function (b) {
+    if (groupe && !groupe.contains(b)) return;
+    b.setAttribute('aria-pressed', String(b.getAttribute(attr) === val));
+  });
+}
+
+/* =================================================================
+   1. Simulateur des quatre témoins
+   ================================================================= */
+var CAS = {
+  ok:      { vib: 'Oui', forme: 'plein', cpt: 5, etat: '« Ça va »', pc: 'Rien en attente', sens: 'succes',
+             titre: 'Tout va bien', texte: 'Les quatre témoins sont d\'accord. Aucun ticket.', ecran: 'Prête', ticket: null },
+  papier:  { vib: 'Non', forme: 'plat', cpt: 0, etat: '« Plus de papier »', pc: 'Rien en attente', sens: 'accent',
+             titre: 'Elle le dit elle-même', texte: 'Souvent réglé sur place : si le compteur repart dans les 10 minutes, le ticket est marqué « résolu sur place ».', ecran: 'Bac 2 vide',
+             ticket: 'Cause probable : bac 2 vide (état SNMP)\nNiveau 1 : attendre 10 min une remise de papier sur place' },
+  bourrage:{ vib: 'Oui, puis arrêt', forme: 'arret', cpt: 2, etat: '« Bourrage »', pc: 'Rien en attente', sens: 'danger',
+             titre: 'Feuille coincée après la 2ᵉ page', texte: 'La vibration s\'arrête et le compteur reste à 2 : le message de l\'imprimante est confirmé.', ecran: 'Feuille coincée',
+             ticket: 'Cause probable : bourrage après la page 2\nNiveau 1 : écran « Feuille coincée » ; déplacement si non résolu en 10 min' },
+  figee:   { vib: 'Non', forme: 'plat', cpt: 0, etat: '« Ça va »', pc: 'Rien en attente', sens: 'danger',
+             titre: 'Imprimante figée', texte: 'Elle dit que tout va bien, mais rien ne bouge et le compteur n\'avance pas. C\'est le cas décrit par Wassim : seule la comparaison le voit.', ecran: 'Bloquée – Wassim arrive',
+             ticket: 'Cause probable : imprimante figée (état « ça va » contredit par vibration et compteur)\nNiveau 2 : redémarrage proposé à Wassim' },
+  pc:      { vib: 'Non', forme: 'plat', cpt: 0, etat: '« Ça va »', pc: '5 pages bloquées', sens: 'info',
+             titre: 'Le problème est dans le PC', texte: 'L\'imprimante attend, mais rien ne lui arrive : les pages sont bloquées dans la file de Windows. Inutile de se déplacer vers l\'imprimante.', ecran: 'Prête',
+             ticket: 'Cause probable : file d\'impression bloquée sur PC-CARDIO-03\nNiveau 2 : relancer le service d\'impression (commande de la liste JEA)' },
+  reseau:  { vib: 'Non', forme: 'plat', cpt: null, etat: 'Ne répond pas', pc: '—', sens: 'danger',
+             titre: 'Pas dans le réseau attendu', texte: 'Le serveur cherche où ça bloque : ping, DNS, DHCP, ports 9100 et 631, puis il compare avec l\'AD.', ecran: 'Hors réseau',
+             ticket: 'Vérifications : ping NON · DNS OK · bail DHCP dans le réseau RADIOLOGIE\nCause probable : l\'imprimante est dans le réseau de la radiologie ;\n  d\'après l\'AD, elle devrait être dans celui de la cardiologie\nAucune modification du réseau : vérification seulement' }
+};
+var tourSim = 0;
+function traceVib(forme, avance) {
+  var pts = [], n = 100;
+  for (var i = 0; i <= n; i++) {
+    var x = i * 2, actif = forme === 'plein' ? i > 12 : forme === 'arret' ? (i > 12 && i < 50) : false;
+    var a = actif ? 16 : 1.6, y = 22 + a * Math.sin(i * 2.3) * (0.6 + 0.4 * Math.sin(i * 0.7 + 1));
+    if (i / n > avance) break;
+    pts.push(x + ' ' + y.toFixed(1));
+  }
+  return pts.length ? 'M' + pts.join('L') : 'M0 22';
+}
+function simuler(cle) {
+  var c = CAS[cle], id = ++tourSim, duree = REDUIT ? 1 : 2400, t0 = performance.now();
+  presse($('temoins'), 'data-cas', cle);
+  $('t-vib').textContent = 'mesure…'; $('t-etat').textContent = '…'; $('t-pc').textContent = '…';
+  $('t-titre').textContent = 'Le serveur compare…'; $('t-texte').textContent = '';
+  $('t-concl').className = 'conclusion'; $('t-ecran').textContent = '…'; $('t-ticket').textContent = '';
+  function image(t) {
+    if (id !== tourSim) return;
+    var p = Math.min(1, (t - t0) / duree);
+    $('t-vib-trace').setAttribute('d', traceVib(c.forme, p));
+    var k = c.cpt === null ? null : Math.min(c.cpt, Math.floor(p * 5.2 * (c.forme === 'arret' ? 1.6 : 1)));
+    if (c.cpt !== null && c.forme === 'plein') k = Math.min(5, Math.floor(Math.max(0, p - 0.12) / 0.88 * 5 + 0.0001));
+    if (c.cpt !== null && c.forme !== 'plein' && c.forme !== 'arret') k = 0;
+    $('t-cpt').textContent = (k === null ? '? ' : k) + ' / 5';
+    $('t-cpt-j').style.width = (k === null ? 0 : k / 5 * 100) + '%';
+    if (p < 1) { requestAnimationFrame(image); return; }
+    $('t-cpt').textContent = (c.cpt === null ? 'sans réponse' : c.cpt + ' / 5');
+    $('t-vib').textContent = c.vib; $('t-etat').textContent = c.etat; $('t-pc').textContent = c.pc;
+    $('t-titre').textContent = c.titre; $('t-texte').textContent = c.texte;
+    $('t-concl').className = 'conclusion ' + c.sens; $('t-ecran').textContent = c.ecran;
+    $('t-ticket').textContent = c.ticket
+      ? 'GLPI · nouveau ticket · Imprimante CARDIO-01 (Cardiologie)\nVibration : ' + c.vib.toLowerCase() + ' · Compteur : ' + (c.cpt === null ? '—' : c.cpt + '/5') + ' · État : ' + c.etat + ' · PC : ' + c.pc.toLowerCase() + '\n' + c.ticket
+      : 'GLPI · aucun ticket ouvert\nJournal : impression de 5 pages confirmée par la vibration et le compteur (+5)';
+  }
+  requestAnimationFrame(image);
+}
+[].forEach.call(document.querySelectorAll('[data-cas]'), function (b) {
+  b.addEventListener('click', function () { simuler(b.getAttribute('data-cas')); });
+});
+
+/* =================================================================
+   2. Station des PC neufs
+   ================================================================= */
+var etape = 0, tourSt = 0;
+var ECRANS = ['Posez votre carte', 'Wassim · posez la carte profil', 'Cardio, médecin · posez l\'étiquette du PC', 'PC 5CG12 → Cardio, médecin. Valider ?'];
+function majStation() {
+  [].forEach.call(document.querySelectorAll('[data-carte]'), function (b) {
+    var n = +b.getAttribute('data-carte');
+    b.disabled = n !== etape; b.setAttribute('aria-pressed', String(n < etape));
+  });
+  $('st-valider').disabled = etape !== 3;
+  $('st-ecran').textContent = ECRANS[Math.min(etape, 3)];
+}
+function resetStation() {
+  etape = 0; tourSt++;
+  [].forEach.call($('st-leds').children, function (li) { li.className = ''; });
+  majStation();
+}
+[].forEach.call(document.querySelectorAll('[data-carte]'), function (b) {
+  b.addEventListener('click', function () { etape++; majStation(); });
+});
+$('st-valider').addEventListener('click', function () {
+  var id = ++tourSt, leds = $('st-leds').children, i = 0;
+  etape = 4; $('st-valider').disabled = true; $('st-ecran').textContent = 'Commande enregistrée · script en cours';
+  (function suivant() {
+    if (id !== tourSt) return;
+    if (i > 0) leds[i - 1].className = 'ok';
+    if (i >= leds.length) { $('st-ecran').textContent = 'PC 5CG12 prêt · Cardiologie'; return; }
+    leds[i].className = 'encours'; i++;
+    setTimeout(suivant, REDUIT ? 150 : 1100);
+  })();
+});
+$('st-reset').addEventListener('click', resetStation);
+resetStation();
+
+/* =================================================================
+   3. Une journée avec le système
+   ================================================================= */
+var V = 'vert', R = 'rouge', J = 'jaune', G = 'gris';
+var JOUR = [
+  { h: '8 h 40', tags: ['V2', 'station'], titre: 'Le PC du Dr Martin se prépare', texte: 'Wassim pose sa carte, la carte « Cardiologie – médecin » et l\'étiquette du PC sur la station, puis valide. Il lance le script sur le PC neuf et part faire autre chose. Les LED avancent.',
+    tb: { cardio: [V, 'prête'], pedia: [V, 'prête'], radio: [V, 'prête'], pc: [J, 'en préparation'], leurre: [G, 'silence'] }, ecranT: 'Écran de la station', ecran: 'PC 5CG12 → Cardio, médecin' },
+  { h: '9 h 05', tags: ['V2', 'AD', 'GLPI'], titre: 'Le PC est prêt, rangé au bon endroit', texte: 'La dernière LED est verte. Dans l\'AD, le PC est dans le service « Cardiologie ». Dans GLPI, sa fiche passe de « en stock » à « en service – Cardiologie ».',
+    tb: { cardio: [V, 'prête'], pedia: [V, 'prête'], radio: [V, 'prête'], pc: [V, 'en service – Cardiologie'], leurre: [G, 'silence'] }, ecranT: 'Écran de la station', ecran: 'PC 5CG12 prêt' },
+  { h: '9 h 10', tags: ['V1', 'quatre témoins'], titre: 'Nadia imprime. Rien ne sort.', texte: 'Pas de vibration, le compteur n\'avance pas, mais l\'imprimante répond « tout va bien ». Le serveur conclut : imprimante figée. Ticket ouvert, pastille rouge.',
+    tb: { cardio: [R, 'figée · ticket ouvert'], pedia: [V, 'prête'], radio: [V, 'prête'], pc: [V, 'en service'], leurre: [G, 'silence'] }, ecranT: 'Boîtier · cardiologie', ecran: 'Bloquée – Wassim arrive' },
+  { h: '9 h 11', tags: ['V1', 'niveau 2'], titre: 'Le système propose, Wassim décide', texte: 'Niveau 2 : le système propose « redémarrer l\'imprimante ». Wassim clique depuis son bureau. (Le redémarrage à distance est une extension ; sinon, prise connectée du commerce.)',
+    tb: { cardio: [J, 'redémarrage lancé par Wassim'], pedia: [V, 'prête'], radio: [V, 'prête'], pc: [V, 'en service'], leurre: [G, 'silence'] }, ecranT: 'Boîtier · cardiologie', ecran: 'Redémarrage…' },
+  { h: '9 h 14', tags: ['V1', 'preuve'], titre: 'Réparé, preuve à l\'appui', texte: 'L\'imprimante repart, elle vibre, son compteur avance de 3. Le ticket se ferme avec cette preuve. Wassim ne s\'est pas déplacé.',
+    tb: { cardio: [V, 'prête · ticket fermé'], pedia: [V, 'prête'], radio: [V, 'prête'], pc: [V, 'en service'], leurre: [G, 'silence'] }, ecranT: 'Boîtier · cardiologie', ecran: 'Réparé' },
+  { h: '10 h 05', tags: ['V1', 'réglé sur place'], titre: 'Bac vide en pédiatrie', texte: 'L\'écran du boîtier affiche « Bac 2 vide ». La secrétaire remet du papier, la vibration revient, le compteur avance. Ticket « résolu sur place ». Personne ne s\'est déplacé.',
+    tb: { cardio: [V, 'prête'], pedia: [J, 'bac 2 vide → résolu sur place'], radio: [V, 'prête'], pc: [V, 'en service'], leurre: [G, 'silence'] }, ecranT: 'Boîtier · pédiatrie', ecran: 'Bac 2 vide' },
+  { h: '11 h 30', tags: ['V2', 'préventif'], titre: 'L\'encre avant la panne', texte: 'L\'imprimante de la radiologie passe sous 10 % d\'encre. Ticket préventif : la cartouche est prévue avant que la panne arrive.',
+    tb: { cardio: [V, 'prête'], pedia: [V, 'prête'], radio: [J, 'encre 8 % · ticket préventif'], pc: [V, 'en service'], leurre: [G, 'silence'] }, ecranT: 'Boîtier · radiologie', ecran: 'Encre 8 % – cartouche prévue' },
+  { h: '15 h 20', tags: ['V2', 'carte RFID'], titre: 'Un bourrage : Wassim se déplace', texte: 'Wassim arrive en pédiatrie et pose sa carte (15 h 26). Il retire la feuille, repose sa carte : la page de test sort, le compteur avance de 1. Durée notée : 7 minutes.',
+    tb: { cardio: [V, 'prête'], pedia: [R, 'bourrage · Wassim sur place'], radio: [J, 'cartouche prévue'], pc: [V, 'en service'], leurre: [G, 'silence'] }, ecranT: 'Boîtier · pédiatrie', ecran: 'Feuille coincée – Wassim est là' },
+  { h: '16 h 02', tags: ['extension', 'sécurité'], titre: 'Le piège donne l\'alerte', texte: 'Sur la maquette, un « attaquant » de test scanne le réseau. La fausse imprimante répond… et donne l\'alerte. Ticket de sécurité.',
+    tb: { cardio: [V, 'prête'], pedia: [V, 'prête · réparée en 7 min'], radio: [J, 'cartouche prévue'], pc: [V, 'en service'], leurre: [R, 'scan détecté · alerte'] }, ecranT: 'Tableau de bord', ecran: 'Alerte sécurité' }
+];
+var pas = 0, auto = null;
+JOUR.forEach(function (s, i) {
+  var b = document.createElement('button'); b.textContent = i + 1; b.setAttribute('aria-label', s.h + ' : ' + s.titre);
+  b.addEventListener('click', function () { montrer(i); }); $('j-frise').appendChild(b);
+});
+function montrer(i) {
+  pas = (i + JOUR.length) % JOUR.length; var s = JOUR[pas];
+  $('j-heure').textContent = s.h; $('j-titre').textContent = s.titre; $('j-texte').textContent = s.texte;
+  $('j-tags').innerHTML = '';
+  s.tags.forEach(function (t, k) { var e = document.createElement('span'); e.className = 'tag ' + (k === 0 ? (t === 'V1' ? 'jaune' : 'papier') : 'papier'); e.textContent = t; $('j-tags').appendChild(e); });
+  Object.keys(s.tb).forEach(function (k) { $('p-' + k).className = 'pastille ' + s.tb[k][0]; $('e-' + k).textContent = s.tb[k][1]; });
+  $('j-ecran-t').textContent = s.ecranT; $('j-ecran').textContent = s.ecran;
+  [].forEach.call($('j-frise').children, function (b, k) { if (k === pas) b.setAttribute('aria-current', 'step'); else b.removeAttribute('aria-current'); });
+}
+$('j-prec').addEventListener('click', function () { montrer(pas - 1); });
+$('j-suiv').addEventListener('click', function () { montrer(pas + 1); });
+$('j-auto').addEventListener('click', function () {
+  if (auto) { clearInterval(auto); auto = null; this.setAttribute('aria-pressed', 'false'); return; }
+  this.setAttribute('aria-pressed', 'true'); auto = setInterval(function () { montrer(pas + 1); }, 4500);
+});
+montrer(0);
+
+/* =================================================================
+   4. Schéma d'architecture (matériel dessiné vu de face)
+   ================================================================= */
+function st(f, s) { return 'style="fill:var(--' + f + ')' + (s ? ';stroke:var(--' + s + ')' : '') + '"'; }
+function rect(x, y, w, h, f, s, rx, sw) { return '<rect x="' + x + '" y="' + y + '" width="' + w + '" height="' + h + '" rx="' + (rx || 0) + '" stroke-width="' + (sw || 2) + '" ' + st(f, s) + '/>'; }
+function txt(x, y, s, cls, anc) { return '<text x="' + x + '" y="' + y + '" class="' + cls + '"' + (anc ? ' text-anchor="' + anc + '"' : '') + '>' + s + '</text>'; }
+function led(x, y, c) { return '<circle cx="' + x + '" cy="' + y + '" r="3" ' + st(c) + '/>'; }
+function etiquette(x, y, nom, sous) { return txt(x, y, nom, 'nom', 'middle') + (sous ? txt(x, y + 15, sous, 'sous', 'middle') : ''); }
+var DESSIN = {
+  imprimante: function (x, y) {
+    return rect(x + 8, y, 134, 30, 'contour-2', 'encre', 6) + rect(x, y + 28, 150, 76, 'blanc', 'encre', 8) +
+      rect(x + 20, y + 40, 80, 7, 'encre-2', null, 3) + rect(x + 108, y + 36, 32, 16, 'bleu-pale', 'encre', 2, 1.5) + led(x + 116, y + 62, 'vert') +
+      rect(x + 10, y + 72, 130, 24, 'papier-2', 'encre', 4, 1.5) + rect(x + 55, y + 81, 40, 6, 'encre-2', null, 3);
+  },
+  boitier: function (x, y) {
+    return rect(x, y, 62, 50, 'encre-2', 'encre', 8) + rect(x + 6, y + 6, 50, 20, 'papier-2', null, 2) +
+      '<text x="' + (x + 31) + '" y="' + (y + 20) + '" text-anchor="middle" style="font-size:7.5px;font-weight:900;fill:var(--encre)">BAC 2 VIDE</text>' +
+      '<circle cx="' + (x + 18) + '" cy="' + (y + 38) + '" r="7" stroke-width="1.5" ' + st('rouge', 'encre') + '/>' + led(x + 46, y + 38, 'jaune');
+  },
+  pc: function (x, y) {
+    return rect(x, y, 104, 66, 'encre', 'encre', 5) + rect(x + 6, y + 6, 92, 50, 'bleu-pale', null, 2) +
+      rect(x + 44, y + 66, 16, 12, 'encre-2', null, 0, 0) + rect(x + 30, y + 78, 44, 6, 'encre-2', null, 2, 0) +
+      rect(x + 114, y + 4, 34, 80, 'encre-2', 'encre', 4) + rect(x + 120, y + 14, 22, 4, 'encre', null, 1, 0) + led(x + 131, y + 70, 'vert');
+  },
+  portable: function (x, y) {
+    return rect(x + 8, y, 100, 62, 'encre', 'encre', 5) + rect(x + 14, y + 6, 88, 50, 'bleu-pale', null, 2) +
+      '<path d="M' + x + ' ' + (y + 74) + 'L' + (x + 8) + ' ' + (y + 62) + 'H' + (x + 108) + 'L' + (x + 116) + ' ' + (y + 74) + 'Z" stroke-width="2" ' + st('contour-2', 'encre') + '/>' +
+      rect(x + 76, y + 50, 22, 8, 'blanc', 'encre', 1, 1);
+  },
+  ap: function (x, y) {
+    return '<path d="M' + (x + 16) + ' ' + y + 'v-22M' + (x + 64) + ' ' + y + 'v-22" stroke-width="3" stroke-linecap="round" style="stroke:var(--encre)"/>' +
+      rect(x, y, 80, 22, 'blanc', 'encre', 8) + led(x + 30, y + 11, 'vert') + led(x + 40, y + 11, 'vert') + led(x + 50, y + 11, 'bleu');
+  },
+  switch: function (x, y) {
+    var s = rect(x, y, 280, 36, 'contour-2', 'encre', 3) + '<text x="' + (x + 8) + '" y="' + (y + 22) + '" style="font-size:8px;font-weight:900;fill:var(--encre)">HP ProCurve</text>';
+    for (var i = 0; i < 12; i++) for (var r = 0; r < 2; r++) s += rect(x + 66 + i * 15 + Math.floor(i / 6) * 6, y + 6 + r * 13, 10, 9, 'encre', null, 1, 0);
+    for (var j = 0; j < 4; j++) s += led(x + 262, y + 8 + j * 7, j % 2 ? 'vert' : 'jaune');
+    return s;
+  },
+  serveur: function (x, y) {
+    var s = rect(x, y, 70, 124, 'encre-2', 'encre', 5);
+    for (var i = 0; i < 4; i++) s += rect(x + 8, y + 10 + i * 14, 54, 10, 'encre', null, 2, 0) + led(x + 56, y + 15 + i * 14, i === 1 ? 'jaune' : 'vert');
+    return s + rect(x + 8, y + 72, 54, 40, 'encre', null, 2, 0) + '<circle cx="' + (x + 35) + '" cy="' + (y + 92) + '" r="7" stroke-width="2" ' + st('encre-2', 'contour-2') + '/>';
+  },
+  station: function (x, y) {
+    var s = rect(x, y, 130, 66, 'encre-2', 'encre', 8) + rect(x + 8, y + 8, 64, 30, 'papier-2', null, 2) +
+      '<text x="' + (x + 40) + '" y="' + (y + 27) + '" text-anchor="middle" style="font-size:7px;font-weight:900;fill:var(--encre)">Valider ?</text>' +
+      '<circle cx="' + (x + 102) + '" cy="' + (y + 24) + '" r="16" stroke-width="2" ' + st('encre', 'papier-2') + '/>' +
+      '<path d="M' + (x + 95) + ' ' + (y + 19) + 'c4 3 10 3 14 0M' + (x + 95) + ' ' + (y + 29) + 'c4-3 10-3 14 0" fill="none" stroke-width="1.5" style="stroke:var(--papier-2)"/>';
+    for (var i = 0; i < 5; i++) s += led(x + 14 + i * 12, y + 52, i < 3 ? 'vert' : 'contour-2');
+    return s;
+  },
+  leurre: function (x, y) {
+    return rect(x, y, 84, 40, 'encre-2', 'encre', 4) + rect(x + 10, y + 8, 26, 24, 'encre', 'contour-2', 2, 1) +
+      rect(x + 46, y + 10, 30, 20, 'contour-2', 'encre', 2, 1) + led(x + 76, y + 36, 'rouge');
+  }
+};
+var NOEUDS = [
+  { d: 'imprimante', x: 50, y: 92, f: 'imp diag', lab: [125, 218, 'Imprimante réseau', 'SNMP · IPP'] },
+  { d: 'boitier', x: 206, y: 112, f: 'imp diag', lab: [237, 186, 'Boîtier ESP32', ''] },
+  { d: 'pc', x: 50, y: 342, f: 'imp diag', lab: [125, 448, 'PC de la secrétaire', 'VM Windows 11 · JEA'] },
+  { d: 'ap', x: 350, y: 92, f: 'imp diag neuf', lab: [390, 136, 'Borne Wi-Fi', ''] },
+  { d: 'switch', x: 300, y: 300, f: 'imp diag neuf secu', lab: [440, 352, 'Switch du lycée', ''] },
+  { d: 'serveur', x: 640, y: 248, f: 'imp diag neuf secu', lab: [675, 392, 'Serveur Ubuntu', ''] },
+  { d: 'pc', x: 790, y: 52, f: 'diag secu', lab: [865, 158, 'Poste de Wassim', 'GLPI · Grafana'] },
+  { d: 'station', x: 300, y: 484, f: 'neuf', lab: [365, 570, 'Station des PC neufs', 'ESP32 · RFID (V2)'] },
+  { d: 'portable', x: 492, y: 482, f: 'neuf', lab: [550, 576, 'PC neuf', 'script PowerShell (V2)'] },
+  { d: 'leurre', x: 700, y: 500, f: 'secu', lab: [742, 560, 'Fausse imprimante', 'ESP32 (extension)'] }
+];
+var LIENS = [
+  { d: 'M268 130 C300 118 320 108 350 103', f: 'imp diag', w: 1, p: [204, 104, 'MQTT/TLS 8883'] },
+  { d: 'M390 114 V300', f: 'imp diag neuf', p: [398, 210, 'Ethernet'] },
+  { d: 'M125 196 V262 H330 V300', f: 'imp diag', p: [150, 256, 'SNMP 161 · IPP 631'] },
+  { d: 'M198 385 H262 V318 H300', f: 'imp diag', p: [206, 378, 'WinRM (JEA)'] },
+  { d: 'M580 318 H640', f: 'imp diag neuf secu', p: [584, 310, ''] },
+  { d: 'M865 140 V200 H520 V300', f: 'diag secu', p: [540, 194, 'HTTPS : GLPI, Grafana'] },
+  { d: 'M300 506 C262 470 262 150 350 112', f: 'neuf', w: 1, p: [214, 470, 'Wi-Fi'] },
+  { d: 'M550 482 V336', f: 'neuf', p: [558, 420, 'HTTPS : commande'] },
+  { d: 'M742 500 V440 H600 V336', f: 'secu', p: [610, 434, 'scan → alerte'] }
+];
+var svg = $('archi'), h = '';
+h += '<rect class="zone" x="18" y="40" width="250" height="440" rx="12"/>' + txt(32, 62, 'SERVICE DE CARDIOLOGIE', 'zone-t');
+h += '<rect class="zone" x="280" y="464" width="350" height="134" rx="12"/>' + txt(294, 456, 'ATELIER DU SERVICE INFORMATIQUE', 'zone-t');
+h += '<rect class="zone" x="610" y="212" width="376" height="226" rx="12"/>' + txt(624, 234, 'SALLE SERVEUR (MAQUETTE)', 'zone-t');
+LIENS.forEach(function (l) {
+  h += '<path class="lien f-' + l.f.split(' ').join(' f-') + (l.w ? ' wifi' : '') + '" d="' + l.d + '"/>';
+  if (l.p[2]) h += '<text class="proto f-' + l.f.split(' ').join(' f-') + '" x="' + l.p[0] + '" y="' + l.p[1] + '">' + l.p[2] + '</text>';
+});
+NOEUDS.forEach(function (n) {
+  h += '<g class="n f-' + n.f.split(' ').join(' f-') + '">' + DESSIN[n.d](n.x, n.y) + etiquette(n.lab[0], n.lab[1], n.lab[2], n.lab[3]) + '</g>';
+});
+/* services du serveur */
+var SERV = ['CUPS : file d\'impression', 'Mosquitto : MQTT', 'Service Python : règles', 'PostgreSQL : mesures', 'Grafana : tableau de bord', 'GLPI : tickets', 'Samba : AD simulé (LDAP)'];
+h += '<g class="n f-imp f-diag f-neuf f-secu">' + rect(728, 246, 244, 176, 'papier-2', 'encre', 10, 1.5);
+SERV.forEach(function (s, i) { h += txt(744, 270 + i * 22, '• ' + s, 'sous'); });
+h += '</g>';
+svg.innerHTML = h;
+
+var FLUX = {
+  '': { t: 'Toute la maquette', e: ['<b>Sur le terrain :</b> l\'imprimante et son boîtier, le PC de la secrétaire.', '<b>Au centre :</b> le serveur Ubuntu reçoit tout, compare et décide.', '<b>À l\'atelier (V2) :</b> la station et le PC neuf.', '<b>Wassim</b> voit GLPI et le tableau de bord depuis son poste.'] },
+  imp: { t: '① Une impression', e: ['<b>Le PC</b> envoie 5 pages au serveur d\'impression (CUPS), qui connaît donc le nombre de pages.', '<b>CUPS</b> transmet à l\'imprimante (IPP 631 ou 9100).', '<b>Le boîtier</b> envoie la vibration au serveur, en MQTT chiffré, par le Wi-Fi.'] },
+  diag: { t: '② Le diagnostic', e: ['<b>SNMP :</b> le serveur lit l\'état et le compteur de pages de l\'imprimante.', '<b>JEA :</b> il compte les documents bloqués dans le PC, sans lire leur nom.', '<b>LDAP :</b> il lit dans l\'AD le service du PC, donc le réseau attendu.', '<b>GLPI :</b> ticket avec la cause ; message renvoyé à l\'écran du boîtier ; pastille sur le poste de Wassim.'] },
+  neuf: { t: '③ Un PC neuf (V2)', e: ['<b>La station</b> envoie au serveur la commande : quel PC, pour quel profil, validée par qui.', '<b>Le script</b> du PC neuf lit son numéro de série et demande sa commande (HTTPS).', '<b>Il rejoint le domaine Samba</b> directement dans le bon service, installe et vérifie.', '<b>GLPI</b> : la fiche du PC passe « en service ».'] },
+  secu: { t: '④ Le piège (extension)', e: ['<b>Un « attaquant » de test</b> scanne le réseau de la maquette.', '<b>La fausse imprimante</b> répond comme une vraie : personne n\'a de raison de lui parler.', '<b>Le serveur</b> ouvre un ticket de sécurité ; alerte sur le poste de Wassim.', 'Elle ne prouve pas une intrusion : c\'est un signal à examiner.'] }
+};
+function flux(k) {
+  if (k) svg.setAttribute('data-flux', k); else svg.removeAttribute('data-flux');
+  presse(null, 'data-flux', k);
+  $('f-titre').textContent = FLUX[k].t;
+  $('f-etapes').innerHTML = FLUX[k].e.map(function (e) { return '<li>' + e + '</li>'; }).join('');
+}
+[].forEach.call(document.querySelectorAll('button[data-flux]'), function (b) {
+  b.addEventListener('click', function () { flux(b.getAttribute('data-flux')); });
+});
+flux('');
+
+/* =================================================================
+   5. Niveaux de confiance
+   ================================================================= */
+var NIV = {
+  1: { t: 'Il écrit « il faudrait la redémarrer » dans le ticket, sans rien faire. Wassim lit et agit lui-même.', s: 'On passe au niveau 2 quand ses conseils sont justes pendant toute une période d\'essai.',
+       l: '[09:10:12] serveur  imprimante figée (vibration 0, compteur +0, état « ça va »)\n[09:10:13] GLPI     ticket #142 ouvert\n[09:10:13] GLPI     suivi : « conseil : redémarrer l\'imprimante »\n[09:10:13] action   aucune' },
+  2: { t: 'Il prépare l\'action. Wassim clique pour la lancer, depuis son bureau.', s: 'On passe au niveau 3 seulement si Wassim n\'a jamais eu à refuser et si les indicateurs sont atteints.',
+       l: '[09:10:12] serveur  imprimante figée\n[09:10:13] GLPI     ticket #142 · action proposée : redémarrer\n[09:11:02] Wassim   action acceptée\n[09:11:03] serveur  redémarrage envoyé\n[09:14:20] preuve   vibration + compteur +3 · ticket fermé' },
+  3: { t: 'Il agit seul, la nuit uniquement, et le note dans le ticket. Toujours réversible : on peut revenir au niveau 2.', s: 'Le journal montre chaque décision et qui l\'a prise.',
+       l: '[02:31:40] serveur  imprimante figée (hors heures de service)\n[02:31:41] serveur  redémarrage automatique (niveau 3)\n[02:34:55] preuve   page de test · compteur +1\n[02:34:56] GLPI     ticket #143 ouvert et fermé avec la preuve' }
+};
+function niveau(n) {
+  presse(null, 'data-niv', String(n));
+  $('n-texte').textContent = NIV[n].t; $('n-suite').textContent = NIV[n].s; $('n-log').textContent = NIV[n].l;
+}
+[].forEach.call(document.querySelectorAll('[data-niv]'), function (b) {
+  b.addEventListener('click', function () { niveau(b.getAttribute('data-niv')); });
+});
+niveau(1);
+
+/* =================================================================
+   6. Physique : seuil de vibration (données simulées)
+   ================================================================= */
+var graine = 7;
+function alea() { graine = (graine * 16807) % 2147483647; return graine / 2147483647; }
+function gauss() { var u = alea() || 1e-9, v = alea(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); }
+var DT = 0.05, N = 200, T_ENVOI = 3, T_DEBUT = 4.6, MU = 0.010, SIG = 0.002, DATA = [];
+for (var i = 0; i < N; i++) {
+  var t = i * DT, v = MU + SIG * gauss();
+  if (t >= T_DEBUT) {
+    var cycle = ((t - T_DEBUT) % 1.6) / 1.6;            /* une page toutes les 1,6 s (cadence simulée) */
+    v = cycle < 0.72 ? 0.055 + 0.012 * gauss() : 0.032 + 0.003 * gauss();
+  }
+  DATA.push(Math.max(0.001, v));
+}
+var veille = DATA.slice(0, Math.round(T_ENVOI / DT));
+var mu = veille.reduce(function (a, b) { return a + b; }, 0) / veille.length;
+var sig = Math.sqrt(veille.reduce(function (a, b) { return a + (b - mu) * (b - mu); }, 0) / (veille.length - 1));
+function erfc(x) { var z = Math.abs(x), t = 1 / (1 + 0.5 * z), r = t * Math.exp(-z * z - 1.26551223 + t * (1.00002368 + t * (0.37409196 + t * (0.09678418 + t * (-0.18628806 + t * (0.27886807 + t * (-1.13520398 + t * (1.48851587 + t * (-0.82215223 + t * 0.17087277))))))))); return x >= 0 ? r : 2 - r; }
+var W = 640, H = 260, X0 = 46, X1 = 626, Y0 = 228, Y1 = 14, VMAX = 0.09;
+function px(t) { return X0 + (X1 - X0) * t / (N * DT); }
+function py(v) { return Y0 - (Y0 - Y1) * Math.min(v, VMAX) / VMAX; }
+function dessinerCourbe(k) {
+  var seuil = mu + k * sig, g = '', i;
+  for (i = 0; i <= 10; i += 2) g += '<line class="grille-l" x1="' + px(i) + '" y1="' + Y1 + '" x2="' + px(i) + '" y2="' + Y0 + '"/><text x="' + px(i) + '" y="' + (Y0 + 16) + '" text-anchor="middle">' + i + ' s</text>';
+  [0, 0.03, 0.06, 0.09].forEach(function (v) { g += '<line class="grille-l" x1="' + X0 + '" y1="' + py(v) + '" x2="' + X1 + '" y2="' + py(v) + '"/><text x="' + (X0 - 6) + '" y="' + (py(v) + 4) + '" text-anchor="end">' + v.toFixed(2).replace('.', ',') + '</text>'; });
+  var reco = 0, imp = 0, premier = null;
+  for (i = 0; i < N; i++) {
+    var t = i * DT;
+    if (DATA[i] > seuil) g += '<rect class="detecte" x="' + px(t) + '" y="' + Y1 + '" width="' + (px(DT) - X0 + 0.5) + '" height="' + (Y0 - Y1) + '"/>';
+    if (t >= T_DEBUT) { imp++; if (DATA[i] > seuil) { reco++; if (premier === null) premier = t; } }
+  }
+  g += '<polyline class="signal" points="' + DATA.map(function (v, i) { return px(i * DT).toFixed(1) + ',' + py(v).toFixed(1); }).join(' ') + '"/>';
+  g += '<line class="envoi" x1="' + px(T_ENVOI) + '" y1="' + Y1 + '" x2="' + px(T_ENVOI) + '" y2="' + Y0 + '"/><text x="' + (px(T_ENVOI) + 5) + '" y="' + (Y1 + 12) + '">envoi des 5 pages</text>';
+  g += '<line class="seuil" x1="' + X0 + '" y1="' + py(seuil) + '" x2="' + X1 + '" y2="' + py(seuil) + '"/><text x="' + (X1 - 4) + '" y="' + (py(seuil) - 6) + '" text-anchor="end" style="fill:var(--rouge-texte);font-weight:800">seuil</text>';
+  g += '<line class="axe" x1="' + X0 + '" y1="' + Y0 + '" x2="' + X1 + '" y2="' + Y0 + '"/><line class="axe" x1="' + X0 + '" y1="' + Y1 + '" x2="' + X0 + '" y2="' + Y0 + '"/>';
+  g += '<text x="' + (X0 + 4) + '" y="' + (Y1 + 12) + '">énergie de vibration (g)</text>';
+  $('courbe').innerHTML = g;
+  var p = 0.5 * erfc(k / Math.SQRT2), parHeure = p * 3600 / DT;
+  $('k-val').textContent = String(k).replace('.', ',');
+  $('m-fa').textContent = parHeure >= 1 ? '≈ ' + Math.round(parHeure) + ' / heure' : parHeure >= 0.01 ? '≈ 1 tous les ' + Math.round(1 / parHeure) + ' h' : 'quasi aucune';
+  $('m-reco').textContent = Math.round(100 * reco / imp) + ' %';
+  $('m-retard').textContent = premier === null ? 'jamais' : (premier - T_ENVOI).toFixed(2).replace('.', ',') + ' s';
+  $('m-avis').textContent = parHeure >= 1 ? 'Seuil trop bas : le bruit de veille dépasse souvent le seuil. Il faudrait filtrer beaucoup (plusieurs fenêtres de suite).'
+    : reco < imp ? 'Seuil trop haut : des pauses entre deux pages passent sous le seuil. L\'imprimante semble s\'arrêter alors qu\'elle travaille.'
+    : 'Bonne zone : presque aucune fausse alerte en veille, et toute l\'impression est reconnue, même entre deux pages.';
+}
+$('k').addEventListener('input', function () { dessinerCourbe(+this.value); });
+dessinerCourbe(3);
+
+/* premier affichage du simulateur */
+simuler('ok');
+})();
+</script>
+</body>
+</html>
