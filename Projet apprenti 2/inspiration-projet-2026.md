@@ -53,3 +53,7 @@ Le projet de l'an dernier ressemble déjà beaucoup à celui de **Wassim** (cart
 | **Total sur 30** | **27** | **24** |
 
 **Recommandation : A, le guichet des mouvements.** Il reprend ce qui a marché l'an dernier (geste simple, rapport, trace, mode dégradé, recalibrage) et corrige ce qui manquait (physique, C10, sécurité, chiffres).
+
+## Décision de l'enseignant (23/11)
+**Le guichet des mouvements est jugé artificiel** : le support sait déjà ce que contient un kit, une liste à cocher suffit. La balance ne répond à aucune vraie question. Piste écartée, comme le casier de `pistes-kit-capteurs.md`.
+Leçon : le capteur doit mesurer **ce que le technicien ignore et ne peut pas savoir autrement**. Sinon, c'est décoratif.
