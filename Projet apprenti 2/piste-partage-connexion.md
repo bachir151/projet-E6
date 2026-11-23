@@ -62,3 +62,9 @@ ESP32 du lycée ; 1 ou 2 ESP32 en plus (environ 5 à 10 € pièce) ; téléphon
 1. Des agents utilisent-ils le partage de connexion de leur téléphone sur leur portable ? L'a-t-il déjà vu ?
 2. Le Wi-Fi des portables est-il actif, ou bloqué par une règle ?
 3. Les bureaux : combien de pièces, quelle taille (pour le nombre de sentinelles) ?
+
+## Objection de l'enseignant (23/11) : « ils filtrent sûrement l'adresse MAC »
+- Le filtrage par adresse MAC (ou 802.1X) décide **qui entre** sur le réseau du service. Il n'empêche pas un portable déjà autorisé d'aller **ailleurs** par sa carte Wi-Fi (partage du téléphone) : il ne protège donc pas contre ce contournement. (Et une adresse MAC se change facilement.)
+- **Mais l'objection est juste sur le fond** : une administration protège sans doute le **portable lui-même** : liste blanche des réseaux Wi-Fi par stratégie de groupe, Wi-Fi coupé quand le câble est branché, **VPN permanent** qui force tout le trafic vers le ministère (probable sur des portables nomades), outil de sécurité sur le poste.
+- Si ces protections existent, le partage de connexion ne donne rien : **la piste tombe** (ou se réduit à « vérifier que les protections tiennent », trop mince).
+- **À demander à Yaksan** : VPN toujours actif ? Wi-Fi limité à certains réseaux ? Un portable peut-il se connecter au partage d'un téléphone ?
