@@ -10,6 +10,8 @@
 > - [ ] Les trois livrables à refaire : page HTML, formulaire académique (remplace celui envoyé le 12/11), présentation 3Blue1Brown
 > - [ ] Valider la physique (sans-contact) avec le collègue de physique
 
+> **23/11/2026 : commission académique imminente.** On défend la « Boîte noire du poste » (seul projet construit). Antisèche d'une page : `antiseche-commission/Antiseche_commission_Yaksan.pdf` (source `antiseche.html`). L'avenant annoncé (HMAC retiré, physique P3/P4, V1 ≈ 113 h + V2 ≈ 35 h, indicateurs mesurables, FRAM, case « Entreprise ») **reste à rédiger**.
+
 ## ⏳ En attente : réponses du tuteur (visite)
 Rien ne bouge sur le projet tant que ces réponses ne sont pas arrivées. Les donner à Claude telles quelles, même partielles.
 

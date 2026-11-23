@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Antisèche commission – Yaksan</title>
+<link rel="stylesheet" href="../../theme.css">
+<style>
+  /* Antisèche A4 d'une page pour l'enseignant, commission académique de validation. Couleurs et polices : theme.css uniquement. */
+  @page { size: A4 portrait; margin: 7mm 9mm 8mm 9mm; background: var(--papier);
+    @bottom-center { content: "Antisèche de l'enseignant · Yaksan (apprenti 2) · usage interne, à ne pas joindre au dossier"; font: 6.4pt var(--police); color: var(--encre-3); } }
+  body { font-size: 7.75pt; line-height: 1.25; margin: 0; background: var(--papier); color: var(--encre); }
+  @media screen { body { max-width: 210mm; margin: 0 auto; padding: 8mm 10mm; } }
+  p { margin: 0 0 2.2pt; }
+  ul { margin: 0; padding-left: 9pt; } li { margin: 0 0 1.3pt; }
+  .top { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 1.8pt solid var(--encre); padding-bottom: 2pt; }
+  .top span { font-size: 6.8pt; color: var(--encre-2); }
+  .top b { font-size: 6.8pt; font-weight: 900; text-transform: uppercase; letter-spacing: .12em; color: var(--encre-2); }
+  h1 { font-size: 15pt; font-weight: 900; font-weight: 1000; text-transform: uppercase; line-height: 1.05; margin: 3pt 0 2pt; letter-spacing: .01em; }
+  h1 small { font-size: 8pt; font-weight: 800; text-transform: none; color: var(--encre-2); letter-spacing: 0; }
+  .bandeau-p { background: var(--encre); color: var(--papier); font-weight: 700; font-size: 7.4pt; padding: 3pt 7pt; border-radius: 3pt; margin: 2pt 0 4pt; }
+  .bandeau-p b { color: var(--jaune); font-weight: 900; }
+  h2 { font-size: 7.9pt; font-weight: 900; font-weight: 1000; text-transform: uppercase; letter-spacing: .05em; margin: 4pt 0 2pt; padding-bottom: 1pt; border-bottom: 0.8pt solid var(--encre); }
+  h2 .n { display: inline-block; background: var(--jaune); border: 0.6pt solid var(--encre); border-radius: 50%; width: 9pt; height: 9pt; line-height: 9pt; text-align: center; font-size: 6.4pt; margin-right: 3pt; }
+  .cols { display: flex; gap: 8pt; }
+  .col-g { width: 44%; } .col-d { width: 56%; }
+  .pitch { background: var(--blanc); border: 0.7pt solid var(--contour); border-left: 3pt solid var(--jaune); border-radius: 0 4pt 4pt 0; padding: 3pt 5pt; font-size: 7.9pt; }
+  .pitch em { color: var(--encre-2); font-style: normal; font-weight: 800; }
+  table { width: 100%; border-collapse: collapse; }
+  th { background: var(--encre); color: var(--papier); font-weight: 800; text-align: left; padding: 1.8pt 3.5pt; font-size: 6.8pt; }
+  td { border-bottom: 0.5pt solid var(--contour-2); padding: 1.5pt 3.5pt; vertical-align: top; background: var(--blanc); }
+  td.v { text-align: center; font-weight: 900; white-space: nowrap; width: 9%; }
+  .v1 { color: var(--vert); } .v2 { background: var(--jaune-pale); }
+  td.k { font-weight: 800; }
+  .ecarts td:first-child { color: var(--encre-2); width: 31%; }
+  .ecarts td:nth-child(2) { font-weight: 700; width: 38%; }
+  .ecarts td:nth-child(3) { color: var(--encre-2); }
+  .q { margin: 0 0 2.4pt; }
+  .q b.qq { display: block; font-weight: 900; }
+  .q b.qq::before { content: "Q · "; color: var(--encre-3); }
+  .q span::before { content: "→ "; font-weight: 900; }
+  .danger { border: 0.8pt solid var(--rouge); border-top: 2.5pt solid var(--rouge); background: var(--rouge-pale); border-radius: 3pt; padding: 2.5pt 5pt; margin-top: 3pt; }
+  .danger b.t { color: var(--rouge-texte); font-weight: 900; text-transform: uppercase; letter-spacing: .05em; font-size: 6.9pt; }
+  .finale { background: var(--jaune); border: 0.8pt solid var(--encre); border-radius: 4pt; padding: 3pt 6pt; margin-top: 4pt; }
+  .finale b.t { font-weight: 900; font-weight: 1000; text-transform: uppercase; letter-spacing: .05em; }
+  .mini { font-size: 6.5pt; color: var(--encre-2); margin-top: 1.5pt; }
+</style>
+</head>
+<body>
+
+<div class="top">
+  <span>BTS CIEL option A · E6 « Valorisation de la donnée et cybersécurité » · Session 2027 · préparée le 23/11/2026</span>
+  <b>Antisèche · commission académique</b>
+</div>
+
+<h1>Boîte noire du poste <small>· Yaksan (apprenti 2) · support et accueil, service RH (carrière et paye) d'une administration</small></h1>
+<div class="bandeau-p">La commission juge <b>le formulaire envoyé le 12/11</b> (13 pages). On défend ce qui est écrit, on assume les écarts et on annonce <b>un avenant</b>.</div>
+
+<div class="cols">
+<div class="col-g">
+
+  <h2><span class="n">1</span>Le pitch (30 secondes)</h2>
+  <div class="pitch">
+    <p>Yaksan est au support d'un service RH d'une administration, sur un réseau <em>isolé d'Internet</em>. Deux plaintes reviennent : des <em>mises à jour obligatoires qui échouent</em>, et une <em>carte d'agent qui ne marche pas</em> à l'accès à la plateforme métier. Aujourd'hui, on répare à l'aveugle.</p>
+    <p>Quand un PC est coupé net ou forcé au bouton, Windows n'a rien pu écrire. Yaksan construit un <em>témoin extérieur</em> : un boîtier ESP32 relié en USB, sans ouvrir le PC, qui garde le récit des derniers instants. Des outils PowerShell croisent ce récit avec les journaux de Windows et donnent la <em>cause probable</em>, ou « non concluant ». Tout se fait sur une <em>maquette au lycée</em>.</p>
+  </div>
+
+  <h2><span class="n">2</span>Le projet en un coup d'œil</h2>
+  <table>
+    <tr><th>Brique</th><th>Code / compétence</th><th>Version</th></tr>
+    <tr><td class="k">Boîtier : voyants, 5 V USB, battement, récit gardé après coupure</td><td>C++ sur ESP32 · C08</td><td class="v v1">V1</td></tr>
+    <tr><td class="k">Corrélateur : arrêt normal, coupure, arrêt forcé, figé</td><td>PowerShell · C08</td><td class="v v1">V1</td></tr>
+    <tr><td class="k">Serveur et tableaux de bord</td><td>Python FastAPI, SQLite · C08</td><td class="v v1">V1</td></tr>
+    <tr><td class="k">Chaîne carte : 5 maillons + heure, remèdes à paliers</td><td>PowerShell · C08</td><td class="v v2">V2</td></tr>
+    <tr><td class="k">Journal chaîné ancré sur le serveur</td><td>sécurité</td><td class="v v2">V2</td></tr>
+    <tr><td class="k">Réseau en place : DNS, Kerberos, LDAP, NTP, TLS mutuel</td><td>captures · C10</td><td class="v">V1–V2</td></tr>
+    <tr><td class="k">Physique : énergie de secours, carte vivante</td><td>mesures, incertitudes</td><td class="v">V1–V2</td></tr>
+  </table>
+  <p class="mini"><b>C01</b> revues, tuteur, guide d'accueil, soutenance · <b>C03</b> planning, journal de bord, passage V1 → V2 décidé en revue · revues R1 29/01, R2 19/03, R3 14/05/2027.</p>
+
+  <h2><span class="n">3</span>Ce qu'on demande à la commission</h2>
+  <ul>
+    <li><b>Valider la réalisation au lycée</b> (arrêté du 25/01/2023 : projet d'apprenti « développé dans l'entreprise »). Raisons : réseau isolé, annuaire géré par une autre équipe, pas de boîtier fait maison sur des postes en service.</li>
+    <li><b>Accepter le sujet</b> avec un avenant remis avant la revue 1 (29/01/2027).</li>
+  </ul>
+
+  <div class="danger">
+    <b class="t">À ne pas dire</b>
+    <ul>
+      <li>Que le besoin est <b>validé</b> par l'entreprise : ce sont des plaintes du tuteur, les chiffres sont des hypothèses à confirmer.</li>
+      <li>« Moins d'arrêts forcés » ou « temps de résolution divisé » : non mesurable au lycée.</li>
+      <li>Les pistes explorées depuis (carte agent, portail captif) : rien n'est construit ni décidé. Si on en parle : « le tuteur a cité un outil envisagé ; toute évolution passera par un avenant ».</li>
+    </ul>
+  </div>
+
+</div>
+<div class="col-d">
+
+  <h2><span class="n">4</span>Les écarts formulaire / projet actuel → avenant</h2>
+  <table class="ecarts">
+    <tr><th>Formulaire du 12/11</th><th>Aujourd'hui (revue du 11/11)</th><th>Pourquoi</th></tr>
+    <tr><td>E7 : faux boîtier démasqué (HMAC) + journal chaîné</td><td>Journal chaîné seul, dernier haché envoyé au serveur</td><td>Une question de sécurité par apprenti ; le HMAC est dans un autre projet</td></tr>
+    <tr><td>Physique P1 à P6</td><td>P3 énergie et P4 carte vivante principaux ; P1 et P6 courts ; P2 et P5 retirés</td><td>Garder ce qui décide d'un choix du montage</td></tr>
+    <tr><td>V1 ≈ 95 h, V2 ≈ 135 h (cumulé, Gantt de 150 h) ; revue interne : contenu ≈ 183 h</td><td>V1 ≈ 113 h, V2 ≈ 35 h ; accueil et libre-service en scénarios</td><td>Tenir 150 h avec l'IA</td></tr>
+    <tr><td>E5, E6 : arrêts forcés en baisse, temps de résolution réduit</td><td>19 pannes sur 20 bien classées ; 100 % des maillons désignés ; temps de diagnostic chronométré avec et sans l'outil</td><td>Mesurable sur la maquette</td></tr>
+    <tr><td>Récit sur microSD</td><td>Mémoire FRAM I²C (ou NVS)</td><td>Écriture en quelques ms ; réserve d'énergie plus petite (essai P3)</td></tr>
+    <tr><td>Case « Projet développé : Entreprise »</td><td>Maquette au lycée, à valider par l'académie</td><td>Cohérence avec les limites de l'étude</td></tr>
+  </table>
+
+  <h2><span class="n">5</span>Questions probables, réponses courtes</h2>
+  <div class="q"><b class="qq">Windows écrit déjà l'événement Kernel-Power 41. À quoi sert le boîtier ?</b>
+    <span>Le 41 dit « arrêt pas propre ». Microsoft précise que l'heure d'appui sur le bouton n'est pas toujours notée. Windows ne distingue pas une coupure d'un système figé puis coupé : il n'écrivait plus. Mesure prévue : Windows seul contre Windows + boîtier, sur les mêmes 20 pannes. Si Windows suffit, on le dira.</span></div>
+  <div class="q"><b class="qq">Un ESP32 en USB sur un poste d'administration ?</b>
+    <span>Il se déclare comme port série, jamais comme clavier ; pas de Wi-Fi ni de Bluetooth ; liste blanche USB possible. Si le service refuse, le diagnostic de la chaîne carte reste utilisable seul.</span></div>
+  <div class="q"><b class="qq">Le contrôleur de domaine est préparé par l'enseignant. Que fait Yaksan ?</b>
+    <span>Ce socle commun relève de l'installation (E5). Lui : programme du boîtier, journal chaîné, agent et collecteur PowerShell, corrélateur, diagnostic carte, serveur, mesures de physique.</span></div>
+  <div class="q"><b class="qq">Où est C10 ?</b>
+    <span>Exploiter, pas configurer : DNS, Kerberos, LDAP, NTP vers le contrôleur ; TLS mutuel capturé (certificat client lisible en TLS 1.2, chiffré en 1.3) ; Kerberos refuse au-delà de 5 min d'écart d'horloge. Aucun VLAN, aucune ACL.</span></div>
+  <div class="q"><b class="qq">La physique est-elle utile ou décorative ?</b>
+    <span>P3 dimensionne la réserve : E = ½·C·(U1² − U2²), durée mesurée à la coupure. P4 fixe le seuil « carte vivante » : courant du lecteur, 20 insertions par cas, u = s/√N. Chaque essai décide d'un choix.</span></div>
+  <div class="q"><b class="qq">Le journal chaîné : celui qui tient le boîtier recalcule toute la chaîne.</b>
+    <span>Oui, d'où l'ancrage : le dernier haché part au serveur à chaque lecture. Limite assumée : les lignes pas encore envoyées ne sont pas protégées.</span></div>
+  <div class="q"><b class="qq">D'où viennent les chiffres du besoin ?</b>
+    <span>Du tuteur : deux plaintes réelles du support. « Environ deux mises à jour ratées par mois » est une hypothèse écrite, à faire confirmer à la prochaine visite.</span></div>
+  <div class="q"><b class="qq">Données personnelles ?</b>
+    <span>Aucune : cartes PIV de laboratoire, aucun nom d'agent ni identifiant de carte, aucune donnée de carrière ou de paye. Le serveur reçoit des causes, pas des personnes.</span></div>
+
+  <div class="finale"><b class="t">À retenir :</b> un témoin extérieur pour les pannes que Windows ne peut pas raconter · une seule question de sécurité : « quelqu'un a-t-il effacé ce qui s'est passé ? » · tout est mesuré sur maquette.</div>
+
+</div>
+</div>
+
+</body>
+</html>
