@@ -70,7 +70,7 @@
     <tr><td class="k">Boîtier : voyants, 5 V USB, battement, récit gardé après coupure</td><td>C++ sur ESP32 · C08</td><td class="v v1">V1</td></tr>
     <tr><td class="k">Corrélateur : arrêt normal, coupure, arrêt forcé, figé</td><td>PowerShell · C08</td><td class="v v1">V1</td></tr>
     <tr><td class="k">Serveur et tableaux de bord</td><td>Python FastAPI, SQLite · C08</td><td class="v v1">V1</td></tr>
-    <tr><td class="k">Chaîne carte : 5 maillons + heure, remèdes à paliers</td><td>PowerShell · C08</td><td class="v v2">V2</td></tr>
+    <tr><td class="k">Chaîne carte : carte, lecteur, Windows, certificat, navigateur, heure ; remèdes à paliers</td><td>PowerShell · C08</td><td class="v v2">V2</td></tr>
     <tr><td class="k">Journal chaîné ancré sur le serveur</td><td>sécurité</td><td class="v v2">V2</td></tr>
     <tr><td class="k">Réseau en place : DNS, Kerberos, LDAP, NTP, TLS mutuel</td><td>captures · C10</td><td class="v">V1–V2</td></tr>
     <tr><td class="k">Physique : énergie de secours, carte vivante</td><td>mesures, incertitudes</td><td class="v">V1–V2</td></tr>
@@ -87,6 +87,7 @@
     <b class="t">À ne pas dire</b>
     <ul>
       <li>Que le besoin est <b>validé</b> par l'entreprise : ce sont des plaintes du tuteur, les chiffres sont des hypothèses à confirmer.</li>
+      <li>Que les mises à jour ratées sont le problème n° 1 : l'apprenti ne les a pas citées le 23/11, c'est une plainte du tuteur à reconfirmer.</li>
       <li>« Moins d'arrêts forcés » ou « temps de résolution divisé » : non mesurable au lycée.</li>
       <li>Les pistes explorées depuis (carte agent, portail captif) : rien n'est construit ni décidé. Si on en parle : « le tuteur a cité un outil envisagé ; toute évolution passera par un avenant ».</li>
     </ul>
@@ -121,6 +122,8 @@
     <span>Oui, d'où l'ancrage : le dernier haché part au serveur à chaque lecture. Limite assumée : les lignes pas encore envoyées ne sont pas protégées.</span></div>
   <div class="q"><b class="qq">D'où viennent les chiffres du besoin ?</b>
     <span>Du tuteur : deux plaintes réelles du support. « Environ deux mises à jour ratées par mois » est une hypothèse écrite, à faire confirmer à la prochaine visite.</span></div>
+  <div class="q"><b class="qq">Du nouveau depuis l'envoi ?</b>
+    <span>Oui : l'apprenti a précisé (23/11) qu'un échec de carte vient souvent d'un <b>certificat expiré</b>, corrigé à la main dans le navigateur. Ça confirme la chaîne carte. Le maillon « certificat » (dates de validité) sera mis en avant dans l'avenant.</span></div>
   <div class="q"><b class="qq">Données personnelles ?</b>
     <span>Aucune : cartes PIV de laboratoire, aucun nom d'agent ni identifiant de carte, aucune donnée de carrière ou de paye. Le serveur reçoit des causes, pas des personnes.</span></div>
 
