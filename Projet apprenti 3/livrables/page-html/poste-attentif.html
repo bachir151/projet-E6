@@ -3,160 +3,1153 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="description" content="CyberSentinel : prototype E6 de Lorenzo. Verrouillage par radar et détection d'interactions avec un leurre réseau.">
-<title>CyberSentinel — projet E6 Lorenzo</title>
+<meta name="description" content="CyberSentinel, projet E6 de Lorenzo : verrouillage de session Windows par radar LD2410 et leurre réseau ESP32. Problème, solution, machine à états, physique, expériences.">
+<title>CyberSentinel — projet E6</title>
 <link rel="icon" href="data:,">
 <link rel="stylesheet" href="../../../theme.css">
 <style>
-/* Mise en page propre à cette page. Couleurs, polices, ombres : theme.css uniquement. */
-header{border-bottom:1.5px solid var(--contour-2);background:var(--papier);position:sticky;top:0;z-index:3}
-header .wrap{min-height:62px;display:flex;align-items:center;justify-content:space-between;gap:14px}
-.brand{font-weight:1000;letter-spacing:-.02em;text-decoration:none;font-size:1.36rem}
-.brand span{color:var(--jaune-fonce)}
-nav{display:flex;gap:18px;flex-wrap:wrap;font-size:.95rem;font-weight:800}
-nav a{text-decoration:none}
-nav a:hover{text-decoration:underline;text-decoration-color:var(--jaune-fonce)}
-section{padding:52px 0;border-bottom:1.5px solid var(--contour-2)}
-.hero{padding-block:64px 50px;display:grid;grid-template-columns:1.15fr .85fr;gap:32px;align-items:center}
-.hero h1{max-width:770px}
-.hero h1 em{font-style:normal;background:linear-gradient(transparent 58%,var(--jaune) 58%)}
-.lead{font-size:1.17rem;color:var(--encre-2);max-width:62ch;margin-top:22px}
-.actions{display:flex;flex-wrap:wrap;gap:15px;margin-top:26px}
-.illustration{border:1.5px solid var(--contour);border-radius:var(--r-carte);background:var(--blanc);box-shadow:var(--ombre-douce);padding:22px}
-.illustration svg{width:100%;height:auto;display:block}
-.grid2,.grid3{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
-.grid3{grid-template-columns:repeat(3,minmax(0,1fr))}
-.card p{color:var(--encre-2)}
-.small{font-size:.9rem;color:var(--encre-3)}
-.zone-2 .small,.scenario .small{color:var(--encre-2)}
-.scenario{background:var(--papier-2);border:1.5px solid var(--contour);border-radius:var(--r-carte);padding:24px}
-.scenario .choices{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:20px}
-.readout{display:grid;grid-template-columns:1fr 1fr;gap:18px}
-.terminal{min-height:190px;margin:0}
-.status{font-weight:900;padding:10px 14px;background:var(--blanc);border:1.5px solid var(--contour);border-radius:var(--r-petit);margin-bottom:12px}
-.bandeau{margin-top:24px}
-.section-finale{border-bottom:0}
-.section-finale .card{background:var(--blanc)}
-.section-finale .small{color:var(--encre-2)}
-footer{padding:34px 0;font-size:.92rem;color:var(--encre-3)}
-@media(max-width:820px){.hero,.grid2,.grid3,.readout{grid-template-columns:1fr}.hero{padding-top:42px}nav{gap:12px}}
-@media(max-width:560px){header{position:static}header .wrap{flex-direction:column;align-items:flex-start;padding-block:10px}}
-@media print{header{position:static}.scenario .choices{display:none}}
+/* Mise en page propre à cette page. Couleurs, polices, ombres : variables de theme.css uniquement. */
+html{scroll-padding-top:64px}
+.prose{max-width:68ch}
+.muted{color:var(--encre-3)}
+.zone-2 .muted{color:var(--encre-2)}
+.eyebrow{margin:0}
+
+/* sommaire */
+nav.toc{position:sticky;top:0;z-index:9;background:var(--papier);border-bottom:1.5px solid var(--contour-2)}
+nav.toc .wrap{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;padding-block:8px}
+nav.toc a{flex:none;text-decoration:none;color:var(--encre-2);font-weight:800;font-size:.95rem;padding:6px 10px;border-radius:var(--r-petit);white-space:nowrap}
+nav.toc a:hover{background:var(--papier-2);color:var(--encre)}
+nav.toc a.on{background:var(--jaune);color:var(--encre)}
+nav.toc a b{font-size:.72rem;margin-right:5px;color:var(--encre-3)}
+
+/* en-tête */
+header.hero{padding-block:48px 36px}
+.hero-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:40px;align-items:center}
+.hero .lead{font-size:1.18rem;margin-top:16px;max-width:54ch;color:var(--encre-2)}
+.tags{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}
+.notice{margin-top:22px;font-size:.92rem;padding:12px 14px;border-left:5px solid var(--jaune-fonce);background:var(--jaune-pale);border-radius:0 var(--r-petit) var(--r-petit) 0;max-width:62ch}
+.svgbox{background:var(--blanc);border:1.5px solid var(--contour);border-radius:var(--r-carte);box-shadow:var(--ombre-douce);padding:14px;overflow-x:auto}
+.svgbox svg{display:block;width:100%;height:auto}
+
+/* sections */
+section{padding-block:56px;border-top:1.5px solid var(--contour-2)}
+.sec-head{display:grid;gap:10px;margin-bottom:26px}
+.sec-head .num{font-weight:1000;font-size:1.05rem;letter-spacing:.04em}
+.sec-head h2{margin:0}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;align-items:start}
+.grid2>*,.grid3>*,.stack>*,.sim>*,.sim-grid>*,.todo>*{min-width:0}
+.arch-grid{grid-template-columns:1.6fr 1fr}
+.stack{display:grid;gap:14px}
+.stack>p{margin:0}
+.controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:12px}
+.big{font-weight:1000;font-size:2.3rem;line-height:1;font-variant-numeric:tabular-nums}
+.figs{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.fig{padding:16px;border-radius:var(--r-carte);background:var(--blanc);border:1.5px solid var(--contour);box-shadow:var(--ombre-douce)}
+.fig small{display:block;color:var(--encre-3);font-size:.86rem;line-height:1.35;margin-top:6px}
+.hyp{font-size:.72rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--encre-3)}
+
+/* problème */
+.pains{display:grid;gap:10px;margin:0;padding:0;list-style:none}
+.pains li{display:grid;grid-template-columns:28px 1fr;gap:10px;align-items:start}
+.dot{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font-weight:900;font-size:.8rem;margin-top:2px;border:1.5px solid var(--encre)}
+.dot.r{background:var(--rouge);color:var(--blanc);border-color:var(--rouge)}
+.dot.j{background:var(--jaune)}
+.dot.b{background:var(--bleu)}
+.expo{display:grid;gap:14px}
+.erow{display:grid;gap:6px}
+.erow .top{display:flex;justify-content:space-between;gap:10px;font-size:.93rem}
+.erow .top b{font-variant-numeric:tabular-nums;white-space:nowrap}
+.ebar{height:22px;border-radius:6px;background:var(--papier-2);border:1px solid var(--contour-2);overflow:hidden}
+.ebar i{display:block;height:100%;width:0;background:var(--encre);transition:width 2.4s cubic-bezier(.2,.7,.2,1)}
+.ebar i.ok{background:var(--vert)}
+.ebar i.ko{background:var(--rouge)}
+
+/* tableaux */
+.tablebox{overflow-x:auto;border:1.5px solid var(--contour);border-radius:var(--r-carte);background:var(--blanc);box-shadow:var(--ombre-douce)}
+.tablebox table{min-width:760px;font-size:.93rem}
+.tablebox th{position:sticky;top:0}
+.tablebox tbody tr:last-child td{border-bottom:none}
+td.c{text-align:center;font-weight:800;white-space:nowrap}
+.y{color:var(--vert)} .n{color:var(--rouge-texte)} .m{color:var(--encre-2)}
+tr.ours td{background:var(--jaune-pale)}
+tr.ours td:first-child{font-weight:900}
+.why{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:22px}
+.why .card h3{font-size:1.15rem}
+.legende{font-size:.85rem;color:var(--encre-3);margin-top:8px}
+
+/* solution */
+.oneline{font-size:clamp(1.4rem,3.2vw,2rem);font-weight:900;line-height:1.22;max-width:38ch;text-wrap:balance;margin:0}
+.principles{display:grid;gap:12px;margin-top:24px}
+.pr{display:grid;grid-template-columns:52px 1fr 1fr;gap:16px;align-items:center;padding:16px 18px;border:1.5px solid var(--contour);border-radius:var(--r-carte);background:var(--blanc);box-shadow:var(--ombre-douce)}
+.pr>*{min-width:0}
+.pr .no{font-weight:1000;font-size:2rem;text-align:center}
+.pr .fact{font-weight:800}
+.pr .ans{color:var(--encre-2)}
+.pr .ans b{color:var(--encre)}
+
+/* journée */
+.steps{display:grid;grid-template-columns:270px 1fr;gap:22px}
+.steps>*{min-width:0}
+.steplist{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.steplist button{width:100%;text-align:left;display:grid;grid-template-columns:76px 1fr;gap:8px;align-items:center;font-size:.93rem;background:var(--blanc);border:1.5px solid var(--contour);border-radius:var(--r-petit);padding:8px 10px}
+.steplist button .k{font-size:.78rem;font-weight:800;color:var(--encre-3)}
+.steplist button.on{border-color:var(--encre);background:var(--jaune)}
+.steplist button.on .k{color:var(--encre-2)}
+.scene{display:grid;gap:14px}
+.scene h3{font-size:1.5rem;margin:0}
+.scene p{margin:0}
+.term{background:var(--encre);color:var(--papier);border-radius:var(--r-petit);padding:12px 14px;font:.84rem/1.6 var(--police-mono);white-space:pre-wrap;min-height:110px;margin:0}
+
+/* architecture */
+#archi .node rect{fill:var(--blanc);stroke:var(--contour);stroke-width:2;transition:stroke .3s,fill .3s}
+#archi .node{cursor:pointer}
+#archi .node:hover rect,#archi .node.sel rect{stroke:var(--encre);fill:var(--jaune-pale)}
+#archi .node:focus{outline:none}
+#archi .node:focus-visible rect{stroke:var(--focus);stroke-width:3}
+#archi .t1{font-weight:900;font-size:18px;fill:var(--encre)}
+#archi .t2{font-size:12.5px;fill:var(--encre-3)}
+#archi .stg{font-size:11px;font-weight:900;fill:var(--vert)}
+#archi .lnk{fill:none;stroke:var(--contour);stroke-width:2.5}
+#archi .lnk.phys{stroke-dasharray:6 6;stroke:var(--jaune-fonce)}
+#archi .lt{font-size:11px;font-weight:700;fill:var(--encre-2)}
+#archi .zone{fill:none;stroke:var(--vert);stroke-width:2;stroke-dasharray:3 6}
+#archi .zt{font-size:12px;font-weight:900;fill:var(--vert)}
+#archi .pk{fill:var(--encre)}
+#archi .pk.alt{fill:var(--rouge)}
+.detail{min-height:200px}
+.detail dl{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;margin:12px 0 0}
+.detail dt{font-size:.74rem;font-weight:800;color:var(--encre-3);text-transform:uppercase;letter-spacing:.08em;padding-top:3px}
+.detail dd{margin:0}
+.pill.v1{color:var(--vert);border-color:var(--vert);background:var(--vert-pale)}
+.pill.v2{background:var(--bleu-pale)}
+.pill.ext{background:var(--jaune)}
+.legend{display:flex;flex-wrap:wrap;gap:16px;font-size:.85rem;color:var(--encre-3);margin-top:10px}
+.legend span{display:inline-flex;gap:6px;align-items:center}
+.sw{width:24px;height:0;border-top:3px solid var(--contour);display:inline-block}
+.sw.d{border-top:3px dashed var(--jaune-fonce)}
+.sw.z{border-top:2px dotted var(--vert)}
+
+/* simulateur */
+.sim{display:grid;gap:18px}
+.sim .row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.sim .row .lab{font-size:.78rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--encre-2);margin-right:4px;min-width:96px}
+.sim .slider{display:flex;gap:12px;align-items:center;flex-wrap:wrap;padding:10px 14px;border:1.5px dashed var(--contour);border-radius:var(--r-petit);background:var(--blanc)}
+.sim .slider input{width:min(280px,100%);accent-color:var(--encre)}
+.sim .slider[hidden]{display:none}
+.sim-grid{display:grid;grid-template-columns:1.25fr .75fr;gap:18px}
+.sim-grid>*{min-width:0}
+.verdict-box{display:grid;gap:8px;align-content:start}
+.verdict-box .v{font-weight:1000;font-size:1.25rem;line-height:1.25}
+.verdict-box .v.ok{color:var(--vert)}
+.verdict-box .v.ko{color:var(--rouge-texte)}
+#fsm .st rect{fill:var(--blanc);stroke:var(--contour);stroke-width:2;transition:fill .2s,stroke .2s}
+#fsm .st text{font-size:15px;font-weight:900;fill:var(--encre)}
+#fsm .st .s2{font-size:12px;font-weight:700;fill:var(--encre-3)}
+#fsm .st.on rect{fill:var(--jaune);stroke:var(--encre);stroke-width:3}
+#fsm .st.on .s2{fill:var(--encre-2)}
+#fsm .ed{fill:none;stroke:var(--encre-2);stroke-width:1.6}
+#fsm .el{font-size:11.5px;font-weight:700;fill:var(--encre-2)}
+#chrono text{font-size:13px;fill:var(--encre)}
+#chrono .rl{font-weight:800;font-size:14px}
+#chrono .ax{stroke:var(--contour-2);stroke-width:1}
+#chrono .tk{font-size:12px;fill:var(--encre-3)}
+#chrono .dep{stroke:var(--rouge);stroke-width:1.5;stroke-dasharray:4 4}
+#chrono .dept{font-size:12px;font-weight:800;fill:var(--rouge-texte)}
+#chrono .cur{stroke:var(--encre);stroke-width:2}
+#chrono .win{fill:var(--jaune-pale);stroke:var(--jaune-fonce);stroke-width:1}
+#chrono .wint{font-size:10.5px;font-weight:800;fill:var(--encre-2)}
+.tablebox table.recap{min-width:520px}
+.recap td,.recap th{text-align:center;white-space:nowrap}
+.recap td:first-child,.recap th:first-child{text-align:left;white-space:normal}
+.recap .ok{color:var(--vert);font-weight:800}
+.recap .ko{color:var(--rouge-texte);font-weight:800}
+
+/* sécurité */
+.attacks{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+.atk{display:grid;gap:10px}
+.atk p{margin:0}
+.atk ol{margin:0;padding-left:20px;font-size:.92rem;color:var(--encre-3)}
+.atk ol li.done{color:var(--encre)}
+.atk ol li.bad{color:var(--rouge-texte);font-weight:800}
+.verdict{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.verdict h3{margin:0}
+.stamp{font-weight:1000;font-size:1.05rem;letter-spacing:.08em;color:var(--rouge-texte);border:2.5px solid var(--rouge-texte);padding:2px 10px;border-radius:6px;transform:rotate(-3deg)}
+.stamp.pop{animation:pop .4s ease-out}
+@keyframes pop{0%{transform:scale(1.6) rotate(-3deg);opacity:0}100%{transform:scale(1) rotate(-3deg);opacity:1}}
+.tst{font-size:.74rem;font-weight:800;letter-spacing:.08em;color:var(--encre-3)}
+.rules{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:22px}
+.rule{padding:14px 16px;border:1.5px solid var(--encre);border-radius:var(--r-petit);background:var(--blanc)}
+.rule b{display:block;font-size:.78rem;letter-spacing:.1em;color:var(--encre-3)}
+.rule p{margin:4px 0 0;font-weight:700}
+
+/* physique */
+.phys p{margin:0}
+.readout{font-weight:900;font-size:1.15rem;font-variant-numeric:tabular-nums}
+input[type=range]{accent-color:var(--encre);width:100%}
+#waves .ref{fill:none;stroke:var(--encre-3);stroke-width:2;stroke-dasharray:5 5}
+#waves .rx{fill:none;stroke:var(--rouge);stroke-width:2.5}
+#waves .ax{stroke:var(--contour-2)}
+#waves text,#lat text{font-size:12px;fill:var(--encre-2)}
+#gates text{font-size:20px;fill:var(--encre-2)}
+#gates .g{stroke:var(--contour-2);stroke-width:1}
+#gates .g.a{fill:var(--blanc)} #gates .g.b{fill:var(--papier-2)}
+#gates .g.hit{fill:var(--jaune)}
+#gates .p{stroke:var(--encre);stroke-width:2}
+#gates .pm{fill:var(--encre)} #gates .pc{fill:var(--bleu)}
+#gates .rad{fill:var(--encre)}
+#lat .ax{stroke:var(--encre-2);stroke-width:1.2}
+#lat .gr{stroke:var(--contour-2);stroke-width:1}
+#lat .fit{stroke:var(--rouge);stroke-width:2}
+#lat .pt{fill:var(--encre)}
+#lat .eb{stroke:var(--encre);stroke-width:1.5}
+
+/* réseau */
+.proto td:first-child{font-weight:800;white-space:nowrap}
+
+/* expériences */
+.todo{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;counter-reset:t}
+.todo .card{display:grid;gap:12px;align-content:start}
+.todo .card p{margin:0}
+.todo .nb{width:44px;height:44px;border-radius:50%;background:var(--jaune);border:2.5px solid var(--encre);display:grid;place-items:center;font-weight:1000;font-size:1.3rem}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chips .tag{font-size:.78rem}
+.stackbar{display:flex;height:42px;border-radius:8px;overflow:hidden;border:1.5px solid var(--encre)}
+.stackbar div{display:grid;place-items:center;font-weight:900;font-size:.82rem;white-space:nowrap;overflow:hidden;width:0;transition:width 1s ease-out}
+.stackbar .s1{background:var(--bleu)} .stackbar .s2{background:var(--jaune)} .stackbar .s3{background:var(--encre);color:var(--papier)}
+.times{display:grid;gap:6px;margin:0;padding-left:20px;font-size:.92rem}
+.flow{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:center}
+.flow .box{padding:10px 12px;border:1.5px solid var(--contour);border-radius:var(--r-petit);background:var(--papier);font-size:.9rem;font-weight:700;text-align:center}
+.flow .arrow{font-weight:1000;font-size:1.2rem}
+.flow .outs{display:grid;gap:6px}
+.checklist{display:grid;gap:8px;margin:0;padding:0;list-style:none}
+.checklist li{display:grid;grid-template-columns:26px 1fr;gap:8px;align-items:start}
+.checklist li::before{content:"✓";width:22px;height:22px;border-radius:50%;border:1.5px solid var(--vert);color:var(--vert);display:grid;place-items:center;font-weight:900;font-size:.8rem}
+.tests{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px}
+.t{display:grid;grid-template-columns:auto 1fr;gap:4px 10px;padding:12px;border:1.5px solid var(--contour);border-radius:var(--r-petit);background:var(--blanc);font-size:.92rem;line-height:1.4}
+.t .id{font-weight:900;grid-row:span 2}
+.t .pill{justify-self:start;font-size:.72rem}
+.t.new{border-color:var(--jaune-fonce);background:var(--jaune-pale)}
+
+/* planning */
+.hrows{display:grid;gap:8px}
+.hrow{display:grid;grid-template-columns:220px 1fr 50px;gap:10px;align-items:center;font-size:.9rem}
+.hrow .b{height:20px;border-radius:5px;background:var(--encre);width:0;transition:width 1.2s ease-out}
+.hrow .b.ph{background:var(--jaune-fonce)}
+.hrow span:last-child{text-align:right;font-weight:800;font-variant-numeric:tabular-nums}
+.gantt{display:grid;grid-template-columns:120px repeat(5,1fr);gap:4px;font-size:.85rem;min-width:440px}
+.gantt .h{font-size:.74rem;font-weight:800;color:var(--encre-3);text-align:center;text-transform:uppercase;letter-spacing:.08em}
+.gantt .rl{color:var(--encre-2)}
+.gantt .g{height:24px;border-radius:6px}
+
+/* limites, fin */
+.limits{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.limits ul{margin:8px 0 0;padding-left:20px;display:grid;gap:6px}
+.section-finale{border-top:0}
+.section-finale .grid2 .card p{margin:0}
+.links{display:flex;flex-wrap:wrap;gap:12px;margin-top:24px}
+footer{padding-block:34px 50px;color:var(--encre-3);font-size:.9rem;border-top:1.5px solid var(--contour-2)}
+
+@media (max-width:900px){
+  .hero-grid,.grid2,.arch-grid,.limits,.steps,.sim-grid{grid-template-columns:1fr}
+  .grid3,.why,.attacks,.todo,.rules{grid-template-columns:1fr}
+  .pr{grid-template-columns:40px 1fr}
+  .pr .ans{grid-column:2}
+  .figs{grid-template-columns:1fr 1fr}
+}
+@media (max-width:520px){
+  .figs{grid-template-columns:1fr}
+  .hrow{grid-template-columns:120px 1fr 40px;font-size:.82rem}
+  .flow{grid-template-columns:1fr}
+  .flow .arrow{transform:rotate(90deg);justify-self:center}
+  .steplist button{grid-template-columns:64px 1fr}
+}
+@media (prefers-reduced-motion:reduce){
+  *{animation:none!important;transition:none!important}
+}
+@media print{nav.toc,.controls,.sim .row,.sim .slider{display:none}section{padding-block:24px}}
 </style>
 </head>
 <body>
-<header><div class="wrap"><a href="#" class="brand">CYBERSENTINEL<span>.</span></a><nav aria-label="Navigation"><a href="#probleme">Besoin</a><a href="#architecture">Architecture</a><a href="#scenario">Simulation</a><a href="#validation">Expériences</a></nav></div></header>
+
+<nav class="toc" aria-label="Sommaire">
+  <div class="wrap">
+    <a href="#probleme"><b>1</b>Le problème</a>
+    <a href="#existant"><b>2</b>Ce qui existe</a>
+    <a href="#solution"><b>3</b>La solution</a>
+    <a href="#journee"><b>4</b>Une journée</a>
+    <a href="#architecture"><b>5</b>Architecture</a>
+    <a href="#cerveau"><b>6</b>Le verrouillage</a>
+    <a href="#securite"><b>7</b>Sécurité</a>
+    <a href="#physique"><b>8</b>Physique</a>
+    <a href="#reseau"><b>9</b>Réseau</a>
+    <a href="#experiences"><b>10</b>Expériences</a>
+    <a href="#planning"><b>11</b>V1, V2, planning</a>
+    <a href="#limites"><b>12</b>Vie privée</a>
+    <a href="#en-bref"><b>13</b>En bref</a>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="wrap hero-grid">
+    <div>
+      <p class="eyebrow">BTS CIEL option A · Épreuve E6 · Apprenti 3 · Session 2027</p>
+      <h1 style="margin-top:10px">Le poste se verrouille quand <mark>on part</mark></h1>
+      <p class="lead">Un radar posé sous l'écran voit que le bureau se vide. Le poste verrouille alors la session Windows tout seul, en quelques secondes. Sur le réseau, une fausse imprimante signale qui vient frapper à sa porte.</p>
+      <div class="tags">
+        <span class="tag">Radar LD2410 · 24 GHz</span><span class="tag">ESP32</span><span class="tag">PowerShell</span><span class="tag">ESP32 + W5500</span><span class="tag">Ubuntu · API</span><span class="tag">HMAC</span>
+      </div>
+      <p class="notice"><b>Besoin réel, solution à faire valider.</b> Le tuteur a confirmé que des agents oublient de verrouiller leur session. Le radar et le leurre sont une <b>proposition</b> au service, pas une solution qu'il a déjà validée. Réalisation au lycée, sur maquette, sans donnée réelle : elle doit être validée par l'académie (arrêté du 25 janvier 2023).</p>
+    </div>
+    <div class="svgbox" role="img" aria-label="Animation : Martine quitte son bureau, le radar voit le siège vide, l'écran se verrouille.">
+      <svg viewBox="0 0 400 290">
+        <line x1="10" y1="236" x2="390" y2="236" stroke-width="2" style="stroke:var(--encre)"/>
+        <rect x="30" y="196" width="190" height="10" rx="3" style="fill:var(--papier-2);stroke:var(--encre)" stroke-width="1.5"/>
+        <path d="M45 206V236M205 206V236" stroke-width="2" style="stroke:var(--encre)"/>
+        <rect x="52" y="96" width="120" height="78" rx="6" stroke-width="2" style="fill:var(--blanc);stroke:var(--encre)"/>
+        <rect x="60" y="104" width="104" height="62" rx="3" style="fill:var(--bleu-pale)"/>
+        <path d="M104 174v14h16v-14M92 192h40" stroke-width="2" style="fill:none;stroke:var(--encre)"/>
+        <g>
+          <rect x="60" y="104" width="104" height="62" rx="3" style="fill:var(--encre)"/>
+          <rect x="100" y="128" width="24" height="20" rx="3" style="fill:var(--jaune)"/>
+          <path d="M104 128v-6a8 8 0 0 1 16 0v6" stroke-width="3" style="fill:none;stroke:var(--jaune)"/>
+          <text x="112" y="161" text-anchor="middle" font-size="9" font-weight="900" style="fill:var(--papier)">VERROUILLÉ</text>
+          <animate attributeName="opacity" values="0;0;1;1;0" keyTimes="0;.62;.66;.94;1" dur="10s" repeatCount="indefinite"/>
+        </g>
+        <rect x="150" y="180" width="26" height="14" rx="3" style="fill:var(--encre)"/>
+        <circle cx="171" cy="187" r="2.5" style="fill:var(--rouge)"/>
+        <g stroke-width="2.5" style="fill:none;stroke:var(--jaune-fonce)">
+          <path d="M184 178q8 9 0 18"><animate attributeName="opacity" values="1;.2;1" dur="1.4s" repeatCount="indefinite"/></path>
+          <path d="M192 172q13 15 0 30"><animate attributeName="opacity" values=".2;1;.2" dur="1.4s" repeatCount="indefinite"/></path>
+          <path d="M200 166q18 21 0 42"><animate attributeName="opacity" values="1;.2;1" dur="1.4s" repeatCount="indefinite"/></path>
+        </g>
+        <g>
+          <path d="M238 236l6-40h44l6 40M250 196v-22h32" stroke-width="2.5" style="fill:none;stroke:var(--encre-2)"/>
+          <circle cx="266" cy="132" r="16" style="fill:var(--encre)"/>
+          <path d="M248 196c0-28 4-46 18-46s18 18 18 46z" style="fill:var(--encre)"/>
+          <animateTransform attributeName="transform" type="translate" values="0 0;0 0;150 0;150 0;0 0" keyTimes="0;.35;.55;.92;1" dur="10s" repeatCount="indefinite"/>
+        </g>
+        <text x="200" y="266" text-anchor="middle" font-size="13" font-weight="800" style="fill:var(--encre-2)">
+          <tspan>Martine est là : le radar voit sa respiration
+            <animate attributeName="opacity" values="1;1;0;0;1" keyTimes="0;.4;.42;.98;1" dur="10s" repeatCount="indefinite"/></tspan>
+        </text>
+        <text x="200" y="266" text-anchor="middle" font-size="13" font-weight="900" style="fill:var(--encre)" opacity="0">Siège vide 2 s → session verrouillée
+          <animate attributeName="opacity" values="0;0;1;1;0" keyTimes="0;.42;.44;.96;1" dur="10s" repeatCount="indefinite"/></text>
+      </svg>
+    </div>
+  </div>
+</header>
+
 <main>
-<div class="wrap hero">
- <div>
-  <div class="eyebrow">BTS CIEL · Épreuve E6 · Projet de Lorenzo</div>
-  <h1>DEUX DÉFENSES.<br><em>UN SIGNAL.</em></h1>
-  <p class="lead">Sécuriser une session Windows lorsqu'un agent s'absente, puis détecter des interactions inattendues avec un équipement leurre sur un réseau isolé.</p>
-  <div><span class="tag jaune">Prototype pédagogique</span> <span class="tag papier">Sans accès au SI réel</span></div>
-  <div class="actions"><a class="btn principal" href="../animation-3d/maquette-3d.html">Explorer la maquette 3D ↗</a><a class="btn" href="#scenario">Tester le scénario</a></div>
- </div>
- <div class="illustration" role="img" aria-label="Schéma : un capteur radar protège Windows et un leurre réseau alimente Ubuntu">
-  <svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
-   <rect x="12" y="16" width="177" height="105" rx="12" stroke-width="2" style="fill:var(--jaune);stroke:var(--encre)"/>
-   <rect x="212" y="16" width="176" height="105" rx="12" stroke-width="2" style="fill:var(--papier);stroke:var(--encre)"/>
-   <g text-anchor="middle" style="fill:var(--encre)">
-    <text x="100" y="41" font-size="14" font-weight="900">RADAR LD2410</text><text x="100" y="66" font-size="12">ESP32 / Présence</text>
-    <text x="300" y="41" font-size="14" font-weight="900">LEURRE HTTP</text><text x="300" y="66" font-size="12">ESP32 / Ethernet</text>
-   </g>
-   <g stroke-width="2.5" fill="none" style="stroke:var(--encre)">
-     <path d="M80 82c10-12 30-12 40 0M72 88c16-23 40-23 56 0"/>
-     <rect x="285" y="71" width="30" height="27" rx="2"/><path d="M290 79h20m-20 7h20m-20 7h20"/>
-     <path d="M100 121v50M300 121v50M100 170h200M200 170v26"/>
-   </g>
-   <rect x="47" y="200" width="306" height="80" rx="14" stroke-width="2" style="fill:var(--papier-2);stroke:var(--encre)"/>
-   <g text-anchor="middle" style="fill:var(--encre)">
-    <text x="200" y="230" font-weight="900" font-size="19">SUPERVISION UBUNTU</text>
-    <text x="200" y="254" font-size="13">Événements techniques · Alertes</text>
-   </g>
-  </svg>
- </div>
-</div>
-<section id="probleme"><div class="wrap">
- <div class="eyebrow">01 — Pourquoi ce projet ?</div><h2>Prévenir localement. Détecter sur le réseau.</h2>
- <div class="grid2" style="margin-top:25px">
-  <article class="card"><div class="eyebrow">Risque physique</div><h3>Une session laissée ouverte</h3><p>Un agent quitte son bureau sans verrouiller Windows. Un radar de présence peut réduire le délai pendant lequel la session reste accessible.</p><p class="small">Le tuteur a confirmé l'existence d'oublis de verrouillage ; la performance du dispositif reste à mesurer.</p></article>
-  <article class="card"><div class="eyebrow">Risque réseau</div><h3>Une activité qui passe inaperçue</h3><p>Un équipement leurre simule un service non utilisé : une connexion vers ce service fournit un signal supplémentaire à examiner.</p><p class="small">L'ANSSI a publié en septembre 2026 un rapport sur des faiblesses de détection à la DGFiP. Cela ne démontre pas qu'un leurre ESP32 aurait empêché les incidents.</p></article>
- </div>
- <div class="bandeau"><strong>Problématique :</strong> dans quelle mesure un prototype embarqué peut-il améliorer la prévention des accès locaux non autorisés et compléter la détection d'interactions réseau inhabituelles, avec un minimum de fausses alertes ?</div>
-</div></section>
-<section id="architecture"><div class="wrap">
- <div class="eyebrow">02 — Architecture</div><h2>Deux fonctions indépendantes, une supervision commune.</h2>
- <div class="grid3" style="margin-top:24px">
-  <article class="card"><div class="eyebrow">A / Prévention</div><h3>LD2410 + ESP32</h3><p>Le radar estime la présence dans une zone définie. L'ESP32 envoie des messages authentifiés par HMAC à un service du poste, qui déclenche le verrouillage de Windows.</p></article>
-  <article class="card"><div class="eyebrow">B / Détection</div><h3>ESP32 + W5500</h3><p>Le second boîtier présente un service HTTP imitant une imprimante. Il journalise uniquement les interactions techniques avec ce service, sans recevoir de données métier.</p></article>
-  <article class="card"><div class="eyebrow">C / Exploitation</div><h3>Windows + Ubuntu</h3><p>Un PC Windows de test et un serveur Ubuntu de laboratoire permettent les scripts PowerShell, le transport sécurisé des événements, les captures Wireshark et les alertes.</p></article>
- </div>
- <div class="callout danger"><strong>Frontière de confiance :</strong> le verrouillage doit continuer même si Ubuntu ou le réseau sont indisponibles. Une interaction avec le leurre ne doit jamais entraîner le verrouillage d'un poste.</div>
-</div></section>
-<section id="scenario" class="zone-2"><div class="wrap">
- <div class="eyebrow">03 — Démonstration interactive</div><h2>Une journée de Martine, en laboratoire.</h2>
- <p class="lead" style="margin-bottom:22px">Choisis un événement. Le résultat affiché est une <strong>simulation de principe</strong>, pas une mesure obtenue avec le matériel.</p>
- <div class="scenario">
-  <div class="choices" role="group" aria-label="Choix du scénario">
-   <button class="choice btn petit" aria-pressed="true" data-scenario="absence">Martine s'absente</button>
-   <button class="choice btn petit" aria-pressed="false" data-scenario="leurre">Accès au faux service</button>
-   <button class="choice btn petit" aria-pressed="false" data-scenario="legitime">Scan réseau autorisé</button>
-   <button class="choice btn petit" aria-pressed="false" data-scenario="panne">Serveur indisponible</button>
+
+<!-- 1 PROBLÈME -->
+<section id="probleme">
+  <div class="wrap">
+    <div class="sec-head"><span class="num">1 · Le problème</span><h2>Une session ouverte, un bureau vide, un collègue qui passe</h2></div>
+    <div class="grid2">
+      <div class="stack">
+        <p class="prose">Martine est gestionnaire dans un bureau partagé. Elle se lève pour aller à l'imprimante ou chercher un dossier. Elle oublie d'appuyer sur <kbd>Win</kbd> + <kbd>L</kbd>. Sa session reste ouverte, avec ses droits et ses dossiers.</p>
+        <ul class="pains">
+          <li><span class="dot r">!</span><span><b>Un oubli humain.</b> Le tuteur de Lorenzo a confirmé que ces oublis existent dans le service (fait interne, sans nom).</span></li>
+          <li><span class="dot j">⏱</span><span><b>Un filet trop lent.</b> Windows se verrouille seul après plusieurs minutes sans clavier ni souris. Pendant ce temps, un collègue, un visiteur ou un prestataire peut voir l'écran ou l'utiliser.</span></li>
+          <li><span class="dot b">?</span><span><b>Le réseau aussi a ses angles morts.</b> L'ANSSI a publié en septembre 2026 un rapport sur des faiblesses de détection à la DGFiP. Un leurre donne un signal de plus. Il n'aurait pas forcément empêché ces incidents.</span></li>
+        </ul>
+      </div>
+      <div class="card stack">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
+          <h3 style="margin:0">Combien de temps la session reste ouverte ?</h3>
+        </div>
+        <div class="expo" id="expo">
+          <div class="erow"><div class="top"><span>Martine pense à <kbd>Win</kbd> + <kbd>L</kbd></span><b data-v="0" data-u="s">0 s</b></div><div class="ebar"><i class="ok" data-w="0"></i></div></div>
+          <div class="erow"><div class="top"><span>Oubli + radar <span class="muted">(objectif, à mesurer)</span></span><b data-v="4" data-u="s">≈ 4 s</b></div><div class="ebar"><i class="ok" data-w="1.2"></i></div></div>
+          <div class="erow"><div class="top"><span>Oubli + filet Windows seul <span class="muted">(exemple)</span></span><b data-v="600" data-u="min">10 min</b></div><div class="ebar"><i class="ko" data-w="100"></i></div></div>
+        </div>
+        <p class="muted" style="font-size:.9rem;margin:0">Le délai réel du filet Windows dans le service est <b>à demander au tuteur</b>. 10 min est un exemple. La barre du radar est presque invisible : c'est le but.</p>
+        <div class="controls" style="margin-top:0"><button class="btn petit" id="expoPlay" type="button">▶ Rejouer</button></div>
+      </div>
+    </div>
+    <div class="figs" style="margin-top:26px">
+      <div class="fig"><span class="hyp">confirmé par le tuteur</span><div class="big">Oublis</div><small>de verrouillage de session dans le service (16/11/2026)</small></div>
+      <div class="fig"><span class="hyp">à demander au tuteur</span><div class="big">? min</div><small>délai actuel du verrouillage par inactivité sur les postes du service</small></div>
+      <div class="fig"><span class="hyp">objectif à mesurer</span><div class="big">&lt; 8 s</div><small>entre le départ de Martine et le verrouillage, dans 95 % des essais (à valider)</small></div>
+    </div>
   </div>
-  <div class="readout">
-   <div><div class="status" id="scenario-state" aria-live="polite">Session Windows : verrouillée</div><p id="scenario-desc">Le radar détecte une absence suffisamment longue. Le poste valide le message et verrouille localement la session.</p><p class="small">Le radar ne permet pas d'identifier l'utilisateur. Les seuils et délais doivent être étalonnés et testés.</p></div>
-   <pre class="terminal" id="scenario-log" aria-live="polite">[10:15:00] ESP32  absence détectée
-[10:15:03] Windows  verrouillage local
-[10:15:04] Ubuntu   événement reçu</pre>
+</section>
+
+<!-- 2 EXISTANT -->
+<section id="existant">
+  <div class="wrap">
+    <div class="sec-head"><span class="num">2 · Les solutions qui existent</span><h2>Pourquoi ne pas utiliser ce que Windows sait déjà faire ?</h2>
+      <p class="prose muted">Ces solutions sont bonnes. La question est de savoir si elles répondent à <b>ce</b> besoin, sur des PC de bureau fixes, sans objet à porter.</p></div>
+    <div class="tablebox">
+      <table>
+        <thead><tr><th>Solution</th><th>Ce qu'elle fait</th><th>Rapide après le départ</th><th>Rien à porter sur soi</th><th>Marche sur un PC de bureau</th><th>Délais mesurés et journalisés</th><th>Sans matériel en plus</th></tr></thead>
+        <tbody>
+          <tr><td><kbd>Win</kbd> + <kbd>L</kbd></td><td>L'agent verrouille lui-même</td><td class="c m">~ s'il y pense</td><td class="c y">✓</td><td class="c y">✓</td><td class="c n">✗</td><td class="c y">✓</td></tr>
+          <tr><td>Verrouillage par inactivité</td><td>Stratégie Windows : verrouille après X min sans clavier ni souris</td><td class="c n">✗ minutes</td><td class="c y">✓</td><td class="c y">✓</td><td class="c m">~</td><td class="c y">✓</td></tr>
+          <tr><td>Verrouillage dynamique</td><td>Verrouille quand le téléphone appairé en Bluetooth s'éloigne</td><td class="c m">~ ≈ 30 s*</td><td class="c n">✗ téléphone</td><td class="c m">~ Bluetooth</td><td class="c n">✗</td><td class="c m">~</td></tr>
+          <tr><td>Présence Windows 11</td><td>« Verrouiller quand je m'en vais » avec un capteur intégré</td><td class="c y">✓</td><td class="c y">✓</td><td class="c n">✗ portables récents</td><td class="c n">✗</td><td class="c n">✗</td></tr>
+          <tr><td>Retrait de la carte à puce</td><td>Verrouille quand on retire sa carte du lecteur</td><td class="c y">✓</td><td class="c n">✗ carte</td><td class="c y">✓</td><td class="c m">~</td><td class="c n">✗ lecteur</td></tr>
+          <tr class="ours"><td>Projet de Lorenzo</td><td>Radar sous l'écran + programme qui décide et verrouille</td><td class="c y">✓ secondes</td><td class="c y">✓</td><td class="c y">✓</td><td class="c y">✓</td><td class="c m">~ boîtier</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="legende">✓ oui · ~ en partie · ✗ non. * Délai annoncé par Microsoft pour le verrouillage dynamique, à vérifier. Le service utilise-t-il déjà une carte à puce ou un téléphone ? <b>À demander au tuteur.</b></p>
+    <div class="why">
+      <div class="card"><h3>L'inactivité : un filet, pas une solution</h3><p>Elle marche toujours, même si tout le reste tombe en panne. C'est pour cela que le projet la <b>garde</b>. Mais elle attend plusieurs minutes, et un collègue qui touche la souris la relance.</p></div>
+      <div class="card"><h3>Téléphone, carte, capteur intégré</h3><p>Ils demandent un objet à porter, un Bluetooth autorisé ou un portable récent. Les PC de bureau du service n'ont en général pas de capteur de présence. Le radar, lui, se pose sous n'importe quel écran.</p></div>
+      <div class="card"><h3>Et pour le leurre ?</h3><p>Des leurres existent : OpenCanary (logiciel libre), les boîtiers Thinkst Canary (payants), T-Pot (plateforme lourde). Le leurre de Lorenzo est volontairement minimal : <b>une fausse imprimante sur un ESP32</b>, qui ne collecte rien.</p></div>
+    </div>
   </div>
- </div>
-</div></section>
-<section id="validation"><div class="wrap">
- <div class="eyebrow">04 — Vérifier la valeur ajoutée</div><h2>Un projet qui se mesure.</h2>
- <table><thead><tr><th>Essai</th><th>Mesure</th><th>Comparaison / critère</th></tr></thead><tbody>
-  <tr><td>Départ de Martine</td><td>Délai jusqu'au verrouillage</td><td>Face au verrouillage Windows par inactivité</td></tr>
-  <tr><td>Martine immobile</td><td>Nombre de faux verrouillages</td><td>Seuils du radar et perturbations du voisinage</td></tr>
-  <tr><td>Accès HTTP au leurre</td><td>Délai réception → alerte</td><td>Cas simulés avec et sans réseau disponible</td></tr>
-  <tr><td>Découverte réseau autorisée</td><td>Nombre d'événements à qualifier</td><td>Ne pas confondre observation et intrusion</td></tr>
-  <tr><td>Boîtier débranché ou message falsifié</td><td>Refus HMAC et repli de Windows</td><td>Absence de dépendance au serveur</td></tr>
- </tbody></table>
- <div class="grid2" style="margin-top:22px">
-  <div class="card"><h3>Version 1 — démonstrateur minimal</h3><p>Radar, ESP32, verrouillage Windows local et leurre HTTP simple, un serveur Ubuntu, essais reproductibles.</p></div>
-  <div class="card"><h3>Version 2 — robustesse et évaluation</h3><p>HMAC/compteur, gestion des pannes, authentification de l'API, filtrage des alertes, campagnes de tests et indicateurs.</p></div>
- </div>
-</div></section>
-<section id="limites" class="section-finale"><div class="wrap">
- <div class="eyebrow">05 — Périmètre et éthique</div><h2>Pas de surveillance des agents. Pas de réseau réel.</h2>
- <div class="grid2" style="margin-top:22px">
-  <div class="card"><h3>Ce que le projet ne fait pas</h3><p>Pas de caméra, pas de reconnaissance des personnes, pas d'enregistrement des durées d'absence, pas de capture de mots de passe, pas d'attaque contre un réseau tiers. Il n'affirme pas détecter toutes les intrusions.</p></div>
-  <div class="card"><h3>Conditions d'un éventuel pilote</h3><p>Autorisation écrite du service, validation sécurité et protection des données, conformité des équipements USB/Ethernet, qualification des flux réseau et des durées de conservation.</p></div>
- </div>
- <h3 style="margin:28px 0 12px">Sources vérifiées</h3>
- <p class="small"><a href="https://cyber.gouv.fr/actualites/lanssi-publie-le-rapport-dincident-sur-les-cyberattaques-ayant-touche-la-dgfip/" target="_blank" rel="noopener">ANSSI — Rapport d'incident sur les cyberattaques ayant touché la DGFiP, 29 septembre 2026</a>.</p>
- <p class="small"><a href="https://messervices.cyber.gouv.fr/guides/guide-dhygiene-informatique" target="_blank" rel="noopener">ANSSI — Guide d'hygiène informatique</a>.</p>
- <p class="small"><a href="https://www.cnil.fr/fr/securite-tracer-les-operations" target="_blank" rel="noopener">CNIL — Sécurité : tracer les opérations</a>.</p>
-</div></section>
+</section>
+
+<!-- 3 SOLUTION -->
+<section id="solution">
+  <div class="wrap">
+    <div class="sec-head"><span class="num">3 · La solution proposée</span></div>
+    <p class="oneline">Le radar dit au poste quand le bureau se vide. Le poste attend 2 secondes pour être sûr, puis verrouille, et ne revient jamais en arrière.</p>
+    <div class="principles">
+      <div class="pr"><span class="no">1</span><span class="fact">Le radar voit du mouvement, pas une personne.</span><span class="ans">Il sert <b>seulement à verrouiller</b>. Jamais à déverrouiller, jamais à reconnaître quelqu'un.</span></div>
+      <div class="pr"><span class="no">2</span><span class="fact">Une seule mesure peut se tromper.</span><span class="ans">Le programme attend <b>2 secondes de siège vide</b> avant de décider. Si Martine revient avant, il annule.</span></div>
+      <div class="pr"><span class="no">3</span><span class="fact">Un collègue peut s'asseoir juste après.</span><span class="ans">Une fois prise, la décision est <b>mémorisée</b> : même si quelqu'un s'assoit, la session se verrouille.</span></div>
+      <div class="pr"><span class="no">4</span><span class="fact">Pas de nouvelles ne veut pas dire « présence ».</span><span class="ans">Boîtier muet ou débranché : le poste <b>verrouille une fois</b> et passe en mode dégradé.</span></div>
+      <div class="pr"><span class="no">5</span><span class="fact">Un programme peut planter.</span><span class="ans">Le <b>verrouillage par inactivité de Windows reste actif</b>. Le radar fait verrouiller plus tôt, jamais plus tard.</span></div>
+      <div class="pr"><span class="no">6</span><span class="fact">Une connexion au leurre n'est pas une preuve.</span><span class="ans">C'est un événement <b>à qualifier</b>. Il n'est jamais relié à une absence ni à un agent.</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- 4 JOURNÉE -->
+<section id="journee" class="zone-2">
+  <div class="wrap">
+    <div class="sec-head"><span class="num">4 · Une journée de Martine</span><h2>Du café oublié à la panne du boîtier</h2>
+      <p class="prose muted">Simulation de principe, au laboratoire. Les heures et les délais sont des exemples, pas des mesures.</p></div>
+    <div class="steps">
+      <ol class="steplist" id="stepList"></ol>
+      <div class="card">
+        <div class="scene" id="scene" aria-live="polite"></div>
+        <div class="controls"><button class="btn petit" id="stPrev" type="button">← Précédent</button><button class="btn petit principal" id="stNext" type="button">Suivant →</button></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 5 ARCHITECTURE -->
+<section id="architecture">
+  <div class="wrap">
+    <div class="sec-head"><span class="num">5 · Architecture de la maquette</span><h2>Deux fonctions indépendantes, une supervision commune</h2>
+      <p class="prose muted">Cliquez sur un élément pour voir son rôle. Tout ce qui est dans le cadre vert suffit pour verrouiller : le réseau et Ubuntu n'y sont pas.</p></div>
+    <div class="grid2 arch-grid">
+      <div class="svgbox">
+        <svg id="archi" viewBox="0 0 1000 520" style="min-width:640px" role="group" aria-label="Schéma d'architecture cliquable">
+          <defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10z" style="fill:var(--contour)"/></marker></defs>
+          <rect class="zone" x="16" y="18" width="268" height="480" rx="16"/>
+          <text class="zt" x="30" y="490">ZONE LOCALE : SUFFIT POUR VERROUILLER</text>
+          <path class="lnk phys" d="M150 120 V178"/><text class="lt" x="160" y="153">UART · 256 000 bauds</text>
+          <path class="lnk phys" d="M150 258 V318"/><text class="lt" x="160" y="285">USB série</text><text class="lt" x="160" y="300">compteur + HMAC (V2)</text>
+          <path class="lnk" d="M270 375 H398" marker-end="url(#ar)"/><text class="lt" x="334" y="365" text-anchor="middle">Ethernet</text>
+          <path class="lnk" d="M600 395 H718" marker-end="url(#ar)"/><text class="lt" x="659" y="385" text-anchor="middle">HTTPS · événements</text>
+          <path class="lnk" d="M500 140 V338" marker-end="url(#ar)"/><text class="lt" x="510" y="245">HTTP vers le leurre</text>
+          <path class="lnk" d="M600 360 H650 V100 H718" marker-end="url(#ar)"/><text class="lt" x="658" y="230">Ethernet</text>
+          <path class="lnk" d="M840 140 V338" marker-end="url(#ar)"/><text class="lt" x="850" y="230">événement</text><text class="lt" x="850" y="245">authentifié</text>
+          <g class="node" tabindex="0" data-k="radar" transform="translate(40,40)"><rect width="220" height="80" rx="12"/><text class="t1" x="14" y="32">Radar LD2410</text><text class="t2" x="14" y="52">24 GHz · sous l'écran</text><text class="stg" x="14" y="70">V1</text></g>
+          <g class="node" tabindex="0" data-k="esp1" transform="translate(40,178)"><rect width="220" height="80" rx="12"/><text class="t1" x="14" y="32">ESP32 n° 1</text><text class="t2" x="14" y="52">boîtier radar · battement de cœur</text><text class="stg" x="14" y="70">V1</text></g>
+          <g class="node" tabindex="0" data-k="pc" transform="translate(40,318)"><rect width="230" height="110" rx="12"/><text class="t1" x="14" y="32">PC Windows 11</text><text class="t2" x="14" y="52">programme PowerShell</text><text class="t2" x="14" y="70">machine à états · verrouillage</text><text class="t2" x="14" y="88">filet : inactivité Windows</text><text class="stg" x="190" y="100">V1</text></g>
+          <g class="node" tabindex="0" data-k="sw" transform="translate(400,338)"><rect width="200" height="80" rx="12"/><text class="t1" x="14" y="32">Switch</text><text class="t2" x="14" y="52">réseau isolé · HP ProCurve</text><text class="stg" x="14" y="70">en place</text></g>
+          <g class="node" tabindex="0" data-k="ub" transform="translate(720,338)"><rect width="250" height="110" rx="12"/><text class="t1" x="14" y="32">Serveur Ubuntu</text><text class="t2" x="14" y="52">API · SQLite · tableau de bord</text><text class="t2" x="14" y="70">NTP · horodatage</text><text class="stg" x="14" y="96">V1</text></g>
+          <g class="node" tabindex="0" data-k="leurre" transform="translate(720,50)"><rect width="250" height="90" rx="12"/><text class="t1" x="14" y="32">Leurre ESP32 + W5500</text><text class="t2" x="14" y="52">fausse imprimante · HTTP</text><text class="stg" x="14" y="74">V1</text></g>
+          <g class="node" tabindex="0" data-k="test" transform="translate(400,60)"><rect width="200" height="80" rx="12"/><text class="t1" x="14" y="32">PC de test</text><text class="t2" x="14" y="52">joue les visiteurs</text><text class="stg" x="14" y="70">V1</text></g>
+          <g id="pkts"></g>
+        </svg>
+      </div>
+      <div class="card detail" id="detail" aria-live="polite"></div>
+    </div>
+    <div class="legend">
+      <span><i class="sw"></i>flux réseau</span>
+      <span><i class="sw d"></i>câble direct (série, USB)</span>
+      <span><i class="sw z"></i>zone locale</span>
+    </div>
+    <div class="controls">
+      <a class="btn petit" href="architecture-2d.html">Schéma réseau avec le vrai matériel</a>
+      <a class="btn petit" href="architecture-2-5d.html">Architecture pas à pas (2,5D)</a>
+      <a class="btn petit" href="../animation-3d/maquette-3d.html">Maquette 3D ↗</a>
+    </div>
+  </div>
+</section>
+
+<!-- 6 LE CERVEAU DU VERROUILLAGE -->
+<section id="cerveau" class="zone-2">
+  <div class="wrap">
+    <div class="sec-head"><span class="num">6 · Le verrouillage pas à pas</span><h2>Huit situations, trois façons de décider</h2>
+      <p class="prose muted">Choisissez une situation et une méthode, puis regardez ce que voit le radar, ce que décide le programme et ce que fait Windows. <b>Simulation de principe</b> : les délais (radar 1 s, doute 2 s, Windows 0,5 s) sont des exemples que Lorenzo devra mesurer.</p></div>
+    <div class="sim">
+      <div class="row" role="group" aria-label="Situation">
+        <span class="lab">Situation</span>
+        <button class="btn petit" type="button" data-sc="A">A · Départ normal</button>
+        <button class="btn petit" type="button" data-sc="B">B · Chaise qui roule</button>
+        <button class="btn petit" type="button" data-sc="C">C · Collègue qui passe</button>
+        <button class="btn petit" type="button" data-sc="D">D · Collègue qui s'assoit</button>
+        <button class="btn petit" type="button" data-sc="E">E · Lecture immobile</button>
+        <button class="btn petit" type="button" data-sc="F">F · Martine se penche</button>
+        <button class="btn petit" type="button" data-sc="G">G · Ventilateur</button>
+        <button class="btn petit" type="button" data-sc="H">H · Boîtier débranché</button>
+      </div>
+      <div class="row" role="group" aria-label="Méthode">
+        <span class="lab">Méthode</span>
+        <button class="btn petit" type="button" data-st="classic">Radar seul, minuteur classique</button>
+        <button class="btn petit" type="button" data-st="fsm">Machine à états (V1)</button>
+        <button class="btn petit" type="button" data-st="zone">+ zone du siège (V2)</button>
+      </div>
+      <div class="slider" id="dBox" hidden>
+        <label for="delta"><b>Le collègue s'assoit</b> <span id="deltaV">4 s</span> après le départ de Martine</label>
+        <input type="range" id="delta" min="0" max="12" step="0.5" value="4">
+      </div>
+      <div class="card stack">
+        <p id="scIntro" style="margin:0"></p>
+        <div class="svgbox" style="padding:8px;box-shadow:none;border-radius:var(--r-petit)"><svg id="chrono" viewBox="0 0 900 236" style="min-width:680px" role="img" aria-label="Chronogramme de la situation"></svg></div>
+        <div class="controls" style="margin-top:0"><button class="btn petit principal" id="simPlay" type="button">▶ Rejouer</button><span class="muted" style="font-size:.86rem">Une seconde de simulation dure un quart de seconde.</span></div>
+      </div>
+      <div class="sim-grid">
+        <div class="card"><p class="eyebrow" style="margin-bottom:6px" id="fsmTitle">Machine à états</p><div style="overflow-x:auto"><svg id="fsm" viewBox="0 0 656 226" style="min-width:520px" role="img" aria-label="Machine à états du programme"></svg></div><p class="muted" style="font-size:.85rem;margin:6px 0 0" id="fsmNote"></p></div>
+        <div class="card verdict-box" aria-live="polite"><p class="eyebrow">Résultat</p><p class="v" id="verdict"></p><p id="verdictTxt" style="margin:0"></p></div>
+      </div>
+      <pre class="term" id="simLog" aria-live="polite" style="min-height:150px"></pre>
+      <div>
+        <h3 style="margin:10px 0 10px">Le bilan des huit situations</h3>
+        <div class="tablebox"><table class="recap" id="recap"></table></div>
+        <p class="legende">Calculé par la simulation ci-dessus (même modèle, mêmes délais d'exemple). Pour D, le délai du curseur est utilisé. Dans tous les cas, le verrouillage par inactivité de Windows reste le filet de dernier recours.</p>
+      </div>
+      <div class="callout danger"><b>Limite honnête :</b> si un collègue s'assoit moins de 3 secondes après le départ de Martine, ou sans aucune coupure, le radar ne voit jamais le siège vide. Aucun programme ne peut corriger cela avec ce seul radar. Le projet le mesure et l'écrit, au lieu de le cacher.</div>
+    </div>
+  </div>
+</section>
+
+<!-- 7 SÉCURITÉ -->
+<section id="securite">
+  <div class="wrap">
+    <div class="sec-head"><span class="num">7 · Cybersécurité</span><h2>Quatre tentatives, aucune ne laisse la session ouverte</h2>
+      <p class="prose muted">Lancez chaque tentative pour voir à quelle étape le programme l'arrête.</p></div>
+    <div class="attacks" id="attacks"></div>
+    <div class="rules">
+      <div class="rule"><b>RÈGLE 1</b><p>Le radar ne déverrouille jamais. Ce code n'existe pas.</p></div>
+      <div class="rule"><b>RÈGLE 2</b><p>Le radar avance le verrouillage, il ne le retarde jamais.</p></div>
+      <div class="rule"><b>RÈGLE 3</b><p>Une décision mémorisée ne s'annule pas.</p></div>
+      <div class="rule"><b>RÈGLE 4</b><p>Pas de nouvelles du boîtier n'est pas une présence.</p></div>
+      <div class="rule"><b>RÈGLE 5</b><p>Le programme suit l'état réel de Windows (verrouillé ou non).</p></div>
+      <div class="rule"><b>RÈGLE 6</b><p>Tout se décide sur le poste : Ubuntu n'est pas sur le chemin.</p></div>
+    </div>
+    <p class="notice" style="margin-top:20px;max-width:none">Règles de code pour Lorenzo (charte IA, liste rouge) : jamais <code>Set-ExecutionPolicy Bypass</code>, jamais de clé HMAC ou de mot de passe écrit dans le code, jamais <code>setInsecure()</code> sur l'ESP32, jamais de contournement de certificat. Règle propre au projet : jamais d'appel qui <b>empêche</b> Windows de se verrouiller (par exemple <code>SetThreadExecutionState</code> ou une souris simulée).</p>
+  </div>
+</section>
+
+<!-- 8 PHYSIQUE -->
+<section id="physique" class="zone-2">
+  <div class="wrap">
+    <div class="sec-head"><span class="num">8 · La physique du radar</span><h2>Ce que le radar mesure vraiment</h2>
+      <p class="prose muted">Le volet physique sert le projet : comprendre pourquoi le radar voit Martine immobile, pourquoi il confond deux personnes proches, et mesurer ses délais avec leurs incertitudes. À valider avec le professeur de physique.</p></div>
+    <div class="grid2 phys">
+      <div class="card stack">
+        <p class="eyebrow">Onde de 24 GHz</p>
+        <h3 style="margin:0">Pourquoi il voit la respiration</h3>
+        <p>La longueur d'onde vaut λ = c / f = 3×10⁸ / 24×10⁹ ≈ <b>12,4 mm</b>. Quand la poitrine avance de d, l'aller-retour de l'onde s'allonge de 2d. Le décalage (la phase) vaut <b>Δφ = 4π·d / λ</b>.</p>
+        <label for="disp">Déplacement de la poitrine : <span class="readout" id="dispV">1,0 mm</span></label>
+        <input type="range" id="disp" min="0" max="6" step="0.1" value="1">
+        <svg id="waves" viewBox="0 0 420 130" role="img" aria-label="Onde de référence et onde réfléchie décalée"><line class="ax" x1="10" y1="65" x2="410" y2="65"/><path class="ref" id="wRef"/><path class="rx" id="wRx"/><text x="12" y="14">pointillés : onde de référence · rouge : onde renvoyée par la poitrine</text></svg>
+        <p class="readout" id="phaseV"></p>
+        <p class="muted" style="font-size:.9rem">Ordres de grandeur à confirmer : la respiration déplace le thorax de quelques millimètres, le cœur de quelques dixièmes. Un millimètre donne déjà environ 1 radian : le signal est fort, si le thorax est bien dans le faisceau.</p>
+      </div>
+      <div class="card stack">
+        <p class="eyebrow">Portes de distance</p>
+        <h3 style="margin:0">Pourquoi il confond deux personnes proches</h3>
+        <p>Le radar range ce qu'il voit dans <b>9 portes de 0,75 m</b>. Deux personnes dans la même porte ne font qu'une seule cible. Il ne donne aucun angle et ne compte pas les personnes.</p>
+        <label for="col">Distance du collègue au radar : <span class="readout" id="colV">1,40 m</span></label>
+        <input type="range" id="col" min="0.1" max="6.5" step="0.05" value="1.4">
+        <svg id="gates" viewBox="0 0 720 180" role="img" aria-label="Les neuf portes de distance du radar"></svg>
+        <p class="readout" id="gateV" style="font-size:1rem"></p>
+        <p class="muted" style="font-size:.9rem">Calcul (déduction à confirmer) : la séparation vaut ΔR = c / 2B. Avec une bande de B = 200 MHz, on trouve 0,75 m, la taille d'une porte. Le mode 0,2 m (selon le firmware) découpe plus fin, mais ne sépare sans doute pas mieux deux personnes. Autre point vérifié dans la documentation : les seuils « immobile » des portes 0 et 1 (0 à 1,5 m, là où Martine est assise) <b>ne sont pas réglables</b>.</p>
+      </div>
+      <div class="card stack">
+        <p class="eyebrow">Délai caché du radar</p>
+        <h3 style="margin:0">Mesurer la latence propre du radar</h3>
+        <p>Le radar attend un temps T réglable (5 s par défaut) avant d'annoncer « personne ». Lorenzo le règle à 0, 1, 2, 5 et 10 s et mesure le délai d à chaque fois. Modèle : <b>d = T + b</b>. On attend une pente de 1 ; l'ordonnée b est la <b>latence propre</b> du radar.</p>
+        <svg id="lat" viewBox="0 0 420 250" role="img" aria-label="Exemple de droite de régression du délai en fonction du réglage"></svg>
+        <p class="muted" style="font-size:.9rem"><b>Valeurs fictives</b> pour montrer la méthode. Les vraies valeurs viendront des mesures de Lorenzo.</p>
+      </div>
+      <div class="card stack">
+        <p class="eyebrow">Incertitudes</p>
+        <h3 style="margin:0">Un résultat, c'est une valeur et une marge</h3>
+        <ul style="margin:0;padding-left:20px;display:grid;gap:8px">
+          <li><b>20 essais</b> par situation. On calcule la moyenne, l'écart-type s et l'incertitude u = s / √20.</li>
+          <li>On donne aussi le <b>pire cas</b> (95 % des essais en dessous) : en sécurité, c'est lui qui compte.</li>
+          <li><b>Zéro erreur ne veut pas dire jamais.</b> 0 faux verrouillage sur 30 essais montre seulement que le taux est probablement sous 10 % (règle de trois : 3 / 30).</li>
+          <li>Sources d'erreur : temps de réaction au signal de départ, rythme des trames du radar, posture, vêtements, chaise, objets métalliques, angle du radar.</li>
+        </ul>
+        <p class="note" style="margin:6px 0 0">L'IA peut aider aux calculs, jamais fournir de données. Lorenzo garde toutes ses mesures brutes, horodatées.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 9 RÉSEAU -->
+<section id="reseau">
+  <div class="wrap">
+    <div class="sec-head"><span class="num">9 · Exploiter le réseau (C10)</span><h2>Observer et expliquer ce qui passe sur le câble</h2>
+      <p class="prose muted">Lorenzo exploite le réseau en place du labo, isolé. Il ne configure ni VLAN ni ACL : ce serait l'épreuve E5. Adresses d'exemple, pas celles de la DGFiP.</p></div>
+    <div class="grid2">
+      <div class="tablebox">
+        <table class="proto" style="min-width:0">
+          <thead><tr><th>Protocole</th><th>Où</th><th>Ce qu'il montre</th></tr></thead>
+          <tbody>
+            <tr><td>Série USB</td><td>boîtier → PC</td><td>Pas un réseau : un port COM. Lorenzo mesure le rythme des messages et le battement de cœur.</td></tr>
+            <tr><td>DHCP / ARP</td><td>leurre, PC</td><td>Le leurre obtient son adresse (ou en a une fixe) et répond aux requêtes ARP</td></tr>
+            <tr><td>HTTP · 80</td><td>PC de test → leurre</td><td>Les requêtes au leurre se lisent en clair : <code>GET /</code>, <code>GET /admin</code></td></tr>
+            <tr><td>HTTPS · 443</td><td>PC, leurre → Ubuntu</td><td>Événements techniques chiffrés : poignée de main TLS visible, contenu illisible</td></tr>
+            <tr><td>NTP · 123</td><td>tous</td><td>Une heure commune : sans elle, impossible de comparer les heures du boîtier, de Windows et du leurre</td></tr>
+            <tr><td>DNS · 53</td><td>tous</td><td>Le nom du serveur résolu avant chaque envoi</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="card stack">
+        <h3 style="margin:0">Ce que Wireshark montre</h3>
+        <pre class="term" style="min-height:0">10.10.0.73 → 10.10.0.80  TCP   SYN → port 80
+10.10.0.73 → 10.10.0.80  HTTP  GET /admin
+10.10.0.80 → 10.10.0.73  HTTP  401 (page factice)
+10.10.0.80 → 10.10.0.20  TLS   événement « accès leurre »
+10.10.0.54 → 10.10.0.20  TLS   événement « boîtier muet »</pre>
+        <p class="muted" style="font-size:.9rem;margin:0">Lignes d'exemple. Indicateurs mesurés : requêtes vues / requêtes envoyées, délai entre la requête et l'alerte, fausses alertes lors d'un inventaire réseau autorisé, événements perdus pendant une panne d'Ubuntu.</p>
+        <p style="font-size:.92rem;margin:0">Le serveur reçoit l'<b>état technique</b> du boîtier (en marche, muet, message refusé). Il ne reçoit pas l'heure des départs de Martine : on ne suit pas les présences.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 10 EXPÉRIENCES -->
+<section id="experiences" class="zone-2">
+  <div class="wrap">
+    <div class="sec-head"><span class="num">10 · Les expériences</span><h2>Ce que Lorenzo devra faire</h2>
+      <p class="prose muted">Trois tâches, dans cet ordre. Elles fournissent les preuves du dossier et le volet physique.</p></div>
+    <div class="todo">
+      <div class="card">
+        <span class="nb">1</span>
+        <h3 style="margin:0">Tester chaque situation</h3>
+        <p>Départ normal, chaise qui roule, collègue qui passe, collègue qui s'assoit, Martine qui lit sans bouger, ventilateur, boîtier débranché.</p>
+        <div class="chips"><span class="tag">A départ</span><span class="tag">B chaise</span><span class="tag">C passant</span><span class="tag">D collègue assis</span><span class="tag">E immobile</span><span class="tag">F penchée</span><span class="tag">G ventilateur</span><span class="tag">H panne</span></div>
+        <p class="muted" style="font-size:.9rem">Chaque situation se joue 20 fois, dans les mêmes conditions.</p>
+      </div>
+      <div class="card">
+        <span class="nb">2</span>
+        <h3 style="margin:0">Chronométrer</h3>
+        <p>Le temps entre le départ de Martine et le verrouillage, en séparant trois parties :</p>
+        <div class="stackbar" id="stackbar" role="img" aria-label="Délai total découpé : radar, programme, Windows (exemple)">
+          <div class="s1" data-w="28.6">radar</div><div class="s2" data-w="57.1">programme</div><div class="s3" data-w="14.3">Win</div>
+        </div>
+        <ul class="times">
+          <li><b>le temps du radar</b> pour voir qu'elle est partie ;</li>
+          <li><b>le temps d'attente du programme</b> ;</li>
+          <li><b>le temps de Windows</b> pour verrouiller.</li>
+        </ul>
+        <p class="muted" style="font-size:.88rem">Exemple : 1 s + 2 s + 0,5 s = 3,5 s. À mesurer.</p>
+      </div>
+      <div class="card">
+        <span class="nb">3</span>
+        <h3 style="margin:0">Enregistrer, puis rejouer</h3>
+        <p>Enregistrer ce que le radar envoie, pour rejouer exactement la même scène avec plusieurs réglages et les comparer.</p>
+        <div class="flow">
+          <div class="box">Une scène jouée une fois<br><span class="muted" style="font-weight:600">trames du radar → fichier CSV</span></div>
+          <span class="arrow" aria-hidden="true">→</span>
+          <div class="outs"><div class="box">Radar seul</div><div class="box">Machine à états</div><div class="box">+ zone du siège</div></div>
+        </div>
+        <p class="muted" style="font-size:.88rem">Mêmes données en entrée : la comparaison est juste.</p>
+      </div>
+    </div>
+
+    <div class="grid2" style="margin-top:28px">
+      <div class="card stack">
+        <h3 style="margin:0">Comment prendre les trois temps</h3>
+        <ol style="margin:0;padding-left:20px;display:grid;gap:8px;font-size:.95rem">
+          <li><b>Départ (t0)</b> : le programme d'essai émet un bip. Martine se lève au bip.</li>
+          <li><b>Radar (t1)</b> : première trame qui dit « personne ».</li>
+          <li><b>Programme (t2)</b> : passage en « verrou obligatoire ».</li>
+          <li><b>Windows (t3)</b> : la session est réellement verrouillée (événement lu par le programme).</li>
+        </ol>
+        <p class="term" style="min-height:0">temps du radar     = t1 − t0
+temps du programme = t2 − t1
+temps de Windows   = t3 − t2
+délai total        = t3 − t0</p>
+        <p class="muted" style="font-size:.88rem;margin:0">Tous les temps sont pris par la même horloge, celle du PC. Pas de caméra : le bip et le journal suffisent.</p>
+      </div>
+      <div class="card stack">
+        <h3 style="margin:0">Avant chaque série d'essais</h3>
+        <ul class="checklist">
+          <li>Radar toujours à la même place : hauteur et distance au siège mesurées au mètre ruban.</li>
+          <li>Réglages notés : version du firmware, portes, seuils, attente interne à 0 s, mode ingénierie activé.</li>
+          <li>2 minutes de salle vide, puis 2 minutes avec Martine assise (mesures de référence).</li>
+          <li>Mêmes personnes, même chaise, même salle, tenue notée.</li>
+          <li>Repères au sol : le siège, une ligne à 1,5 m, le couloir de passage à 2 m.</li>
+          <li>Pour les longues lectures (E, F) : mode « simulation », le programme note « aurait verrouillé » sans verrouiller.</li>
+        </ul>
+      </div>
+    </div>
+
+    <h3 style="margin:32px 0 12px">Les huit expériences</h3>
+    <div class="tablebox">
+      <table>
+        <thead><tr><th>Situation</th><th>Ce que Lorenzo fait</th><th>Ce qu'il mesure</th><th>Réussi si… (à valider avant les essais)</th></tr></thead>
+        <tbody>
+          <tr><td><b>A</b> Départ normal</td><td>Martine assise 1 min, puis part au bip</td><td>Les trois temps et le total</td><td>Verrouillé 20 fois sur 20 ; total médian ≤ 5 s ; 95 % des essais ≤ 8 s</td></tr>
+          <tr><td><b>B</b> Chaise qui roule</td><td>Même départ, en poussant la chaise depuis un repère</td><td>Retard par rapport à A</td><td>Retard médian ≤ 3 s</td></tr>
+          <tr><td><b>C</b> Collègue qui passe</td><td>Un collègue passe à 1 ; 1,5 ; 2 ; 3 m, de 1 à 6 s après le départ</td><td>Verrouillé ou non, retard</td><td>À 2 m ou plus : aucun effet (avec la zone du siège, V2)</td></tr>
+          <tr><td><b>D</b> Collègue qui s'assoit</td><td>Il s'assoit 0, 1, 2, 3, 5, 8 s après le départ ; 10 fois chaque</td><td>À partir de quel délai le verrou tient</td><td>Délai limite ≤ 4 s ; le relais sans coupure est noté « non résolu »</td></tr>
+          <tr><td><b>E</b> Lecture immobile</td><td>10 lectures de 10 min, 3 postures, 2 distances</td><td>Doutes et faux verrouillages</td><td>0 faux verrouillage sur 100 min</td></tr>
+          <tr><td><b>F</b> Martine se penche</td><td>Se pencher, reculer à 1,2 m, se tourner : 30 gestes</td><td>Faux verrouillages</td><td>Au plus 1 sur 30</td></tr>
+          <tr><td><b>G</b> Ventilateur</td><td>Ventilateur USB 5 V à 1 et 2 m : salle vide, puis départs</td><td>Fausse présence, retard</td><td>Salle vide : jamais « présence » (V2)</td></tr>
+          <tr><td><b>H</b> Pannes</td><td>Débrancher le radar, l'USB, bloquer l'ESP32, fermer le programme, rejouer un vieux message</td><td>Temps pour voir la panne, action prise</td><td>Panne vue en ≤ 3 s ; jamais de session ouverte au-delà du délai du filet Windows</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="legende">Pas de câblage 230 V : le ventilateur est alimenté en USB. Les seuils de réussite sont des propositions : ils seront fixés avec le tuteur et l'enseignant avant les essais.</p>
+
+    <h3 style="margin:32px 0 12px">Recette : les tests du dossier</h3>
+    <div class="tests" id="tests"></div>
+    <p class="legende">Les tests encadrés en jaune ont été ajoutés le 23/11 pour couvrir le collègue qui s'assoit, les pannes et le verrouillage en boucle.</p>
+  </div>
+</section>
+
+<!-- 11 PLANNING -->
+<section id="planning">
+  <div class="wrap">
+    <div class="sec-head"><span class="num">11 · V1, V2, extensions et planning</span><h2>150 heures, dont 22 pour mesurer</h2></div>
+    <div class="grid3">
+      <div class="card"><span class="pill v1">V1 obligatoire</span>
+        <p style="margin-top:10px">Radar + ESP32, attente interne à 0 s, battement de cœur · programme Windows avec machine à états (armement, doute 2 s, verrou obligatoire, mode dégradé) · filet Windows par inactivité (stratégie locale) · enregistrement des trames · leurre HTTP · API Ubuntu minimale · captures Wireshark.</p></div>
+      <div class="card"><span class="pill v2">V2 visée</span>
+        <p style="margin-top:10px">HMAC-SHA256 + compteur · zone du siège (énergie de chaque porte, réglage sur la salle vide) · API authentifiée et chiffrée · file d'attente si Ubuntu tombe · qualification des événements du leurre · campagne de mesures avec incertitudes.</p></div>
+      <div class="card"><span class="pill ext">Extensions</span>
+        <p style="margin-top:10px">Repérer le moment où Martine se lève (hypothèse à tester, pas une promesse) · deuxième leurre basse interaction · mise en boîtier · domaine Active Directory et GPO (décision du 18/11).</p></div>
+    </div>
+    <div class="card" style="margin-top:20px">
+      <h3>Trois paliers avant d'agir sur le poste</h3>
+      <div class="grid3" style="margin-top:8px">
+        <p style="margin:0"><b>1. Simulation.</b> Le programme écrit « aurait verrouillé à 10:15:03 » sans rien faire. Idéal pour compter les faux verrouillages.</p>
+        <p style="margin:0"><b>2. Avertissement.</b> Pendant le doute, la LED du boîtier prévient. Martine peut bouger pour annuler, <b>avant</b> la décision seulement.</p>
+        <p style="margin:0"><b>3. Automatique.</b> Le programme verrouille seul. C'est le mode de la démonstration.</p>
+      </div>
+    </div>
+    <div class="grid2" style="margin-top:20px">
+      <div class="card stack">
+        <h3 style="margin:0">Répartition des heures</h3>
+        <div class="hrows" id="hours"></div>
+        <p class="muted" style="font-size:.88rem;margin:0">Estimation du TODO, à faire valider. Elle remplit les 150 h <b>sans marge</b> : à rééquilibrer à la première revue.</p>
+      </div>
+      <div class="tablebox" style="padding:14px">
+        <div class="gantt" role="img" aria-label="Planning du 1er janvier au 15 mai">
+          <span></span><span class="h">janv.</span><span class="h">févr.</span><span class="h">mars</span><span class="h">avril</span><span class="h">mai</span>
+          <span class="rl">Radar, programme</span><span class="g" style="grid-column:2/3;background:var(--vert)"></span><span style="grid-column:3/7"></span>
+          <span class="rl">Leurre, API</span><span></span><span class="g" style="grid-column:3/5;background:var(--vert)"></span><span style="grid-column:5/7"></span>
+          <span class="rl">Mesures, physique</span><span style="grid-column:2/4"></span><span class="g" style="grid-column:4/6;background:var(--jaune-fonce)"></span><span></span>
+          <span class="rl">Recette V1</span><span style="grid-column:2/5"></span><span class="g" style="grid-column:5/6;background:var(--encre)"></span><span></span>
+          <span class="rl">V2, dossier, oral</span><span style="grid-column:2/5"></span><span class="g" style="grid-column:5/7;background:var(--bleu)"></span>
+        </div>
+        <p class="muted" style="font-size:.85rem;margin:10px 0 0">Du 1er janvier au 15 mai. Les dates des revues sont fixées par le lycée.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 12 VIE PRIVÉE, LIMITES -->
+<section id="limites">
+  <div class="wrap">
+    <div class="sec-head"><span class="num">12 · Vie privée et limites</span><h2>On protège un poste, on ne surveille pas une personne</h2></div>
+    <div class="limits">
+      <div class="card"><h3>Limites assumées</h3>
+        <ul>
+          <li>Le radar <b>ne reconnaît personne</b>. Il ne sait pas si c'est Martine.</li>
+          <li>Un collègue qui s'assoit en moins de 3 s, ou sans coupure, n'est pas détecté.</li>
+          <li>Une connexion au leurre n'est <b>pas une preuve d'attaque</b> : un inventaire autorisé peut la provoquer.</li>
+          <li>Prototype de laboratoire : aucun déploiement à la DGFiP, aucun accès au réseau réel.</li>
+        </ul></div>
+      <div class="card"><h3>Données et vie privée</h3>
+        <ul>
+          <li>Pas de caméra, pas de micro, pas de reconnaissance de personne.</li>
+          <li>Pas d'historique nominatif des présences, pas de durée d'absence enregistrée.</li>
+          <li>Journaux techniques courts : pannes, messages refusés, accès au leurre.</li>
+          <li>Le leurre ne collecte ni mot de passe ni fichier.</li>
+        </ul></div>
+      <div class="card"><h3>Pour un vrai essai en entreprise</h3>
+        <ul>
+          <li>Accord écrit du service, avis de la sécurité informatique et du délégué à la protection des données.</li>
+          <li>Information des agents avant tout essai.</li>
+          <li>Matériel USB et radio autorisé sur les postes (conformité à vérifier).</li>
+          <li>Tester les droits Windows nécessaires sur un poste du service.</li>
+        </ul></div>
+      <div class="card"><h3>Ce qui reste à vérifier</h3>
+        <ul>
+          <li>Comment l'attente interne du radar agit sur l'état envoyé, et sa latence à 0 s.</li>
+          <li>Le rythme des trames et la version du firmware du module de Lorenzo.</li>
+          <li>La réception des événements « session verrouillée » en PowerShell.</li>
+          <li>Le délai du filet Windows actuellement appliqué dans le service.</li>
+        </ul></div>
+    </div>
+  </div>
+</section>
+
+<!-- 13 EN BREF -->
+<section id="en-bref" class="section-finale">
+  <div class="wrap">
+    <div class="sec-head"><span class="num">13 · En bref</span><h2>Ce qu'il faut retenir</h2></div>
+    <div class="grid2">
+      <div class="card"><h3>Le problème</h3><p>Des sessions restent ouvertes quand un agent oublie de verrouiller. Le filet Windows met plusieurs minutes.</p></div>
+      <div class="card"><h3>La solution</h3><p>Un radar voit que le siège se vide. Après 2 s de vide, le programme décide, mémorise et verrouille. Il ne déverrouille jamais.</p></div>
+      <div class="card"><h3>Ce qui est mesuré</h3><p>Le délai départ → verrouillage en trois parties, les faux verrouillages, le délai limite du collègue qui s'assoit, les pannes. Avec incertitudes.</p></div>
+      <div class="card"><h3>Ce qui n'est pas promis</h3><p>Reconnaître Martine, voir un relais sans coupure, prouver une intrusion avec le leurre. Le filet Windows reste toujours actif.</p></div>
+    </div>
+    <div class="links">
+      <a class="btn principal" href="../animation-radar/radar-verrouillage.html">Animation : le radar qui verrouille</a>
+      <a class="btn" href="../animation-leurre/leurre-esp32.html">Animation : le leurre ESP32</a>
+      <a class="btn" href="../animation-3d/maquette-3d.html">Maquette 3D</a>
+    </div>
+  </div>
+</section>
 </main>
-<footer><div class="wrap">CyberSentinel · Projet de Lorenzo · BTS CIEL E6 · Maquette pédagogique non déployée à la DGFiP. Dernière refonte : 20 novembre 2026.</div></footer>
+
+<footer>
+  <div class="wrap">CyberSentinel · Projet E6 de Lorenzo · BTS CIEL option A · session 2027. Maquette pédagogique, contexte anonymisé, non déployée à la DGFiP. Les valeurs marquées « exemple », « fictif » ou « à mesurer » seront remplacées par les mesures de Lorenzo. Mise à jour : 23 novembre 2026.</div>
+</footer>
+
 <script>
 (function(){
- 'use strict';
- var scenarios={
-  absence:{state:'Windows : session verrouillée',desc:'Le radar détecte une absence persistante. Le programme local vérifie le message signé puis verrouille la session, indépendamment d’Ubuntu.',log:'[10:15:00] ESP32   absence détectée\n[10:15:03] Windows  verrouillage local\n[10:15:04] Ubuntu   événement reçu'},
-  leurre:{state:'Ubuntu : accès au leurre à qualifier',desc:'Un poste de test consulte la fausse page d’administration HTTP. Le leurre relève la requête et transmet un événement technique. Cela ne prouve pas une intrusion.',log:'[10:24:12] 10.10.0.73 -> 10.10.0.80:80\n[10:24:12] Leurre   GET /admin (fictif)\n[10:24:13] Ubuntu   événement reçu\n[10:24:13] Statut   à qualifier'},
-  legitime:{state:'Ubuntu : découverte autorisée, faux positif possible',desc:'Un inventaire réseau autorisé peut interroger le leurre : il faut distinguer observation et menace avant toute escalade.',log:'[11:08:02] Inventaire réseau autorisé\n[11:08:03] Leurre    HTTP GET /\n[11:08:03] Statut    vérification nécessaire'},
-  panne:{state:'Windows : protection locale maintenue',desc:'La connexion à Ubuntu est coupée. Le verrouillage fonctionne toujours côté Windows. Les événements réseau sont à mettre en attente si leur transmission échoue.',log:'[11:42:00] Réseau    liaison Ubuntu perdue\n[11:42:03] Windows   verrouillage local\n[11:42:03] Journal   en attente de reprise'}
- };
- var btns=[].slice.call(document.querySelectorAll('[data-scenario]'));
- function show(key){
-  var d=scenarios[key];if(!d)return;
-  document.getElementById('scenario-state').textContent=d.state;
-  document.getElementById('scenario-desc').textContent=d.desc;
-  document.getElementById('scenario-log').textContent=d.log;
-  btns.forEach(function(b){b.setAttribute('aria-pressed',String(b.dataset.scenario===key));});
- }
- btns.forEach(function(b){b.addEventListener('click',function(){show(b.dataset.scenario);});});
- show('absence');
+  'use strict';
+  var reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function $(s){return document.querySelector(s);}
+  function fr(x,d){return (d===undefined?x:x.toFixed(d)).toString().replace('.',',');}
+  var NS='http://www.w3.org/2000/svg';
+  function el(tag,attrs,txt){var e=document.createElementNS(NS,tag);for(var k in attrs)e.setAttribute(k,attrs[k]);if(txt!==undefined)e.textContent=txt;return e;}
+
+  /* ---------- sommaire actif ---------- */
+  var links=[].slice.call(document.querySelectorAll('nav.toc a'));
+  if('IntersectionObserver' in window){
+    var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){links.forEach(function(l){l.classList.toggle('on',l.getAttribute('href')==='#'+e.target.id);});}});},{rootMargin:'-45% 0px -50% 0px'});
+    links.forEach(function(a){var s=document.querySelector(a.getAttribute('href'));if(s)io.observe(s);});
+  }
+
+  /* ---------- 1. barres d'exposition ---------- */
+  var ebars=[].slice.call(document.querySelectorAll('#expo .ebar i'));
+  function playExpo(){
+    ebars.forEach(function(b){b.style.transition='none';b.style.width='0';});
+    void document.body.offsetWidth;
+    ebars.forEach(function(b){b.style.transition='';var w=parseFloat(b.dataset.w);b.style.width=(w>0&&w<1.5?'6px':w+'%');});
+  }
+  $('#expoPlay').addEventListener('click',playExpo);
+  if(reduce||!('IntersectionObserver' in window)){playExpo();}
+  else{var oe=new IntersectionObserver(function(es){if(es[0].isIntersecting){playExpo();oe.disconnect();}},{threshold:.5});oe.observe($('#expo'));}
+
+  /* ---------- 4. journée de Martine ---------- */
+  var S=[
+    {k:'8 h 30',t:'Martine s’installe',b:'Elle déverrouille sa session. Le programme passe en « armement » : il ne peut pas verrouiller tant qu’il n’a pas vu Martine assise pendant 5 secondes. Cela évite un verrouillage en boucle si le radar la voit mal.',term:'[08:30:02] Windows    session déverrouillée\n[08:30:02] programme  armement : j’attends de voir Martine\n[08:30:07] programme  siège occupé depuis 5 s → surveillance'},
+    {k:'10 h 15',t:'Martine part sans verrouiller',b:'Elle va chercher un document à l’imprimante et oublie Win + L. Le radar voit le siège vide une seconde après. Le programme attend 2 secondes pour être sûr, puis décide : verrou obligatoire.',term:'[10:15:00] Martine    se lève et part\n[10:15:01] radar      siège vide\n[10:15:01] programme  doute : j’attends 2 s\n[10:15:03] programme  VERROU OBLIGATOIRE (décision mémorisée)\n[10:15:03] Windows    session verrouillée (0,5 s plus tard)'},
+    {k:'10 h 15 + 7 s',t:'Un collègue s’assoit',b:'Le radar voit de nouveau quelqu’un. La décision est déjà prise : la session reste verrouillée. Le radar ne déverrouille jamais : il faut le mot de passe de Martine.',term:'[10:15:07] radar      quelqu’un sur le siège\n[10:15:07] programme  état « verrouillé » : je ne fais rien\n[10:15:07] Windows    écran de connexion affiché'},
+    {k:'11 h 00',t:'Martine lit sans bouger',b:'Elle lit un long document sans toucher au clavier. Le radar voit les petits mouvements de sa respiration. Un instant, il la perd : le programme doute, puis la retrouve avant 2 secondes et annule.',term:'[11:04:12] radar      siège vide (respiration perdue)\n[11:04:12] programme  doute : j’attends 2 s\n[11:04:13] radar      quelqu’un sur le siège\n[11:04:13] programme  présence revenue : j’annule\n           → aucun faux verrouillage'},
+    {k:'14 h 00',t:'Quelqu’un interroge la fausse imprimante',b:'Le PC de test ouvre la page du leurre, puis demande /admin. Le leurre note l’heure, l’adresse IP et le chemin, et prévient le serveur. Le technicien voit un événement « à qualifier ». Il n’est relié ni à Martine ni à son absence.',term:'[14:00:12] 10.10.0.73 → 10.10.0.80:80  GET /\n[14:00:15] 10.10.0.73 → 10.10.0.80:80  GET /admin\n[14:00:15] leurre     événement envoyé au serveur\n[14:00:16] Ubuntu     statut : à qualifier'},
+    {k:'15 h 00',t:'Le serveur Ubuntu tombe en panne',b:'Les événements ne partent plus : ils attendent. Le verrouillage, lui, marche toujours : il ne dépend que du boîtier et du PC.',term:'[15:00:00] réseau     serveur Ubuntu injoignable\n[15:00:00] programme  événements mis en attente\n[15:12:40] Martine    se lève et part\n[15:12:43] Windows    session verrouillée (sans le serveur)'},
+    {k:'16 h 30',t:'Le câble du boîtier est arraché',b:'Le PC ne reçoit plus rien. Après 2 secondes, il passe en mode dégradé et verrouille une fois. Ensuite, c’est le verrouillage par inactivité de Windows qui protège le poste, jusqu’à la réparation.',term:'[16:30:00] USB        boîtier débranché\n[16:30:02] programme  aucun message depuis 2 s → mode dégradé\n[16:30:02] programme  verrouillage de sécurité\n[16:30:02] programme  radar sans pouvoir ; filet Windows actif'}
+  ];
+  var list=$('#stepList'),scene=$('#scene'),cur=0;
+  S.forEach(function(s,i){var li=document.createElement('li');var b=document.createElement('button');b.type='button';b.innerHTML='<span class="k">'+s.k+'</span><span>'+s.t+'</span>';b.addEventListener('click',function(){go(i);});li.appendChild(b);list.appendChild(li);});
+  function go(i){
+    cur=Math.max(0,Math.min(S.length-1,i));
+    [].slice.call(list.querySelectorAll('button')).forEach(function(b,j){b.classList.toggle('on',j===cur);b.setAttribute('aria-current',j===cur?'step':'false');});
+    var s=S[cur];
+    scene.innerHTML='<p class="eyebrow">Étape '+(cur+1)+' / '+S.length+' · '+s.k+'</p><h3>'+s.t+'</h3><p>'+s.b+'</p><pre class="term"></pre>';
+    var pre=scene.querySelector('pre');
+    if(reduce){pre.textContent=s.term;}
+    else{var lines=s.term.split('\n'),n=0;pre.textContent='';(function next(){if(n<lines.length&&scene.contains(pre)){pre.textContent+=(n?'\n':'')+lines[n++];setTimeout(next,380);}})();}
+    $('#stPrev').disabled=cur===0;$('#stNext').disabled=cur===S.length-1;
+  }
+  $('#stPrev').addEventListener('click',function(){go(cur-1);});
+  $('#stNext').addEventListener('click',function(){go(cur+1);});
+  go(0);
+
+  /* ---------- 5. architecture ---------- */
+  var D={
+    radar:{t:'Radar LD2410',s:'v1',role:'Envoie plusieurs fois par seconde (rythme à mesurer) : y a-t-il une cible qui bouge, une cible immobile, à quelle distance, avec quelle énergie. En mode « ingénierie », il donne aussi l’énergie de chacune de ses 9 portes de distance.',tech:'Radar 24 GHz, liaison série UART à 256 000 bauds, alimentation 5 V. Attente interne réglée à 0 s (5 s par défaut).',why:'Il voit du mouvement, pas une personne : il ne sait pas si c’est Martine.'},
+    esp1:{t:'ESP32 n° 1 (boîtier radar)',s:'v1',role:'Lit les trames du radar, réactive le mode ingénierie à chaque démarrage, calcule « siège occupé ou vide » et envoie un message au PC plusieurs fois par seconde, même quand rien ne change (battement de cœur).',tech:'ESP32, programme embarqué, chien de garde matériel. En V2 : HMAC-SHA256 + compteur sur chaque message.',why:'S’il se tait, le PC le remarque en 2 s. « Pas de nouvelles » n’est jamais « présence ».'},
+    pc:{t:'PC Windows 11 de test',s:'v1',role:'Le programme de Lorenzo reçoit les messages, fait tourner la machine à états et verrouille la session. Il journalise chaque décision et suit l’état réel de Windows.',tech:'PowerShell, port série, appel LockWorkStation répété jusqu’à confirmation, lancé par une tâche planifiée à l’ouverture de session (un service Windows ne peut pas verrouiller la session de l’utilisateur). Stratégie locale : verrouillage après inactivité.',why:'Tout se décide ici, sans attendre le réseau. Si le programme s’arrête, Windows verrouille quand même après quelques minutes.'},
+    sw:{t:'Switch du labo (réseau isolé)',s:'v1',role:'Relie le PC Windows, le serveur, le leurre et le PC de test, sur un réseau séparé de celui du lycée.',tech:'Switch HP ProCurve du lycée, exploité tel quel. Adresses d’exemple en 10.10.0.0/24.',why:'Lorenzo exploite le réseau en place (C10). Il ne configure ni VLAN ni ACL : ce serait l’épreuve E5.'},
+    ub:{t:'Serveur Ubuntu',s:'v1',role:'Reçoit les événements techniques (boîtier muet, message refusé, accès au leurre), les horodate, les range et les affiche sur un tableau de bord.',tech:'Ubuntu Server, API Python, SQLite, tableau de bord web, NTP. En V2 : HTTPS authentifié et file d’attente.',why:'Il n’est pas sur le chemin du verrouillage : s’il tombe, les postes se verrouillent toujours.'},
+    leurre:{t:'Leurre : ESP32 n° 2 + W5500',s:'v1',role:'Fait semblant d’être une imprimante réseau. Personne n’a de raison de s’y connecter : une connexion est donc un signal à examiner.',tech:'ESP32 + carte Ethernet W5500, page HTTP minimale sur le port 80, journal : heure, IP source, chemin demandé.',why:'Faible interaction : pas de vrai service, pas d’identifiant collecté. Un accès n’est pas une preuve d’attaque.'},
+    test:{t:'PC de test',s:'v1',role:'Joue les visiteurs du leurre : une consultation de la page, un chemin « /admin », un inventaire réseau autorisé.',tech:'Navigateur, curl, outil d’inventaire autorisé, uniquement sur le réseau isolé.',why:'Permet de mesurer combien de requêtes sont vues et combien d’alertes sont fausses.'}
+  };
+  var SL={v1:['v1','V1 obligatoire'],v2:['v2','V2 visée'],ext:['ext','Extension']};
+  var det=$('#detail'),nodes=[].slice.call(document.querySelectorAll('#archi .node'));
+  function showNode(k){var d=D[k];nodes.forEach(function(n){n.classList.toggle('sel',n.dataset.k===k);});
+    det.innerHTML='<span class="pill '+SL[d.s][0]+'">'+SL[d.s][1]+'</span><h3 style="margin-top:10px">'+d.t+'</h3><p>'+d.role+'</p><dl><dt>Techno</dt><dd>'+d.tech+'</dd><dt>À retenir</dt><dd>'+d.why+'</dd></dl>';}
+  nodes.forEach(function(n){n.setAttribute('role','button');n.setAttribute('aria-label',D[n.dataset.k].t);n.addEventListener('click',function(){showNode(n.dataset.k);});n.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();showNode(n.dataset.k);}});});
+  showNode('pc');
+  var pk=$('#pkts');
+  var routes=[{d:'M150 120 V178',c:'pk',dur:900,off:0},{d:'M150 258 V318',c:'pk',dur:900,off:450},{d:'M500 140 V338',c:'pk alt',dur:2200,off:0},{d:'M600 360 H650 V100 H718',c:'pk alt',dur:2400,off:900},{d:'M840 140 V338',c:'pk alt',dur:1800,off:1800},{d:'M270 375 H398',c:'pk',dur:1800,off:300},{d:'M600 395 H718',c:'pk',dur:1600,off:1200}];
+  routes.forEach(function(r){r.p=el('path',{d:r.d,fill:'none',stroke:'none'});r.c=el('circle',{r:6,'class':r.c});pk.appendChild(r.p);pk.appendChild(r.c);r.L=r.p.getTotalLength();});
+  function placeAt(r,t){var pt=r.p.getPointAtLength(r.L*t);r.c.setAttribute('cx',pt.x);r.c.setAttribute('cy',pt.y);}
+  if(reduce){routes.forEach(function(r){placeAt(r,.5);});}
+  else{var ta=null;(function tick(ts){if(ta===null)ta=ts;routes.forEach(function(r){var t=((ts-ta+r.off)%r.dur)/r.dur;placeAt(r,t);r.c.style.opacity=(t<.05||t>.95)?0:1;});requestAnimationFrame(tick);})(performance.now());}
+
+  /* ---------- 6. simulateur de la machine à états ---------- */
+  var P={L:1,TD:2,TW:.5,HOLD:5,TC:5,THB:2,TMAX:24,DT:.05};
+  var delta=4;
+  var SC={
+    A:{nom:'Départ normal',dep:3,pres:[[0,3]],det:[[0,3]],intro:'Martine se lève à 3 s et quitte le bureau.'},
+    B:{nom:'Chaise qui roule',dep:3,pres:[[0,3]],det:[[0,3]],other:{lab:'Chaise qui roule',iv:[[3,7]],seat:true,ev:'la chaise roule encore'},intro:'Martine part à 3 s en poussant sa chaise, qui roule et pivote jusqu’à 7 s.'},
+    C:{nom:'Collègue qui passe',dep:3,pres:[[0,3]],det:[[0,3]],other:{lab:'Collègue à 2 m',iv:[[4.5,6.5]],seat:false,ev:'un collègue passe à 2 m'},intro:'Martine part à 3 s. Un collègue passe derrière, à 2 m, entre 4,5 et 6,5 s.'},
+    D:{nom:'Collègue qui s’assoit',dep:3,pres:[[0,3]],det:[[0,3]],other:{lab:'Collègue assis',iv:null,seat:true,ev:'le collègue s’assoit'},intro:''},
+    E:{nom:'Lecture immobile',dep:null,stays:true,pres:[[0,24]],det:[[0,8],[9.2,24]],intro:'Martine lit sans bouger pendant tout l’essai. Entre 8 et 9,2 s, le radar perd un instant sa respiration.',phys:[[8,'le radar perd la respiration de Martine'],[9.2,'le radar retrouve sa respiration']]},
+    F:{nom:'Martine se penche',dep:null,stays:true,pres:[[0,24]],det:[[0,6],[8.5,24]],intro:'Martine se penche pour ramasser un dossier : elle sort de la zone du radar de 6 à 8,5 s.',phys:[[6,'Martine se penche, hors de la zone'],[8.5,'Martine se redresse']]},
+    G:{nom:'Ventilateur',dep:3,pres:[[0,3]],det:[[0,3]],other:{lab:'Ventilateur à 2 m',iv:[[0,24]],seat:false,ev:''},intro:'Un ventilateur tourne à 2 m pendant tout l’essai. Martine part à 3 s.'},
+    H:{nom:'Boîtier débranché',dep:8,pres:[[0,8]],det:[[0,8]],lost:4,intro:'Le câble USB du boîtier est arraché à 4 s. Martine part à 8 s.'}
+  };
+  var STN={classic:'Radar seul, minuteur classique',fsm:'Machine à états (V1)',zone:'Machine à états + zone du siège (V2)'};
+  function inIv(iv,t){for(var i=0;i<iv.length;i++){if(t>=iv[i][0]-1e-9&&t<iv[i][1]-1e-9)return true;}return false;}
+  function otherIv(k){var o=SC[k].other;if(!o)return [];return k==='D'?[[3+delta,P.TMAX+1]]:o.iv;}
+
+  function simulate(k,s){
+    var sc=SC[k],N=Math.round(P.TMAX/P.DT)+1,oth=otherIv(k);
+    var useO=!!sc.other&&(s!=='zone'||sc.other.seat);
+    var hold=s==='classic'?P.L+P.HOLD:P.L;
+    var last=0,st='P',t0=0,tl=0,tx=0,prevO=true,lockAt=null;
+    var R={O:[],S:[],W:[],link:[],ev:[]};
+    function ev(t,who,txt){R.ev.push([t,who,txt]);}
+    for(var i=0;i<N;i++){
+      var t=Math.round(i*P.DT*100)/100;
+      var raw=inIv(sc.det,t)||(useO&&inIv(oth,t));
+      if(raw)last=t;
+      var o=(t-last)<hold-1e-9;
+      var linkOk=!(sc.lost!=null&&t>=sc.lost);
+      if(linkOk&&o!==prevO&&i>0){ev(t,'radar',o?'quelqu’un dans la zone':'plus personne');}
+      prevO=o;
+      var before=st;
+      if(s==='classic'){
+        if(st==='P'){if(linkOk&&!o){st='M';t0=t;}}
+        else if(st==='M'){if(linkOk&&o){st='P';}else if(t-t0>=P.TC-1e-9){st='L';tl=t;}}
+        else if(st==='L'){if(t-tl>=P.TW-1e-9){st='V';}}
+      }else{
+        var muet=!linkOk&&(t-sc.lost)>=P.THB-1e-9;
+        if(st==='P'){if(muet){st='X';tx=t;}else if(linkOk&&!o){st='D';t0=t;}}
+        else if(st==='D'){if(muet){st='X';tx=t;}else if(linkOk&&o){st='P';}else if(t-t0>=P.TD-1e-9){st='L';tl=t;}}
+        else if(st==='X'){if(t-tx>=.25-1e-9){st='L';tl=t;}}
+        else if(st==='L'){if(t-tl>=P.TW-1e-9){st='V';}}
+      }
+      if(st!==before){
+        var m={'P>M':'absence annoncée : minuteur de 5 s','M>P':'présence : minuteur annulé','M>L':'5 s écoulées : verrouillage demandé','P>D':'doute : j’attends 2 s','D>P':'présence revenue : j’annule','D>L':'VERROU OBLIGATOIRE (décision mémorisée)','P>X':'aucun message depuis 2 s : mode dégradé','D>X':'aucun message depuis 2 s : mode dégradé','X>L':'verrouillage de sécurité','L>V':''};
+        var key=before+'>'+st;
+        if(key==='L>V'){ev(t,'Windows','session verrouillée');lockAt=t;}
+        else ev(t,'programme',m[key]||key);
+      }
+      R.O.push(linkOk?(o?1:0):-1);R.S.push(st);R.W.push(st==='V'?1:0);
+    }
+    if(sc.dep!=null)ev(sc.dep,'Martine','quitte son poste');
+    if(sc.lost!=null){ev(sc.lost,'USB','câble du boîtier arraché');}
+    if(sc.other&&sc.other.ev){var a=oth[0][0];if(a>0&&a<P.TMAX){var txt=sc.other.ev;if(k==='D'||k==='C'){var iL=Math.round(a/P.DT);if(R.S[iL]==='V'||R.S[iL]==='L')txt+=' : trop tard, la décision est prise';else if(!useO)txt+=' : hors de la zone du siège, ignoré';}ev(a,'scène',txt);}}
+    if(sc.phys)sc.phys.forEach(function(p){ev(p[0],'scène',p[1]);});
+    if(s==='classic'&&sc.lost!=null)ev(sc.lost+.01,'programme','plus de message : je garde la dernière info (« présence »)');
+    R.ev.sort(function(a,b){return a[0]-b[0];});
+    R.lockAt=lockAt;R.useO=useO;
+    return R;
+  }
+  function verdict(k,s,R){
+    var sc=SC[k];
+    if(sc.stays){
+      return R.lockAt!=null?{ok:false,v:'Faux verrouillage à '+fr(R.lockAt,1)+' s ✘',x:'Martine était là. Elle doit retaper son mot de passe : si cela arrive souvent, les agents débrancheront le boîtier.',c:'✘ faux verrou'}
+                           :{ok:true,v:'Aucun faux verrouillage ✔',x:s==='classic'?'Le long délai interne du radar masque les petites pertes de signal.':'Le programme a douté, puis Martine est revenue dans la zone avant 2 s : il a annulé.',c:'✔ aucun'};
+    }
+    if(k==='H'){
+      return R.lockAt!=null?{ok:true,v:'Verrouillage de sécurité à '+fr(R.lockAt,2)+' s ✔',x:'Le boîtier ne répond plus : le programme ne croit plus à la présence. Martine retape son mot de passe, mais la panne est visible et la session n’est jamais laissée ouverte.',c:'✔ '+fr(R.lockAt,1)+' s'}
+                           :{ok:false,v:'Session ouverte ✘',x:'Le programme croit encore que Martine est là, car le dernier message disait « présence ». Seul le verrouillage par inactivité de Windows fermera la session.',c:'✘ ouverte'};
+    }
+    if(R.lockAt!=null){var dl=R.lockAt-sc.dep,x;
+      if(k==='D')x='Le collègue est arrivé après la décision : elle ne s’annule pas.';
+      else if((k==='G'||k==='C')&&s==='zone')x='Ce qui bouge hors de la zone du siège est ignoré.';
+      else if(k==='B')x='La chaise qui roule ressemble à une présence : elle retarde le verrou.';
+      else if(k==='C')x='Le passant a relancé l’attente : le verrou arrive plus tard.';
+      else x=s==='classic'?'Le radar attend 5 s avant d’annoncer « personne », puis le minuteur ajoute 5 s.':'Siège vide 1 s après le départ, 2 s de doute, puis Windows confirme.';
+      return {ok:true,v:'Verrouillé '+fr(dl,1)+' s après le départ ✔',x:x,c:'✔ '+fr(dl,1)+' s'};}
+    var why={classic:'Toute présence relance le minuteur.',fsm:'Le radar n’a jamais vu le siège vide assez longtemps.',zone:'Le radar n’a jamais vu le siège vide assez longtemps.'}[s];
+    if(k==='G'&&s!=='zone')why='Le ventilateur bouge en permanence : pour le radar, il y a toujours quelqu’un.';
+    if(k==='D')why=s==='classic'?'Le collègue s’est assis avant que le radar annonce « personne ». Le radar ne sait pas que ce n’est pas Martine.':'Le collègue s’est assis avant la fin du doute (ou sans coupure). Le radar ne sait pas que ce n’est pas Martine.';
+    return {ok:false,v:'Session encore ouverte à '+P.TMAX+' s ✘',x:why+' Filet : le verrouillage par inactivité de Windows.',c:'✘ ouverte'};
+  }
+
+  /* --- dessin de la machine à états --- */
+  var FSM={
+    fsm:{nodes:[['A','Armement','vu 5 s avant',8,20],['P','Présence','surveillance',178,20],['D','Doute','2 s',348,20],['L','Verrou','obligatoire',518,20],['V','Verrouillé','par Windows',518,140],['X','Dégradé','boîtier muet',178,140]],
+      edges:[['M136 40 H176','vu 5 s',156,33],['M306 38 H346','vide',326,31],['M348 60 H308','revient',328,73],['M476 47 H516','2 s',496,40],['M582 74 V138','confirmé',616,110],['M242 74 V138','muet',266,110],['M306 167 H516','1 verrou',411,160],['M582 194 V214 H72 V76','déverrouillage par Martine → armement',300,209]],
+      note:'Depuis tout état : Win + L ou le filet Windows mènent à « Verrouillé ». Le radar n’a aucune flèche vers le déverrouillage.'},
+    classic:{nodes:[['P','Présence','',60,60],['M','Minuteur','5 s',264,60],['L','Demande','envoyée',468,30],['V','Verrouillé','par Windows',468,130]],
+      edges:[['M188 80 H262','absence',225,73],['M264 102 H190','présence',227,116],['M392 80 H466','5 s',429,73],['M532 84 V128','',0,0]],
+      note:'Toute présence, même un collègue ou une chaise, annule le minuteur. Le radar lui-même attend déjà 5 s avant d’annoncer « personne ».'}
+  };
+  var fsmSvg=$('#fsm');
+  function drawFsm(kind){
+    var f=FSM[kind==='classic'?'classic':'fsm'];
+    while(fsmSvg.firstChild)fsmSvg.removeChild(fsmSvg.firstChild);
+    var defs=el('defs',{});var mk=el('marker',{id:'fa',viewBox:'0 0 10 10',refX:9,refY:5,markerWidth:7,markerHeight:7,orient:'auto'});mk.appendChild(el('path',{d:'M0 0L10 5L0 10z',style:'fill:var(--encre-2)'}));defs.appendChild(mk);fsmSvg.appendChild(defs);
+    f.edges.forEach(function(e){fsmSvg.appendChild(el('path',{d:e[0],'class':'ed','marker-end':'url(#fa)'}));if(e[1])fsmSvg.appendChild(el('text',{x:e[2],y:e[3],'class':'el','text-anchor':'middle'},e[1]));});
+    f.nodes.forEach(function(n){var g=el('g',{'class':'st','data-s':n[0],transform:'translate('+n[3]+','+n[4]+')'});g.appendChild(el('rect',{width:128,height:54,rx:12}));g.appendChild(el('text',{x:64,y:24,'text-anchor':'middle'},n[1]));g.appendChild(el('text',{x:64,y:41,'text-anchor':'middle','class':'s2'},n[2]));fsmSvg.appendChild(g);});
+    $('#fsmTitle').textContent=kind==='classic'?'Minuteur classique':'Machine à états du programme';
+    $('#fsmNote').textContent=f.note;
+  }
+  function lightFsm(st){[].slice.call(fsmSvg.querySelectorAll('.st')).forEach(function(g){g.classList.toggle('on',g.dataset.s===st);});}
+
+  /* --- chronogramme --- */
+  var ch=$('#chrono'),X0=180,X1=884,SCL=(X1-X0)/P.TMAX,ROWS=[22,62,102,142,182],RH=26;
+  var SCOL={P:['var(--vert-pale)','var(--encre)','présence'],M:['var(--jaune)','var(--encre)','minuteur'],D:['var(--jaune)','var(--encre)','doute'],L:['var(--rouge-pale)','var(--rouge-texte)','verrou'],V:['var(--encre)','var(--papier)','verrouillé'],X:['var(--papier-2)','var(--encre)','dégradé']};
+  var clipR,cursor,curState={k:'A',s:'fsm'},R=null,raf=null;
+  function seg(g,y,a,b,fill,txt,tcol,stroke){var w=(b-a)*SCL;if(w<=0)return;g.appendChild(el('rect',{x:X0+a*SCL,y:y,width:w,height:RH,rx:4,style:'fill:'+fill+(stroke?';stroke:'+stroke:'')}));if(txt&&w>46)g.appendChild(el('text',{x:X0+a*SCL+w/2,y:y+17,'text-anchor':'middle',style:'fill:'+tcol+';font-weight:800;font-size:11.5px'},txt));}
+  function runs(arr){var out=[],st=0;for(var i=1;i<=arr.length;i++){if(i===arr.length||arr[i]!==arr[st]){out.push([arr[st],st*P.DT,Math.min(i*P.DT,P.TMAX)]);st=i;}}return out;}
+  function drawChrono(k,s){
+    var sc=SC[k];
+    while(ch.firstChild)ch.removeChild(ch.firstChild);
+    var defs=el('defs',{});var cp=el('clipPath',{id:'reveal'});clipR=el('rect',{x:0,y:0,width:X1+10,height:236});cp.appendChild(clipR);defs.appendChild(cp);ch.appendChild(defs);
+    var labs=['Martine au poste',sc.other?sc.other.lab:'Autre mouvement','Radar : quelqu’un ?','Programme','Windows'];
+    labs.forEach(function(l,i){ch.appendChild(el('text',{x:4,y:ROWS[i]+17,'class':'rl'},l));ch.appendChild(el('line',{x1:X0,x2:X1,y1:ROWS[i]+RH+5,y2:ROWS[i]+RH+5,'class':'ax'}));});
+    for(var t=0;t<=P.TMAX;t+=2){ch.appendChild(el('text',{x:X0+t*SCL,y:230,'class':'tk','text-anchor':'middle'},t+' s'));}
+    var g=el('g',{'clip-path':'url(#reveal)'});ch.appendChild(g);
+    // fenêtre de vulnérabilité (D)
+    if(k==='D'&&s!=='classic'){var w0=sc.dep,w1=sc.dep+P.L+P.TD;g.appendChild(el('rect',{x:X0+w0*SCL,y:ROWS[1]-4,width:(w1-w0)*SCL,height:RH+8,rx:4,'class':'win'}));g.appendChild(el('text',{x:X0+w1*SCL+4,y:ROWS[1]-6,'class':'wint'},'fenêtre de 3 s'));}
+    sc.pres.forEach(function(iv){seg(g,ROWS[0],iv[0],Math.min(iv[1],P.TMAX),'var(--encre-2)','présente','var(--papier)');});
+    otherIv(k).forEach(function(iv){seg(g,ROWS[1],iv[0],Math.min(iv[1],P.TMAX),R.useO?'var(--bleu)':'var(--bleu-pale)',R.useO?sc.other.lab.split(' ')[0].toLowerCase():'ignoré (hors zone)','var(--encre)',R.useO?null:'var(--contour)');});
+    runs(R.O).forEach(function(r){if(r[0]===1)seg(g,ROWS[2],r[1],r[2],'var(--jaune)','oui','var(--encre)');else if(r[0]===-1)seg(g,ROWS[2],r[1],r[2],'var(--papier-2)','aucun message','var(--encre-2)','var(--contour)');});
+    runs(R.S).forEach(function(r){var c=SCOL[r[0]];seg(g,ROWS[3],r[1],r[2],c[0],c[2],c[1],r[0]==='X'?'var(--contour)':null);});
+    runs(R.W).forEach(function(r){if(r[0]===1)seg(g,ROWS[4],r[1],r[2],'var(--encre)','verrouillée','var(--papier)');else seg(g,ROWS[4],r[1],r[2],'var(--blanc)','ouverte','var(--encre-2)','var(--contour)');});
+    if(sc.dep!=null){ch.appendChild(el('line',{x1:X0+sc.dep*SCL,x2:X0+sc.dep*SCL,y1:12,y2:212,'class':'dep'}));ch.appendChild(el('text',{x:X0+sc.dep*SCL+3,y:11,'class':'dept'},'départ'));}
+    if(sc.lost!=null){ch.appendChild(el('line',{x1:X0+sc.lost*SCL,x2:X0+sc.lost*SCL,y1:12,y2:212,'class':'dep'}));ch.appendChild(el('text',{x:X0+sc.lost*SCL+3,y:11,'class':'dept'},'câble arraché'));}
+    cursor=el('line',{x1:X0,x2:X0,y1:14,y2:212,'class':'cur'});ch.appendChild(cursor);
+  }
+  function logUpTo(t){
+    var out=R.ev.filter(function(e){return e[0]<=t+1e-6;}).map(function(e){var w=(e[1]+'          ').slice(0,10);return '['+(e[0]<10?'0':'')+fr(e[0],2)+' s] '+w+' '+e[2];});
+    $('#simLog').textContent=out.join('\n')||'[00,00 s] Martine travaille à son poste';
+  }
+  function setT(t){
+    var x=X0+t*SCL;clipR.setAttribute('width',x);cursor.setAttribute('x1',x);cursor.setAttribute('x2',x);
+    var i=Math.min(R.S.length-1,Math.round(t/P.DT));var st=R.S[i];lightFsm(curState.s==='classic'&&st==='P'?'P':st);
+    logUpTo(t);
+  }
+  function play(){
+    cancelAnimationFrame(raf);
+    if(reduce){setT(P.TMAX);cursor.setAttribute('x1',X1);cursor.setAttribute('x2',X1);return;}
+    var start=null,dur=P.TMAX*250;
+    (function step(ts){if(start===null)start=ts;var t=Math.min(P.TMAX,(ts-start)/dur*P.TMAX);setT(t);if(t<P.TMAX)raf=requestAnimationFrame(step);})(performance.now());
+  }
+  function render(autoplay){
+    var k=curState.k,s=curState.s;
+    [].slice.call(document.querySelectorAll('[data-sc]')).forEach(function(b){b.setAttribute('aria-pressed',String(b.dataset.sc===k));});
+    [].slice.call(document.querySelectorAll('[data-st]')).forEach(function(b){b.setAttribute('aria-pressed',String(b.dataset.st===s));});
+    $('#dBox').hidden=k!=='D';
+    SC.D.intro='Martine part à 3 s. Un collègue s’assoit à sa place '+fr(delta)+' s plus tard. Faites glisser le curseur pour trouver le délai limite.';
+    $('#scIntro').innerHTML='<b>'+k+' · '+SC[k].nom+'.</b> '+SC[k].intro+' <span class="muted">Méthode : '+STN[s]+'.</span>';
+    R=simulate(k,s);
+    drawFsm(s);drawChrono(k,s);
+    var v=verdict(k,s,R);var ve=$('#verdict');ve.textContent=v.v;ve.className='v '+(v.ok?'ok':'ko');
+    var extra='';if(k==='D')extra=' Fenêtre de vulnérabilité de cette méthode : '+(s==='classic'?'≈ 11 s (attente radar 5 s + minuteur 5 s + 1 s)':'≈ 3 s (radar 1 s + doute 2 s)')+'.';
+    $('#verdictTxt').textContent=v.x+extra;
+    if(autoplay)play();else setT(P.TMAX);
+    renderRecap();
+  }
+  function renderRecap(){
+    var keys=['A','B','C','D','E','F','G','H'],sts=['classic','fsm','zone'];
+    var h='<thead><tr><th>Situation</th><th>Radar seul</th><th>Machine à états (V1)</th><th>+ zone du siège (V2)</th></tr></thead><tbody>';
+    keys.forEach(function(k){h+='<tr><td><b>'+k+'</b> '+SC[k].nom+(k==='D'?' ('+fr(delta)+' s)':'')+'</td>';sts.forEach(function(s){var v=verdict(k,s,simulate(k,s));h+='<td class="'+(v.ok?'ok':'ko')+'">'+v.c+'</td>';});h+='</tr>';});
+    $('#recap').innerHTML=h+'</tbody>';
+  }
+  [].slice.call(document.querySelectorAll('[data-sc]')).forEach(function(b){b.addEventListener('click',function(){curState.k=b.dataset.sc;render(true);});});
+  [].slice.call(document.querySelectorAll('[data-st]')).forEach(function(b){b.addEventListener('click',function(){curState.s=b.dataset.st;render(true);});});
+  $('#delta').addEventListener('input',function(e){delta=parseFloat(e.target.value);$('#deltaV').textContent=fr(delta)+' s';render(false);});
+  $('#simPlay').addEventListener('click',play);
+  render(false);
+  if(!reduce&&'IntersectionObserver' in window){var os=new IntersectionObserver(function(es){if(es[0].isIntersecting){play();os.disconnect();}},{threshold:.4});os.observe(ch);}
+
+  /* ---------- 7. sécurité ---------- */
+  var A=[
+    {t:'Un faux boîtier',d:'Un boîtier pirate envoie « présence » en boucle pour garder la session ouverte.',s:['Message reçu sur le port USB','Signature HMAC recalculée avec la clé secrète du vrai boîtier','Signature différente : message refusé'],v:'Message ignoré. Après plusieurs refus : mode dégradé et verrouillage.',test:'T04 · V2',stamp:'REFUSÉ'},
+    {t:'Un vieux message rejoué',d:'Quelqu’un a enregistré un vrai message « présence » et le renvoie plus tard.',s:['Message reçu, signature valide','Compteur lu : 1 041','Dernier compteur accepté : 1 187 → message trop vieux'],v:'Message refusé.',test:'T04 · V2',stamp:'REFUSÉ'},
+    {t:'Débrancher le boîtier',d:'Quelqu’un débranche le boîtier pour que le radar ne verrouille plus.',s:['Port USB disparu','Aucun message depuis 2 s','« Pas de nouvelles » n’est pas « présence » : mode dégradé'],v:'La session se verrouille une fois. Le filet Windows reste actif.',test:'T12 · V1',stamp:'VERROUILLÉ'},
+    {t:'Arrêter le programme',d:'Le programme de Lorenzo est fermé ou plante.',s:['Le programme ne tourne plus','Le radar ne peut plus rien faire','La stratégie Windows compte l’inactivité, sans le programme'],v:'Windows verrouille quand même après le délai d’inactivité, plus lentement.',test:'T13 · V1',stamp:'FILET'}
+  ];
+  var at=$('#attacks');
+  A.forEach(function(a){var c=document.createElement('div');c.className='card atk';
+    c.innerHTML='<div class="verdict"><h3>'+a.t+'</h3><span class="tst">'+a.test+'</span></div><p>'+a.d+'</p><ol>'+a.s.map(function(x,j){return '<li class="'+(j===a.s.length-1?'bad':'done')+'">'+x+'</li>';}).join('')+'</ol><div class="verdict"><span class="stamp">'+a.stamp+'</span><button class="btn petit" type="button">Lancer la tentative</button></div><p class="muted" style="font-size:.9rem">'+a.v+'</p>';
+    at.appendChild(c);
+    var lis=[].slice.call(c.querySelectorAll('li')),stp=c.querySelector('.stamp');
+    c.querySelector('button').addEventListener('click',function(){
+      lis.forEach(function(l){l.className='';});stp.style.visibility='hidden';stp.classList.remove('pop');
+      lis.forEach(function(l,j){setTimeout(function(){l.className=j===lis.length-1?'bad':'done';if(j===lis.length-1){stp.style.visibility='visible';void stp.offsetWidth;stp.classList.add('pop');}},reduce?0:500*(j+1));});
+    });
+  });
+
+  /* ---------- 8. physique ---------- */
+  var LAMBDA=12.4;
+  function wave(ph){var d='';for(var x=10;x<=410;x+=4){var y=72-36*Math.sin(2*Math.PI*(x-10)/100+ph);d+=(x===10?'M':'L')+x+' '+y.toFixed(1);}return d;}
+  $('#wRef').setAttribute('d',wave(0));
+  function upPhase(){var d=parseFloat($('#disp').value);var ph=4*Math.PI*d/LAMBDA;$('#dispV').textContent=fr(d,1)+' mm';$('#wRx').setAttribute('d',wave(-ph));$('#phaseV').textContent='Δφ = 4π × '+fr(d,1)+' / 12,4 = '+fr(ph,2)+' rad ≈ '+Math.round(ph*180/Math.PI)+'°';}
+  $('#disp').addEventListener('input',upPhase);upPhase();
+  var gs=$('#gates'),GX=44,GW=74,MART=0.6;
+  function upGates(){
+    var c=parseFloat($('#col').value);while(gs.firstChild)gs.removeChild(gs.firstChild);
+    var gm=Math.floor(MART/.75),gc=Math.min(8,Math.floor(c/.75));
+    for(var i=0;i<9;i++){gs.appendChild(el('rect',{x:GX+i*GW,y:40,width:GW,height:54,'class':'g '+(i===gm||i===gc?'hit':(i%2?'b':'a'))}));gs.appendChild(el('text',{x:GX+i*GW+GW/2,y:116,'text-anchor':'middle',style:'font-weight:800'},i));if(i%2===0)gs.appendChild(el('text',{x:GX+i*GW,y:142,'text-anchor':'middle'},fr(i*.75,1)+' m'));}
+    gs.appendChild(el('text',{x:2,y:116,style:'font-size:15px'},'porte'));
+    gs.appendChild(el('rect',{x:6,y:54,width:30,height:26,rx:4,'class':'rad'}));gs.appendChild(el('text',{x:4,y:30,style:'font-weight:800;fill:var(--encre)'},'radar'));
+    var xm=GX+MART/.75*GW,xc=GX+c/.75*GW;
+    gs.appendChild(el('circle',{cx:xm,cy:60,r:10,'class':'p pm'}));gs.appendChild(el('text',{x:xm+14,y:30,'text-anchor':'middle',style:'font-weight:800;fill:var(--encre)'},'Martine'));
+    gs.appendChild(el('circle',{cx:xc,cy:76,r:10,'class':'p pc'}));gs.appendChild(el('text',{x:Math.max(110,Math.min(660,xc)),y:170,'text-anchor':'middle',style:'font-weight:800;fill:var(--encre)'},'▲ collègue'));
+    $('#colV').textContent=fr(c,2)+' m';
+    $('#gateV').innerHTML=gc===gm?'<span class="texte-danger">Même porte que Martine : le radar ne voit qu’une seule cible.</span>':'Porte '+gc+' (Martine : porte '+gm+'). Deux portes différentes, mais le radar ne donne qu’<b>une</b> distance « mobile » et <b>une</b> distance « immobile » : il résume la scène.';
+  }
+  $('#col').addEventListener('input',upGates);upGates();
+  (function drawLat(){
+    var s=$('#lat'),ox=46,oy=212,sx=34,sy=15.5;
+    for(var d=0;d<=12;d+=2){s.appendChild(el('line',{x1:ox,x2:ox+10*sx,y1:oy-d*sy,y2:oy-d*sy,'class':'gr'}));s.appendChild(el('text',{x:ox-8,y:oy-d*sy+4,'text-anchor':'end'},d));}
+    [0,1,2,5,10].forEach(function(T){s.appendChild(el('text',{x:ox+T*sx,y:oy+16,'text-anchor':'middle'},T));});
+    s.appendChild(el('line',{x1:ox,y1:oy,x2:ox+10*sx+6,y2:oy,'class':'ax'}));s.appendChild(el('line',{x1:ox,y1:oy,x2:ox,y2:oy-12.6*sy,'class':'ax'}));
+    s.appendChild(el('text',{x:ox+5*sx,y:oy+34,'text-anchor':'middle'},'réglage T de l’attente interne (s)'));
+    s.appendChild(el('text',{x:12,y:16},'délai d mesuré (s)'));
+    s.appendChild(el('line',{x1:ox,y1:oy-1.1*sy,x2:ox+10*sx,y2:oy-11.1*sy,'class':'fit'}));
+    [[0,1.2,.25],[1,2.0,.3],[2,3.2,.3],[5,6.0,.35],[10,11.2,.4]].forEach(function(p){var x=ox+p[0]*sx,y=oy-p[1]*sy;s.appendChild(el('line',{x1:x,x2:x,y1:y-p[2]*2*sy,y2:y+p[2]*2*sy,'class':'eb'}));s.appendChild(el('circle',{cx:x,cy:y,r:4.5,'class':'pt'}));});
+    s.appendChild(el('text',{x:ox+5.4*sx,y:oy-3.4*sy,style:'fill:var(--rouge-texte);font-weight:800'},'d = 1,00 × T + 1,1 s'));
+    s.appendChild(el('text',{x:ox+5.4*sx,y:oy-2.3*sy,style:'fill:var(--rouge-texte)'},'(valeurs fictives)'));
+  })();
+
+  /* ---------- 10. barre des trois temps, recette ---------- */
+  var sb=[].slice.call(document.querySelectorAll('#stackbar div'));
+  function playSB(){sb.forEach(function(d,i){setTimeout(function(){d.style.width=d.dataset.w+'%';},reduce?0:i*900);});}
+  if(reduce||!('IntersectionObserver' in window))playSB();
+  else{var ob=new IntersectionObserver(function(es){if(es[0].isIntersecting){playSB();ob.disconnect();}},{threshold:.5});ob.observe($('#stackbar'));}
+  var T=[
+    ['T01','Martine part : session verrouillée après le délai défini','v1'],
+    ['T02','Martine lit sans toucher le clavier : pas de faux verrouillage','v1'],
+    ['T03','Un collègue passe dans la zone extérieure : pas de maintien abusif','v2'],
+    ['T04','Message falsifié ou rejoué : refusé, repli sur le filet Windows','v2'],
+    ['T05','Ubuntu indisponible : le verrouillage local fonctionne','v1'],
+    ['T06','GET / vers le leurre : événement reçu et affiché','v1'],
+    ['T07','GET /admin : événement à qualifier, pas une preuve d’attaque','v1'],
+    ['T08','Inventaire autorisé : événement classé bénin, faux positifs mesurés','v2'],
+    ['T09','Câble Ethernet du leurre débranché : indisponibilité signalée','v2'],
+    ['T10','API Ubuntu coupée : événements mis en attente puis rejoués','v2'],
+    ['T11','Un collègue s’assoit 4 s après le départ : la session se verrouille quand même','v1',1],
+    ['T12','Boîtier débranché ou muet : verrouillage une fois, mode dégradé','v1',1],
+    ['T13','Programme arrêté : le filet Windows verrouille au délai prévu','v1',1],
+    ['T14','Après déverrouillage : aucun verrouillage en boucle (armement)','v1',1]
+  ];
+  var tg=$('#tests');
+  T.forEach(function(t){var d=document.createElement('div');d.className='t'+(t[3]?' new':'');d.innerHTML='<span class="id">'+t[0]+'</span><span>'+t[1]+'</span><span class="pill '+t[2]+'">'+SL[t[2]][1]+'</span>';tg.appendChild(d);});
+
+  /* ---------- 11. heures ---------- */
+  var H=[['Analyse du besoin, état de l’art',12],['Montage et réglage du radar',18],['Programme Windows, verrouillage',22],['Leurre HTTP ESP32 + W5500',27],['API Ubuntu, tableau de bord',24],['Authentification, pannes',12],['Mesures, essais, physique',22,1],['Dossier, oral, recette',13]];
+  var hb=$('#hours');
+  H.forEach(function(h){var r=document.createElement('div');r.className='hrow';r.innerHTML='<span>'+h[0]+'</span><div><div class="b'+(h[2]?' ph':'')+'" data-w="'+(h[1]/27*100)+'"></div></div><span>'+h[1]+' h</span>';hb.appendChild(r);});
+  var hbs=[].slice.call(hb.querySelectorAll('.b'));
+  function playH(){hbs.forEach(function(b){b.style.width=b.dataset.w+'%';});}
+  if(reduce||!('IntersectionObserver' in window))playH();
+  else{var oh=new IntersectionObserver(function(es){if(es[0].isIntersecting){playH();oh.disconnect();}},{threshold:.4});oh.observe(hb);}
 })();
 </script>
-</body></html>
+</body>
+</html>

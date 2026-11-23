@@ -962,7 +962,7 @@ function tick(now) {
   autoQuality(now);
 }
 let frames = 0;
-/* qualité automatique : sur une petite carte graphique (PC du lycée), on retire le grain et les ombres */
+/* qualité automatique : sur une petite carte graphique (PC), on retire le grain et les ombres */
 const AQ = { t0: 0, n: 0, last: 0, done: LITE || Q.has('hq') };
 function autoQuality(now) {
   if (AQ.done) return;

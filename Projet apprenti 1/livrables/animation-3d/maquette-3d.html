@@ -563,7 +563,7 @@ const swFront = canvasTex(1760, 176, (g, w, h) => {
   const gr = g.createLinearGradient(0, 0, 0, h); gr.addColorStop(0, '#a3aab0'); gr.addColorStop(1, '#868d93');
   g.fillStyle = gr; g.fillRect(0, 0, w, h);
   g.fillStyle = '#20262c'; g.font = 'bold 34px Arial'; g.fillText('SWITCH 24 PORTS', 60, 80);
-  g.font = '24px Arial'; g.fillText('réseau du lycée (en place)', 60, 120);
+  g.font = '24px Arial'; g.fillText('réseau en place', 60, 120);
   for (let i = 0; i < 24; i++) {
     const p = portPx(i);
     g.fillStyle = '#111417'; g.fillRect(p.x - 28, p.y - 22, 56, 44);
@@ -717,7 +717,7 @@ const prnFrontTex = canvasTex(1040, 540, (g, w, h) => {
   g.fillStyle = '#8d9196'; rr(g, w / 2 - 110, 360, 220, 34, 14); g.fill();      // poignée
   g.fillStyle = '#b9bcc0'; g.fillRect(40, 270, w - 80, 4);
   g.fillStyle = '#5b6168'; g.font = `bold 34px ${FONT}`; g.fillText('LASER  RÉSEAU', 60, 80);
-  g.font = `24px ${FONT}`; g.fillStyle = '#7b8188'; g.fillText('imprimante de test du lycée', 60, 118);
+  g.font = `24px ${FONT}`; g.fillStyle = '#7b8188'; g.fillText('imprimante de test', 60, 118);
   g.fillStyle = '#b5b8bc'; for (let i = 0; i < 9; i++) g.fillRect(60 + i * 16, 180, 8, 60);   // aération
   g.fillStyle = '#5b6168'; g.font = `22px ${FONT}`; g.fillText('BAC 2', 60, 330);
   g.fillStyle = '#6b7178'; g.fillRect(w - 260, 470, 200, 10);                                   // jauge papier
@@ -1034,11 +1034,11 @@ function label(group, pos, title, sub, cls = '') {
 label('overview', W(prn, V(-14, 13, PRD.d / 2 + 1)), 'Imprimante réseau', 'SNMP 161 · IPP 631 · RAW 9100');
 label('overview', W(box, V(0, 12, 0)), 'Boîtier ESP32', 'vibration · humidité · bouton · écran');
 label('overview', V(-2, 24, -58), 'Point d\'accès Wi-Fi', 'réseau en place');
-label('overview', V(24, 9, -62), 'Switch du lycée', 'réseau en place');
+label('overview', V(24, 9, -62), 'Switch', 'réseau en place');
 label('overview', V(92, 50, -42), 'Serveur Ubuntu', 'Mosquitto · Python · CUPS · PostgreSQL · GLPI · Grafana');
 label('overview', W(lap.g, V(0, 27, -14)), 'PC de la secrétaire', 'Windows 11 · point d\'accès JEA');
 label('overview', V(54, 50, 6), 'Poste du technicien', 'GLPI et tableau de bord');
-label('overview', V(-22, 10, -60), 'Bloc USB 5 V', 'aucun câblage 230 V', 'small');
+label('overview', V(-22, 10, -60), '', '', 'small');
 label('boitier', W(esp, V(0.9, 0.7, 0)), 'ESP32 DevKit', 'Wi-Fi · MQTT/TLS · heure NTP', 'small');
 label('boitier', W(mpu, V(0, 0.5, 0)), 'MPU6050 (GY-521)', 'vibration · I²C 0x68', 'small');
 label('boitier', W(sht, V(0, 0.5, 0)), 'SHT31 (V2)', 'température, humidité · I²C 0x44', 'small');
@@ -1113,7 +1113,7 @@ function drawTech() {
     g.fillStyle = '#f3f6f7'; g.fillRect(0, 0, w, h);
     g.fillStyle = '#2a3a4a'; g.fillRect(0, 0, w, 66);
     g.fillStyle = '#fff'; g.font = `bold 30px ${FONT}`; g.fillText('GLPI · tickets', 26, 44);
-    g.fillStyle = '#9fd0ff'; g.font = `24px ${FONT}`; g.fillText('+ tableau de bord (Grafana)', 260, 44);
+    g.fillStyle = '#9fd0ff'; g.font = `24px ${FONT}`; g.fillText('+ tableau de bord', 260, 44);
     /* tickets */
     g.fillStyle = '#56656f'; g.font = `bold 22px ${FONT}`; g.fillText('N°', 30, 104); g.fillText('Ticket', 110, 104); g.fillText('État', 520, 104);
     if (!world.tickets.length) { g.fillStyle = '#6c7a84'; g.font = `24px ${FONT}`; g.fillText('Aucun ticket ouvert', 30, 150); }
