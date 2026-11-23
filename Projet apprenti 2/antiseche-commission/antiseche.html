@@ -8,7 +8,7 @@
   /* Antisèche A4 d'une page pour l'enseignant, commission académique de validation. Couleurs et polices : theme.css uniquement. */
   @page { size: A4 portrait; margin: 7mm 9mm 8mm 9mm; background: var(--papier);
     @bottom-center { content: "Antisèche de l'enseignant · Yaksan (apprenti 2) · usage interne, à ne pas joindre au dossier"; font: 6.4pt var(--police); color: var(--encre-3); } }
-  body { font-size: 7.75pt; line-height: 1.25; margin: 0; background: var(--papier); color: var(--encre); }
+  body { font-size: 7.45pt; line-height: 1.23; margin: 0; background: var(--papier); color: var(--encre); }
   @media screen { body { max-width: 210mm; margin: 0 auto; padding: 8mm 10mm; } }
   p { margin: 0 0 2.2pt; }
   ul { margin: 0; padding-left: 9pt; } li { margin: 0 0 1.3pt; }
@@ -23,7 +23,7 @@
   h2 .n { display: inline-block; background: var(--jaune); border: 0.6pt solid var(--encre); border-radius: 50%; width: 9pt; height: 9pt; line-height: 9pt; text-align: center; font-size: 6.4pt; margin-right: 3pt; }
   .cols { display: flex; gap: 8pt; }
   .col-g { width: 44%; } .col-d { width: 56%; }
-  .pitch { background: var(--blanc); border: 0.7pt solid var(--contour); border-left: 3pt solid var(--jaune); border-radius: 0 4pt 4pt 0; padding: 3pt 5pt; font-size: 7.9pt; }
+  .pitch { background: var(--blanc); border: 0.7pt solid var(--contour); border-left: 3pt solid var(--jaune); border-radius: 0 4pt 4pt 0; padding: 3pt 5pt; font-size: 7.6pt; }
   .pitch em { color: var(--encre-2); font-style: normal; font-weight: 800; }
   table { width: 100%; border-collapse: collapse; }
   th { background: var(--encre); color: var(--papier); font-weight: 800; text-align: left; padding: 1.8pt 3.5pt; font-size: 6.8pt; }
@@ -61,14 +61,14 @@
   <h2><span class="n">1</span>Le pitch (30 secondes)</h2>
   <div class="pitch">
     <p>Yaksan est au support d'un service RH d'une administration, sur un réseau <em>isolé d'Internet</em>. Deux plaintes reviennent : des <em>mises à jour obligatoires qui échouent</em>, et une <em>carte d'agent qui ne marche pas</em> à l'accès à la plateforme métier. Aujourd'hui, on répare à l'aveugle.</p>
-    <p>Quand un PC est coupé net ou forcé au bouton, Windows n'a rien pu écrire. Yaksan construit un <em>témoin extérieur</em> : un boîtier ESP32 relié en USB, sans ouvrir le PC, qui garde le récit des derniers instants. Des outils PowerShell croisent ce récit avec les journaux de Windows et donnent la <em>cause probable</em>, ou « non concluant ». Tout se fait sur une <em>maquette au lycée</em>.</p>
+    <p>Quand un portable est forcé au bouton, se fige ou s'éteint batterie vide, Windows n'a souvent rien pu écrire. Yaksan construit un <em>témoin extérieur</em> : un boîtier ESP32 relié en USB, sans ouvrir le PC, qui garde le récit des derniers instants. Des outils PowerShell croisent ce récit avec les journaux de Windows et donnent la <em>cause probable</em>, ou « non concluant ». Tout se fait sur une <em>maquette au lycée</em>.</p>
   </div>
 
   <h2><span class="n">2</span>Le projet en un coup d'œil</h2>
   <table>
     <tr><th>Brique</th><th>Code / compétence</th><th>Version</th></tr>
     <tr><td class="k">Boîtier : voyants, 5 V USB, battement, récit gardé après coupure</td><td>C++ sur ESP32 · C08</td><td class="v v1">V1</td></tr>
-    <tr><td class="k">Corrélateur : arrêt normal, coupure, arrêt forcé, figé</td><td>PowerShell · C08</td><td class="v v1">V1</td></tr>
+    <tr><td class="k">Corrélateur : arrêt normal, veille (capot), batterie vide, arrêt forcé, figé</td><td>PowerShell · C08</td><td class="v v1">V1</td></tr>
     <tr><td class="k">Serveur et tableaux de bord</td><td>Python FastAPI, SQLite · C08</td><td class="v v1">V1</td></tr>
     <tr><td class="k">Chaîne carte : carte, lecteur, Windows, certificat, navigateur, heure ; remèdes à paliers</td><td>PowerShell · C08</td><td class="v v2">V2</td></tr>
     <tr><td class="k">Journal chaîné ancré sur le serveur</td><td>sécurité</td><td class="v v2">V2</td></tr>
@@ -88,6 +88,7 @@
     <ul>
       <li>Que le besoin est <b>validé</b> par l'entreprise : ce sont des plaintes du tuteur, les chiffres sont des hypothèses à confirmer.</li>
       <li>Que les mises à jour ratées sont le problème n° 1 : l'apprenti ne les a pas citées le 23/11, c'est une plainte du tuteur à reconfirmer.</li>
+      <li>« Coupure secteur » comme démonstration principale : les postes sont des portables.</li>
       <li>« Moins d'arrêts forcés » ou « temps de résolution divisé » : non mesurable au lycée.</li>
       <li>Les pistes explorées depuis (carte agent, portail captif) : rien n'est construit ni décidé. Si on en parle : « le tuteur a cité un outil envisagé ; toute évolution passera par un avenant ».</li>
     </ul>
@@ -104,6 +105,7 @@
     <tr><td>V1 ≈ 95 h, V2 ≈ 135 h (cumulé, Gantt de 150 h) ; revue interne : contenu ≈ 183 h</td><td>V1 ≈ 113 h, V2 ≈ 35 h ; accueil et libre-service en scénarios</td><td>Tenir 150 h avec l'IA</td></tr>
     <tr><td>E5, E6 : arrêts forcés en baisse, temps de résolution réduit</td><td>19 pannes sur 20 bien classées ; 100 % des maillons désignés ; temps de diagnostic chronométré avec et sans l'outil</td><td>Mesurable sur la maquette</td></tr>
     <tr><td>Récit sur microSD</td><td>Mémoire FRAM I²C (ou NVS)</td><td>Écriture en quelques ms ; réserve d'énergie plus petite (essai P3)</td></tr>
+    <tr><td>Poste fixe ; coupures sur une multiprise</td><td>Portable (confirmé le 23/11) : classe « coupure » remplacée par veille et batterie vide</td><td>Coller au parc réel</td></tr>
     <tr><td>Case « Projet développé : Entreprise »</td><td>Maquette au lycée, à valider par l'académie</td><td>Cohérence avec les limites de l'étude</td></tr>
   </table>
 
@@ -124,6 +126,8 @@
     <span>Du tuteur : deux plaintes réelles du support. « Environ deux mises à jour ratées par mois » est une hypothèse écrite, à faire confirmer à la prochaine visite.</span></div>
   <div class="q"><b class="qq">Du nouveau depuis l'envoi ?</b>
     <span>Oui : l'apprenti a précisé (23/11) qu'un échec de carte vient souvent d'un <b>certificat expiré</b>, corrigé à la main dans le navigateur. Ça confirme la chaîne carte. Le maillon « certificat » (dates de validité) sera mis en avant dans l'avenant.</span></div>
+  <div class="q"><b class="qq">Vos postes sont des portables : une coupure de courant ne les éteint pas.</b>
+    <span>Exact, confirmé le 23/11. La classe « coupure » sort ; on garde l'arrêt forcé et le système figé, on ajoute la veille (capot fermé) et la batterie vide pendant une mise à jour. Le boîtier lit le 5 V de l'USB, le voyant d'alimentation et le battement. Ce sera dans l'avenant.</span></div>
   <div class="q"><b class="qq">Données personnelles ?</b>
     <span>Aucune : cartes PIV de laboratoire, aucun nom d'agent ni identifiant de carte, aucune donnée de carrière ou de paye. Le serveur reçoit des causes, pas des personnes.</span></div>
 

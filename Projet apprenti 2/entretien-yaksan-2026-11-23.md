@@ -31,8 +31,17 @@ Source : 4 pages manuscrites de l'enseignant, d'après Yaksan. Transcription, pu
 | Réseau isolé d'Internet | Confirmé ; accès Internet par un compte filtré à 3 niveaux | La contradiction avec la piste ALCASAR est levée : un accès filtré existe déjà |
 | — | Tickets GLPI | GLPI est déjà le cœur du projet de Wassim : ne pas en faire un sujet chez Yaksan |
 
+## Réponse de l'enseignant (23/11, soir)
+**Tous les postes sont des portables.** Conséquences pour la Boîte noire :
+- La classe « coupure secteur » disparaît (la batterie prend le relais). Restent : arrêt normal, **arrêt forcé** au bouton, **système figé** ; on ajoute **veille** (capot fermé) et **batterie vide**.
+- Windows note bien la veille et le réveil, et souvent l'arrêt sur batterie critique : la valeur ajoutée du boîtier se réduit à l'arrêt forcé et au système figé. La mesure « Windows seul contre Windows + boîtier, sur les mêmes pannes » devient la preuve centrale (et peut conclure que le boîtier n'apporte presque rien).
+- Voyants : peu nombreux sur un portable, parfois cachés capot fermé. Le boîtier s'appuie surtout sur le 5 V de l'USB et le battement ; P1 (voyants) devient très court.
+- Un boîtier collé à un portable qui se déplace : à discuter (station d'accueil ?).
+- Maquette : il faut un **portable Windows 11** au lycée (le formulaire prévoyait un poste fixe et des coupures sur multiprise).
+- Piste physique de remplacement, à valider avec le collègue de physique : la **batterie du portable** (capacité réelle face à la capacité d'origine, décharge mesurée face au modèle, autonomie restante pendant une mise à jour).
+
 ## Questions à poser à Yaksan (courtes)
-1. Les postes sont-ils **tous** des portables ? Que se passe-t-il quand on ferme le capot (veille, arrêt, perte de réseau) ?
+1. Que se passe-t-il quand on ferme le capot (veille, arrêt, perte de réseau) ? Les portables sont-ils posés sur une station d'accueil au bureau ?
 2. Les mises à jour qui échouent : ça arrive encore ? Combien de fois par mois ?
 3. Certificat expiré : combien de cas par mois ? Qui le renouvelle (lui, une autre équipe, l'agent) ? Combien de temps ça prend ? Le certificat est-il dans la carte ou dans Windows ?
 4. Arrivées et départs : combien par mois ? Combien de temps pour un arrivant ? Au départ, qui retire les accès (messagerie, boîtes partagées, compte Internet) ?
