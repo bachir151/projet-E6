@@ -87,7 +87,7 @@ def save(name, content):
 def synoptique():
     b = [text(30, 34, "Synoptique de la maquette au lycée (réseau exploité tel quel, aucune connexion à l’hôpital, aucune donnée réelle)", 16, "bold", anchor="start")]
     b.append(box(30, 60, 270, 160, "Boîtier de l’imprimante", ["ESP32 (C++), Wi-Fi", "accéléromètre : vibration", "bouton, écran à encre", "SHT31 : humidité (V2)", "lecteur RFID (V2)"], hl=True))
-    b.append(box(400, 60, 340, 190, "Serveur – PC Ubuntu", ["Mosquitto (MQTT sur TLS)", "CUPS : serveur d’impression", "service Python : compare les témoins", "PostgreSQL, tableau de bord", "interroge l’imprimante (SNMP),", "le PC (JEA) et l’AD (LDAP)"], hl=True))
+    b.append(box(400, 60, 340, 190, "Serveur – PC Ubuntu", ["Mosquitto (MQTT sur TLS)", "CUPS : serveur d’impression", "service Python : compare les témoins", "PostgreSQL, tableau de bord", "interroge l’imprimante (SNMP)", "et le PC (JEA) ; DNS et heure"], hl=True))
     b.append(arrow(300, 140, 398, 140, "MQTT / TLS", ly=132, both=True))
     b.append(box(30, 260, 270, 100, "Imprimante réseau", ["du lycée ou de récupération", "SNMP (état, encre, compteur), IPP"]))
     b.append(arrow(400, 230, 302, 290, "SNMP, IPP", lx=352, ly=250, anchor="end"))
@@ -100,12 +100,12 @@ def synoptique():
     b.append(box(840, 60, 290, 100, "GLPI dans Docker", ["données fictives", "compte de service limité"], hl=True))
     b.append(arrow(742, 110, 838, 110, "API REST", ly=102, both=True, size=11))
     b.append(box(840, 190, 290, 80, "PC du technicien", ["navigateur : GLPI, tableau de bord"]))
-    b.append(box(840, 300, 290, 100, "Annuaire AD – Samba (Ubuntu)", ["domaine de la maquette (commun)", "partage des applications"]))
-    b.append(arrow(742, 230, 838, 320, "LDAP", lx=794, ly=262, anchor="start", size=11))
+    b.append(box(840, 300, 290, 100, "Annuaire AD – Samba (V2)", ["seconde VM Ubuntu", "domaine de la maquette"], dashed=True))
+    b.append(arrow(742, 230, 838, 320, "LDAP", lx=794, ly=262, anchor="start", dashed=True, size=11))
     b.append(arrow(742, 400, 838, 380, "jonction, partage", lx=790, ly=416, dashed=True, size=11))
     b.append(box(840, 430, 290, 80, "Réseau de la maquette", ["Wi-Fi, DHCP, DNS, NTP, switchs, routeur"]))
-    b.append(text(30, 545, "En bleu : réalisé par l’apprenti. Pointillés : V2. Windows 11 Famille ne peut rejoindre aucun domaine : les PC Windows sont des machines", 13, fill=GREY, anchor="start"))
-    b.append(text(30, 563, "virtuelles Windows 11 Entreprise (version d’évaluation) ou des PC sous Windows 11 Pro. L’AD est simulé par Samba sur Ubuntu.", 13, fill=GREY, anchor="start"))
+    b.append(text(30, 545, "En bleu : réalisé par l’apprenti. Pointillés : V2. En V1, le PC Windows (VM Windows 11 Entreprise ou Pro) a un compte local, sans domaine.", 13, fill=GREY, anchor="start"))
+    b.append(text(30, 563, "En V2, l’AD est simulé par Samba sur une seconde VM Ubuntu (Windows 11 Famille ne peut rejoindre aucun domaine).", 13, fill=GREY, anchor="start"))
     save("0_synoptique", svg(1160, 580, "".join(b)))
 
 
@@ -138,7 +138,7 @@ def exigences():
         ("E4 – Pages comptées", ["compteur SNMP : au plus", "1 écart sur 100 pages ;", "10 pages de test sur 10"], "comptage"),
         ("E5 – Diagnostic borné", ["JEA : commande hors liste", "refusée et tracée ;", "lecture seule du PC"], "démonstration"),
         ("E6 – Retour au terrain", ["Écran du boîtier à jour", "en moins d’1 minute ;", "témoins dans le ticket"], "chronométrage"),
-        ("E7 – Bon réseau", ["Imprimante hors du réseau", "attendu par l’AD :", "signalée 5 fois sur 5"], "essai, capture"),
+        ("E7 – Bon réseau", ["Imprimante hors du réseau", "attendu (inventaire GLPI) :", "signalée 5 fois sur 5"], "essai, capture"),
         ("E8 – PC neufs (V2)", ["5 PC préparés : bon service", "dans l’AD, applications,", "fiche GLPI à jour"], "essai de la station"),
     ]
     xs = [30, 300, 570, 840]
@@ -156,7 +156,7 @@ def exigences():
         b.append(line([(x + W / 2, 180 if i < 4 else 370), (x + W / 2, y)]))
     b.append(line([(xs[0] + W / 2, 370), (xs[3] + W / 2, 370)]))
     b.append(line([(xs[3] + W / 2, 180), (xs[3] + W + 12, 180), (xs[3] + W + 12, 370), (xs[3] + W / 2, 370)]))
-    b.append(text(30, 562, "Le symbole ⊕ indique que E0 se décompose en E1 à E8. V1 : E1 à E7 (paliers 1 et 2). V2 : E8, carte de Wassim, preuve de réparation, encre, humidité, palier 3.", 12.5, fill=GREY, anchor="start"))
+    b.append(text(30, 562, "Le symbole ⊕ indique que E0 se décompose en E1 à E8. V1 : E1 à E7 (palier 1). V2 : E8, annuaire AD, carte de Wassim, preuve de réparation, encre, humidité.", 12.5, fill=GREY, anchor="start"))
     save("1_exigences", svg(1125, 575, "".join(b)))
 
 
@@ -172,8 +172,8 @@ def contexte():
     b.append(actor(120, 60, "Secrétaire", "imprime, appuie sur le bouton"))
     b.append(arrow(175, 120, sx - 2, sy + 30, "bouton, écran", lx=290, ly=232, anchor="end", both=True))
     b.append(actor(120, 400, "Technicien support", "lit, décide, pose sa carte"))
-    b.append(arrow(165, 450, sx - 2, sy + 120, "ticket, validation", lx=290, ly=440, both=True))
-    b.append(text(290, 456, "(palier 2), 3 cartes (V2)", 12, fill=GREY))
+    b.append(arrow(165, 450, sx - 2, sy + 120, "ticket, conseil", lx=290, ly=440, both=True))
+    b.append(text(290, 456, "(palier 1), cartes (V2)", 12, fill=GREY))
 
     def ext(x, y, w, title, sub, dashed=False):
         return box(x, y, w, 64, title, [sub], dashed=dashed, stereo="«external»", tsize=14, lsize=12)
@@ -185,8 +185,8 @@ def contexte():
     b.append(text(842, 228, "(lecture seule, JEA)", 12, fill=GREY, anchor="start"))
     b.append(ext(880, 270, 230, "GLPI", "tickets, fiches des PC"))
     b.append(arrow(878, 300, sx + sw + 2, 300, "tickets, suivis", ly=292, both=True))
-    b.append(ext(880, 470, 230, "Annuaire AD (Samba)", "service de chaque PC"))
-    b.append(arrow(878, 500, sx + sw + 2, 355, "service, réseau attendu", lx=822, ly=418, anchor="start"))
+    b.append(ext(880, 470, 230, "Annuaire AD (Samba) · V2", "service de chaque PC", dashed=True))
+    b.append(arrow(878, 500, sx + sw + 2, 355, "service, réseau attendu", lx=822, ly=418, anchor="start", dashed=True))
     b.append(ext(430, 470, 260, "Réseau de la maquette", "Wi-Fi, DHCP, DNS, NTP"))
     b.append(arrow(560, 468, 560, sy + sh + 2, "adresses, heure commune", lx=570, ly=430, both=True, anchor="start"))
     b.append(ext(60, 560, 250, "PC neuf (V2)", "Windows 11 Entreprise", dashed=True))
@@ -210,7 +210,7 @@ def cas():
         (400, 105, "Surveiller l’impression", "(vibration, compteur)", False),
         (400, 185, "Signaler une panne", "(bouton)", False),
         (400, 265, "Lire le ticket et", "le tableau de bord", False),
-        (400, 345, "Valider une action", "proposée (palier 2)", False),
+        (400, 345, "Appliquer le conseil", "(redémarrer à la main)", False),
         (400, 425, "Pointer une intervention", "avec sa carte (V2)", True),
         (400, 505, "Préparer un PC neuf", "avec 3 cartes (V2)", True),
         (400, 585, "Régler les seuils", "et le palier", False),
@@ -219,7 +219,7 @@ def cas():
         (720, 145, "Comparer les témoins,", "trouver la cause", False),
         (720, 225, "Interroger", "l’imprimante (SNMP)", False),
         (720, 305, "Lire la file", "du PC (JEA)", False),
-        (720, 385, "Ouvrir ou compléter", "le ticket (paliers)", False),
+        (720, 385, "Ouvrir ou compléter", "le ticket (palier 1)", False),
         (720, 465, "Afficher l’état", "sur le boîtier", False),
         (720, 545, "Ranger le PC dans le", "bon service (V2)", True),
     ]
@@ -239,7 +239,7 @@ def cas():
     b.append(actor(990, 160, "Imprimante"))
     b.append(actor(990, 290, "PC secrétaire"))
     b.append(actor(990, 420, "GLPI"))
-    b.append(actor(990, 540, "AD (Samba)"))
+    b.append(actor(990, 540, "AD (Samba, V2)"))
     Lk = lambda x1, y1, x2, y2: line([(x1, y1), (x2, y2)], color="#4b5563", width=1.2)
     for y in (105, 185):
         b.append(Lk(130, 115, 260, y))
@@ -298,16 +298,16 @@ def sequence():
     b.append(msg("srv", "pcs", y + 270, "7. file ? (JEA)"))
     b.append(msg("pcs", "srv", y + 305, "8. 0 document", ret=True))
     b.append(self_("srv", y + 325, "9. envoyé, rien ne bouge, elle dit « ça va »", "→ imprimante figée"))
-    b.append(msg("srv", "glpi", y + 390, "10. ticket + « redémarrer ? » (palier 2)"))
+    b.append(msg("srv", "glpi", y + 390, "10. ticket + conseil « redémarrer » (palier 1)"))
     b.append(msg("srv", "brt", y + 425, "11. écran « Bloquée »", lx=690))
     b.append(note(y + 465, "9:11:10"))
-    b.append(msg("tech", "srv", y + 485, "12. valide le redémarrage", lx=840))
-    b.append(msg("srv", "imp", y + 520, "13. redémarrage"))
+    b.append(msg("tech", "srv", y + 485, "12. pris en charge (ticket)", lx=840))
+    b.append(msg("tech", "imp", y + 520, "13. redémarre à la main"))
     b.append(note(y + 560, "9:14:00"))
     b.append(msg("imp", "srv", y + 580, "14. compteur +5 (SNMP)", ret=True))
     b.append(msg("srv", "glpi", y + 615, "15. résolu, preuve jointe"))
     b.append(msg("srv", "brt", y + 650, "16. écran « Réparé »", lx=690))
-    b.append(text(30, 860, "Palier 1 : le système conseille seulement. Palier 3 (V2) : il redémarre seul, la nuit, et le note dans le ticket.", 12.5, fill=GREY, anchor="start"))
+    b.append(text(30, 860, "V1 : palier 1, le système conseille seulement ; le redémarrage se fait à la main. Le redémarrage à distance est une extension.", 12.5, fill=GREY, anchor="start"))
     save("4_sequence", svg(1160, 875, "".join(b)))
 
 
@@ -329,7 +329,7 @@ def gantt():
         ("4. Physique : vibration, délai, humidité (12 h)", (D(2027, 2, 1), D(2027, 3, 12)), "phy"),
         ("5. Serveur : règles, SNMP, vérifications réseau (22 h)", (D(2027, 2, 8), D(2027, 3, 19)), "c8"),
         ("7. Réseau : DHCP, DNS, NTP, SNMP, captures (8 h)", (D(2027, 2, 8), D(2027, 4, 9)), "c10"),
-        ("6. PowerShell : file d’impression (JEA), AD (14 h)", (D(2027, 2, 22), D(2027, 3, 26)), "c8"),
+        ("6. PowerShell : file d’impression (JEA), réseau attendu (14 h)", (D(2027, 2, 22), D(2027, 3, 26)), "c8"),
         ("8. GLPI : tickets à paliers, écran, tableau de bord (16 h)", (D(2027, 3, 15), D(2027, 4, 16)), "c8"),
         ("V2 – RFID et PC neufs", None),
         ("9. RFID : carte, preuve, station des PC neufs (12 h)", (D(2027, 4, 6), D(2027, 4, 30)), "c8"),

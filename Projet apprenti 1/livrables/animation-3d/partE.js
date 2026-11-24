@@ -67,7 +67,7 @@ function drawTech() {
     if (world.offer) {
       g.fillStyle = world.clicked ? '#23824f' : '#c98a00'; rr(g, 30, h - 120, 660, 70, 12); g.fill();
       g.fillStyle = '#fff'; g.font = `bold 26px ${FONT}`;
-      g.fillText(world.clicked ? '✓ Redémarrage validé par le technicien' : 'Palier 2 : redémarrer l\'imprimante ?  [ Valider ]', 50, h - 76);
+      g.fillText(world.clicked ? '✓ Pris en charge par le technicien' : 'Palier 1 : conseil · redémarrer l\'imprimante', 50, h - 76);
     }
     /* tableau de bord */
     const X = 740; g.fillStyle = '#fff'; g.fillRect(X, 84, w - X - 20, h - 104);
@@ -232,19 +232,18 @@ const steps = [
   }
 },
 {
-  title: '4. Palier 2 : le technicien valide, le compteur prouve',
-  text: `<p>Le système <b>propose</b> de redémarrer l'imprimante. Il n'agit pas seul : le technicien <b>valide d'un clic</b> (palier 2).</p>
-         <p>L'imprimante redémarre et imprime les 5 pages : elle <b>vibre</b> et son <b>compteur</b> avance de 5. Ces deux mesures sont la <b>preuve</b> : le ticket est fermé « résolu, preuve : compteur +5/5 et vibration ». Personne ne s'est déplacé.</p>`,
+  title: '4. Palier 1 : le système conseille, le technicien agit, le compteur prouve',
+  text: `<p>Le système <b>conseille</b> dans le ticket : « redémarrer l'imprimante ». Il n'agit pas : en V1, il lit l'imprimante en SNMP (<b>lecture seule</b>) et ne la modifie jamais (palier 1).</p>
+         <p>Le technicien, ou la secrétaire guidée par l'écran du boîtier, <b>redémarre l'imprimante à la main</b>. Elle imprime les 5 pages : elle <b>vibre</b> et son <b>compteur</b> avance de 5. Ces deux mesures sont la <b>preuve</b> : le ticket est fermé « résolu, preuve : compteur +5/5 et vibration ». Aucun déplacement à l'aveugle : la cause et le geste étaient connus.</p>`,
   cam: [[70, 70, 120], [10, 18, -14]], labels: 'overview',
   async run() {
     world.pastille = 'bad'; ticket('1234', 'Imprimante cardio-2 figée', 'nouveau', '#c2382e', 'aucune vibration, compteur +0/5, SNMP « prête »');
     setRGB(0xff2a1a); drawEink('BLOQUÉE', 'ticket 1234 · Wassim prévenu');
     world.offer = true; drawTech(); await sleep(1600);
     world.clicked = true; drawTech(); beep(1200, 0.06);
-    await route(FROM_TEC, { kind: 'glpi', label: 'validé : redémarrer' });
+    await route(FROM_TEC, { kind: 'glpi', label: 'pris en charge' });
     flyTo([30, 92, 105], [-24, 18, -26], 1.6);
-    await route(TO_PRN, { kind: 'snmp', label: 'SNMP SET · redémarrage' });
-    drawPrnLCD('Redémarrage…', '', '#ffb020'); prnLedMat.color.setRGB(1, 0.6, 0.1).multiplyScalar(3);
+    drawPrnLCD('Redémarrage à la main…', '', '#ffb020'); prnLedMat.color.setRGB(1, 0.6, 0.1).multiplyScalar(3);
     await sleep(1800); prnLedMat.color.setRGB(0.2, 1, 0.45).multiplyScalar(3);
     setRead(readVib, 'vibration : <b>0,41 g</b>');
     await printSheets(5);

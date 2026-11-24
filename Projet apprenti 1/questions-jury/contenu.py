@@ -1,10 +1,10 @@
 # Questions difficiles du jury – Wassim (apprenti 1)
-# Projet « Le service informatique augmenté » (décision du 16/11/2026)
+# Projet « Diagnostic à distance des imprimantes : valorisation des données et ticket enrichi » (décisions des 16 et 24/11/2026)
 # Généré par : python3 docs/questions-jury/generer.py "Projet apprenti 1/questions-jury/contenu.py"
 
 META = {
     "titre": "Questions difficiles du jury – projet de Wassim",
-    "sous_titre": "« Le service informatique augmenté » : boîtier de l'imprimante (quatre témoins, GLPI) et station RFID des PC neufs (PowerShell, AD Samba) · apprenti 1",
+    "sous_titre": "« Diagnostic à distance des imprimantes : valorisation des données et ticket enrichi » : boîtier, sonde (SNMP, PC par JEA), quatre témoins, GLPI ; V2 : annuaire Samba et station des PC neufs · apprenti 1",
     "pied": "Questions du jury – apprenti 1 – document de préparation, ne pas diffuser",
     "pdf": "Questions_jury_Wassim.pdf",
     "cadre": [
@@ -12,7 +12,7 @@ META = {
         "<b>Deux publics.</b> Partie A : questions <b>à l'enseignant</b> (commission, jury). Parties B à G : questions <b>à l'apprenti</b> pendant l'oral (C01, C03, C08, C10, physique, sécurité).",
         "<b>Règle d'or pour l'oral :</b> une phrase de réponse, puis la preuve (essai, mesure, capture). Dire ce que le système ne sait pas faire fait partie de la réponse.",
     ],
-    "fin": "Document de préparation pédagogique. Points non vérifiés sur le matériel : distinction vibration impression/veille, compteur de pages lu en SNMP sur l'imprimante du lycée, redémarrage SNMP selon le modèle d'imprimante.",
+    "fin": "Document de préparation pédagogique. Points non vérifiés sur le matériel : distinction vibration impression/veille, compteur de pages lu en SNMP sur l'imprimante du lycée, objets SNMP lus selon la marque et le modèle d'imprimante, accès JEA sans domaine (compte local).",
 }
 
 TOP = ["B1", "B2", "F1", "D2", "A2", "E1", "C2"]
@@ -24,7 +24,7 @@ SECTIONS = [
 {"id": "A1", "niv": 3,
  "q": "Le texte impose qu'un projet d'apprenti soit développé dans l'entreprise. Pourquoi au lycée ?",
  "piege": "Arrêté du 25 janvier 2023 : « Pour les apprentis les projets doivent impérativement être développés dans l'entreprise ».",
- "rep": "Le besoin vient du support d'un hôpital (imprimantes, PC des nouveaux médecins). On ne branche pas un projet d'apprenti sur les imprimantes, l'AD ou le GLPI de production d'un hôpital. La réalisation se fait au lycée sur maquette, données fictives, sous réserve de validation par l'académie.",
+ "rep": "Le besoin vient du support d'un hôpital (imprimantes, tickets reçus par plusieurs canaux). On ne branche pas un projet d'apprenti sur les imprimantes ou le GLPI de production d'un hôpital. La réalisation se fait au lycée sur maquette, données fictives, sous réserve de validation par l'académie.",
 },
 {"id": "A2", "niv": 3,
  "q": "Le formulaire envoyé le 12 novembre parlait de chariots de soins. Pourquoi ce changement ?",
@@ -32,12 +32,12 @@ SECTIONS = [
  "preuve": "Notes de l'entretien du 16/11/2026.",
 },
 {"id": "A3", "niv": 2,
- "q": "Les PC du lycée sont sous Windows 11 Famille. Comment faites-vous un domaine Active Directory ?",
- "rep": "Windows 11 Famille ne peut rejoindre aucun domaine. L'AD est simulé par Samba sur Ubuntu, vu par Windows comme un vrai contrôleur de domaine. Les PC Windows sont des machines virtuelles Windows 11 Entreprise en évaluation (ou des PC sous Windows 11 Pro).",
+ "q": "Pourquoi n'y a-t-il pas d'Active Directory dans la V1 ?",
+ "rep": "Le besoin est de savoir à distance s'il faut se déplacer : la sonde n'a besoin que de l'imprimante (SNMP), du PC (JEA) et du boîtier. Le réseau attendu vient d'un tableau dans GLPI. L'annuaire est prévu en V2, simulé par Samba sur Ubuntu (Windows 11 Famille ne rejoint aucun domaine ; le PC de la maquette est une machine virtuelle Windows 11 Entreprise en évaluation ou Pro). Point à tester d'abord : l'accès JEA sans domaine, avec un compte local.",
 },
 {"id": "A4", "niv": 2,
  "q": "Le projet semble très gros. Qu'est-ce qui est obligatoire ?",
- "rep": "V1 : boîtier, quatre témoins, règles, ticket GLPI aux paliers 1 et 2, écran, tableau de bord. V2 : carte du technicien, preuve de réparation, encre, station des PC neufs, palier 3. Les extensions (redémarrage automatique, fausse imprimante, cartes sécurisées) ne sont pas dues.",
+ "rep": "V1 : boîtier, sonde, quatre témoins, règles, ticket GLPI au palier 1 (le système conseille), écran, tableau de bord. V2 : carte du technicien, preuve de réparation, encre, annuaire Samba et station des PC neufs. Les extensions (redémarrage à distance, fausse imprimante, cartes sécurisées) ne sont pas dues.",
 },
 ]},
 {
@@ -51,7 +51,7 @@ SECTIONS = [
 },
 {"id": "B2", "niv": 3,
  "q": "Que gagne concrètement le service ?",
- "rep": "Un ticket avec la cause au lieu de « ça ne marche pas » ; des déplacements évités (papier remis sur place, redémarrage à distance) ; une preuve de réparation ; en V2, des PC neufs rangés dans le bon service sans oubli dans GLPI.",
+ "rep": "Un ticket avec la cause au lieu de « ça ne marche pas » ; des déplacements évités (câble branché ou papier remis sur place, redémarrage fait à la main sur conseil) ; une preuve de réparation ; en V2, des PC neufs rangés dans le bon service.",
  "relance": "Avez-vous des chiffres ? → indicateurs E1 à E8 mesurés sur la maquette ; volumes réels à demander au tuteur.",
 },
 {"id": "B3", "niv": 2,
@@ -67,8 +67,8 @@ SECTIONS = [
  "rep": "Que la vibration ne distingue pas « imprime » et « attend ». Testé dès la tâche 3 ; si c'était raté, le compteur de pages et l'état SNMP suffisaient comme témoins.",
 },
 {"id": "C2", "niv": 3,
- "q": "Comment décidez-vous de passer du palier 2 au palier 3 ?",
- "rep": "Sur indicateurs : causes justes pendant toute la campagne d'essai, aucune action refusée par le technicien. Le palier 3 agit seulement la nuit, et on peut toujours revenir au palier 2.",
+ "q": "Pourquoi le système ne redémarre-t-il pas l'imprimante tout seul ?",
+ "rep": "En V1, le système reste au palier 1 : il conseille, lit en lecture seule et ne modifie jamais l'imprimante. Passer à un palier supérieur (confirmation humaine, puis automatique) est une extension, décidée sur indicateurs : causes justes pendant toute la campagne d'essai, aucune action refusée par le technicien.",
 },
 ]},
 {
@@ -86,7 +86,7 @@ SECTIONS = [
  "preuve": "Extrait du code Python et du ticket produit.",
 },
 {"id": "D3", "niv": 2,
- "q": "Que fait exactement votre script de préparation des PC neufs ?",
+ "q": "(V2) Que fait exactement votre script de préparation des PC neufs ?",
  "rep": "Il lit le numéro de série, demande sa commande au serveur, met le PC dans le domaine directement dans l'unité d'organisation du service (Add-Computer -OUPath), installe les applications du profil, vérifie et rend compte. Le mot de passe de jonction est demandé, jamais écrit.",
 },
 ]},
@@ -95,7 +95,7 @@ SECTIONS = [
 "questions": [
 {"id": "E1", "niv": 3,
  "q": "Une imprimante ne répond plus. Que vérifie votre système, dans quel ordre ?",
- "rep": "Ping ; nom DNS ; bail DHCP ; ports 9100 et 631 ; puis comparaison de son réseau avec le réseau attendu pour le service lu dans l'AD. Le ticket dit l'étape qui bloque.",
+ "rep": "Ping ; nom DNS ; bail DHCP ; ports 9100 et 631 ; puis comparaison de son réseau avec le réseau attendu pour le service, lu dans un tableau de l'inventaire GLPI (en V2, dans l'AD). Le ticket dit l'étape qui bloque.",
  "preuve": "Capture Wireshark et ticket « hors du réseau attendu ».",
 },
 {"id": "E2", "niv": 2,

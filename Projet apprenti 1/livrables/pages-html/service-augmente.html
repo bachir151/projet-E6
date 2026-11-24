@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="description" content="Le service informatique augmenté : projet E6 de Wassim. Un boîtier sur l'imprimante, quatre témoins comparés par un serveur, des tickets GLPI avec la cause et la preuve ; en V2, la station des PC neufs.">
-<title>Service informatique augmenté — projet E6 de Wassim</title>
+<meta name="description" content="Diagnostic à distance des imprimantes : projet E6 de Wassim. Un boîtier sur l'imprimante, quatre témoins comparés par un serveur, des tickets GLPI avec la cause et la preuve ; en V2, la station des PC neufs.">
+<title>Diagnostic des imprimantes — projet E6 de Wassim</title>
 <link rel="icon" href="data:,">
 <link rel="stylesheet" href="../../../theme.css">
 <style>
@@ -152,7 +152,7 @@ footer{padding:30px 0;font-size:.9rem;color:var(--encre-3)}
 </head>
 <body>
 <header><div class="wrap">
- <a href="#" class="brand">SERVICE AUGMENTÉ<span>.</span></a>
+ <a href="#" class="brand">DIAGNOSTIC<span>.</span></a>
  <nav aria-label="Navigation">
   <a href="#probleme">Besoin</a><a href="#existant">Existant</a><a href="#solution">Solution</a><a href="#journee">Scénario</a><a href="#architecture">Architecture</a><a href="#securite">Sécurité</a><a href="#physique">Physique</a><a href="#parcours">V1 / V2</a>
  </nav>
@@ -162,8 +162,8 @@ footer{padding:30px 0;font-size:.9rem;color:var(--encre-3)}
 <div class="wrap hero">
  <div>
   <div class="eyebrow">BTS CIEL · Épreuve E6 · Projet de Wassim</div>
-  <h1>LE SERVICE INFORMATIQUE <em>AUGMENTÉ.</em></h1>
-  <p class="lead">De l'imprimante muette au PC du nouveau médecin. Un petit boîtier collé sur l'imprimante sent si elle travaille vraiment. Un serveur compare quatre témoins et ouvre le ticket avec <strong>la cause et la preuve</strong>.</p>
+  <h1>DIAGNOSTIC À DISTANCE <em>DES IMPRIMANTES.</em></h1>
+  <p class="lead">De la panne au ticket : savoir à distance s'il faut se déplacer. Un petit boîtier collé sur l'imprimante sent si elle travaille vraiment. Un serveur compare quatre témoins et ouvre le ticket avec <strong>la cause et la preuve</strong>.</p>
   <div class="tags"><span class="tag jaune">Proposition à faire valider par le tuteur</span><span class="tag papier">Maquette au lycée</span><span class="tag papier">Aucune donnée patient</span></div>
   <div class="actions">
    <a class="btn principal" href="#temoins">Tester les quatre témoins</a>
@@ -223,12 +223,12 @@ footer{padding:30px 0;font-size:.9rem;color:var(--encre-3)}
  <p class="lead">Wassim est technicien de support au service informatique d'un centre hospitalier. Tout part de l'entretien du 16 novembre 2026. Voici ce qu'il a dit.</p>
  <div class="grid4 mt">
   <article class="card danger"><div class="eyebrow">Panne n° 1</div><p class="quote">« Le plus gros problème, c'est les imprimantes. »</p><p>Allumées, mais elles n'impriment pas. Il vérifie le VLAN, l'encre… toujours les mêmes gestes.</p></article>
-  <article class="card"><div class="eyebrow">Tâche fréquente</div><p class="quote">« Sans le domaine, on ne peut rien faire. »</p><p>Le PC d'un nouveau médecin : domaine, bon service de l'AD, script d'installation. Une erreur de service arrive vite.</p></article>
-  <article class="card"><div class="eyebrow">Les tickets</div><p class="quote">« Il y a trop de tickets. »</p><p>Ils arrivent mal décrits : « l'imprimante ne marche pas ». Certains utilisateurs viennent directement au service.</p></article>
-  <article class="card"><div class="eyebrow">Sa méthode</div><p class="quote">D'abord à distance.</p><p>Il prend la main sur le PC. Il se déplace seulement si c'est vraiment bloqué. Un bon diagnostic évite des déplacements.</p></article>
+  <article class="card"><div class="eyebrow">Un manque</div><p class="quote">Aucun dispositif pour lire les imprimantes à distance.</p><p>Pas de supervision centralisée des imprimantes (type Zabbix). Pour savoir ce qui se passe, Wassim prend la main sur le PC ou se déplace.</p></article>
+  <article class="card"><div class="eyebrow">Les tickets</div><p class="quote">« Il y a trop de tickets. »</p><p>Ils arrivent mal décrits : « l'imprimante ne marche pas ». Par GLPI, mais aussi par téléphone, par mail ou par le chat de GLPI. Certains utilisateurs viennent directement au service.</p></article>
+  <article class="card"><div class="eyebrow">Sa méthode</div><p class="quote">D'abord à distance.</p><p>Il prend la main sur le PC. Il se déplace si c'est bloqué. Parfois pour rien : l'imprimante marche, mais le câble n'est pas branché au PC. Un bon diagnostic évite ces déplacements.</p></article>
  </div>
  <div class="bandeau"><strong>Question du projet :</strong> si un petit boîtier collé sur l'imprimante voyait ce qui se passe vraiment, et si le ticket arrivait avec <b>sa cause et sa preuve</b>, combien de déplacements et de temps gagnerait-on, <b>sans prendre de risque</b> sur les postes ?</div>
- <p class="small" style="margin-top:12px">Besoin exprimé par l'apprenti, pas encore validé par l'entreprise. Les chiffres (part des tickets « imprimante », nombre de PC neufs par mois) sont à demander au tuteur.</p>
+ <p class="small" style="margin-top:12px">Besoin exprimé par l'apprenti (entretiens des 16 et 23 novembre), pas encore validé par l'entreprise. Les chiffres (part des tickets « imprimante », part des déplacements inutiles, nombre de PC neufs par mois) sont à demander au tuteur.</p>
 </div></section>
 
 <!-- ============================================================ 02 -->
@@ -239,13 +239,13 @@ footer{padding:30px 0;font-size:.9rem;color:var(--encre-3)}
   <thead><tr><th>Outil existant</th><th>Ce qu'il fait bien</th><th>Ce qui lui manque</th></tr></thead>
   <tbody>
    <tr><td><b>Page web de l'imprimante</b></td><td>Montre son état et son niveau d'encre.</td><td>Une imprimante à la fois. Elle peut dire « tout va bien » alors qu'elle est figée.</td></tr>
-   <tr><td><b>Supervision</b> (Centreon, Zabbix…)</td><td>Surveille toutes les imprimantes du réseau.</td><td>Lit l'état et le compteur de pages, mais ne les compare pas à ce qui a été envoyé. Ne sent pas si la machine travaille. Ne regarde pas le PC. Lourde à installer.</td></tr>
+   <tr><td><b>Supervision</b> (Centreon, Zabbix…)</td><td>Surveille toutes les imprimantes du réseau. <b>Absente du service</b> pour les imprimantes (dit Wassim, à confirmer).</td><td>Ne verrait que les imprimantes en réseau, pas celles branchées en USB. Lit l'état et le compteur de pages, mais ne les compare pas à ce qui a été envoyé. Ne sent pas si la machine travaille. Ne regarde pas le PC. Lourde à installer.</td></tr>
    <tr><td><b>Prise en main à distance</b></td><td>Wassim voit le PC comme s'il y était.</td><td>Les mêmes vérifications à refaire à la main, ticket après ticket.</td></tr>
-   <tr><td><b>GLPI</b> (outil de tickets)</td><td>Suit les tickets et la liste du matériel.</td><td>Le ticket ne contient que la phrase de l'utilisateur. Personne ne prouve que la réparation a marché.</td></tr>
+   <tr><td><b>GLPI</b> (outil de tickets)</td><td>Suit les tickets et la liste du matériel.</td><td>Le ticket ne contient que la phrase de l'utilisateur, qu'il vienne de GLPI, du téléphone, d'un mail ou du chat. Personne ne prouve que la réparation a marché.</td></tr>
    <tr><td><b>Script d'installation actuel</b></td><td>Installe les applications rapidement.</td><td>Le service et le profil se choisissent à la main. GLPI n'est pas mis à jour tout seul.</td></tr>
   </tbody>
  </table></div>
- <div class="callout accent"><strong>Ce qui manque partout :</strong> un témoin physique (« la machine travaille-t-elle vraiment ? »), une comparaison entre les pages envoyées et les pages imprimées, et un lien automatique entre le terrain, l'AD et GLPI.</div>
+ <div class="callout accent"><strong>Ce qui manque partout :</strong> un témoin physique (« la machine travaille-t-elle vraiment ? »), une comparaison entre les pages envoyées et les pages imprimées, et un lien automatique entre le terrain et GLPI. Et personne ne dit « l'imprimante marche, vérifiez le câble » avant le déplacement.</div>
 </div></section>
 
 <!-- ============================================================ 03 -->
@@ -254,7 +254,7 @@ footer{padding:30px 0;font-size:.9rem;color:var(--encre-3)}
  <h2>Deux outils de terrain. Un seul cerveau.</h2>
  <div class="grid3 mt">
   <article class="card accent"><div class="eyebrow">Sur l'imprimante · V1</div><h3>Le boîtier</h3><p>Un ESP32 avec un accéléromètre (la vibration), un gros bouton rouge « ça ne marche pas » et un écran à encre électronique qui donne des nouvelles : <em>Bac 2 vide</em>, <em>Wassim arrive</em>, <em>Réparé</em>.</p></article>
-  <article class="card"><div class="eyebrow">Au centre · V1</div><h3>Le cerveau commun</h3><p>Un serveur Ubuntu reçoit tout, compare les quatre témoins, lit l'AD et écrit la cause probable dans GLPI. Un tableau de bord montre une pastille par imprimante.</p></article>
+  <article class="card"><div class="eyebrow">Au centre · V1</div><h3>Le cerveau commun</h3><p>Un serveur Ubuntu reçoit tout, compare les quatre témoins et écrit la cause probable dans GLPI. Un tableau de bord montre une pastille par imprimante.</p></article>
   <article class="card"><div class="eyebrow">À l'atelier · V2</div><h3>La station des PC neufs</h3><p>Wassim pose trois cartes RFID : la sienne, celle du profil, celle du PC. Un script PowerShell range le PC dans le bon service de l'AD et met GLPI à jour.</p></article>
  </div>
 
@@ -276,6 +276,7 @@ footer{padding:30px 0;font-size:.9rem;color:var(--encre-3)}
    <button class="btn petit" data-cas="bourrage" aria-pressed="false">Bourrage</button>
    <button class="btn petit" data-cas="figee" aria-pressed="false">Imprimante figée</button>
    <button class="btn petit" data-cas="pc" aria-pressed="false">Bloqué dans le PC</button>
+   <button class="btn petit" data-cas="cable" aria-pressed="false">Câble USB débranché</button>
    <button class="btn petit" data-cas="reseau" aria-pressed="false">Hors réseau</button>
   </div>
   <div class="temoins">
@@ -291,10 +292,12 @@ footer{padding:30px 0;font-size:.9rem;color:var(--encre-3)}
   <pre class="terminal ticket" id="t-ticket" aria-live="polite"></pre>
  </div>
 
+ <div class="callout info"><strong>Trois façons de brancher l'imprimante, trois diagnostics.</strong> <b>Réseau filaire ou Wi-Fi :</b> elle a une adresse IP, donc ping et SNMP marchent ; le Wi-Fi ajoute une panne possible, « elle n'est pas sur le bon réseau sans fil ». <b>USB :</b> pas d'adresse IP, pas de SNMP ; <b>seul le PC lu par JEA</b> voit la panne. <b>Bluetooth ou Wi-Fi Direct :</b> même chose qu'en USB. Wassim a parlé de Bluetooth ; le Wi-Fi est plus probable (à confirmer par le tuteur). La V1 teste l'USB et le réseau filaire ; le Wi-Fi vient ensuite.</div>
+
  <div class="callout info"><strong>Pourquoi le compteur plutôt qu'un capteur de feuilles ?</strong> Un capteur infrarouge au-dessus de la sortie était prévu. Il est retiré de la V1 (décision du 22/11/2026) : dans les 10 pannes de test, aucune n'a besoin de lui pour trouver la bonne cause. Il est aussi difficile à placer (sortie sous le scanner, pile de feuilles qui monte, lumière du local). Le compteur se lit par le réseau, sans rien fixer. Le capteur revient en V2 <b>pour contrôler le compteur</b>.</div>
 
  <div class="grid2 mt">
-  <div class="card"><div class="eyebrow">Ce que le serveur ajoute</div><h3>Un ticket qui sait déjà</h3><p><b>Les vérifications réseau :</b> ping, nom DNS, bail DHCP, ports 9100 et 631. Le ticket dit lequel bloque.</p><p><b>Le bon VLAN :</b> l'AD dit que le PC est en cardiologie, donc l'imprimante doit être dans le réseau de la cardiologie. Le système vérifie, il ne change rien au réseau.</p><p><b>Réglé sur place :</b> la secrétaire remet du papier, la vibration revient, le compteur repart : ticket « résolu sur place ».</p></div>
+  <div class="card"><div class="eyebrow">Ce que le serveur ajoute</div><h3>Un ticket qui sait déjà</h3><p><b>Les vérifications réseau :</b> ping, nom DNS, bail DHCP, ports 9100 et 631. Le ticket dit lequel bloque.</p><p><b>Le bon réseau :</b> un tableau de l'inventaire GLPI dit que le PC est en cardiologie, donc l'imprimante doit être dans le réseau de la cardiologie. Le système vérifie, il ne change rien au réseau.</p><p><b>Réglé sur place :</b> la secrétaire remet du papier, la vibration revient, le compteur repart : ticket « résolu sur place ».</p></div>
   <div class="card"><div class="eyebrow">Ce qui vient en V2</div><h3>Prévenir et prouver</h3><p><b>La preuve de réparation :</b> Wassim pose sa carte en partant, le serveur envoie une page de test, le compteur avance de 1 : le ticket se ferme avec la preuve.</p><p><b>L'encre avant la panne :</b> ticket préventif à 10 %.</p><p><b>L'humidité du local :</b> capteur SHT31 sur le boîtier ; au-dessus d'environ 65 % (seuil à fixer par la mesure), ticket « papier à ranger ».</p></div>
  </div>
 
@@ -388,7 +391,7 @@ footer{padding:30px 0;font-size:.9rem;color:var(--encre-3)}
    <tr><td>PC de la secrétaire → serveur → imprimante</td><td>IPP (631) via CUPS, ou impression directe (9100)</td><td>Le travail d'impression ; CUPS connaît le nombre de pages envoyées</td></tr>
    <tr><td>Serveur → imprimante</td><td>SNMP (161) ; v3 chiffré si l'imprimante le permet</td><td>État, compteur de pages (<code>prtMarkerLifeCount</code>), encre</td></tr>
    <tr><td>Serveur → PC de la secrétaire</td><td>PowerShell à distance, point d'accès JEA (WinRM)</td><td>Nombre de documents en attente, jamais leur nom</td></tr>
-   <tr><td>Serveur → annuaire</td><td>LDAP vers Samba (AD simulé)</td><td>Le service du PC, donc le réseau attendu pour l'imprimante</td></tr>
+   <tr><td>Serveur → annuaire <span class="tag papier">V2</span></td><td>LDAP vers Samba (AD simulé)</td><td>Le service du PC, donc le réseau attendu pour l'imprimante</td></tr>
    <tr><td>Serveur → GLPI, Wassim → tableau de bord</td><td>API REST de GLPI et Grafana, en HTTPS</td><td>Tickets, suivis, fiche du PC ; pastilles</td></tr>
    <tr><td>Réseau en place</td><td>DHCP, DNS, NTP</td><td>Adresses, noms, heure juste pour dater les événements (C10)</td></tr>
   </tbody>
@@ -407,7 +410,7 @@ footer{padding:30px 0;font-size:.9rem;color:var(--encre-3)}
    <tr><td><b>Le diagnostic fait plus que prévu</b></td><td>Point d'accès PowerShell limité (JEA) : liste fermée de commandes, compte sans droit d'administrateur.</td><td>Une commande hors liste est refusée et tracée.</td></tr>
    <tr><td><b>Le système abîme GLPI</b></td><td>Son compte ajoute des tickets et des suivis, ne supprime rien, ne ferme qu'avec une preuve.</td><td>Une suppression demandée par le système est refusée.</td></tr>
    <tr><td><b>Quelqu'un écoute le réseau</b></td><td>SNMP v2 : la communauté circule en clair. Passage en SNMP v3 si l'imprimante le permet.</td><td>Deux captures Wireshark : en v2 la communauté se lit, en v3 plus rien.</td></tr>
-   <tr><td><b>Le mot de passe de l'AD traîne</b></td><td>Compte dédié, limité ; mot de passe demandé à l'exécution.</td><td>On montre le script : aucun mot de passe dedans.</td></tr>
+   <tr><td><b>Le mot de passe de l'AD traîne</b> (V2)</td><td>Compte dédié, limité ; mot de passe demandé à l'exécution.</td><td>On montre le script : aucun mot de passe dedans.</td></tr>
    <tr><td><b>Une carte RFID est copiée</b> (V2)</td><td>Les cartes bon marché se copient : confirmation à l'écran ; cartes sécurisées en extension.</td><td>Copie acceptée par un système naïf, refusée par le système corrigé.</td></tr>
    <tr><td><b>Un pirate cherche les imprimantes</b> (extension)</td><td>Une fausse imprimante (ESP32) à laquelle personne n'a de raison de parler.</td><td>Un scan de test déclenche une alerte.</td></tr>
   </tbody>
@@ -418,8 +421,8 @@ footer{padding:30px 0;font-size:.9rem;color:var(--encre-3)}
   <h3>L'imprimante de cardiologie est figée. Que fait le système ?</h3>
   <div class="choix" role="group" aria-label="Niveau de confiance">
    <button class="btn petit" data-niv="1" aria-pressed="true">1 · Il conseille</button>
-   <button class="btn petit" data-niv="2" aria-pressed="false">2 · Il propose</button>
-   <button class="btn petit" data-niv="3" aria-pressed="false">3 · Il agit seul (V2)</button>
+   <button class="btn petit" data-niv="2" aria-pressed="false">2 · Il propose (extension)</button>
+   <button class="btn petit" data-niv="3" aria-pressed="false">3 · Il agit seul (extension)</button>
   </div>
   <div class="grid2">
    <div><p id="n-texte"></p><p class="small" id="n-suite"></p></div>
@@ -475,9 +478,9 @@ footer{padding:30px 0;font-size:.9rem;color:var(--encre-3)}
  <div class="eyebrow">09 — Parcours</div>
  <h2>Une V1 complète, une V2 visée.</h2>
  <div class="grid3 mt">
-  <div class="card accent version"><h3>V1 <span class="tag jaune">obligatoire</span></h3><ul><li>Boîtier : vibration, bouton, écran</li><li>SNMP : état et compteur de pages</li><li>Serveur : comparaison des quatre témoins</li><li>Vérifications réseau, bon VLAN lu dans l'AD</li><li>Tickets GLPI aux niveaux 1 et 2, retour sur l'écran</li><li>Tableau de bord</li></ul></div>
-  <div class="card version"><h3>V2 <span class="tag papier">visée</span></h3><ul><li>Carte RFID du technicien, preuve de réparation</li><li>Encre surveillée avant la panne</li><li>Humidité du local (SHT31)</li><li>Station des PC neufs</li><li>Niveau 3 (il agit seul, la nuit)</li><li>Capteur de feuilles pour contrôler le compteur</li></ul></div>
-  <div class="card a-venir version"><h3>Extensions</h3><ul><li>Redémarrage à distance de l'imprimante figée</li><li>Fausse imprimante servant de piège</li><li>Cartes RFID sécurisées</li><li>SNMP version 3</li><li>Étagère des cartouches</li></ul></div>
+  <div class="card accent version"><h3>V1 <span class="tag jaune">obligatoire</span></h3><ul><li>Boîtier : vibration, bouton, écran</li><li>SNMP : état et compteur de pages</li><li>Serveur : comparaison des quatre témoins</li><li>Vérifications réseau, bon réseau lu dans l'inventaire GLPI</li><li>Ticket GLPI au niveau 1 (il conseille), retour sur l'écran</li><li>Tableau de bord</li></ul></div>
+  <div class="card version"><h3>V2 <span class="tag papier">visée</span></h3><ul><li>Carte RFID du technicien, preuve de réparation</li><li>Encre surveillée avant la panne</li><li>Humidité du local (SHT31)</li><li>Annuaire AD (Samba) et station des PC neufs</li><li>Capteur de feuilles pour contrôler le compteur</li></ul></div>
+  <div class="card a-venir version"><h3>Extensions</h3><ul><li>Niveaux 2 et 3 : redémarrage à distance de l'imprimante figée (il propose, puis il agit seul)</li><li>Fausse imprimante servant de piège</li><li>Cartes RFID sécurisées</li><li>SNMP version 3</li><li>Étagère des cartouches</li></ul></div>
  </div>
 
  <h3 class="mt" style="margin-bottom:0">Comment savoir si ça marche</h3>
@@ -490,7 +493,7 @@ footer{padding:30px 0;font-size:.9rem;color:var(--encre-3)}
    <tr><td>E4 – Pages comptées</td><td>Compteur SNMP sur 100 pages ; 10 pages de test</td><td>Au plus 1 écart ; 10 sur 10</td><td><span class="tag jaune">V1</span></td></tr>
    <tr><td>E5 – Diagnostic borné</td><td>Commande hors de la liste JEA</td><td>Refusée et tracée</td><td><span class="tag jaune">V1</span></td></tr>
    <tr><td>E6 – Retour au terrain</td><td>Écran du boîtier ; contenu du ticket</td><td>Moins d'1 minute ; les 4 témoins dans le ticket</td><td><span class="tag jaune">V1</span></td></tr>
-   <tr><td>E7 – Bon réseau</td><td>Imprimante placée hors du réseau attendu par l'AD</td><td>Signalée 5 fois sur 5</td><td><span class="tag jaune">V1</span></td></tr>
+   <tr><td>E7 – Bon réseau</td><td>Imprimante placée hors du réseau attendu (inventaire GLPI)</td><td>Signalée 5 fois sur 5</td><td><span class="tag jaune">V1</span></td></tr>
    <tr><td>E8 – PC neufs</td><td>5 PC préparés avec la station</td><td>Bon service, applications, fiche GLPI : 5 sur 5</td><td><span class="tag papier">V2</span></td></tr>
   </tbody>
  </table></div>
@@ -502,11 +505,11 @@ footer{padding:30px 0;font-size:.9rem;color:var(--encre-3)}
    <thead><tr><th>N°</th><th>Tâche</th><th>Heures</th><th>Compétence</th></tr></thead>
    <tbody>
     <tr><td>1</td><td>Analyse du besoin, cahier des charges, planification</td><td>12</td><td>C03, C01</td></tr>
-    <tr><td>2</td><td>Maquette : GLPI, CUPS, machines virtuelles Windows 11 dans le domaine Samba, imprimante</td><td>12</td><td>C10</td></tr>
+    <tr><td>2</td><td>Maquette : GLPI, CUPS, machine virtuelle Windows 11 (compte local), imprimante ; V2 : domaine Samba</td><td>12</td><td>C10</td></tr>
     <tr><td>3</td><td>Boîtier : vibration, bouton, écran, MQTT</td><td>27</td><td>C08</td></tr>
     <tr><td>4</td><td>Physique : étalonnage, vibration, délai de démarrage, humidité (V2), incertitudes</td><td>12</td><td>physique</td></tr>
     <tr><td>5</td><td>Serveur : règles de comparaison, SNMP (état, compteur), vérifications réseau</td><td>22</td><td>C08</td></tr>
-    <tr><td>6</td><td>PowerShell : file d'impression par JEA ; lecture de l'AD</td><td>14</td><td>C08, C10</td></tr>
+    <tr><td>6</td><td>PowerShell : file d'impression par JEA ; tableau du réseau attendu (V2 : lecture de l'AD)</td><td>14</td><td>C08, C10</td></tr>
     <tr><td>7</td><td>Exploitation du réseau : DHCP, DNS, NTP, SNMP, captures</td><td>8</td><td>C10</td></tr>
     <tr><td>8</td><td>GLPI : tickets à paliers, retour sur l'écran, tableau de bord</td><td>16</td><td>C08</td></tr>
     <tr><td>9</td><td>RFID : carte du technicien, preuve de réparation, station des PC neufs (V2)</td><td>12</td><td>C08</td></tr>
@@ -523,7 +526,7 @@ footer{padding:30px 0;font-size:.9rem;color:var(--encre-3)}
    <li><b>La vibration distingue « imprime » et « attend »</b> : premier essai sur l'imprimante du lycée, en début de projet.</li>
    <li><b>Le compteur de pages</b> : le lire en SNMP (<code>snmpget</code>, objet <code>prtMarkerLifeCount</code>) et vérifier qu'il avance à chaque page. Selon le modèle, une feuille recto verso compte pour 1 ou 2. S'il est absent ou faux, le capteur de feuilles repasse en V1.</li>
    <li><b>Une imprimante réseau disponible au lycée</b> : à demander.</li>
-   <li><b>Machines virtuelles Windows 11</b> : environ 4 Go de mémoire chacune ; version d'évaluation de 90 jours, à réinstaller pendant le projet. Windows 11 Famille ne rejoint aucun domaine : AD simulé par Samba.</li>
+   <li><b>Machines virtuelles Windows 11</b> : environ 4 Go de mémoire chacune ; version d'évaluation de 90 jours, à réinstaller pendant le projet. V2 : Windows 11 Famille ne rejoint aucun domaine, l'AD sera simulé par Samba.</li>
    <li><b>Proximité avec Lorenzo</b> : son cœur de projet est une fausse imprimante leurre. Chez Wassim, elle reste une extension, gardée seulement si elle se distingue.</li>
   </ul>
  </details>
@@ -553,7 +556,7 @@ footer{padding:30px 0;font-size:.9rem;color:var(--encre-3)}
 </div></section>
 </main>
 
-<footer><div class="wrap">Le service informatique augmenté · Projet de Wassim · BTS CIEL option A, épreuve E6, session 2027 · Maquette pédagogique, contexte anonymisé. Version du 22 novembre 2026 (compteur de pages en V1, capteur de feuilles en V2).</div></footer>
+<footer><div class="wrap">Diagnostic à distance des imprimantes : valorisation des données et ticket enrichi · Projet de Wassim · BTS CIEL option A, épreuve E6, session 2027 · Maquette pédagogique, contexte anonymisé. Version du 24 novembre 2026 (V1 sans annuaire : AD et station des PC neufs en V2).</div></footer>
 
 <script>
 (function () {
@@ -582,13 +585,16 @@ var CAS = {
              ticket: 'Cause probable : bourrage après la page 2\nNiveau 1 : écran « Feuille coincée » ; déplacement si non résolu en 10 min' },
   figee:   { vib: 'Non', forme: 'plat', cpt: 0, etat: '« Ça va »', pc: 'Rien en attente', sens: 'danger',
              titre: 'Imprimante figée', texte: 'Elle dit que tout va bien, mais rien ne bouge et le compteur n\'avance pas. C\'est le cas décrit par Wassim : seule la comparaison le voit.', ecran: 'Bloquée – Wassim arrive',
-             ticket: 'Cause probable : imprimante figée (état « ça va » contredit par vibration et compteur)\nNiveau 2 : redémarrage proposé à Wassim' },
+             ticket: 'Cause probable : imprimante figée (état « ça va » contredit par vibration et compteur)\nConseil : redémarrer l\'imprimante (geste à la main)\nNiveau 2 : si elle reste figée, déplacement' },
   pc:      { vib: 'Non', forme: 'plat', cpt: 0, etat: '« Ça va »', pc: '5 pages bloquées', sens: 'info',
              titre: 'Le problème est dans le PC', texte: 'L\'imprimante attend, mais rien ne lui arrive : les pages sont bloquées dans la file de Windows. Inutile de se déplacer vers l\'imprimante.', ecran: 'Prête',
-             ticket: 'Cause probable : file d\'impression bloquée sur PC-CARDIO-03\nNiveau 2 : relancer le service d\'impression (commande de la liste JEA)' },
+             ticket: 'Cause probable : file d\'impression bloquée sur PC-CARDIO-03\nConseil : relancer le service d\'impression sur le poste (geste de Wassim)' },
+  cable:   { vib: 'Non', forme: 'plat', cpt: null, etat: 'Imprimante en USB : pas de SNMP', pc: 'Imprimante absente', sens: 'info',
+             titre: 'Le PC ne voit plus l\'imprimante', texte: 'Le PC ne trouve plus le périphérique USB. Cause la plus probable : le câble n\'est pas branché. Avant de se déplacer, on demande à l\'utilisateur de le vérifier.', ecran: 'Vérifiez le câble',
+             ticket: 'Cause probable : imprimante absente de PC-CARDIO-03 (périphérique USB non détecté)\nNiveau 1 : demander de vérifier le câble USB ; pas de déplacement avant ce geste\nNiveau 2 : si le PC ne la voit toujours pas après 10 min, déplacement' },
   reseau:  { vib: 'Non', forme: 'plat', cpt: null, etat: 'Ne répond pas', pc: '—', sens: 'danger',
-             titre: 'Pas dans le réseau attendu', texte: 'Le serveur cherche où ça bloque : ping, DNS, DHCP, ports 9100 et 631, puis il compare avec l\'AD.', ecran: 'Hors réseau',
-             ticket: 'Vérifications : ping NON · DNS OK · bail DHCP dans le réseau RADIOLOGIE\nCause probable : l\'imprimante est dans le réseau de la radiologie ;\n  d\'après l\'AD, elle devrait être dans celui de la cardiologie\nAucune modification du réseau : vérification seulement' }
+             titre: 'Pas dans le réseau attendu', texte: 'Le serveur cherche où ça bloque : ping, DNS, DHCP, ports 9100 et 631, puis il compare avec l\'inventaire GLPI.', ecran: 'Hors réseau',
+             ticket: 'Vérifications : ping NON · DNS OK · bail DHCP dans le réseau RADIOLOGIE\nCause probable : l\'imprimante est dans le réseau de la radiologie ;\n  d\'après l\'inventaire GLPI, elle devrait être dans celui de la cardiologie\nAucune modification du réseau : vérification seulement' }
 };
 var tourSim = 0;
 function traceVib(forme, avance) {
@@ -677,8 +683,8 @@ var JOUR = [
     tb: { cardio: [V, 'prête'], pedia: [V, 'prête'], radio: [V, 'prête'], pc: [V, 'en service – Cardiologie'], leurre: [G, 'silence'] }, ecranT: 'Écran de la station', ecran: 'PC 5CG12 prêt' },
   { h: '9 h 10', tags: ['V1', 'quatre témoins'], titre: 'Nadia imprime. Rien ne sort.', texte: 'Pas de vibration, le compteur n\'avance pas, mais l\'imprimante répond « tout va bien ». Le serveur conclut : imprimante figée. Ticket ouvert, pastille rouge.',
     tb: { cardio: [R, 'figée · ticket ouvert'], pedia: [V, 'prête'], radio: [V, 'prête'], pc: [V, 'en service'], leurre: [G, 'silence'] }, ecranT: 'Boîtier · cardiologie', ecran: 'Bloquée – Wassim arrive' },
-  { h: '9 h 11', tags: ['V1', 'niveau 2'], titre: 'Le système propose, Wassim décide', texte: 'Niveau 2 : le système propose « redémarrer l\'imprimante ». Wassim clique depuis son bureau. (Le redémarrage à distance est une extension ; sinon, prise connectée du commerce.)',
-    tb: { cardio: [J, 'redémarrage lancé par Wassim'], pedia: [V, 'prête'], radio: [V, 'prête'], pc: [V, 'en service'], leurre: [G, 'silence'] }, ecranT: 'Boîtier · cardiologie', ecran: 'Redémarrage…' },
+  { h: '9 h 11', tags: ['V1', 'niveau 1'], titre: 'Le système conseille, on redémarre à la main', texte: 'Niveau 1 : le ticket dit « redémarrer l\'imprimante » et l\'écran du boîtier le répète. La secrétaire, ou Wassim, l\'éteint et la rallume. Le serveur ne la modifie jamais : le redémarrage à distance est une extension.',
+    tb: { cardio: [J, 'redémarrée à la main'], pedia: [V, 'prête'], radio: [V, 'prête'], pc: [V, 'en service'], leurre: [G, 'silence'] }, ecranT: 'Boîtier · cardiologie', ecran: 'Redémarrage…' },
   { h: '9 h 14', tags: ['V1', 'preuve'], titre: 'Réparé, preuve à l\'appui', texte: 'L\'imprimante repart, elle vibre, son compteur avance de 3. Le ticket se ferme avec cette preuve. Wassim ne s\'est pas déplacé.',
     tb: { cardio: [V, 'prête · ticket fermé'], pedia: [V, 'prête'], radio: [V, 'prête'], pc: [V, 'en service'], leurre: [G, 'silence'] }, ecranT: 'Boîtier · cardiologie', ecran: 'Réparé' },
   { h: '10 h 05', tags: ['V1', 'réglé sur place'], titre: 'Bac vide en pédiatrie', texte: 'L\'écran du boîtier affiche « Bac 2 vide ». La secrétaire remet du papier, la vibration revient, le compteur avance. Ticket « résolu sur place ». Personne ne s\'est déplacé.',
@@ -804,7 +810,7 @@ NOEUDS.forEach(function (n) {
   h += '<g class="n f-' + n.f.split(' ').join(' f-') + '">' + DESSIN[n.d](n.x, n.y) + etiquette(n.lab[0], n.lab[1], n.lab[2], n.lab[3]) + '</g>';
 });
 /* services du serveur */
-var SERV = ['CUPS : file d\'impression', 'Mosquitto : MQTT', 'Service Python : règles', 'PostgreSQL : mesures', 'Grafana : tableau de bord', 'GLPI : tickets', 'Samba : AD simulé (LDAP)'];
+var SERV = ['CUPS : file d\'impression', 'Mosquitto : MQTT', 'Service Python : règles', 'PostgreSQL : mesures', 'Grafana : tableau de bord', 'GLPI : tickets', 'Samba : AD simulé (LDAP, V2)'];
 h += '<g class="n f-imp f-diag f-neuf f-secu">' + rect(728, 246, 244, 176, 'papier-2', 'encre', 10, 1.5);
 SERV.forEach(function (s, i) { h += txt(744, 270 + i * 22, '• ' + s, 'sous'); });
 h += '</g>';
@@ -813,8 +819,8 @@ svg.innerHTML = h;
 var FLUX = {
   '': { t: 'Toute la maquette', e: ['<b>Sur le terrain :</b> l\'imprimante et son boîtier, le PC de la secrétaire.', '<b>Au centre :</b> le serveur Ubuntu reçoit tout, compare et décide.', '<b>À l\'atelier (V2) :</b> la station et le PC neuf.', '<b>Wassim</b> voit GLPI et le tableau de bord depuis son poste.'] },
   imp: { t: '① Une impression', e: ['<b>Le PC</b> envoie 5 pages au serveur d\'impression (CUPS), qui connaît donc le nombre de pages.', '<b>CUPS</b> transmet à l\'imprimante (IPP 631 ou 9100).', '<b>Le boîtier</b> envoie la vibration au serveur, en MQTT chiffré, par le Wi-Fi.'] },
-  diag: { t: '② Le diagnostic', e: ['<b>SNMP :</b> le serveur lit l\'état et le compteur de pages de l\'imprimante.', '<b>JEA :</b> il compte les documents bloqués dans le PC, sans lire leur nom.', '<b>LDAP :</b> il lit dans l\'AD le service du PC, donc le réseau attendu.', '<b>GLPI :</b> ticket avec la cause ; message renvoyé à l\'écran du boîtier ; pastille sur le poste de Wassim.'] },
-  neuf: { t: '③ Un PC neuf (V2)', e: ['<b>La station</b> envoie au serveur la commande : quel PC, pour quel profil, validée par qui.', '<b>Le script</b> du PC neuf lit son numéro de série et demande sa commande (HTTPS).', '<b>Il rejoint le domaine Samba</b> directement dans le bon service, installe et vérifie.', '<b>GLPI</b> : la fiche du PC passe « en service ».'] },
+  diag: { t: '② Le diagnostic', e: ['<b>SNMP :</b> le serveur lit l\'état et le compteur de pages de l\'imprimante.', '<b>JEA :</b> il compte les documents bloqués dans le PC, sans lire leur nom.', '<b>Inventaire GLPI :</b> il lit le réseau attendu pour le PC (V2 : dans l\'AD, par LDAP).', '<b>GLPI :</b> ticket avec la cause ; message renvoyé à l\'écran du boîtier ; pastille sur le poste de Wassim.'] },
+  neuf: { t: '③ Un PC neuf (V2)', e: ['<b>La station</b> envoie au serveur la commande : quel PC, pour quel profil, validée par qui.', '<b>Le script</b> du PC neuf lit son numéro de série et demande sa commande (HTTPS).', '<b>Il rejoint le domaine Samba (V2)</b> directement dans le bon service, installe et vérifie.', '<b>GLPI</b> : la fiche du PC passe « en service ».'] },
   secu: { t: '④ Le piège (extension)', e: ['<b>Un « attaquant » de test</b> scanne le réseau de la maquette.', '<b>La fausse imprimante</b> répond comme une vraie : personne n\'a de raison de lui parler.', '<b>Le serveur</b> ouvre un ticket de sécurité ; alerte sur le poste de Wassim.', 'Elle ne prouve pas une intrusion : c\'est un signal à examiner.'] }
 };
 function flux(k) {
@@ -834,9 +840,9 @@ flux('');
 var NIV = {
   1: { t: 'Il écrit « il faudrait la redémarrer » dans le ticket, sans rien faire. Wassim lit et agit lui-même.', s: 'On passe au niveau 2 quand ses conseils sont justes pendant toute une période d\'essai.',
        l: '[09:10:12] serveur  imprimante figée (vibration 0, compteur +0, état « ça va »)\n[09:10:13] GLPI     ticket #142 ouvert\n[09:10:13] GLPI     suivi : « conseil : redémarrer l\'imprimante »\n[09:10:13] action   aucune' },
-  2: { t: 'Il prépare l\'action. Wassim clique pour la lancer, depuis son bureau.', s: 'On passe au niveau 3 seulement si Wassim n\'a jamais eu à refuser et si les indicateurs sont atteints.',
+  2: { t: 'Extension. Il prépare l\'action. Wassim clique pour la lancer, depuis son bureau.', s: 'En V1, le serveur ne modifie jamais l\'imprimante. On passerait au niveau 3 seulement si Wassim n\'a jamais eu à refuser et si les indicateurs sont atteints.',
        l: '[09:10:12] serveur  imprimante figée\n[09:10:13] GLPI     ticket #142 · action proposée : redémarrer\n[09:11:02] Wassim   action acceptée\n[09:11:03] serveur  redémarrage envoyé\n[09:14:20] preuve   vibration + compteur +3 · ticket fermé' },
-  3: { t: 'Il agit seul, la nuit uniquement, et le note dans le ticket. Toujours réversible : on peut revenir au niveau 2.', s: 'Le journal montre chaque décision et qui l\'a prise.',
+  3: { t: 'Extension. Il agit seul, la nuit uniquement, et le note dans le ticket. Toujours réversible : on peut revenir au niveau 2.', s: 'Le journal montre chaque décision et qui l\'a prise.',
        l: '[02:31:40] serveur  imprimante figée (hors heures de service)\n[02:31:41] serveur  redémarrage automatique (niveau 3)\n[02:34:55] preuve   page de test · compteur +1\n[02:34:56] GLPI     ticket #143 ouvert et fermé avec la preuve' }
 };
 function niveau(n) {

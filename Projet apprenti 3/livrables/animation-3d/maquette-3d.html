@@ -835,27 +835,7 @@ function makePerf(w, d) {
   return g;
 }
 
-/* =====================================================================
-   OSCILLOSCOPE (mesure R4 : combien de secondes avant le blocage)
-   ===================================================================== */
 const FONT = '"Nunito", Arial, sans-serif', MONO = 'ui-monospace, Consolas, monospace';
-function makeScope() {
-  const g = new THREE.Group();
-  const body = grained(0x3b4047, 0.5, 0.5, 0.01);
-  mesh(RB(36, 17, 32, 1.2), body, 0, 8.5, 0, g);
-  mesh(RB(36.2, 3.2, 31, 0.8), grained(0x20242a, 0.55, 0.4), 0, 1.7, 0, g);
-  const sc = canvasTex(800, 520, () => {});
-  mesh(BOX(22.4, 14.8, 0.2), M.glassDark, -5.4, 9.2, 15.95, g, false);
-  front(21, 13.6, makeScreenMat(sc), -5.4, 9.2, 16.1, g);
-  for (let r = 0; r < 2; r++) for (let c = 0; c < 3; c++) {
-    const k = mesh(new THREE.CylinderGeometry(1.35, 1.5, 1.4, 24), M.darkMetal, 10 + c * 4.4 - 3, 13 - r * 4.6, 16.7, g); k.rotation.x = Math.PI / 2;
-    mesh(BOX(0.15, 0.1, 1.2), M.chrome, 10 + c * 4.4 - 3, 13 - r * 4.6, 17.45, g, false);
-  }
-  for (const x of [10, 14.5]) { const b = mesh(new THREE.CylinderGeometry(1.0, 1.0, 1.6, 20), M.chrome, x - 3, 3.0, 16.7, g); b.rotation.x = Math.PI / 2; }
-  mesh(RB(10, 1.2, 1.6, 0.3), M.plBlack, 0, 17.4, 0, g);          /* poignée */
-  for (const [x, z] of [[-14, -11], [14, -11], [-14, 11], [14, 11]]) mesh(RB(3.2, 1.0, 3.2, 0.3), M.rubber, x, 0.2, z, g);
-  return { g, screen: sc };
-}
 
 /* =====================================================================
    CHAISE DE BUREAU (origine = dessus de l'assise, avant = +z local)
@@ -1046,7 +1026,7 @@ function rings(pos, hex, r = 6, n = 3, axis = 'y', dur = 1.1) {
 /* =====================================================================
    6. Mise en place sur le bureau
    ===================================================================== */
-const world = { led: 'off', mon: 'work', dash: 'log', scope: 'off', netCut: false, usbOut: false, fakeOn: false, srvAct: -9, lockT: 0, readout: null };
+const world = { led: 'off', mon: 'work', dash: 'log', netCut: false, usbOut: false, fakeOn: false, srvAct: -9, lockT: 0, readout: null };
 
 /* routeur Cisco ISR 4331 (façade dessinée) */
 const rtFront = canvasTex(1760, 176, (g, w, h) => {
@@ -1105,7 +1085,6 @@ const decoyCable = new THREE.CatmullRomCurve3([
 scene.add(new THREE.Mesh(new THREE.TubeGeometry(decoyCable,40,.52,6,false), M.rubber));
 
 const dash = makeLaptop({ body: 0xa4a9b0 }); dash.g.position.set(80, 0, 14); dash.g.rotation.y = 0.3; scene.add(dash.g);
-const scope = makeScope(); scope.g.position.set(-92, 0, -28); scope.g.rotation.y = 0.35; scene.add(scope.g);
 
 /* clavier et souris */
 const kbd = new THREE.Group(); kbd.position.set(-30, 0, 27); scene.add(kbd);
@@ -1289,7 +1268,6 @@ label('decoy', V(62, 16, -52), 'Switch du laboratoire', 'liaison Ethernet isolé
 label('decoy', V(104, 48, -40), 'Serveur Ubuntu', 'événements techniques', 'small');
 label('decoy', V(80, 40, 14), 'PC de test', 'interroge le service factice', 'small');
 label('overview', V(80, 40, 14), 'PC du technicien', 'tableau de bord', 'small');
-label('overview', V(-92, 22, -28), 'Oscilloscope', 'mesure du délai (R4)', 'small');
 label('overview', V(-30, 82, 72), 'Martine, gestionnaire', 'agente (personnage fictif)', 'small');
 label('box', V(-30, 8, -13), 'ESP32-WROOM-32', 'lit le radar, signe, commande la LED', 'small');
 label('box', V(-38, 5, 0), 'Radar LD2410', '24 GHz · série 256 000 bauds', 'small');
@@ -1300,7 +1278,6 @@ label('phys', V(radarPos.x - 12, 9, radarPos.z + 0.75 * GATE * 0.5), 'Porte 0', 
 label('phys', V(radarPos.x - 22, 9, radarPos.z + 1.5 * GATE * 0.98), 'Porte 1', '0,75 à 1,5 m', 'small');
 label('phys', V(radarPos.x - 22, 9, radarPos.z + 2.5 * GATE * 0.95), 'Porte 2', '1,5 à 2,25 m', 'small');
 label('phys', V(radarPos.x + 36, 9, radarPos.z + 100 * 0.9), 'Zone retenue', 'exemple : 1,0 m', 'small');
-label('phys', V(-92, 22, -28), 'Oscilloscope', 'délai départ → blocage', 'small');
 const readM = mkRead(V(-30, 84, 66)), readRadar = mkRead(radarPos.clone().add(V(12, 14, 0)));
 let showLabels = true, labelMode = 'overview';
 function refreshLabels() {
@@ -1308,9 +1285,9 @@ function refreshLabels() {
 }
 
 /* =====================================================================
-   10. Écrans : Windows 11 (VM), tableau de bord, oscilloscope
+   10. Écrans : Windows 11 (VM), tableau de bord
    ===================================================================== */
-Object.assign(world, { psLines: [], count: 3, progress: 0, reports: 0, idleTxt: null, events: [], pkts: [], parc: null, scopeT: 0, capIdx: 0 });
+Object.assign(world, { psLines: [], count: 3, progress: 0, reports: 0, idleTxt: null, events: [], pkts: [], parc: null, capIdx: 0 });
 
 function wallpaper(g, w, h) {
   const gr = g.createLinearGradient(0, 0, w, h); gr.addColorStop(0, '#0a3d86'); gr.addColorStop(0.55, '#1d6fd1'); gr.addColorStop(1, '#0a2a5c');
@@ -1399,47 +1376,7 @@ function drawDash() {
     }
   });
 }
-function drawScope() {
-  const t = world.scopeT;
-  scope.screen.redraw((g, w, h) => {
-    g.fillStyle = '#07110c'; g.fillRect(0, 0, w, h);
-    if (world.scope === 'off') { g.fillStyle = '#1c3226'; g.font = `24px ${MONO}`; g.fillText('STOP', 20, 40); return; }
-    const X0 = 30, Y0 = 30, GW = w - 60, GH = h - 130;
-    g.strokeStyle = 'rgba(80,200,120,.28)'; g.lineWidth = 1;
-    for (let i = 0; i <= 10; i++) { g.beginPath(); g.moveTo(X0 + i * GW / 10, Y0); g.lineTo(X0 + i * GW / 10, Y0 + GH); g.stroke(); }
-    for (let j = 0; j <= 8; j++) { g.beginPath(); g.moveTo(X0, Y0 + j * GH / 8); g.lineTo(X0 + GW, Y0 + j * GH / 8); g.stroke(); }
-    g.lineWidth = 3;
-    if (world.scope === 'breath') {
-      g.strokeStyle = '#ffd84a'; g.beginPath();
-      for (let i = 0; i <= 200; i++) { const x = X0 + i / 200 * GW, tt = t - (1 - i / 200) * 6; const y = Y0 + GH / 2 - Math.sin(tt * 2 * Math.PI * 0.27) * GH * 0.22 - Math.sin(tt * 7.1) * 6; i ? g.lineTo(x, y) : g.moveTo(x, y); }
-      g.stroke();
-      g.fillStyle = '#ffd84a'; g.font = `20px ${MONO}`; g.fillText('CH1  phase de l\'écho (la respiration)', X0, h - 78);
-      g.fillStyle = '#9ad7ac'; g.fillText('période ≈ 3,7 s  ·  amplitude ≈ 1 mm (exemple)', X0, h - 48);
-    } else if (world.scope === 'timing') {
-      const k = world.timingK;                         /* 0..1 : avancement du balayage */
-      const xs = X0 + GW * 0.18, xe = xs + GW * 0.41;   /* départ puis blocage : 4,1 s sur 10 s */
-      const y1 = [Y0 + GH * 0.26, Y0 + GH * 0.46], y2 = [Y0 + GH * 0.62, Y0 + GH * 0.82];
-      const sweep = X0 + GW * k;
-      const trace = (xc, ya, yb, col) => {
-        g.strokeStyle = col; g.beginPath(); g.moveTo(X0, ya);
-        const xe2 = Math.min(sweep, xc); g.lineTo(xe2, ya);
-        if (sweep > xc) { g.lineTo(xc, yb); g.lineTo(sweep, yb); }
-        g.stroke();
-      };
-      trace(xs, y1[0], y1[1], '#ffd84a');
-      trace(xe, y2[0], y2[1], '#59c8ff');
-      if (sweep > xe) {
-        g.strokeStyle = '#ffffff'; g.lineWidth = 1.5; g.setLineDash([6, 6]);
-        for (const x of [xs, xe]) { g.beginPath(); g.moveTo(x, Y0); g.lineTo(x, Y0 + GH); g.stroke(); }
-        g.setLineDash([]); g.lineWidth = 3;
-        g.fillStyle = '#fff'; g.font = `bold 26px ${MONO}`; g.fillText('Δt ≈ 4,1 s  (exemple)', xs + 12, Y0 + 40);
-      }
-      g.fillStyle = '#ffd84a'; g.font = `19px ${MONO}`; g.fillText('CH1  boîtier : « absent »', X0, h - 60);
-      g.fillStyle = '#59c8ff'; g.fillText('CH2  poste : session verrouillée', X0, h - 34);
-    }
-  });
-}
-function redrawAll() { drawMon(); drawDash(); drawScope(); }
+function redrawAll() { drawMon(); drawDash(); }
 const pushPS = (txt, col) => { world.psLines.push([txt, col]); if (world.mon === 'ps') drawMon(); };
 const pushEv = (txt, col) => { world.events.push([txt, col]); drawDash(); };
 
@@ -1490,7 +1427,7 @@ let msgNo = 4820;
    12. État de départ de chaque étape
    ===================================================================== */
 function baseline(i) {
-  Object.assign(world, { mon: 'work', dash: 'log', scope: 'off', psLines: [], events: [], pkts: [], idleTxt: null, count: 3, progress: 0, reports: 0, timingK: 0, netCut: false, usbOut: false, parc: null, progressTxt: null, scopeT: 0 });
+  Object.assign(world, { mon: 'work', dash: 'log', psLines: [], events: [], pkts: [], idleTxt: null, count: 3, progress: 0, reports: 0, netCut: false, usbOut: false, parc: null, progressTxt: null });
   setSeated(i === 2 || i === 8 ? 'read' : 'type');
   decoyLed.material.color.setHex(0x61bf84);
   Object.assign(stQ, { x: 280, z: 150, walk: 0 }); Q.root.visible = false;
@@ -1500,10 +1437,10 @@ function baseline(i) {
   usbReal.mesh.visible = true; cPC.mesh.visible = true; portLEDs[P_PC].used = true;
   setRGB(i === 1 ? 'off' : 'vert');
   setRead(readM); setRead(readRadar);
-  if (i === 2) { world.scope = 'breath'; world.idleTxt = 'inactif depuis 04:12 : il ne voit rien'; stM.breath = 0.034; }
+  if (i === 2) { world.idleTxt = 'inactif depuis 04:12 : il ne voit rien'; stM.breath = 0.034; }
   if (i === 3) { world.mon = 'ps'; world.psLines = [['PS> Start-PresenceService', '#8fa3b5'], ['  port COM3 · 256000 bauds', '#8fa3b5'], ['  secret chargé · compteur = 4820', '#8fa3b5']]; }
   if (i === 5) { world.dash = 'wire'; }
-  if (i === 8) { world.scope = 'breath'; stM.breath = 0.034; }
+  if (i === 8) { stM.breath = 0.034; }
 
   redrawAll();
 }
@@ -1559,7 +1496,7 @@ const steps = [
   text: `<p>Martine <b>lit un dossier papier</b>, sans toucher au clavier. Windows se croit seul : « inactif depuis 4 minutes ».</p>
          <p>Le radar envoie une onde (λ = 12,5 mm) et écoute l'écho. En respirant, la poitrine bouge de quelques millimètres : l'écho change, et la <b>porte 0</b> (0 à 0,75 m) garde de l'énergie. Résultat : <b>présent</b>.</p>
          <p><b>Inactif ne veut pas dire absent.</b></p>`,
-  note: 'La respiration est amplifiée sur l\'image pour qu\'on la voie. L\'oscilloscope montre la phase de l\'écho (valeurs d\'exemple).',
+  note: 'La respiration est amplifiée sur l\'image pour qu\'on la voie.',
   cam: [[118, 96, -2], [-30, 8, 36]], labels: 'phys',
   async run() {
     setRead(readRadar, 'porte 0 : énergie 74 (seuil 40) → présent', '#3ddc84');
@@ -1712,9 +1649,9 @@ const steps = [
 {
   title: '8. La physique : régler le radar avec des mesures',
   text: `<p>Le radar découpe l'espace en <b>portes</b> de 0,75 m. Martine est dans la porte 0. Un collègue qui passe dans l'allée est dans la porte 2 : le seuil de la <b>zone retenue</b> l'ignore.</p>
-         <p>Lorenzo mesure les seuils et la zone (R1 à R3), puis le <b>délai</b> entre le départ et le blocage (R4, à l'oscilloscope), avec des incertitudes.</p>
+         <p>Lorenzo mesure les seuils et la zone (R1 à R3), avec des incertitudes.</p>
          <p>λ = c/f = 12,5 mm · ΔR = c/2B = 0,6 m (B = 250 MHz) · Δφ = 4π·Δd/λ ≈ 1 rad pour 1 mm.</p>`,
-  note: 'Valeurs d\'exemple : les vraies viendront des essais R1 à R4. Le balayage de l\'oscilloscope est accéléré à l\'écran.',
+  note: 'Valeurs d\'exemple : les vraies viendront des essais R1 à R3.',
   cam: [[40, 300, 250], [-30, 0, 70]], labels: 'phys',
   async run() {
     setRead(readRadar, 'porte 0 : agent détecté → compté', '#3ddc84');
@@ -1734,13 +1671,6 @@ const steps = [
     await walk; Q.root.visible = false;
     setRead(readRadar, 'porte 0 : agent détecté → compté', '#3ddc84');
     await sleep(1200);
-    /* mesure R4 : Martine part, l'oscilloscope chronomètre */
-    world.scope = 'timing'; world.timingK = 0; drawScope(); flyTo([-62, 30, 40], [-92, 9, -28], 2);
-    stM.breath = 0.018;
-    const lv = leave(1.1);
-    await anim(6.5, k => { world.timingK = k; drawScope(); }, k => k);
-    await lv;
-    setRead(readRadar, 'R4 : délai départ → blocage ≈ 4,1 s (exemple)', '#c18cff');
     while (true) { await sleep(2500); }
   }
 },
@@ -1875,7 +1805,6 @@ controls.addEventListener('start', () => { cam.k = 1; });
    15. Boucle d'animation
    ===================================================================== */
 const clock = new THREE.Clock();
-let lastScope = 0;
 function tick() {
   const dt = Math.min(clock.getDelta(), 0.05), now = clock.elapsedTime;
 
@@ -1927,11 +1856,9 @@ function tick() {
   /* personnages */
   applyPose(P, stM, now);
   if (Q.root.visible) applyPose(Q, stQ, now);
-  /* oscilloscope : la respiration défile */
-  if (world.scope === 'breath' && now - lastScope > 0.07) { lastScope = now; world.scopeT = now; drawScope(); }
   fan.children.forEach((c, k) => { if (c.material && c !== zoneRing && k === 0) c.material.opacity = 0.14 + 0.03 * Math.sin(now * 3); });
 
-  if (tweens.length || packets.length || world.scope === 'breath') shadowFrames = 2;
+  if (tweens.length || packets.length || stM.breath > 0) shadowFrames = 2;
   if (shadowFrames > 0) { renderer.shadowMap.needsUpdate = true; shadowFrames--; }
   composer.render();
   labelRenderer.render(scene, camera);

@@ -13,6 +13,8 @@
    ===================================================================== */
 (function () {
 'use strict';
+/* « ?cadre » dans l'adresse : page intégrée dans un autre document (diaporama du quartier) → sans en-tête ni règles */
+if (/[?&]cadre\b/.test(location.search)) document.documentElement.classList.add('cadre');
 var D = window.SCHEMA, NS = 'http://www.w3.org/2000/svg', svg = document.getElementById('schema');
 var REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches, CANCEL = { cancel: true };
 function el(tag, attrs, parent, text) {
@@ -155,7 +157,12 @@ D.noeuds.forEach(function (n) { if (n.cache) { N[n.id].g.classList.add('cache');
 
 /* ---------- outils des étapes ---------- */
 var RUN = 0, BUL = {};
-function sleep(ms) { var id = RUN; return new Promise(function (res, rej) { setTimeout(function () { id === RUN ? res() : rej(CANCEL); }, REDUCED ? Math.min(ms, 400) : ms); }); }
+/* pause : une horloge virtuelle qui s'arrête pendant la pause ; minuteurs et trajets suivent cette horloge */
+var PAUSE = false, pauseA = 0, decal = 0, MINUTEURS = [];
+function vt() { return (PAUSE ? pauseA : performance.now()) - decal; }
+function armer(m) { m.h = setTimeout(function () { var i = MINUTEURS.indexOf(m); if (i >= 0) MINUTEURS.splice(i, 1); m.fn(); }, Math.max(0, m.due - vt())); }
+function plusTard(fn, ms) { var m = { fn: fn, due: vt() + ms, h: 0 }; MINUTEURS.push(m); if (!PAUSE) armer(m); return m; }
+function sleep(ms) { var id = RUN; return new Promise(function (res, rej) { plusTard(function () { id === RUN ? res() : rej(CANCEL); }, REDUCED ? Math.min(ms, 400) : ms); }); }
 function bg(p) { p.catch(function () {}); return p; }
 function chemin(ids) {
   var out = [];
@@ -180,15 +187,15 @@ function go(ids, kind, label, o) {
       rb.setAttribute('x', b.x - 8); rb.setAttribute('y', b.y - 3); rb.setAttribute('width', b.width + 16); rb.setAttribute('height', b.height + 6);
     }
     var dur = REDUCED ? 300 : Math.max(700, Lg / (o.speed || 260) * 1000), stopAt = o.dropAt == null ? 1 : o.dropAt, t0 = null;
-    function frame(t) {
+    function frame() {
       if (id !== RUN) { tr.remove(); tok.remove(); return rej(CANCEL); }
-      if (t0 == null) t0 = t;
+      var t = vt(); if (t0 == null) t0 = t;
       var k = Math.min(1, (t - t0) / dur), e = 0.5 - Math.cos(Math.PI * k) / 2, kk = Math.min(e, stopAt), pt = tr.getPointAtLength(kk * Lg);
       tok.setAttribute('transform', 'translate(' + r1(pt.x) + ' ' + r1(pt.y) + ')');
       tr.style.strokeDashoffset = Lg * (1 - kk);
       if (e >= stopAt) {
         if (o.dropAt != null) tok.classList.add('perdu');
-        setTimeout(function () { tr.classList.add('fini'); setTimeout(function () { tr.remove(); }, 650); if (o.dropAt == null) tok.remove(); else setTimeout(function () { tok.remove(); }, 700); }, 150);
+        plusTard(function () { tr.classList.add('fini'); plusTard(function () { tr.remove(); }, 650); if (o.dropAt == null) tok.remove(); else plusTard(function () { tok.remove(); }, 700); }, 150);
         return res();
       }
       requestAnimationFrame(frame);
@@ -245,9 +252,9 @@ function onde(id, dir, rmax) {
   var nd = N[id].n, p = el('path', { 'class': 'onde' }, layOnde), dx = dir === 'gauche' ? -1 : 1, id0 = RUN;
   var t0 = null, dur = 1300, R0 = rmax || 120;
   return new Promise(function (res, rej) {
-    function f(t) {
+    function f() {
       if (id0 !== RUN) { p.remove(); return rej(CANCEL); }
-      if (t0 == null) t0 = t; var k = Math.min(1, (t - t0) / dur), r = 20 + (R0 - 20) * k, x0 = nd.x + dx * N[id].hw.w / 2;
+      var t = vt(); if (t0 == null) t0 = t; var k = Math.min(1, (t - t0) / dur), r = 20 + (R0 - 20) * k, x0 = nd.x + dx * N[id].hw.w / 2;
       p.setAttribute('d', 'M' + r1(x0 + dx * r * Math.cos(.7)) + ' ' + r1(nd.y - r * Math.sin(.7)) + 'A' + r + ' ' + r + ' 0 0 ' + (dx > 0 ? 1 : 0) + ' ' + r1(x0 + dx * r * Math.cos(.7)) + ' ' + r1(nd.y + r * Math.sin(.7)));
       p.style.opacity = 1 - k;
       if (k < 1) requestAnimationFrame(f); else { p.remove(); res(); }
@@ -270,13 +277,13 @@ STEPS.forEach(function (s, i) {
   b.addEventListener('click', function () { show(i); }); pointsBox.appendChild(b);
 });
 function reset() {
-  RUN++; layTok.innerHTML = ''; layTrace.innerHTML = ''; layOnde.innerHTML = ''; layBul.innerHTML = ''; BUL = {};
+  RUN++; MINUTEURS.forEach(function (m) { clearTimeout(m.h); }); MINUTEURS = []; layTok.innerHTML = ''; layTrace.innerHTML = ''; layOnde.innerHTML = ''; layBul.innerHTML = ''; BUL = {};
   D.noeuds.forEach(function (n) { var nd = N[n.id]; nd.g.querySelector('.dessin').innerHTML = INIT[n.id].html; etat(n.id, null); montre(n.id, !n.cache); nd.g.classList.remove('flash'); });
   L.forEach(function (l) { l.p.classList.remove('coupe'); });
 }
 function show(i) {
   cur = Math.max(0, Math.min(STEPS.length - 1, i)); var s = STEPS[cur]; vus[cur] = true;
-  reset();
+  pause(false); reset();
   if (D.init) D.init(S);
   if (s.init) s.init(S);
   eNum.textContent = 'Étape ' + cur + ' sur ' + (STEPS.length - 1);
@@ -293,6 +300,26 @@ function show(i) {
 bNext.addEventListener('click', function () { show(cur === STEPS.length - 1 ? 0 : cur + 1); });
 bPrev.addEventListener('click', function () { show(cur - 1); });
 document.getElementById('bReplay').addEventListener('click', function () { show(cur); });
+/* bouton pause (ajouté après « Rejouer ») ; touche P ; message « schema-pause » envoyé par le diaporama */
+var FIGEES = [], bPause = document.createElement('button'); bPause.type = 'button'; bPause.className = 'btn'; bPause.id = 'bPause';
+document.getElementById('bReplay').after(bPause);
+function pause(on) {
+  if (on === PAUSE) { majPause(); return; }
+  if (on) { PAUSE = true; pauseA = performance.now(); MINUTEURS.forEach(function (m) { clearTimeout(m.h); }); }
+  else { decal += performance.now() - pauseA; PAUSE = false; MINUTEURS.forEach(armer); }
+  /* les animations CSS s'arrêtent par la classe « en-pause » ; on fige en plus les transitions en cours */
+  if (on && document.getAnimations) FIGEES = document.getAnimations().filter(function (a) { return a.playState === 'running' && !(window.CSSAnimation && a instanceof CSSAnimation); });
+  FIGEES.forEach(function (a) { try { on ? a.pause() : a.play(); } catch (e) {} });
+  if (!on) FIGEES = [];
+  majPause();
+}
+function majPause() {
+  document.documentElement.classList.toggle('en-pause', PAUSE);
+  bPause.textContent = PAUSE ? '▶ Reprendre' : '❚❚ Pause'; bPause.setAttribute('aria-pressed', String(PAUSE));
+  try { if (parent !== window) parent.postMessage({ schema: 'etat', pause: PAUSE }, '*'); } catch (e) {}
+}
+bPause.addEventListener('click', function () { pause(!PAUSE); });
+addEventListener('message', function (e) { var d = e.data; if (d && d.schema === 'pause') pause(d.on == null ? !PAUSE : !!d.on); });
 var bLab = document.getElementById('bLab');
 function toggleLab() { var on = bLab.getAttribute('aria-pressed') !== 'true'; bLab.setAttribute('aria-pressed', String(on)); svg.classList.toggle('sans-lab', !on); }
 bLab.addEventListener('click', toggleLab);
@@ -301,6 +328,7 @@ addEventListener('keydown', function (e) {
   if (e.key === 'ArrowRight') { e.preventDefault(); if (cur < STEPS.length - 1) show(cur + 1); }
   else if (e.key === 'ArrowLeft') { e.preventDefault(); if (cur > 0) show(cur - 1); }
   else if (e.key === 'r' || e.key === 'R') show(cur);
+  else if (e.key === 'p' || e.key === 'P') pause(!PAUSE);
   else if (e.key === 'e' || e.key === 'E') toggleLab();
 });
 var h = /#etape-(\d+)/.exec(location.hash);

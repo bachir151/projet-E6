@@ -215,7 +215,7 @@ harmoniser_cases(d)
 
 # ================================================================== EN-TÊTE
 remplacer_marque(T[0].cell(3, 0).paragraphs[0], " à attribuer par la commission")
-remplacer_marque(T[0].cell(3, 1).paragraphs[0], "Le service informatique augmenté : de l’imprimante muette au PC du nouveau médecin", gras=True)
+remplacer_marque(T[0].cell(3, 1).paragraphs[0], "Diagnostic à distance des imprimantes : valorisation des données et ticket enrichi", gras=True)
 
 t = T[1]
 cocher(cases(t.cell(0, 1).paragraphs[0])[0])          # projet nouveau : oui
@@ -251,14 +251,14 @@ R.titre("Contexte")
 R.texte("Wassim est technicien support au service informatique d’un centre hospitalier. Il traite les tickets "
         "de premier et de deuxième niveau. Il l’a dit lui-même en entretien : ", ("« le plus gros problème, c’est "
         "les imprimantes »", "g"), ". Elles sont allumées mais n’impriment pas ; il vérifie si elles sont dans le "
-        "bon VLAN, s’il manque de l’encre. Sa deuxième tâche fréquente : ", ("préparer le PC d’un nouveau "
-        "médecin", "g"), " (le mettre dans le domaine, le ranger dans le bon service de l’annuaire AD, installer "
-        "les applications avec un script). Il trouve aussi qu’il y a trop de tickets, souvent mal décrits.")
+        "bon VLAN, s’il manque de l’encre. Il recueille les problèmes des agents ", ("par plusieurs canaux", "g"), " : les tickets sont gérés dans GLPI, mais les "
+        "agents appellent aussi, écrivent un mail ou passent par le chat de GLPI. Le service n’a pas de supervision "
+        "centralisée des imprimantes. Selon les bureaux, l’imprimante est reliée au PC par un câble USB, en réseau "
+        "ou en sans-fil. (Faits rapportés par l’apprenti, à confirmer par le tuteur.)")
 R.titre("Le problème")
 R.texte("Un ticket « l’imprimante ne marche pas » ne dit rien de la cause. L’imprimante elle-même peut répondre "
         "« tout va bien » alors qu’elle est figée. Le technicien refait à la main les mêmes vérifications, se "
-        "déplace souvent pour rien, et personne ne prouve que la réparation a marché. Pour les PC neufs, le choix du "
-        "service et du profil se fait de mémoire, et la fiche du PC dans l’outil de tickets est souvent oubliée.")
+        "déplace parfois pour rien (par exemple : l’imprimante marche, mais son câble n’est pas branché au PC), et personne ne prouve que la réparation a marché.")
 R.texte(("Question posée par le projet : ", "g"), "si un petit boîtier collé sur l’imprimante voyait ce qui se "
         "passe vraiment, et si le ticket arrivait avec sa cause et sa preuve, combien de déplacements et de temps "
         "gagnerait-on, sans prendre de risque sur les postes ? L’apprenti construit le système, le teste sur "
@@ -268,30 +268,31 @@ R.tableau(
     ["Solution", "Ce qu’elle apporte", "Pourquoi elle ne suffit pas"],
     [
         ["Page web de l’imprimante", "État, niveau d’encre", "Une imprimante à la fois ; peut dire « tout va bien » alors qu’elle est figée"],
-        ["Supervision (Centreon, Zabbix…)", "Toutes les imprimantes du réseau", "Lit l’état et le compteur de pages sans les comparer à ce qui a été envoyé ; ne sent pas si la machine travaille ; ne regarde pas le PC qui imprime"],
+        ["Supervision (Centreon, Zabbix…) : absente du service pour les imprimantes (à confirmer)", "Toutes les imprimantes du réseau", "Ne voit pas les imprimantes en USB ; lit l’état et le compteur de pages sans les comparer à ce qui a été envoyé ; ne sent pas si la machine travaille ; ne regarde pas le PC qui imprime"],
         ["Prise en main à distance", "Le technicien voit le PC", "Vérifications manuelles, ticket après ticket"],
-        ["Outil de tickets (GLPI)", "Suivi, historique, liste du matériel", "Le ticket ne contient que la phrase de l’utilisateur ; aucune preuve de réparation"],
+        ["Outil de tickets (GLPI)", "Suivi, historique, liste du matériel", "Le ticket ne contient que la phrase de l’utilisateur (GLPI, téléphone, mail ou chat) ; aucune preuve de réparation"],
         ["Script d’installation actuel", "Installe vite les applications", "Service et profil choisis à la main ; GLPI non mis à jour"],
     ],
     [4.2, 5.0, 8.8])
 R.texte(("Constat : ", "g"), "aucun outil ne compare ce que dit l’imprimante avec ce qui se passe physiquement "
-        "(vibration, pages vraiment imprimées), ni avec ce que le PC a envoyé. C’est pourtant cette comparaison qui donne la cause.")
+        "(vibration, pages vraiment imprimées), ni avec ce que le PC a envoyé. Aucun ne dit « l’imprimante marche, "
+        "vérifiez le câble » avant un déplacement. C’est pourtant cette comparaison qui donne la cause.")
 R.titre("Principe de la solution")
 R.puce(("Le boîtier", "g"), " (ESP32), collé sur l’imprimante : un accéléromètre sent si elle vibre, un gros bouton « ça ne marche pas » ouvre un ticket, un écran à "
        "encre électronique donne des nouvelles (« Bac 2 vide », « Wassim arrive », « Réparé »).")
 R.puce(("Le serveur", "g"), " (Ubuntu) compare quatre témoins : la vibration, le compteur de pages et l’état "
-       "de l’imprimante (SNMP), et ce que dit le PC (script PowerShell en lecture seule). Il lit l’annuaire AD pour connaître le "
-       "réseau attendu. Il écrit la cause probable dans GLPI et met à jour un tableau de bord.")
-R.puce(("La station des PC neufs", "g"), " (V2) : le technicien pose trois cartes RFID (la sienne, celle du profil, "
+       "de l’imprimante (SNMP), et ce que dit le PC (script PowerShell en lecture seule). Le réseau attendu pour chaque service "
+       "vient d’un tableau de l’inventaire GLPI. Il écrit la cause probable dans GLPI et met à jour un tableau de bord.")
+R.puce(("L’annuaire et la station des PC neufs", "g"), " (V2) : une seconde machine virtuelle héberge un annuaire Active Directory simulé (Samba). Le technicien pose trois cartes RFID (la sienne, celle du profil, "
        "celle du PC) ; un script PowerShell met le PC dans le domaine, directement dans le bon service, installe "
        "les applications du profil et met à jour GLPI.")
 R.image(IMG("0_synoptique"), 17.6, "Synoptique de l’architecture (maquette de démonstration).")
 R.titre("Progression du projet")
 R.puce(("V1 (obligatoire) : ", "g"), "boîtier (vibration, bouton, écran), lecture SNMP (état, compteur de pages), serveur, comparaison des "
-       "quatre témoins, vérifications réseau, ticket GLPI aux paliers 1 et 2, retour sur l’écran, tableau de bord.")
+       "quatre témoins, vérifications réseau, ticket GLPI au palier 1 (le système conseille, il ne modifie jamais l’imprimante), retour sur l’écran, tableau de bord.")
 R.puce(("V2 (visée) : ", "g"), "carte RFID du technicien (arrivée, départ, durée) et preuve de réparation par page "
-       "de test ; encre surveillée avant la panne ; humidité du local croisée avec les bourrages ; station des PC "
-       "neufs ; palier 3 ; capteur de feuilles pour contrôler le compteur de l’imprimante.")
+       "de test ; encre surveillée avant la panne ; humidité du local croisée avec les bourrages ; annuaire AD "
+       "(Samba) et station des PC neufs ; capteur de feuilles pour contrôler le compteur de l’imprimante.")
 R.puce(("Extensions : ", "g"), "redémarrage de l’imprimante figée à distance ; fausse imprimante servant de piège ; "
        "cartes RFID sécurisées ; SNMP version 3 ; étagère des cartouches.")
 R.titre("Limites de l’étude")
@@ -299,15 +300,15 @@ R.puce(("Point réglementaire : ", "g"), "l’arrêté du 25 janvier 2023 indiqu
        "doivent être développés dans l’entreprise. Ici, le besoin vient de l’hôpital, mais la réalisation se fait "
        "au lycée, sur maquette, sans accès à la production ni donnée réelle. Cette organisation doit être "
        "validée par l’académie.")
-R.puce(("Maquette : ", "g"), "les PC du lycée sont sous Windows 11 Famille, qui ne peut rejoindre aucun domaine. "
-       "L’annuaire AD est donc simulé par Samba sur Ubuntu, et les PC Windows sont des machines virtuelles Windows 11 "
-       "Entreprise (version d’évaluation) ou des PC sous Windows 11 Pro.")
+R.puce(("Maquette : ", "g"), "en V1, un serveur Ubuntu et un PC Windows en machine virtuelle (Windows 11 Entreprise en "
+       "évaluation, ou Windows 11 Pro), avec un compte local, sans domaine. En V2, les PC du lycée sous Windows 11 Famille ne pouvant rejoindre aucun domaine, "
+       "l’annuaire AD sera simulé par Samba sur une seconde machine virtuelle.")
 R.puce("Aucune donnée patient : le script lit le nombre de documents en attente, jamais leur nom. Pas de micro, pas "
        "de caméra. Le système ne supprime aucun ticket et ne ferme un ticket qu’avec une preuve.")
 R.titre("Attentes du client")
 R.puce("Savoir pourquoi une imprimante n’imprime pas, sans attendre l’appel ni se déplacer pour rien.")
 R.puce("Un ticket qui arrive avec la cause et la preuve, et un utilisateur informé sur place.")
-R.puce("Des PC neufs prêts plus vite, rangés dans le bon service, avec une fiche GLPI à jour.")
+R.puce("(V2) Des PC neufs prêts plus vite, rangés dans le bon service, avec une fiche GLPI à jour.")
 R.puce("Une réponse chiffrée : recommander ou non l’adoption.")
 # ================================================================== 1.3 DOMAINE
 cell = T[3].cell(0, 1)
@@ -337,7 +338,7 @@ for p in cell.paragraphs:
 R = Redac(P[47])
 R.titre("Besoin exprimé")
 R.texte("Savoir tout de suite pourquoi une imprimante n’imprime pas, ouvrir le ticket avec la cause et la preuve, "
-        "informer l’utilisateur sur place ; en V2, préparer les PC des nouveaux médecins sans erreur de service.")
+        "informer l’utilisateur sur place ; en V2, ranger les PC neufs dans le bon service sans erreur.")
 R.titre("Les quatre témoins")
 R.tableau(
     ["Témoin", "Matériel ou outil", "Ce qu’il dit"],
@@ -357,37 +358,38 @@ R.tableau(
         ["Vibration puis arrêt, compteur +2, « bourrage »", "Feuille coincée", "FEUILLE COINCÉE"],
         ["Rien ne bouge, compteur +0, « prête »", "Imprimante figée", "BLOQUÉE"],
         ["Rien ne bouge, documents bloqués dans le PC", "Problème dans le PC", "PRÊTE"],
-        ["Pas de réponse, ou hors du réseau attendu par l’AD", "Câble, adresse ou VLAN", "HORS RÉSEAU"],
+        ["Pas de réponse, ou hors du réseau attendu (inventaire GLPI)", "Câble, adresse ou VLAN", "HORS RÉSEAU"],
     ],
     [7.4, 4.6, 6.0])
 R.titre("Exigences et indicateurs mesurés sur la maquette (objectifs à valider par le tuteur)")
 R.tableau(
     ["Exigence", "Mesure sur la maquette", "Objectif", "Étape"],
     [
-        ["E1 – Bonne cause", "10 pannes provoquées (papier retiré, feuille bloquée, câble, mauvais réseau, imprimante figée, file bloquée)", "Cause juste dans au moins 9 cas", "V1"],
+        ["E1 – Bonne cause", "10 pannes provoquées (papier retiré, feuille bloquée, câble USB débranché, mauvais réseau, imprimante figée, file bloquée)", "Cause juste dans au moins 9 cas", "V1"],
         ["E2 – Pas de fausse alerte", "1 h d’impressions normales", "Aucun ticket", "V1"],
         ["E3 – Rapide", "Temps entre l’impression ratée et le ticket", "Moins d’1 minute", "V1"],
         ["E4 – Pages comptées", "Compteur SNMP sur 100 pages ; 10 pages de test", "Au plus 1 écart ; 10 sur 10", "V1"],
         ["E5 – Diagnostic borné", "Commande hors de la liste JEA", "Refusée et tracée", "V1"],
         ["E6 – Retour au terrain", "Mise à jour de l’écran du boîtier ; contenu du ticket", "Moins d’1 minute ; les 4 témoins dans le ticket", "V1"],
-        ["E7 – Bon réseau", "Imprimante placée hors du réseau attendu par l’AD", "Signalée 5 fois sur 5", "V1"],
+        ["E7 – Bon réseau", "Imprimante placée hors du réseau attendu (inventaire GLPI)", "Signalée 5 fois sur 5", "V1"],
         ["E8 – PC neufs", "5 PC préparés avec la station", "Bon service, applications, fiche GLPI : 5 sur 5", "V2"],
     ],
     [3.6, 7.0, 5.8, 1.6])
-R.titre("Trois paliers avant d’agir tout seul")
+R.titre("Trois paliers avant d’agir : la V1 reste au palier 1")
 R.tableau(
     ["Palier", "Ce que fait le système", "Quand on passe au suivant"],
     [
-        ["1. Conseil", "Il écrit la cause et l’action conseillée dans le ticket, sans rien faire", "Conseils justes pendant toute la campagne d’essai"],
-        ["2. Confirmation", "Il prépare l’action (relancer le service d’impression du PC, redémarrer l’imprimante) ; le technicien la lance d’un clic", "Le technicien n’a jamais eu à refuser"],
-        ["3. Automatique (V2)", "Il agit seul, la nuit uniquement, et le note dans le ticket", "Seulement si les indicateurs sont atteints"],
+        ["1. Conseil (V1)", "Il écrit la cause et l’action conseillée dans le ticket, sans rien faire ; la secrétaire ou le technicien agit à la main", "Conseils justes pendant toute la campagne d’essai"],
+        ["2. Confirmation (extension)", "Il prépare l’action (relancer le service d’impression du PC, redémarrer l’imprimante) ; le technicien la lance d’un clic", "Le technicien n’a jamais eu à refuser"],
+        ["3. Automatique (extension)", "Il agit seul, la nuit uniquement, et le note dans le ticket", "Seulement si les indicateurs sont atteints"],
     ],
     [3.6, 7.6, 6.8])
 R.titre("Questions au tuteur (hypothèses à confirmer)")
-R.puce("Quelle part des tickets concerne les imprimantes ? les PC neufs ? (ordre de grandeur sur un mois)")
-R.puce("Les imprimantes sont-elles en réseau, dans un VLAN à part, publiées dans l’AD ?")
+R.puce("Quelle part des tickets concerne les imprimantes ? (ordre de grandeur sur un mois)")
+R.puce("Les imprimantes sont-elles en réseau (filaire ou Wi-Fi), en USB, ou en Bluetooth / Wi-Fi Direct ? Dans un VLAN à part ?")
+R.puce("Quelle part des déplacements est inutile (câble non branché, par exemple) ? Combien de temps prend un déplacement, aller-retour compris ?")
+R.puce("Par quels canaux arrivent les tickets (GLPI, téléphone, mail, chat) ? Le mail crée-t-il déjà un ticket tout seul ?")
 R.puce("Le technicien a-t-il le droit de lire l’état des imprimantes (SNMP) ?")
-R.puce("Combien de profils d’installation existent (médecin, secrétaire, infirmier…) ?")
 
 # ================================================================== 2.1 SYSML
 R = Redac(P[52])
@@ -402,19 +404,19 @@ R.puce("Matériel à acheter : ", ("75 à 125 € environ", "g"), " (à confirme
        "capteur de température et d’humidité SHT31 (V2), capteur infrarouge (V2), 2 écrans à encre électronique, bouton, LED, 2 lecteurs RFID, cartes RFID, boîtiers.")
 R.puce("PC Ubuntu, réseau, imprimante réseau (du lycée ou de récupération) : fournis par le lycée. Les PC Windows sont "
        "des machines virtuelles Windows 11 Entreprise (évaluation gratuite de 90 jours) ou des PC sous Windows 11 Pro.")
-R.puce("Tous les logiciels sont libres ou gratuits (Samba, GLPI, CUPS, Mosquitto, PostgreSQL, Grafana).")
+R.puce("Tous les logiciels sont libres ou gratuits (GLPI, CUPS, Mosquitto, PostgreSQL, Grafana).")
 
 R = Redac(P[60])
 R.puce(("Boîtier : ", "g"), "ESP32 programmé en C++ ; accéléromètre lu en continu, énergie de vibration calculée "
        "chaque seconde ; bouton ; écran à encre ; "
        "alimentation par bloc USB 5 V ; MQTT sur TLS ; capteur SHT31 (température, humidité, I²C), lecteur RFID et capteur infrarouge de feuilles en V2.")
 R.puce(("Serveur : ", "g"), "PC Ubuntu ; CUPS (serveur d’impression : il connaît les travaux envoyés) ; Mosquitto ; "
-       "service Python (règles, SNMP avec pysnmp : état et compteur de pages, pilotage du PC avec pywinrm, LDAP avec ldap3, API REST de GLPI) ; "
+       "service Python (règles, SNMP avec pysnmp : état et compteur de pages, pilotage du PC avec pywinrm, API REST de GLPI ; V2 : LDAP avec ldap3) ; "
        "PostgreSQL ; tableau de bord Grafana.")
-R.puce(("PC Windows : ", "g"), "machines virtuelles Windows 11 Entreprise dans le domaine de la maquette ; WinRM en "
-       "HTTPS (port 5986) ; point d’accès JEA (Get-PrintJob, Get-Printer, Restart-Service Spooler au palier 2).")
-R.puce(("Annuaire : ", "g"), "Samba en contrôleur de domaine Active Directory sur Ubuntu, commun aux projets du lycée ; "
-       "unités d’organisation par service ; compte de lecture LDAP ; compte de jonction limité (V2).")
+R.puce(("PC Windows : ", "g"), "machine virtuelle Windows 11 Entreprise avec un compte local (V2 : dans le domaine de la maquette) ; WinRM en "
+       "HTTPS (port 5986) ; point d’accès JEA en lecture seule (Get-PrintJob, Get-Printer).")
+R.puce(("Annuaire (V2) : ", "g"), "Samba en contrôleur de domaine Active Directory sur une seconde machine virtuelle Ubuntu ; "
+       "unités d’organisation par service ; compte de lecture LDAP ; compte de jonction limité. En V1, le DNS et l’heure de la maquette sont fournis par le serveur.")
 R.puce(("GLPI : ", "g"), "installé avec Docker, données fictives ; version fixée au départ (les API des versions 10 "
        "et 11 diffèrent).")
 R.puce(("Réseau : ", "g"), "réseau de la maquette du lycée (Wi-Fi, DHCP, DNS, NTP, switchs HP ProCurve, routeur Cisco "
@@ -434,7 +436,7 @@ R.texte(("Question de sécurité : « le diagnostic à distance peut-il faire pl
 R.puce(("Point d’accès JEA : ", "g"), "liste fermée de commandes, compte sans droit d’administrateur. "
        "Démonstration : une commande hors liste est refusée et tracée.")
 R.puce(("Flux chiffrés : ", "g"), "MQTT en TLS avec un identifiant par boîtier ; WinRM en HTTPS ; API de GLPI en HTTPS.")
-R.puce(("Comptes limités : ", "g"), "lecture seule pour LDAP et SNMP ; le compte GLPI ajoute des tickets et des suivis, "
+R.puce(("Comptes limités : ", "g"), "lecture seule pour SNMP (et pour LDAP en V2) ; le compte GLPI ajoute des tickets et des suivis, "
        "ne supprime rien et ne ferme un ticket qu’avec une preuve (page de test comptée, ou compteur qui repart).")
 R.puce(("Cartes RFID (V2) : ", "g"), "les cartes bon marché se copient ; le numéro de carte ne suffit donc pas, l’écran "
        "demande une confirmation. Cartes sécurisées en extension.")
@@ -446,25 +448,25 @@ R.tableau(
     [
         ["La vibration ne distingue pas assez « imprime » et « attend »", "Essai dès la tâche 3 ; le compteur de pages et l’état SNMP restent des témoins suffisants"],
         ["Compteur de pages absent ou faux sur l’imprimante du lycée", "Lecture SNMP testée dès la tâche 2 ; sinon, le capteur de feuilles (V2) passe en V1"],
-        ["Windows 11 Famille ne rejoint pas un domaine", "Machines virtuelles Windows 11 Entreprise (évaluation) ou Windows 11 Pro"],
+        ["WinRM / JEA sans domaine (compte local) à valider", "Test dès les premières semaines ; repli : domaine Samba avancé de la V2"],
         ["WinRM avec JEA difficile à piloter depuis Linux", "Test dès les premières semaines ; repli : script local planifié qui envoie en HTTPS"],
         ["Nombre de pages d’un travail mal connu de CUPS", "Comparer au nombre annoncé par la file du PC ; sinon, comparer seulement « a imprimé / n’a rien imprimé »"],
         ["Pas de bourrage observé avec le papier humide", "Le volet physique repose d’abord sur la prise d’eau du papier, mesurable à coup sûr ; le lien avec les bourrages est un résultat, pas une condition"],
-        ["Retard sur la V2", "La V1 forme un projet complet ; la station des PC neufs peut être réduite"],
+        ["Retard sur la V2", "La V1 forme un projet complet ; l’annuaire AD et la station des PC neufs peuvent être réduits"],
     ],
     [7.6, 10.4])
 
 # ================================================================== 2.3 RESSOURCES
 R = Redac(P[73])
-R.puce(("Matériel du lycée : ", "g"), "ESP32, PC Ubuntu (serveur, Samba, GLPI dans Docker, machines virtuelles), "
+R.puce(("Matériel du lycée : ", "g"), "ESP32, PC Ubuntu (serveur, GLPI dans Docker, machines virtuelles ; V2 : Samba), "
        "imprimante réseau, réseau de la maquette (Wi-Fi, switchs HP ProCurve, routeur Cisco ISR 4331), multimètre ; "
        "laboratoire de physique (hygromètre de référence, balance au centigramme).")
 R.puce(("Matériel à commander (décembre 2026) : ", "g"), "accéléromètre, capteur SHT31, capteur infrarouge (V2), "
        "écrans à encre, bouton, LED, lecteurs et cartes RFID, boîtiers, connectique.")
-R.puce(("Logiciels : ", "g"), "PlatformIO ou Arduino IDE, Samba, CUPS, Mosquitto, Python (paho-mqtt, pysnmp, pywinrm, "
-       "ldap3), PostgreSQL, Docker, GLPI, Grafana, PowerShell, Wireshark, Git, Visual Studio Code.")
+R.puce(("Logiciels : ", "g"), "PlatformIO ou Arduino IDE, CUPS, Mosquitto, Python (paho-mqtt, pysnmp, pywinrm ; "
+       "V2 : Samba, ldap3), PostgreSQL, Docker, GLPI, Grafana, PowerShell, Wireshark, Git, Visual Studio Code.")
 R.puce(("Documents : ", "g"), "fiche de présentation validée par le tuteur, fiches techniques des capteurs, RFC 3805 "
-       "(Printer MIB), documentation de l’API de GLPI et de Samba, Microsoft Learn (JEA, Add-Computer, Get-PrintJob), "
+       "(Printer MIB), documentation de l’API de GLPI, Microsoft Learn (JEA, Get-PrintJob ; V2 : Add-Computer, Samba), "
        "charte IA du lycée.")
 
 # ================================================================== 3 RÉPARTITION
@@ -483,7 +485,7 @@ lst = [
     "F6 Ouvrir et compléter le ticket GLPI (paliers)",
     "F7 Afficher l’état sur le boîtier ; tableau de bord",
     "F8 Carte du technicien, preuve de réparation (V2)",
-    "F9 Préparer un PC neuf avec 3 cartes (V2)",
+    "F9 Annuaire AD et PC neuf avec 3 cartes (V2)",
 ]
 for i, s in enumerate(lst):
     pp = c1.add_paragraph()
@@ -493,12 +495,12 @@ for i, s in enumerate(lst):
     pp.paragraph_format.space_after = Pt(1)
 textes = {
     "Installation": "serveur Ubuntu (CUPS, Mosquitto, PostgreSQL, service Python, Grafana), GLPI dans Docker avec "
-                    "données fictives, machines virtuelles Windows 11 dans le domaine Samba, outils de capture.",
+                    "données fictives, machine virtuelle Windows 11 (compte local), outils de capture ; V2 : domaine Samba.",
     "Mise en œuvre": "boîtier (ESP32, accéléromètre, bouton, écran) fixé sur l’imprimante ; "
-                     "seuils réglés à partir des mesures de physique ; station des PC neufs (V2).",
+                     "seuils réglés à partir des mesures de physique ; annuaire AD et station des PC neufs (V2).",
     "Configuration": "TLS de Mosquitto et identifiant par boîtier, WinRM HTTPS et point d’accès JEA, comptes de "
-                     "lecture SNMP et LDAP, compte GLPI limité ; exploitation du réseau en place (DHCP, DNS, NTP).",
-    "Réalisation": "programme du boîtier, service Python (règles, SNMP, JEA, LDAP, API GLPI), scripts PowerShell, "
+                     "lecture SNMP (LDAP en V2), compte GLPI limité ; exploitation du réseau en place (DHCP, DNS, NTP).",
+    "Réalisation": "programme du boîtier, service Python (sonde, règles, SNMP, JEA, API GLPI), scripts PowerShell, "
                    "tableau de bord, station et script de préparation des PC (V2), campagne d’essai.",
     "Documentation": "dossier technique, protocoles et résultats des essais (physique et indicateurs), bilan "
                      "« adopter ou non », journal de bord et journal IA, support d’oral.",
@@ -524,11 +526,11 @@ R.puce(("C01 Communiquer : ", "g"), "revues de projet, échanges avec le tuteur,
        "sur l’écran du boîtier, bilan « adopter ou non », dossier technique, soutenance avec démonstration.")
 R.puce(("C03 Gérer un projet : ", "g"), "analyse du besoin, planning en 11 tâches, journal de bord, passage V1 → V2 "
        "et d’un palier à l’autre décidé sur indicateurs, suivi des risques et du budget.")
-R.puce(("C08 Coder : ", "g"), "C++ sur ESP32 (capteurs, interruptions, MQTT, écran, RFID), Python (règles, SNMP, "
-       "pilotage WinRM, LDAP, API REST de GLPI), SQL, PowerShell (JEA, préparation des PC).")
+R.puce(("C08 Coder : ", "g"), "C++ sur ESP32 (capteurs, interruptions, MQTT, écran, RFID), Python (sonde de l’imprimante avec profils par marque et mode simulé, règles, SNMP, "
+       "pilotage WinRM, API REST de GLPI), SQL, PowerShell (JEA ; V2 : préparation des PC).")
 R.puce(("C10 Exploiter un réseau : ", "g"), "réservation DHCP et nom DNS pour le serveur et les boîtiers ; heure NTP "
-       "commune ; vérifications réseau d’une imprimante (ping, DNS, DHCP, ports 9100 et 631) ; lecture de l’AD pour "
-       "le réseau attendu ; captures Wireshark (SNMP, où la communauté circule en clair, IPP, MQTT, LDAP).")
+       "commune ; vérifications réseau d’une imprimante (ping, DNS, DHCP, ports 9100 et 631) ; tableau du réseau attendu dans GLPI ; "
+       "captures Wireshark (SNMP, où la communauté circule en clair, IPP, MQTT).")
 R.titre("Volet physique : « quand peut-on dire que l’imprimante imprime ? »")
 R.tableau(
     ["Étape", "Mesure", "Modèle, exploitation"],
@@ -562,14 +564,14 @@ R.tableau(
     ["N°", "Tâche", "Heures", "Compétence · jalon"],
     [
         ["1", "Analyse du besoin, cahier des charges, planification", "12", "C03, C01 · revue 1"],
-        ["2", "Maquette : GLPI, CUPS, machines virtuelles Windows 11 dans le domaine Samba, imprimante", "12", "C10"],
+        ["2", "Maquette : GLPI, CUPS, machine virtuelle Windows 11 (compte local), imprimante ; V2 : domaine Samba", "12", "C10"],
         ["3", "Boîtier : vibration, bouton, écran, MQTT", "27", "C08"],
         ["4", "Physique : étalonnage, vibration, délai de démarrage, humidité (V2), incertitudes", "12", "physique"],
-        ["5", "Serveur : règles de comparaison, SNMP (état, compteur), vérifications réseau", "22", "C08 · revue 2"],
-        ["6", "PowerShell : file d’impression par JEA ; lecture de l’AD", "14", "C08, C10"],
+        ["5", "Serveur : sonde de l’imprimante (SNMP, PC pour l’USB, profils par marque, simulateur), règles de comparaison, vérifications réseau", "22", "C08 · revue 2"],
+        ["6", "PowerShell : file d’impression par JEA ; tableau du réseau attendu (V2 : lecture de l’AD)", "14", "C08, C10"],
         ["7", "Exploitation du réseau : DHCP, DNS, NTP, SNMP, captures", "8", "C10"],
         ["8", "GLPI : tickets à paliers, retour sur l’écran, tableau de bord", "16", "C08"],
-        ["9", "RFID : carte du technicien, preuve de réparation, station des PC neufs (V2)", "12", "C08"],
+        ["9", "RFID : carte du technicien, preuve de réparation, annuaire AD et station des PC neufs (V2)", "12", "C08"],
         ["10", "Campagne d’essai, indicateurs, bilan « adopter ou non »", "7", "C03 · revue 3"],
         ["11", "Dossier technique et préparation de la soutenance", "8", "C01"],
         ["", "Total", "150", ""],
@@ -591,13 +593,13 @@ R.texte("Lors d’une démonstration sur la maquette, devant le tuteur et le jur
 R.puce("On fige l’imprimante, puis on imprime : rien ne vibre, le compteur n’avance pas, l’imprimante répond « prête ». "
        "En moins d’une minute, ", ("le ticket GLPI indique « imprimante figée »", "g"), " et l’écran du boîtier "
        "affiche « Bloquée ».")
-R.puce("Le technicien valide le redémarrage (palier 2) ; l’imprimante vibre et son compteur avance, le ticket est "
+R.puce("Le ticket conseille de redémarrer l’imprimante (palier 1) ; le technicien ou la secrétaire le fait à la main. L’imprimante vibre et son compteur avance, le ticket est "
        "résolu avec la preuve et l’écran affiche « Réparé ».")
-R.puce("Autres pannes provoquées : papier retiré, feuille bloquée, câble débranché, imprimante dans le mauvais réseau, "
-       "documents bloqués dans le PC. À chaque fois, la bonne cause est écrite dans le ticket.")
+R.puce("Autres pannes provoquées : papier retiré, feuille bloquée, câble USB débranché (le PC ne voit plus l’imprimante : le ticket dit de vérifier le câble avant tout "
+       "déplacement), imprimante dans le mauvais réseau, documents bloqués dans le PC. À chaque fois, la bonne cause est écrite dans le ticket.")
 R.puce("Une commande hors de la liste JEA est ", ("refusée et tracée", "g"), " ; le compte GLPI ne peut rien "
        "supprimer.")
-R.puce("(V2) Trois cartes posées sur la station : le PC neuf entre dans le domaine, directement dans le bon service, "
+R.puce("(V2) Avec l’annuaire AD simulé, trois cartes posées sur la station : le PC neuf entre dans le domaine, directement dans le bon service, "
        "reçoit ses applications, et sa fiche GLPI se met à jour.")
 R.puce("Les indicateurs sont présentés : causes justes sur 10 pannes, fausses alertes en 1 h, délai jusqu’au ticket, "
        "pages comptées sur 100, PC préparés sur 5.")

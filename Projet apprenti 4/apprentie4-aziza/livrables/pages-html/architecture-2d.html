@@ -14,7 +14,7 @@
   <div>
     <span class="label">Projet 4 · Aziza · le kit de maintenance</span>
     <h1>Le schéma réseau pas à pas</h1>
-    <p class="lead">La maquette du lycée, à plat : le matériel vu de face et les liens réseau. Chaque point qui circule est un message. Clique sur <b>Suivant</b> pour suivre leur trajet, étape par étape.</p>
+    <p class="lead">La maquette, à plat : le matériel vu de face et les liens réseau. Chaque point qui circule est un message. Clique sur <b>Suivant</b> pour suivre leur trajet, étape par étape.</p>
   </div>
   <nav class="liens" aria-label="Autres pages du projet"><a class="btn petit" href="vue-ensemble.html">Vue d'ensemble</a><a class="btn petit" href="architecture-2-5d.html">Version 2,5D</a><a class="btn petit" href="../animation-3d/maquette-3d.html">Maquette 3D ↗</a></nav>
 </header>
@@ -36,7 +36,7 @@
       <button class="btn principal" id="bNext" type="button">Suivant ▶</button>
     </div>
     <div id="points" role="group" aria-label="Aller à une étape"></div>
-    <p class="aide"><kbd>←</kbd> <kbd>→</kbd> étapes · <kbd>R</kbd> rejouer · <kbd>E</kbd> étiquettes</p>
+    <p class="aide"><kbd>←</kbd> <kbd>→</kbd> étapes · <kbd>R</kbd> rejouer · <kbd>P</kbd> pause · <kbd>E</kbd> étiquettes</p>
     <ul class="legende" aria-label="Légende"><li><i style="background:var(--bleu)"></i>demande</li><li><i style="background:var(--vert)"></i>kit, fichier, réponse</li><li><i style="background:var(--jaune)"></i>rapport, sortie</li><li><i style="background:var(--rouge)"></i>refus, panne</li><li><i style="background:var(--blanc)"></i>capteur, SPI</li><li><s class="wifi"></s>Wi-Fi</li><li><s></s>Ethernet</li><li><s class="usb"></s>USB</li></ul>
   </aside>
 </main>
@@ -60,7 +60,7 @@
 var TXT = [
 {
 "t": "Vue d'ensemble",
-"x": "<p>La maquette du lycée, vue de biais. Au fond, le <b>réseau en place</b> : serveur Ubuntu, switch, borne Wi-Fi et PC du lycée (tableau de bord).</p><p>Devant : le <b>poste du référent</b>, le <b>PC de maintenance</b> et son téléphone, la <b>borne de sortie</b> (ESP32 + lecteur RFID) et le <b>banc de physique</b>.</p><p>Les points qui circulent sont des <b>messages</b>. Clique sur <b>Suivant</b>.</p>"
+"x": "<p>La maquette, vue de biais. Au fond, le <b>réseau en place</b> : serveur Ubuntu, switch, borne Wi-Fi et PC de supervision (tableau de bord).</p><p>Devant : le <b>poste du référent</b>, le <b>PC de maintenance</b> et son téléphone, la <b>borne de sortie</b> (ESP32 + lecteur RFID) et le <b>banc de physique</b>.</p><p>Les points qui circulent sont des <b>messages</b>. Clique sur <b>Suivant</b>.</p>"
 },
 {
 "t": "1. Le référent signe et publie le kit",
@@ -68,7 +68,7 @@ var TXT = [
 },
 {
 "t": "2. Le PC demande s'il y a du nouveau",
-"x": "<p>C'est <b>toujours le PC qui demande</b> : au démarrage, à l'ouverture de session et toutes les 30 min. Le serveur ne peut pas joindre un PC en 4G.</p><p>Au lycée, <code>tc netem</code> ralentit le serveur pour <b>imiter la 4G</b> du téléphone.</p><p>Le PC vérifie la <b>signature</b> (c'est bien le référent) et le <b>numéro de version</b> (13 &gt; 12). Un ancien kit, même bien signé, est refusé.</p>"
+"x": "<p>C'est <b>toujours le PC qui demande</b> : au démarrage, à l'ouverture de session et toutes les 30 min. Le serveur ne peut pas joindre un PC en 4G.</p><p>Sur la maquette, <code>tc netem</code> ralentit le serveur pour <b>imiter la 4G</b> du téléphone.</p><p>Le PC vérifie la <b>signature</b> (c'est bien le référent) et le <b>numéro de version</b> (13 &gt; 12). Un ancien kit, même bien signé, est refusé.</p>"
 },
 {
 "t": "3. Seuls les fichiers modifiés arrivent",
@@ -95,7 +95,7 @@ var TXT = [
 "x": "<p>Le tableau de bord montre l'état de chaque PC : kit installé, dernier rapport, dernière sortie. Un bouton <b>exporte un fichier CSV</b> pour les tableaux Excel du service.</p><p>Pour finir, tout fonctionne en même temps : les PC demandent, le serveur répond, la borne vérifie, le banc mesure.</p>"
 }
 ];
-TXT[0].x = '<p>Le schéma réseau de la maquette, à plat. En haut, le <b>réseau en place</b> : poste du référent, switch, serveur Ubuntu (avec <code>tc netem</code> qui imite la 4G) et borne Wi-Fi.</p><p>En bas : le <b>PC de maintenance</b> et son téléphone, la <b>borne de sortie</b> (ESP32 + lecteur RFID), le <b>PC du lycée</b> (tableau de bord) et le <b>banc de physique</b>.</p><p>Les points qui circulent sont des <b>messages</b>. Clique sur <b>Suivant</b>.</p>';
+TXT[0].x = '<p>Le schéma réseau de la maquette, à plat. En haut, le <b>réseau en place</b> : poste du référent, switch, serveur Ubuntu (avec <code>tc netem</code> qui imite la 4G) et borne Wi-Fi.</p><p>En bas : le <b>PC de maintenance</b> et son téléphone, la <b>borne de sortie</b> (ESP32 + lecteur RFID), le <b>PC de supervision</b> (tableau de bord) et le <b>banc de physique</b>.</p><p>Les points qui circulent sont des <b>messages</b>. Clique sur <b>Suivant</b>.</p>';
 var VERS_SRV = ['lap', 'sw', 'netem', 'srv'], DU_SRV = VERS_SRV.slice().reverse();
 var BORNE_UP = ['borne', 'ap', 'sw', 'netem', 'srv'], BORNE_DOWN = BORNE_UP.slice().reverse();
 function tab(S, rows, sortie) {
@@ -108,14 +108,14 @@ function agent(S, lines) { S.ecran('lap', [['Agent du kit · PC-04', 'var(--jaun
 window.SCHEMA = {
   noeuds: [
     { id: 'ap', k: 'ap', x: 560, y: 60, nom: 'Borne Wi-Fi', sous: 'Wi-Fi du bureau', cote: 'droite' },
-    { id: 'sw', k: 'switch', x: 560, y: 210, nom: 'Switch du lycée', sous: 'réseau en place', cote: 'bas' },
+    { id: 'sw', k: 'switch', x: 560, y: 210, nom: 'Switch ProCurve', sous: 'réseau en place', cote: 'bas' },
     { id: 'netem', k: 'netem', x: 800, y: 210, nom: 'tc netem', sous: '4G simulée', cote: 'bas' },
     { id: 'srv', k: 'serveur', x: 1010, y: 210, nom: 'Serveur Ubuntu', sous: 'nginx · Flask · SQLite' },
     { id: 'ref', k: 'pc', x: 180, y: 210, nom: 'Poste du référent', sous: 'Windows 11 · signe le kit' },
     { id: 'lap', k: 'portable', x: 330, y: 500, nom: 'PC de maintenance', sous: 'agent PowerShell · BITS' },
     { id: 'phone', k: 'telephone', x: 130, y: 500, nom: 'Téléphone', sous: '4G sur le terrain' },
     { id: 'borne', k: 'borne', x: 680, y: 500, nom: 'Borne de sortie', sous: 'ESP32 + lecteur RC522' },
-    { id: 'lyc', k: 'pc', x: 1010, y: 500, nom: 'PC du lycée', sous: 'tableau de bord' },
+    { id: 'lyc', k: 'pc', x: 1010, y: 500, nom: 'PC de supervision', sous: 'tableau de bord' },
     { id: 'banc', k: 'banc-froid', x: 330, y: 700, nom: 'Banc de physique', sous: 'ESP32 + DS18B20 + SHT40', cote: 'droite' }
   ],
   liens: [
@@ -123,7 +123,7 @@ window.SCHEMA = {
     ['sw', 'netem', 'eth', ''],
     ['netem', 'srv', 'eth', ''],
     ['ap', 'sw', 'eth', ''],
-    ['lap', 'sw', 'eth', 'Ethernet (au lycée)', { via: [[330, 340], [520, 340]], t: 0.3 }],
+    ['lap', 'sw', 'eth', 'Ethernet (au bureau)', { via: [[330, 340], [520, 340]], t: 0.3 }],
     ['lyc', 'sw', 'eth', '', { via: [[1010, 360], [600, 360]] }],
     ['borne', 'ap', 'wifi', 'Wi-Fi · HTTPS', { via: [[680, 60]], t: 0.2 }],
     ['phone', 'lap', 'usb', 'partage 4G'],

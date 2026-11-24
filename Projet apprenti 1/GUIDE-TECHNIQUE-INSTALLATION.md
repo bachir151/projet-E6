@@ -1,8 +1,8 @@
 # Guide technique de mise en place du projet de Wassim
 
-Date : 22 novembre 2026.
+Date : 24 novembre 2026. **Mise à jour : la V1 se fait sans annuaire.** Samba et l'AD (sections 3 à 6) passent en V2. Le DNS et l'heure de la maquette sont fournis par le serveur (§ 2.5).
 
-Ce guide explique comment construire la maquette du « service informatique augmenté », depuis les premières machines virtuelles jusqu'au ticket GLPI. Il suit cet ordre : **VM 1 Samba AD → PC de la secrétaire → VM 2 diagnostic et GLPI → imprimante → ESP32 → essais de bout en bout**.
+Ce guide explique comment construire la maquette de « Diagnostic à distance des imprimantes : valorisation des données et ticket enrichi », depuis la première machine virtuelle jusqu'au ticket GLPI. **Ordre en V1 : serveur Ubuntu (VM 2) → PC Windows en compte local → GLPI → imprimante (SNMP) → ESP32 → programme Python et sonde → essais de bout en bout.** **V2 : VM 1 Samba AD → jonction du PC au domaine → station des PC neufs.** Les noms « VM 1 » et « VM 2 » sont gardés pour ne pas casser les références : en V1, il n'y a que la VM 2, appelée aussi « le serveur ».
 
 Les commandes sont des instructions à exécuter sur les machines indiquées. Elles n'ont pas été exécutées sur une maquette matérielle lors de la rédaction. Les adresses, noms et comptes ci-dessous sont des choix pour le laboratoire ; les remplacer ensemble si le réseau du lycée impose un autre plan. Le modèle exact d'imprimante et les références des modules ESP32 restent à relever avant le câblage.
 
@@ -12,10 +12,10 @@ Le besoin métier reste une amélioration proposée à faire valider par le tute
 
 1. [Comprendre les rôles et les échanges](#1-comprendre-les-rôles-et-les-échanges)
 2. [Préparer les machines et le réseau](#2-préparer-les-machines-et-le-réseau)
-3. [Installer Samba sur la VM 1](#3-installer-samba-sur-la-vm-1)
-4. [Préparer les certificats de la maquette](#4-préparer-les-certificats-de-la-maquette)
-5. [Joindre le PC de la secrétaire au domaine](#5-joindre-le-pc-de-la-secrétaire-au-domaine)
-6. [Préparer la VM 2 et sa consultation de Samba](#6-préparer-la-vm-2-et-sa-consultation-de-samba)
+3. [Installer Samba sur la VM 1](#3-installer-samba-sur-la-vm-1) **(V2)**
+4. [Préparer les certificats de la maquette](#4-préparer-les-certificats-de-la-maquette) (V1 : HTTPS et MQTT ; LDAPS en V2)
+5. [Joindre le PC de la secrétaire au domaine](#5-joindre-le-pc-de-la-secrétaire-au-domaine) **(V2)**
+6. [Préparer la VM 2 et sa consultation de Samba](#6-préparer-la-vm-2-et-sa-consultation-de-samba) (outils en V1 ; lecture LDAP en V2)
 7. [Installer GLPI sur la VM 2](#7-installer-glpi-sur-la-vm-2)
 8. [Configurer la surveillance SNMP de l'imprimante](#8-configurer-la-surveillance-snmp-de-limprimante)
 9. [Installer MQTT sur la VM 2](#9-installer-mqtt-sur-la-vm-2)
@@ -34,9 +34,9 @@ Le besoin métier reste une amélioration proposée à faire valider par le tute
 
 | Élément | Fonction dans la maquette |
 |---|---|
-| VM 1, Ubuntu et Samba AD | Domaine, annuaire des utilisateurs et des PC, DNS du domaine |
-| PC Windows de la secrétaire | Poste membre du domaine ; envoie des travaux d'impression fictifs |
-| VM 2, Ubuntu | Programme Python, service MQTT, serveur web, GLPI, base MariaDB ; CUPS si les impressions passent par elle |
+| VM 1, Ubuntu et Samba AD **(V2)** | Domaine, annuaire des utilisateurs et des PC, DNS du domaine. En V1, absente : le serveur fournit le DNS et l'heure |
+| PC Windows de la secrétaire | Compte local en V1 (membre du domaine en V2) ; envoie des travaux d'impression fictifs |
+| VM 2, Ubuntu (le serveur) | Programme Python (sonde et règles), service MQTT, serveur web, GLPI, base MariaDB, DNS et heure de la maquette ; CUPS si les impressions passent par elle |
 | Imprimante réseau | Imprime ; fournit ses informations par SNMP |
 | ESP32 fixé à l'imprimante | Lit les capteurs et les entrées ; transmet les événements ; commande l'affichage |
 | GLPI | Enregistre les équipements, les tickets et leur suivi |
@@ -50,15 +50,16 @@ L'imprimante **ne rejoint pas le domaine Samba**. Le boîtier **ne dialogue pas 
 ```mermaid
 flowchart TD
     PC["PC Windows de la secrétaire"]
-    AD["VM 1 : Samba AD et DNS"]
+    AD["V2 : VM 1, Samba AD"]
     PY["VM 2 : programme Python"]
     MQ["VM 2 : Mosquitto MQTT"]
     GLPI["VM 2 : GLPI et MariaDB"]
     CUPS["VM 2 : file CUPS"]
     IMP["Imprimante réseau"]
     ESP["ESP32, capteurs, bouton et écran"]
-    PC <-->|"Domaine : DNS, Kerberos, LDAP, SMB, RPC"| AD
-    PY <-->|"LDAPS : lecture de l'annuaire"| AD
+    PC <-.->|"V2 : domaine (DNS, Kerberos, LDAP, SMB, RPC)"| AD
+    PY <-.->|"V2 : LDAPS, lecture de l'annuaire"| AD
+    PC -->|"V1 : DNS et heure du serveur"| PY
     PY <-->|"SNMP : lecture de l'imprimante"| IMP
     ESP <-->|"Wi-Fi et MQTT/TLS"| MQ
     MQ <--> PY
@@ -76,7 +77,7 @@ flowchart TD
 | C/C++ | Langages de programmation | Firmware ESP32 avec ESP-IDF ou Arduino |
 | Wi-Fi, Ethernet | Moyens de raccordement au réseau | ESP32 en Wi-Fi ; VM et imprimante accessibles sur le LAN |
 | SNMP | Protocole de supervision | État et compteurs de l'imprimante |
-| LDAP avec TLS, ici LDAPS | Accès sécurisé à un annuaire | Service du PC dans Samba AD |
+| LDAP avec TLS, ici LDAPS (V2) | Accès sécurisé à un annuaire | Service du PC dans Samba AD |
 | MQTT avec TLS | Échange de messages via un serveur intermédiaire | Mesures et événements du boîtier |
 | HTTPS | HTTP chiffré et authentification du serveur | Interface et API GLPI |
 | JSON | Format des messages | Événements ESP32 et corps des appels API |
@@ -87,13 +88,13 @@ flowchart TD
 
 | Étape | Résultat utile |
 |---|---|
-| Socle | Un PC rejoint Samba, le DNS fonctionne, les machines ont la même heure |
+| Socle (V1) | Le serveur fournit le DNS et l'heure ; le PC Windows (compte local) le joint |
 | Première intégration | VM 2 lit l'imprimante et crée un ticket d'essai GLPI |
 | Boîtier V1 | Vibration, bouton, écran et transmission MQTT |
-| Diagnostic enrichi | Lecture du service dans Samba, file Windows, comparaison des témoins |
-| V2 | Badge technicien, humidité, preuve de réparation, station des PC neufs |
+| Diagnostic enrichi | Tableau du réseau attendu (GLPI), file Windows, comparaison des témoins |
+| V2 | Annuaire Samba, badge technicien, humidité, preuve de réparation, station des PC neufs |
 
-On peut donc préparer Samba dès le départ sans rendre la première alerte d'imprimante dépendante de l'annuaire.
+La première alerte d'imprimante ne dépend jamais de l'annuaire : en V1, il n'y en a pas.
 
 ## 2. Préparer les machines et le réseau
 
@@ -101,11 +102,11 @@ On peut donc préparer Samba dès le départ sans rendre la première alerte d'i
 
 | Machine | Système de référence | Ressources de départ proposées |
 |---|---|---|
-| VM 1 | Ubuntu Server 24.04 LTS | 2 vCPU, 2 à 4 Go de RAM, disque 25 Go |
+| VM 1 **(V2)** | Ubuntu Server 24.04 LTS | 2 vCPU, 2 à 4 Go de RAM, disque 25 Go |
 | VM 2 | Ubuntu Server 24.04 LTS | 2 à 4 vCPU, 4 Go de RAM, disque 40 Go |
 | PC secrétaire | Windows 11 Pro, Éducation ou Entreprise | Si VM : 2 vCPU, 4 Go de RAM minimum, disque 64 Go, TPM virtuel et démarrage compatibles Windows 11 |
 
-Ces valeurs sont un point de départ à adapter au PC hôte. Windows 11 Famille ne rejoint pas un domaine AD. Le projet prévoit une VM Entreprise d'évaluation, ou une édition compatible déjà licenciée ; relever les conditions et la date d'expiration au téléchargement.
+Ces valeurs sont un point de départ à adapter au PC hôte. Windows 11 Famille ne rejoint pas un domaine AD (utile en V2). Le projet prévoit une VM Entreprise d'évaluation, ou une édition compatible déjà licenciée ; relever les conditions et la date d'expiration au téléchargement.
 
 Créer les VM avec KVM/virt-manager ou l'hyperviseur déjà utilisé au lycée. Une VM Windows supplémentaire reste nécessaire si aucun PC compatible n'est disponible : « deux VM » désigne ici les deux serveurs Ubuntu.
 
@@ -114,7 +115,7 @@ Créer les VM avec KVM/virt-manager ou l'hyperviseur déjà utilisé au lycée. 
 | Équipement | Nom | Adresse |
 |---|---|---|
 | Routeur de laboratoire déjà configuré | passerelle | `192.168.50.1/24` |
-| VM 1 | `dc1.wassim.internal` | `192.168.50.10/24` |
+| VM 1 **(V2)** | `dc1.wassim.internal` | `192.168.50.10/24` |
 | VM 2 | `srv2.wassim.internal` | `192.168.50.20/24` |
 | Imprimante | `imp-cardio.wassim.internal` | `192.168.50.30/24` |
 | PC secrétaire | `PC-SECRETARIAT` | `192.168.50.40/24` |
@@ -122,7 +123,7 @@ Créer les VM avec KVM/virt-manager ou l'hyperviseur déjà utilisé au lycée. 
 | Interface web GLPI | `glpi.wassim.internal` | `192.168.50.20` |
 | Service MQTT | `mqtt.wassim.internal` | `192.168.50.20` |
 
-Le DNS des clients sera `192.168.50.10`. Le domaine DNS sera `wassim.internal`, le domaine court `WASSIM` et le royaume Kerberos `WASSIM.INTERNAL`.
+**En V1**, le DNS des clients est le serveur (`192.168.50.20`, § 2.5). **En V2**, il passera à `192.168.50.10` (VM 1). Le domaine DNS sera `wassim.internal`, le domaine court `WASSIM` et le royaume Kerberos `WASSIM.INTERNAL`.
 
 Ce réseau de laboratoire doit être disponible. Ne pas attribuer ces adresses sur un réseau existant sans vérifier les doublons. Le routeur fournit, si nécessaire, le DHCP, l'accès Internet et une référence DNS/NTP autorisée. Samba n'installe pas automatiquement un serveur DHCP.
 
@@ -134,7 +135,7 @@ Les deux VM, le PC, l'imprimante et le point d'accès Wi-Fi doivent pouvoir éch
 
 Le NAT par défaut de certaines VM ne suffit pas : l'ESP32 ne peut généralement pas ouvrir une connexion vers un serveur caché derrière ce NAT. Un réseau « interne » entre VM n'inclut pas non plus l'imprimante physique. Avec un pont Wi-Fi, vérifier les limites du pilote et de l'hyperviseur ; un raccordement Ethernet de l'hôte est plus prévisible.
 
-Sur le point d'accès : SSID dédié, sécurité WPA2/WPA3 selon la carte, bande compatible avec l'ESP32, DNS du domaine transmis par DHCP et absence d'isolation entre clients pour cette maquette.
+Sur le point d'accès : SSID dédié, sécurité WPA2/WPA3 selon la carte, bande compatible avec l'ESP32, DNS de la maquette transmis par DHCP et absence d'isolation entre clients pour cette maquette.
 
 ### 2.4 Régler Ubuntu avant Samba
 
@@ -165,7 +166,7 @@ network:
         addresses: [192.168.50.1]
 ```
 
-Sur VM 2 : même structure, adresse `192.168.50.20/24`. Après mise en route de VM 1, remplacer son DNS par `192.168.50.10` et ajouter `search: [wassim.internal]` dans `nameservers`.
+Sur VM 2 : même structure, adresse `192.168.50.20/24`. En V2, après mise en route de VM 1, remplacer son DNS par `192.168.50.10` et ajouter `search: [wassim.internal]` dans `nameservers`.
 
 ```bash
 sudo netplan generate
@@ -201,7 +202,20 @@ chronyc tracking
 
 **Validation :** IP et nom conformes, route correcte, accès aux dépôts, horloge synchronisée. Créer un instantané « Ubuntu prêt » avant le provisionnement de Samba.
 
+### 2.5 DNS et heure du laboratoire sur le serveur (V1)
+
+Sans VM 1, le serveur (VM 2) fournit les noms et l'heure, ce que fournissait Samba. Exploiter ces services fait partie de la compétence C10. **Ces commandes sont des pistes : elles n'ont pas été essayées sur la maquette.**
+
+1. **Heure (chrony).** Sur VM 2, garder une source amont autorisée dans `/etc/chrony/chrony.conf`, puis autoriser le réseau de laboratoire : `allow 192.168.50.0/24`. Redémarrer chrony, puis vérifier sur un client avec `chronyc sources -v`.
+2. **Noms (dnsmasq, exemple).** Installer `dnsmasq` sur VM 2. Si `systemd-resolved` occupe déjà le port 53, désactiver son écoute locale (`DNSStubListener=no` dans `/etc/systemd/resolved.conf`). Déclarer les noms du § 2.2 : `address=/glpi.wassim.internal/192.168.50.20`, `address=/mqtt.wassim.internal/192.168.50.20`, `address=/imp-cardio.wassim.internal/192.168.50.30`, et un `server=192.168.50.1` pour le reste.
+3. Donner `192.168.50.20` comme DNS aux clients (réservation DHCP ou réglage fixe).
+
+**Validation :** `dig @192.168.50.20 glpi.wassim.internal +short` rend `192.168.50.20` ; les horloges du PC, de VM 2 et de l'ESP32 sont cohérentes.
+
+> **V1 sans domaine, à tester en premier :** l'accès du serveur Ubuntu au PC Windows (WinRM en HTTPS et JEA, § 12.6) avec un **compte local** du PC. Cet essai n'a pas été fait. Si l'accès sans domaine bloque, c'est la seule raison de reculer l'AD de la V2 vers la V1.
+
 ## 3. Installer Samba sur la VM 1
+> **V2.** Toute la section 3 (Samba AD) est reportée en V2. Ne pas la faire en V1.
 
 ### 3.1 Installer le rôle de contrôleur de domaine
 
@@ -328,6 +342,7 @@ Sur VM 2, remplacer les sources concurrentes par `server dc1.wassim.internal ibu
 **Validation de VM 1 :** DNS, Kerberos, comptes, unités d'organisation et heure fonctionnent. Conserver un instantané « Domaine créé ».
 
 ## 4. Préparer les certificats de la maquette
+> **V1 :** autorité de certification de la maquette et certificat de VM 2 (HTTPS pour GLPI, MQTT/TLS), et du PC pour WinRM. **V2 :** certificat de VM 1 et LDAPS (§ 4.3).
 
 ### 4.1 Ce qu'il faut obtenir
 
@@ -423,6 +438,7 @@ openssl s_client -connect dc1.wassim.internal:636 \
 Attendu : chaîne valide et nom conforme. Ces paramètres sont documentés dans le [manuel smb.conf](https://www.samba.org/samba/docs/current/man-html/smb.conf.5.html).
 
 ## 5. Joindre le PC de la secrétaire au domaine
+> **V2.** En V1, le PC garde un compte local et ne rejoint aucun domaine. Cette section est reportée.
 
 ### 5.1 Régler son réseau
 
@@ -492,6 +508,7 @@ sudo samba-tool computer move PC-SECRETARIAT 'OU=Cardiologie,DC=wassim,DC=intern
 **Validation :** ouverture d'une session de domaine, relation d'approbation correcte, service et horloge identifiés.
 
 ## 6. Préparer la VM 2 et sa consultation de Samba
+> **V1 :** § 6.1 seulement (outils de VM 2). **V2 :** § 6.2 et 6.3 (lecture de l'annuaire par LDAPS). En V1, le réseau attendu vient d'un tableau PC ↔ imprimante ↔ réseau dans GLPI.
 
 ### 6.1 Installer les outils
 
@@ -757,6 +774,12 @@ Fixer ensuite la période de lecture, proposée au départ à 5 secondes, et un 
 
 **Validation :** une page réelle entraîne une variation comprise du compteur ; les états et les limites du modèle sont consignés. Les niveaux d'encre ne sont retenus que s'ils sont exploitables.
 
+### 8.5 Tester sans imprimante
+
+Si le modèle n'est pas encore disponible, développer avec un **simulateur SNMP** (par exemple snmpsim) qui sert un fichier de valeurs par scénario : tout va bien, bac vide, bourrage, imprimante figée. Les valeurs sont écrites d'après la RFC 3805. Pour tester les pannes réseau réelles, un appareil simulé sur le LAN (VM Ubuntu ou Raspberry Pi, avec le service SNMP de Linux) donne une vraie adresse IP.
+
+Un simulateur ne révèle pas les différences entre modèles. Dès qu'une vraie imprimante est disponible, refaire les relevés des § 8.3 et 8.4 et consigner, par modèle, les objets lus et leurs valeurs. Cahier des charges de la sonde : `sonde/CAHIER-DES-CHARGES.md`.
+
 ## 9. Installer MQTT sur la VM 2
 
 ### 9.1 Installer le serveur de messages
@@ -978,8 +1001,9 @@ Exemple de fichier de secrets à éditer localement ; les marqueurs doivent êtr
 ```ini
 MQTT_USER=diagnostic
 MQTT_PASSWORD=<SECRET_LOCAL>
-LDAP_USER=svc-diagnostic@wassim.internal
-LDAP_PASSWORD=<SECRET_LOCAL>
+# V2 seulement (annuaire Samba) :
+# LDAP_USER=svc-diagnostic@wassim.internal
+# LDAP_PASSWORD=<SECRET_LOCAL>
 GLPI_APP_TOKEN=<JETON_APPLICATION>
 GLPI_USER_TOKEN=<JETON_UTILISATEUR>
 ```
@@ -1093,8 +1117,9 @@ Le script ne réessaie pas un `POST` après timeout. Le serveur peut avoir cré�
 | Registre des équipements | Configuration et IDs GLPI | Association boîtier ↔ imprimante ↔ PC |
 | Réception MQTT | Messages validés | Mesures et événements datés |
 | Collecte SNMP | IP et OID relevés | Compteur, état, qualité et date de mesure |
-| Lecture LDAP | Nom du PC | OU ou état « annuaire indisponible » |
+| Réseau attendu | Nom du PC, tableau de l'inventaire GLPI | Réseau attendu pour le service ; en V2, lecture LDAP de l'OU (« annuaire indisponible » possible) |
 | Suivi d'impression | CUPS et file Windows | Travail demandé, en attente, terminé ou inconnu |
+| Raccordement vu par le PC | Lecture JEA (imprimante présente ? USB ?) | Vue, absente ou inconnue ; seul témoin pour une imprimante en USB |
 | Moteur de règles | Témoins récents | Cause probable et niveau de confiance |
 | Client GLPI | Incident local | Ticket créé ou mis à jour |
 | Affichage | État de l'incident | Message MQTT vers l'e-ink |
@@ -1109,6 +1134,7 @@ Chaque collecte doit avoir un timeout. Une panne de Samba ne doit pas bloquer la
 | État indiquant manque de papier | Bac à vérifier | OID et décodage validés sur le modèle |
 | Travail attendu, pas de vibration, compteur stable, SNMP « prêt », file Windows vide | Imprimante probablement figée | Délai d'attente dépassé, travail bien arrivé, mesures fiables |
 | Documents encore en attente sur le PC | Blocage possible côté poste ou transfert | Collecte Windows récente ; le nombre seul ne prouve pas la cause |
+| Imprimante en USB que le PC ne voit plus | Branchement à vérifier | Collecte Windows récente ; message « vérifier le câble » avant tout déplacement, sans affirmer que l'imprimante est en bon état |
 | Absence de réponse SNMP | Supervision de l'imprimante indisponible | Faire les tests réseau avant de conclure à une panne matérielle |
 | Adresse hors du réseau attendu pour le service | Adressage ou réseau à vérifier | Association PC/imprimante connue et plan à jour |
 
@@ -1270,7 +1296,7 @@ Si la commande échoue, remonter une erreur de collecte ; ne pas renvoyer un fau
 
 Cette étape appartient au diagnostic enrichi. **JEA limite les commandes autorisées ; WinRM transporte la session.** Le PC doit exposer une fonction fixe, et non un PowerShell administrateur complet.
 
-Sur VM 1, créer un compte distinct du lecteur LDAP :
+**V1 (sans domaine) :** créer à la place un compte local sur le PC Windows (`net user svc-file-print`, sans droit d'administrateur), autorisé seulement sur le point d'accès JEA. **V2 :** sur VM 1, créer un compte distinct du lecteur LDAP :
 
 ```bash
 sudo samba-tool user create svc-file-print --userou='OU=ComptesTechniques'
@@ -1414,9 +1440,10 @@ Les ports ci-dessous sont des destinations ; les réponses sont autorisées par 
 
 | Source → destination | Ports usuels | Besoin |
 |---|---|---|
-| PC Windows → VM 1 | TCP/UDP 53, 88, 389, 464 ; TCP 135, 445 et RPC dynamiques | DNS, domaine, authentification et services AD |
-| Clients de l'heure → VM 1 | UDP 123 | NTP |
-| VM 2 → VM 1 | TCP 636, DNS 53, NTP 123 | Lecture LDAPS, résolution, heure |
+| PC Windows → VM 1 **(V2)** | TCP/UDP 53, 88, 389, 464 ; TCP 135, 445 et RPC dynamiques | DNS, domaine, authentification et services AD |
+| PC Windows → VM 2 (V1) | UDP/TCP 53 | Résolution des noms de la maquette |
+| Clients de l'heure → VM 2 (V1) ou VM 1 (V2) | UDP 123 | NTP |
+| VM 2 → VM 1 **(V2)** | TCP 636, DNS 53, NTP 123 | Lecture LDAPS, résolution, heure |
 | VM 2 → imprimante | UDP 161 | Lecture SNMP |
 | VM 2 → imprimante | TCP 631, ou 9100 si ce backend est retenu | Transmission des impressions |
 | PC → VM 2 | TCP 631 | File CUPS, si installée |
@@ -1467,9 +1494,9 @@ Une capture MQTT/TLS montre la connexion à 8883 et les échanges chiffrés. Ell
 | Test | Action | Résultat attendu | Trace à conserver |
 |---|---|---|---|
 | T01 Réseau | Vérifier IP, routes et accès depuis les équipements physiques | VM 2 joignable par ESP32 et imprimante | Plan et relevé des interfaces |
-| T02 Domaine | Joindre le PC et ouvrir la session fictive | PC membre et rangé dans Cardiologie | Résultat de jonction sans secrets |
-| T03 DNS et heure | Résoudre les noms et vérifier NTP/Kerberos | Résolution et horloges cohérentes | Sorties de contrôle |
-| T04 Annuaire | Lire l'OU depuis VM 2 avec le compte technique | Service obtenu ; aucun droit d'administration | Attributs utiles seulement |
+| T02 Domaine **(V2)** | Joindre le PC et ouvrir la session fictive | PC membre et rangé dans Cardiologie | Résultat de jonction sans secrets |
+| T03 DNS et heure | Résoudre les noms et vérifier NTP (Kerberos en V2) | Résolution et horloges cohérentes | Sorties de contrôle |
+| T04 Annuaire **(V2)** | Lire l'OU depuis VM 2 avec le compte technique | Service obtenu ; aucun droit d'administration | Attributs utiles seulement |
 | T05 SNMP | Lire le compteur avant/après une page | Variation expliquée et délai relevé | Tableau de mesures |
 | T06 MQTT | Appuyer sur le bouton et recevoir l'événement | Identifiant reconnu, sujet autorisé | Événement expurgé |
 | T07 Affichage | Publier un état depuis Python | Texte et date sur l'e-ink | Photo du boîtier de maquette |
@@ -1502,7 +1529,7 @@ N'afficher « ticket créé » qu'après confirmation de GLPI. Si GLPI est indis
 | Redémarrage ESP32 | Nouvel identifiant de démarrage ; pas de faux appui |
 | GLPI arrêté | Événement persisté, reprise contrôlée après retour |
 | Réponse API perdue après création | Recherche de l'incident avant de rejouer le POST |
-| Samba arrêté | Supervision conservée ; service signalé indisponible ou cache explicitement daté |
+| Samba arrêté (V2) | Supervision conservée ; service signalé indisponible ou cache explicitement daté |
 | MQTT arrêté | Perte de liaison indiquée ; pas de fausse conclusion sur l'imprimante |
 | Imprimante déconnectée du réseau | Diagnostic d'injoignabilité, pas affirmation automatique de panne matérielle |
 | Papier retiré du bac | État identifié si l'imprimante expose cette information |
@@ -1532,10 +1559,10 @@ Vérifier dans cet ordre : alimentation → adresse et route → DNS → heure �
 
 | Symptôme | Vérifications prioritaires |
 |---|---|
-| Le PC ne trouve pas le domaine | DNS du PC vers `.10`, enregistrements SRV, accès au contrôleur |
+| Le PC ne trouve pas le domaine (V2) | DNS du PC vers `.10`, enregistrements SRV, accès au contrôleur |
 | La jonction échoue malgré le DNS | Heure, identifiants, droits sur le compte ordinateur, pare-feu et RPC |
-| `hostname -f` incorrect sur VM 1 | Nom système, `/etc/hosts`, adresse LAN et enregistrement DNS |
-| LDAP refuse la connexion | CA, SAN `dc1`, port 636, compte, expiration du mot de passe |
+| `hostname -f` incorrect sur VM 1 (V2) | Nom système, `/etc/hosts`, adresse LAN et enregistrement DNS |
+| LDAP refuse la connexion (V2) | CA, SAN `dc1`, port 636, compte, expiration du mot de passe |
 | SNMP timeout | Version, utilisateur/communauté, algorithmes, UDP 161 et liste d'IP autorisées |
 | SNMP répond mais pas au compteur choisi | Index réel, OID du modèle, unité du compteur |
 | L'encre apparaît négative | Valeur spéciale ou inconnue ; ne pas convertir en pourcentage |
@@ -1565,7 +1592,7 @@ Sur VM 1 : `sudo journalctl -u samba-ad-dc -n 50 --no-pager`, `sudo testparm -s`
 
 | Élément | À sauvegarder | Contrôle de restauration |
 |---|---|---|
-| Samba AD | Sauvegarde de domaine prise en charge par `samba-tool domain backup`, configuration et certificats | Restaurer dans un réseau isolé, sans double contrôleur du même nom |
+| Samba AD (V2) | Sauvegarde de domaine prise en charge par `samba-tool domain backup`, configuration et certificats | Restaurer dans un réseau isolé, sans double contrôleur du même nom |
 | GLPI | Export cohérent de la base, `config`, `files`, version de l'application et plugins éventuels | Retrouver un équipement, un ticket et sa pièce jointe fictive |
 | Diagnostic | Code, dépendances verrouillées, configuration, base SQLite et opérations en attente | Reprendre un incident sans créer un doublon |
 | MQTT | Configuration, ACL, comptes et état persistant si utilisé | Reconnexion et droits inchangés |
@@ -1614,7 +1641,9 @@ Ajouter les événements arrivée/départ du technicien au ticket existant. Pour
 
 La réussite du test permet de proposer ou enregistrer une résolution selon le palier retenu. Dans GLPI, **résoudre** et **clore** un ticket sont deux états différents ; utiliser le workflow validé avec le tuteur. Un badge de départ seul ne suffit pas à prouver la réparation.
 
-### 16.3 Station des PC neufs
+### 16.3 Annuaire Samba et station des PC neufs
+
+Cette partie est la V2 : elle comprend l'annuaire (sections 3 à 6 du guide) et la station. Commencer par les sections 3, 4.3, 5 et 6.2 à 6.3, puis revenir ici.
 
 Réutiliser Samba et GLPI déjà installés. Ajouter une station distincte avec la carte du technicien, une carte de profil et l'étiquette du PC. Le serveur prépare une commande, affiche le récapitulatif et attend la validation physique avant l'action.
 

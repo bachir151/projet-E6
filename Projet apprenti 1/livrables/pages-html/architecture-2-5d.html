@@ -148,14 +148,14 @@
     <figcaption class="reperes-tech">
       <h2>Qui fait quoi et comment les informations circulent</h2>
       <div class="reperes-grille">
-        <div class="repere"><h3>Hôte Ubuntu · deux VM serveurs</h3><p><b>VM 1 : Samba AD et DNS.</b> Elle héberge le domaine et classe les PC par service. <b>VM 2 : Python, Mosquitto, CUPS, GLPI et MariaDB.</b> Les deux VM sont hébergées sur la machine Ubuntu.</p></div>
-        <div class="repere"><h3>Poste Ubuntu du technicien · OpenRSAT</h3><p><b>OpenRSAT administre Samba AD</b> : comptes, PC, services et DNS. Le navigateur consulte <b>GLPI sur VM 2 en HTTPS</b>. OpenRSAT est une interface d’administration ; le domaine fonctionne sur VM 1.</p></div>
-        <div class="repere"><h3>PC physique de la secrétaire</h3><p><b>Ordinateur séparé, Windows 11 Pro ou Entreprise.</b> Il rejoint le domaine de VM 1, avec le DNS de Samba. Il imprime via <b>CUPS sur VM 2</b>. Sa file d’impression peut être lue par <b>WinRM HTTPS / JEA</b>.</p></div>
-        <div class="repere"><h3>Imprimante réseau · SNMP et IPP</h3><p><b>Python sur VM 2 interroge l’imprimante en SNMP</b> et interprète ses réponses : état, compteur et consommables. <b>IPP transporte les travaux d’impression</b>. L’imprimante ne rejoint pas le domaine Samba.</p></div>
-        <div class="repere"><h3>ESP32 · Wi-Fi et MQTT avec TLS</h3><p>Le boîtier transmet vibration, bouton et badge (V2) à <b>Mosquitto sur VM 2</b>, qui échange les messages avec Python. Python renvoie le texte de l’<b>écran e-ink</b> par le même chemin. Le <b>bouton</b> signale une panne ; le <b>badge (V2)</b> trace l’arrivée et le départ. Le <b>SHT31 (V2)</b> mesure l’humidité et la température pour étudier le risque de bourrage. L’e-ink conserve le dernier message, même sans courant.</p></div>
-        <div class="repere"><h3>Python → API GLPI → MariaDB</h3><p><b>Un programme Python, organisé en plusieurs fichiers</b>, collecte et croise les témoins. Il consulte aussi Samba par <b>LDAPS</b> pour connaître le service du PC. Il demande à <b>l’API REST de GLPI en HTTPS</b> de créer ou compléter un ticket ; <b>GLPI écrit dans sa propre base MariaDB</b>.</p></div>
+        <div class="repere"><h3>Hôte Ubuntu · un serveur (VM)</h3><p><b>Une VM : Python (la sonde et les règles), Mosquitto, CUPS, GLPI et MariaDB</b>, avec le DNS et l’heure de la maquette. <b>V2 : une seconde VM, Samba AD</b>, classe les PC par service et sert à ranger les PC neufs.</p></div>
+        <div class="repere"><h3>Poste Ubuntu du technicien</h3><p>Le navigateur consulte <b>GLPI sur le serveur en HTTPS</b>. En V2, <b>OpenRSAT</b> administre Samba AD : comptes, PC et services.</p></div>
+        <div class="repere"><h3>PC physique de la secrétaire</h3><p><b>Ordinateur séparé, Windows 11 Pro ou Entreprise.</b> En V1, il utilise un <b>compte local</b>, sans domaine (V2 : il rejoint le domaine Samba). Il imprime via <b>CUPS sur le serveur</b>. Sa file d’impression peut être lue par <b>WinRM HTTPS / JEA</b>.</p></div>
+        <div class="repere"><h3>Imprimante réseau · SNMP et IPP</h3><p><b>Python sur le serveur interroge l’imprimante en SNMP</b> et interprète ses réponses : état, compteur et consommables. <b>IPP transporte les travaux d’impression</b>. L’imprimante ne rejoint aucun domaine. Une imprimante en USB n’a pas d’adresse : seul le PC la voit, par JEA.</p></div>
+        <div class="repere"><h3>ESP32 · Wi-Fi et MQTT avec TLS</h3><p>Le boîtier transmet vibration, bouton et badge (V2) à <b>Mosquitto sur le serveur</b>, qui échange les messages avec Python. Python renvoie le texte de l’<b>écran e-ink</b> par le même chemin. Le <b>bouton</b> signale une panne ; le <b>badge (V2)</b> trace l’arrivée et le départ. Le <b>SHT31 (V2)</b> mesure l’humidité et la température pour étudier le risque de bourrage. L’e-ink conserve le dernier message, même sans courant.</p></div>
+        <div class="repere"><h3>Python → API GLPI → MariaDB</h3><p><b>Un programme Python, organisé en plusieurs fichiers</b>, collecte et croise les témoins. Le réseau attendu pour le service vient d’un tableau PC ↔ imprimante ↔ réseau dans l’inventaire GLPI (V2 : Samba par <b>LDAPS</b>). Il demande à <b>l’API REST de GLPI en HTTPS</b> de créer ou compléter un ticket ; <b>GLPI écrit dans sa propre base MariaDB</b>.</p></div>
       </div>
-      <p class="repere-flux"><b>Impression :</b> PC secrétaire → CUPS (VM 2) → imprimante.<br><b>Diagnostic :</b> SNMP + événements MQTT → Python (VM 2) → API GLPI → base MariaDB.<br><b>Retour sur place :</b> Python → MQTT/TLS → ESP32 → écran e-ink.</p>
+      <p class="repere-flux"><b>Impression :</b> PC secrétaire → CUPS (serveur) → imprimante.<br><b>Diagnostic :</b> SNMP + événements MQTT → Python (serveur) → API GLPI → base MariaDB.<br><b>Retour sur place :</b> Python → MQTT/TLS → ESP32 → écran e-ink.</p>
     </figcaption>
   </figure>
 
@@ -188,7 +188,7 @@
     <ol>
       <li><b>Une imprimante peut mentir</b> : « prête » en SNMP ne prouve rien. Le serveur croise quatre témoins (vibration, compteur de pages, état SNMP, file du PC).</li>
       <li><b>Le compteur est la preuve</b> : un ticket n'est fermé que si le compteur de pages a avancé et que l'imprimante a vibré.</li>
-      <li><b>Le système propose, l'humain valide</b> : aucun redémarrage sans le clic du technicien (palier 2).</li>
+      <li><b>Le système conseille, l'humain agit</b> : en V1, le serveur ne modifie ni ne redémarre l'imprimante (lecture seule, palier 1). Agir à sa place est une extension.</li>
       <li><b>Le diagnostic ne fait que ce qui est permis</b> : liste fermée de commandes (JEA), refus tracés, compte GLPI sans droit de suppression.</li>
     </ol>
   </div>
@@ -338,7 +338,7 @@ var tkRows = [], tkOffer, tkOfferTxt, tkHead;
   }
   tkOffer = el('g', { style: 'display:none' }, f);
   el('rect', { x: 8, y: 55, width: 104, height: 10, rx: 5, 'class': 'tr', style: 'fill:var(--jaune);stroke-width:.8' }, tkOffer);
-  tkOfferTxt = txt(tkOffer, 60, 61.8, 'Proposé : redémarrer cardio-2 · Valider ?', 'font-size:4.8px;font-weight:900', 'middle');
+  tkOfferTxt = txt(tkOffer, 60, 61.8, 'Conseil : redémarrer cardio-2', 'font-size:4.8px;font-weight:900', 'middle');
   box(g, 400, 72, 38, 80, 16, 2, 'gris');
   box(g, 488, 76, 38, 9, 12, 2, 'gris');
 })();
@@ -441,12 +441,12 @@ function pill(parent, x, y, lines) {
   return g;
 }
 var LABELS = [
-  ['srv', [65, 47, 100], 0, -26, 'Hôte Ubuntu · 2 VM', 'VM1 Samba · VM2 Python / GLPI'],
+  ['srv', [65, 47, 100], 0, -26, 'Serveur Ubuntu · 1 VM', 'Python · GLPI · MQTT · CUPS'],
   ['sw', [186, 41, 74], 18, -16, 'Switch du lycée', 'réseau en place'],
   ['ap', [320, 5, 160], 0, -8, 'Borne Wi-Fi', 'réseau du lycée'],
-  ['tec', [440, 52, 124], 0, -12, 'Technicien · Ubuntu', 'OpenRSAT · navigateur GLPI'],
-  ['sec', [44, 235, 120], -10, -14, 'PC physique · secrétaire', 'Windows 11 Pro / Entreprise · domaine'],
-  ['box', [281, 352, 105], 100, -10, 'Boîtier ESP32', 'MQTT/TLS ↔ VM2 · écran e-ink'],
+  ['tec', [440, 52, 124], 0, -12, 'Technicien · Ubuntu', 'navigateur GLPI'],
+  ['sec', [44, 235, 120], -10, -14, 'PC physique · secrétaire', 'Windows 11 Pro / Entreprise · compte local'],
+  ['box', [281, 352, 105], 100, -10, 'Boîtier ESP32', 'MQTT/TLS ↔ serveur · écran e-ink'],
   ['prn', [240, 420, 30], -60, 100, 'Imprimante réseau', 'IPP : imprimer · SNMP : superviser'],
   ['banc', [500, 320, 96], 150, 30, 'Banc de physique', 'humidité et pesée du papier']
 ];
@@ -576,7 +576,7 @@ function render() {
   tkHead.style.fill = s.head;
   tkRows.forEach(function (r, i) { var t = TK[s.tk[i]]; r.dot.style.fill = t ? t[2] : 'var(--papier-2)'; r.t1.textContent = t ? t[0] : (i === 0 && !s.tk.length ? 'aucun ticket ouvert' : ''); r.t2.textContent = t ? t[1] : ''; });
   tkOffer.style.display = s.offer ? '' : 'none';
-  tkOfferTxt.textContent = s.offer === 2 ? '✔ validé par le technicien' : 'Proposé : redémarrer cardio-2 · Valider ?';
+  tkOfferTxt.textContent = s.offer === 2 ? '✔ pris en charge par le technicien' : 'Conseil : redémarrer cardio-2';
   secLines.forEach(function (t, i) { var l = s.sec[i]; t.textContent = l ? l[0] : ''; t.style.fill = l ? l[1] : 'var(--blanc)'; });
   btnTop.style.fill = s.btn ? 'color-mix(in srgb,var(--rouge) 60%,var(--blanc))' : 'var(--rouge)';
   Object.keys(CARDS).forEach(function (k) { var o = cardOffset(k, s.cards[k]); CARDS[k].pos = o; CARDS[k].g.setAttribute('transform', 'translate(' + r1(o[0]) + ' ' + r1(o[1]) + ')'); });
@@ -598,7 +598,7 @@ async function lancerImpression() {
 }
 var STEPS = [
 { t: 'Vue d\'ensemble', all: true, loop: true,
-  x: "<p>La machine <b>Ubuntu héberge deux VM</b> : <b>VM 1, Samba AD et DNS</b> pour le domaine ; <b>VM 2, Python, Mosquitto, CUPS et GLPI</b> pour le diagnostic et les tickets.</p><p>Le <b>PC de la secrétaire est un ordinateur physique séparé</b>, sous Windows 11 Pro ou Entreprise, membre du domaine. Le technicien utilise <b>OpenRSAT sous Ubuntu</b> pour administrer Samba et son <b>navigateur HTTPS</b> pour consulter GLPI.</p><p>Les points animés suivent le réseau. Les appels <b>Python → API GLPI → MariaDB</b> restent dans VM 2. Les étiquettes sous le dessin détaillent chaque rôle.</p>",
+  x: "<p>Le <b>serveur Ubuntu</b> (une VM) héberge <b>Python, Mosquitto, CUPS et GLPI</b> pour le diagnostic et les tickets, avec le DNS et l'heure de la maquette. En <b>V2</b>, une seconde VM hébergera Samba AD.</p><p>Le <b>PC de la secrétaire est un ordinateur physique séparé</b>, sous Windows 11 Pro ou Entreprise, avec un compte local. Le technicien utilise le <b>navigateur HTTPS</b> pour consulter GLPI.</p><p>Les points animés suivent le réseau. Les appels <b>Python → API GLPI → MariaDB</b> restent sur le serveur. Les étiquettes sous le dessin détaillent chaque rôle.</p>",
   run: async function () {
     for (;;) {
       if (Math.random() < 0.6) bg(go(UP, { kind: 'mqtt', size: 5 }));
@@ -631,7 +631,7 @@ var STEPS = [
     set({ ep: ['PRÊTE', '5 pages imprimées'], led: 'vert' });
   } },
 { t: '3. La panne : l\'imprimante figée', on: ['sec', 'sw', 'srv', 'prn', 'ap', 'tec'],
-  x: '<p>La secrétaire relance une impression. Le travail arrive… mais <b>rien ne vibre</b> et <b>aucune feuille ne sort</b>.</p><p>Pourtant, en SNMP, l\'imprimante répond « <b>prête</b> » : elle se trompe. Son <b>compteur de pages</b>, lui, n\'a pas bougé. Le serveur demande aussi au PC, par un point d\'accès PowerShell limité (<b>JEA</b>), si des documents y sont bloqués : non.</p><p>Le programme <b>Python de VM 2</b> interprète les réponses SNMP et les croise avec les événements MQTT. Conclusion : <b>imprimante probablement figée</b>. Python appelle l’API HTTPS de GLPI sur VM 2 : le ticket s\'ouvre avec la cause, et l\'écran du boîtier prévient sur place.</p>',
+  x: '<p>La secrétaire relance une impression. Le travail arrive… mais <b>rien ne vibre</b> et <b>aucune feuille ne sort</b>.</p><p>Pourtant, en SNMP, l\'imprimante répond « <b>prête</b> » : elle se trompe. Son <b>compteur de pages</b>, lui, n\'a pas bougé. Le serveur demande aussi au PC, par un point d\'accès PowerShell limité (<b>JEA</b>), si des documents y sont bloqués : non.</p><p>Le programme <b>Python de le serveur</b> interprète les réponses SNMP et les croise avec les événements MQTT. Conclusion : <b>imprimante probablement figée</b>. Python appelle l’API HTTPS de GLPI sur le serveur : le ticket s\'ouvre avec la cause, et l\'écran du boîtier prévient sur place.</p>',
   run: async function () {
     await lancerImpression();
     for (var s = 5; s <= 30; s += 5) { bubble('box', A.box, ['#Boîtier', 'vibration : 0,00 g', 'attente : ' + s + ' s'], o(B_BOX, { cls: s === 30 ? 'alerte' : '' })); await sleep(420); }
@@ -648,16 +648,15 @@ var STEPS = [
     await go(DOWN, { kind: 'mqtt', label: 'écran : BLOQUÉE' });
     set({ ep: ['BLOQUÉE', 'ticket 1234 · Wassim prévenu'] }); bip();
   } },
-{ t: '4. Palier 2 : le technicien valide, le compteur prouve', on: ['tec', 'sw', 'srv', 'prn', 'ap'],
-  x: '<p>Le système <b>propose</b> de redémarrer l\'imprimante. Il n\'agit pas seul : le technicien <b>valide d\'un clic</b> (palier 2).</p><p>L\'imprimante redémarre et imprime les 5 pages : elle <b>vibre</b> et son <b>compteur</b> avance de 5. Ces deux mesures sont la <b>preuve</b> : le ticket est fermé « résolu, preuve : compteur +5/5 et vibration ».</p><p>Personne ne s\'est déplacé.</p>',
+{ t: '4. Palier 1 : le système conseille, le technicien agit, le compteur prouve', on: ['tec', 'sw', 'srv', 'prn', 'ap'],
+  x: '<p>Le système <b>conseille</b> dans le ticket : « redémarrer l\'imprimante ». Il n\'agit pas : en V1, il lit l\'imprimante (SNMP en <b>lecture seule</b>) et ne la modifie jamais (palier 1).</p><p>Le technicien, ou la secrétaire guidée par l\'écran du boîtier, <b>redémarre</b> l\'imprimante. Elle imprime les 5 pages : elle <b>vibre</b> et son <b>compteur</b> avance de 5. Ces deux mesures sont la <b>preuve</b> : le ticket est fermé « résolu, preuve : compteur +5/5 et vibration ».</p><p>Aucun déplacement à l\'aveugle : la cause et le geste étaient connus.</p>',
   run: async function () {
     set({ offer: 1 });
-    bubble('tec', A.tec, ['#Palier 2', 'le système propose,', 'le technicien décide'], B_TEC);
+    bubble('tec', A.tec, ['#Palier 1', 'le système conseille,', 'le technicien agit'], B_TEC);
     await sleep(1800);
     set({ offer: 2 });
-    await go(R('tec', 'srv'), { kind: 'glpi', label: 'validé : redémarrer' });
+    await go(R('tec', 'srv'), { kind: 'glpi', label: 'pris en charge' });
     unbubble('tec');
-    await go(R('srv', 'prn'), { kind: 'snmp', label: 'SNMP SET · redémarrage' });
     set({ lcd: ['Redémarrage…', 'var(--jaune)'] });
     await sleep(1600);
     set({ lcd: ['Prête', 'var(--vert)'] });
@@ -667,7 +666,7 @@ var STEPS = [
     await go(R('prn', 'srv'), { kind: 'snmp', label: 'compteur +5 : preuve' });
     await go(R('srv', 'tec'), { kind: 'glpi', label: 'ticket 1234 résolu' });
     set({ tk: ['t1234r'], head: 'var(--vert)', offer: 0, led: 'vert' }); flashRow(0);
-    bubble('tec', A.tec, ['#GLPI sur VM 2', 'ticket 1234 résolu', 'preuve : compteur +5/5'], o(B_TEC, { cls: 'ok' }));
+    bubble('tec', A.tec, ['#GLPI sur le serveur', 'ticket 1234 résolu', 'preuve : compteur +5/5'], o(B_TEC, { cls: 'ok' }));
     await go(DOWN, { kind: 'mqtt', label: 'écran : RÉPARÉ' });
     set({ ep: ['RÉPARÉ', 'preuve : 5 pages imprimées'] });
   } },
@@ -719,7 +718,7 @@ var STEPS = [
     await go(R('srv', 'tec'), { kind: 'glpi', label: 'arrivée notée' });
     set({ tk: ['t1235c'], head: 'var(--jaune-fonce)' }); flashRow(0);
     set({ ep: ['TECHNICIEN', 'sur place · 10:58'] });
-    bubble('tec', A.tec, ['#GLPI sur VM 2', 'ticket 1235 : en cours', 'arrivée 10:58'], B_TEC);
+    bubble('tec', A.tec, ['#GLPI sur le serveur', 'ticket 1235 : en cours', 'arrivée 10:58'], B_TEC);
     await sleep(900);
     await moveCard('badge', 'home');
   } },
@@ -738,7 +737,7 @@ var STEPS = [
     await go(R('sec', 'srv'), { kind: 'err', label: 'refusé · tracé' });
     await sleep(500);
     await go(R('srv', 'tec'), { kind: 'err', label: 'DELETE ticket 1234 ?' });
-    bubble('tec', A.tec, ['#GLPI sur VM 2', 'compte du serveur :', 'créer et commenter, jamais supprimer'], { dx: -10, dy: -40, align: 'right', cls: 'alerte' });
+    bubble('tec', A.tec, ['#GLPI sur le serveur', 'compte du serveur :', 'créer et commenter, jamais supprimer'], { dx: -10, dy: -40, align: 'right', cls: 'alerte' });
   } }
 ];
 

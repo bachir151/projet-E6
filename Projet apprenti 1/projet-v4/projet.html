@@ -305,6 +305,88 @@
 </ol>
 <p>Le gros bouton rouge sert quand la secrétaire voit un problème que les capteurs n'ont pas vu. Elle appuie : le ticket s'ouvre avec le nom exact de l'imprimante, sans rien écrire.</p>
 
+<h3>Le chemin d'un appui sur le bouton</h3>
+<figure>
+<svg viewBox="0 0 1000 400" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <marker id="f1" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" style="fill:var(--encre)"/></marker>
+    <marker id="f2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" style="fill:var(--rouge)"/></marker>
+  </defs>
+  <rect x="0" y="0" width="1000" height="400" style="fill:var(--blanc)"/>
+  <!-- Boîtes -->
+  <g>
+    <rect x="10" y="140" width="140" height="100" rx="10" stroke-width="2" style="fill:var(--blanc);stroke:var(--encre)"/>
+    <rect x="215" y="140" width="140" height="100" rx="10" stroke-width="2" style="fill:var(--blanc);stroke:var(--encre)"/>
+    <rect x="420" y="140" width="150" height="100" rx="10" stroke-width="2" style="fill:var(--jaune-pale);stroke:var(--encre)"/>
+    <rect x="640" y="140" width="140" height="100" rx="10" stroke-width="2" style="fill:var(--blanc);stroke:var(--encre)"/>
+    <rect x="845" y="140" width="145" height="100" rx="10" stroke-width="2" style="fill:var(--blanc);stroke:var(--encre)"/>
+    <rect x="330" y="15" width="130" height="60" rx="8" stroke-width="2" style="fill:var(--blanc);stroke:var(--encre)"/>
+    <rect x="530" y="15" width="130" height="60" rx="8" stroke-width="2" style="fill:var(--blanc);stroke:var(--encre)"/>
+    <rect x="290" y="300" width="160" height="62" rx="8" stroke-width="2" style="fill:var(--blanc);stroke:var(--encre)"/>
+  </g>
+  <g>
+    <text x="80" y="176" font-size="16" font-weight="800" text-anchor="middle" style="fill:var(--encre)">Boîtier</text><text x="80" y="196" font-size="16" font-weight="800" text-anchor="middle" style="fill:var(--encre)">ESP32</text>
+    <text x="285" y="176" font-size="16" font-weight="800" text-anchor="middle" style="fill:var(--encre)">Mosquitto</text>
+    <text x="495" y="176" font-size="16" font-weight="800" text-anchor="middle" style="fill:var(--encre)">Programme</text><text x="495" y="196" font-size="16" font-weight="800" text-anchor="middle" style="fill:var(--encre)">Python</text>
+    <text x="710" y="176" font-size="16" font-weight="800" text-anchor="middle" style="fill:var(--encre)">GLPI</text>
+    <text x="917" y="176" font-size="16" font-weight="800" text-anchor="middle" style="fill:var(--encre)">MariaDB</text>
+    <text x="395" y="42" font-size="15" font-size="16" font-weight="800" text-anchor="middle" style="fill:var(--encre)">Imprimante</text>
+    <text x="595" y="42" font-size="15" font-size="16" font-weight="800" text-anchor="middle" style="fill:var(--encre)">PC secrétaire</text>
+    <text x="370" y="326" font-size="15" font-size="16" font-weight="800" text-anchor="middle" style="fill:var(--encre)">PostgreSQL</text>
+  </g>
+  <g>
+    <text x="80" y="218" font-size="13" text-anchor="middle" style="fill:var(--encre-2)">le bouton est pressé</text>
+    <text x="285" y="200" font-size="13" text-anchor="middle" style="fill:var(--encre-2)">le « facteur »</text><text x="285" y="218" font-size="13" text-anchor="middle" style="fill:var(--encre-2)">(serveur MQTT)</text>
+    <text x="495" y="218" font-size="13" text-anchor="middle" style="fill:var(--encre-2)">compare, décide</text>
+    <text x="710" y="200" font-size="13" text-anchor="middle" style="fill:var(--encre-2)">l'outil de tickets</text><text x="710" y="218" font-size="13" text-anchor="middle" style="fill:var(--encre-2)">(API REST)</text>
+    <text x="917" y="200" font-size="13" text-anchor="middle" style="fill:var(--encre-2)">la base de GLPI</text><text x="917" y="218" font-size="13" text-anchor="middle" style="fill:var(--encre-2)">(ses tickets)</text>
+    <text x="395" y="62" font-size="13" text-anchor="middle" style="fill:var(--encre-2)">compteur, état</text>
+    <text x="595" y="62" font-size="13" text-anchor="middle" style="fill:var(--encre-2)">file d'impression</text>
+    <text x="370" y="348" font-size="13" text-anchor="middle" style="fill:var(--encre-2)">mesures → Grafana</text>
+  </g>
+  <!-- Flèches -->
+  <g fill="none" stroke-width="2.5" style="stroke:var(--encre)">
+    <path d="M152,172 L213,172" marker-end="url(#f1)"/>
+    <path d="M357,172 L418,172" marker-end="url(#f1)"/>
+    <path d="M572,172 L638,172" marker-end="url(#f1)"/>
+    <path d="M782,172 L843,172" marker-end="url(#f1)"/>
+    <path d="M418,212 L357,212" marker-end="url(#f1)"/>
+    <path d="M213,212 L152,212" marker-end="url(#f1)"/>
+    <path d="M470,138 L440,77" marker-start="url(#f1)" marker-end="url(#f1)" stroke-dasharray="7 5"/>
+    <path d="M540,138 L575,77" marker-start="url(#f1)" marker-end="url(#f1)" stroke-dasharray="7 5"/>
+    <path d="M450,242 L400,298" marker-end="url(#f1)"/>
+  </g>
+  <!-- Interdit -->
+  <path d="M545,242 C545,322 915,322 915,244" fill="none" stroke-width="2.5" stroke-dasharray="7 5" marker-end="url(#f2)" style="stroke:var(--rouge)"/>
+  <path d="M716,288 L744,316 M744,288 L716,316" stroke-width="4" stroke-linecap="round" style="stroke:var(--rouge)"/>
+  <text x="730" y="352" font-size="14" font-weight="800" text-anchor="middle" style="fill:var(--rouge-texte)">Python n'écrit jamais ici</text>
+  <!-- Pastilles numérotées -->
+  <g>
+    <circle cx="182" cy="172" r="11" style="fill:var(--encre)"/><text x="182" y="177" font-size="13" font-weight="900" text-anchor="middle" style="fill:var(--papier)">1</text>
+    <circle cx="387" cy="172" r="11" style="fill:var(--encre)"/><text x="387" y="177" font-size="13" font-weight="900" text-anchor="middle" style="fill:var(--papier)">2</text>
+    <circle cx="605" cy="172" r="11" style="fill:var(--encre)"/><text x="605" y="177" font-size="13" font-weight="900" text-anchor="middle" style="fill:var(--papier)">4</text>
+    <circle cx="812" cy="172" r="11" style="fill:var(--encre)"/><text x="812" y="177" font-size="13" font-weight="900" text-anchor="middle" style="fill:var(--papier)">5</text>
+    <circle cx="387" cy="212" r="11" style="fill:var(--encre)"/><text x="387" y="217" font-size="13" font-weight="900" text-anchor="middle" style="fill:var(--papier)">6</text>
+    <circle cx="182" cy="212" r="11" style="fill:var(--encre)"/><text x="182" y="217" font-size="13" font-weight="900" text-anchor="middle" style="fill:var(--papier)">6</text>
+    <circle cx="455" cy="107" r="11" style="fill:var(--encre)"/><text x="455" y="112" font-size="13" font-weight="900" text-anchor="middle" style="fill:var(--papier)">3</text>
+    <circle cx="558" cy="107" r="11" style="fill:var(--encre)"/><text x="558" y="112" font-size="13" font-weight="900" text-anchor="middle" style="fill:var(--papier)">3</text>
+    <circle cx="425" cy="270" r="11" style="fill:var(--encre)"/><text x="425" y="275" font-size="13" font-weight="900" text-anchor="middle" style="fill:var(--papier)">7</text>
+  </g>
+</svg>
+<figcaption>Figure 3 – Qui parle à qui quand la secrétaire appuie sur le bouton. Les numéros suivent le tableau ci-dessous.</figcaption>
+</figure>
+<table>
+  <tr><th style="width:6%">N°</th><th style="width:27%">De → vers</th><th style="width:22%">Protocole</th><th>Ce qui passe</th></tr>
+  <tr><td class="k">1</td><td>Boîtier → Mosquitto</td><td>MQTT/TLS (port 8883), par le Wi-Fi</td><td>Un petit message : « bouton pressé », avec le nom de l'imprimante et l'heure.</td></tr>
+  <tr><td class="k">2</td><td>Mosquitto → Python</td><td>MQTT (abonnement)</td><td>Python est abonné : il reçoit le message dès qu'il arrive.</td></tr>
+  <tr><td class="k">3</td><td>Python ↔ imprimante, Python ↔ PC</td><td>SNMP (161) ; WinRM HTTPS (5986) avec JEA</td><td>Python pose ses questions : état et compteur de pages, documents bloqués dans la file du PC.</td></tr>
+  <tr><td class="k">4</td><td>Python → GLPI</td><td>API REST en HTTPS</td><td>Création du ticket avec la cause probable. Le compte de Python ne peut rien supprimer.</td></tr>
+  <tr><td class="k">5</td><td>GLPI → MariaDB</td><td>SQL, sur le même serveur</td><td>GLPI écrit le ticket dans sa propre base. <b>Python ne s'y connecte pas.</b></td></tr>
+  <tr><td class="k">6</td><td>Python → Mosquitto → boîtier</td><td>MQTT</td><td>Le message de retour affiché sur l'écran : <span class="screen">Bloquée</span>, puis <span class="screen">Réparé</span>.</td></tr>
+  <tr><td class="k">7</td><td>Python → PostgreSQL</td><td>SQL</td><td>Les mesures et les événements, pour le tableau de bord. Ce n'est pas la base de GLPI.</td></tr>
+</table>
+<p class="small">Choix de mise en œuvre à valider (Mosquitto, MQTT/TLS, API REST de GLPI) : ils rendent le schéma concret, ce ne sont pas des réalisations déjà faites.</p>
+
 <h3>Le boîtier lui-même</h3>
 <table>
   <tr><th style="width:26%">Pièce</th><th>Rôle</th></tr>
@@ -439,7 +521,7 @@
   <path d="M770,352 L822,352" fill="none" stroke-width="2.6" marker-end="url(#a3)" style="stroke:var(--encre)"/>
   <g><circle cx="796" cy="352" r="12" style="fill:var(--encre)"/><text x="796" y="357" font-size="13" font-weight="700" text-anchor="middle" style="fill:var(--blanc)">9</text></g>
 </svg>
-<figcaption>Figure 3 – La station des PC neufs. Les numéros suivent les étapes ci-dessous.</figcaption>
+<figcaption>Figure 4 – La station des PC neufs. Les numéros suivent les étapes ci-dessous.</figcaption>
 </figure>
 
 <h3>Ce qui se passe, étape par étape</h3>

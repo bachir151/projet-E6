@@ -137,3 +137,11 @@ Variante si le professeur de physique refuse : humidité du papier et bourrages 
 - R. et A. Arpaci-Dusseau, *Operating Systems: Three Easy Pieces*, chapitre « Hard Disk Drives » (en ligne, gratuit, ostep.org) : même modèle, avec calculs simples. Lisible par un apprenti.
 - RFC 3805, *Printer MIB v2* (2004) et RFC 2790, *Host Resources MIB* (2000) : objets SNMP de l'état et des consommables d'une imprimante.
 - Microsoft Learn, « Just Enough Administration » : déjà utilisé dans le formulaire.
+
+## 8. Précisions de Wassim (23/11/2026, rapportées par l'enseignant, à confirmer par le tuteur)
+- Les tickets arrivent par **GLPI**, mais aussi par **téléphone, mail et chat GLPI**.
+- Il n'y a **pas de supervision centralisée** des imprimantes (type Zabbix). Non vérifié auprès du service.
+- Wassim **se déplace parfois pour rien** : l'imprimante est en bon état, mais le câble n'est pas branché au PC.
+- Les imprimantes sont reliées au PC **par fil (USB) ou en sans-fil (Bluetooth dit par Wassim ; Wi-Fi plus probable, à confirmer)** ; **dans certains bureaux, elles sont en réseau**.
+
+Conséquence : deux ou trois modes de raccordement (USB, réseau filaire, Wi-Fi), donc des façons de diagnostiquer (voir `docs/apprentis.md`). Indicateur à mesurer : **déplacements évités** et minutes gagnées par ticket (hypothèses à faire valider par le tuteur).

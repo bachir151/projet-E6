@@ -1,0 +1,1078 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Présentation des projets</title>
+<meta name="description" content="Diaporama des projets E6 (BTS CIEL option A) : contexte, besoin, solutions existantes, solution proposée, architecture et maquette 3D, avec le plan 2D et le quartier 3D.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="../theme.css">
+<script src="maisons.js"></script>
+<style>
+/* =====================================================================
+   Diaporama des projets E6. Couleurs, polices, ombres : theme.css uniquement.
+   Seule exception : la couleur d'identité de chaque projet, lue dans maisons.js
+   (la même que dans le quartier 2D et 3D), posée par le script dans --c.
+   Scène fixe 1600 × 900 mise à l'échelle. Sous 900 px de large : mode lecture
+   (diapositives les unes sous les autres, tout est visible, pas de cadre 3D).
+   ===================================================================== */
+html,body{height:100%}
+body{overflow:hidden;background:var(--papier-2)}
+#stage{position:absolute;left:0;top:0;width:1600px;height:900px;transform-origin:0 0;background:var(--papier);overflow:hidden;
+  box-shadow:var(--ombre-douce);font-size:22px;line-height:1.45}
+.slide{position:absolute;inset:0;padding:34px 64px 104px;display:none;flex-direction:column;--c:var(--jaune)}
+.slide.active{display:flex}
+.slide.projet::before{content:"";position:absolute;left:0;right:0;top:0;height:10px;background:var(--c);border-bottom:2.5px solid var(--encre)}
+
+/* en-tête d'une diapositive de projet */
+.tete{margin-bottom:22px}
+.tete .ligne{display:flex;justify-content:space-between;align-items:center;gap:20px;margin-bottom:10px}
+.tete .label{font-size:15px;margin:0;display:flex;align-items:center;gap:10px;flex:1;min-width:0;line-height:1.3}
+.tete .label i{flex:none}
+.parties{flex:none}
+.tete .label i{width:16px;height:16px;border-radius:50%;background:var(--c);border:2.5px solid var(--encre);display:inline-block}
+.tete h2{font-size:52px;line-height:1.02;margin:0}
+.parties{display:flex;gap:6px;flex-wrap:nowrap}
+.parties button{border:2px solid var(--encre);border-radius:999px;background:var(--blanc);font:800 14px/1 var(--police);padding:8px 12px;color:var(--encre-2);white-space:nowrap}
+.parties button:hover{background:var(--jaune-pale)}
+.parties button.fait{background:var(--papier-2)}
+.parties button[aria-current="true"]{background:var(--jaune);color:var(--encre);box-shadow:var(--ombre-decalee)}
+.corps{flex:1;min-height:0;display:grid;gap:24px;align-content:start}
+.slide .bandeau{margin:auto 0 0;font-size:25px;padding:12px 22px}
+
+/* barre de commande, en bas de la scène */
+#barre{position:absolute;left:64px;right:64px;bottom:22px;height:52px;display:flex;align-items:center;gap:12px;z-index:5}
+#barre .btn{min-height:46px;font-size:15px;padding:8px 18px}
+#barre .espace{flex:1}
+#compteur{font-weight:900;font-size:17px;color:var(--encre-2);min-width:80px;text-align:center}
+#barre .aide{font-size:14px;color:var(--encre-3);font-weight:700}
+#progres{position:absolute;left:0;bottom:0;height:6px;background:var(--encre);transition:width .3s;z-index:6}
+
+/* apparitions au clic */
+.f{opacity:0;transform:translateY(16px);transition:opacity .4s ease,transform .45s cubic-bezier(.2,.8,.2,1)}
+.f.vu{opacity:1;transform:none}
+.instant .f,.instant .barre-temps i{transition:none!important}
+
+/* briques communes */
+.carte{border-color:var(--encre);border-width:2px;padding:20px 22px}
+.carte h3{font-size:26px;margin-bottom:8px}
+.carte p{margin:0 0 .4em}
+.carte .label{font-size:14px}
+.grille-4{display:grid;grid-template-columns:repeat(4,1fr);gap:20px}
+.grille-3{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.grille-2{display:grid;grid-template-columns:repeat(2,1fr);gap:24px}
+.deux-col{display:grid;grid-template-columns:1.15fr 1fr;gap:28px;align-items:start}
+.citation{font-weight:900;font-size:24px;line-height:1.25;margin:0 0 10px}
+.petit{font-size:18px;color:var(--encre-2)}
+.note{font-size:19px}
+.encadre{font-size:21px;margin:0}
+.tag{font-size:15px}
+.v{display:inline-block;font:900 14px/1 var(--police);border:2px solid var(--encre);border-radius:999px;padding:4px 10px;background:var(--jaune);vertical-align:3px;margin-right:6px}
+.v.v2{background:var(--bleu)}
+.v.ext{background:var(--papier-2)}
+
+/* tableaux comparatifs */
+table.comp{font-size:20px;background:var(--blanc);border:2px solid var(--encre);border-radius:14px;overflow:hidden;border-collapse:separate;border-spacing:0}
+table.comp th{font-size:16px;line-height:1.25;padding:10px 12px;border-bottom:2px solid var(--encre)}
+table.comp td{padding:9px 12px;line-height:1.3}
+table.comp td.c,table.comp th.c{text-align:center}
+table.comp tr.nous td{background:var(--jaune-pale);font-weight:800;border-bottom:0}
+table.comp tr:last-child td{border-bottom:0}
+.ok{color:var(--vert);font-weight:900}
+.non{color:var(--rouge-texte);font-weight:900}
+.moy{color:var(--encre-2);font-weight:900}
+.ok small,.non small,.moy small{display:block;font-size:14px;font-weight:700}
+
+/* cadres intégrés (schéma 2D, maquette 3D) */
+.embed{position:relative;border:3px solid var(--encre);border-radius:8px;overflow:hidden;background:var(--encre);box-shadow:8px 8px 0 var(--c)}
+.embed.clair{background:var(--papier)}
+.embed iframe{position:absolute;left:0;top:0;border:0;transform-origin:0 0;display:block}
+.embed .attente{position:absolute;inset:0;display:grid;place-items:center;color:var(--papier);font-weight:800;font-size:20px}
+.embed.clair .attente{color:var(--encre-3)}
+.embed .alt{display:none}
+.sous-cadre{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:14px}
+.sous-cadre .btn{min-height:42px;font-size:15px;padding:7px 16px}
+.sous-cadre .aide{font-size:15px;color:var(--encre-3);font-weight:700;margin-left:auto}
+
+/* flux réseau (architecture 2/2) */
+.flux{display:grid;grid-template-columns:330px 1fr 1fr;font-size:19px;background:var(--blanc);border:2px solid var(--encre);border-radius:14px;overflow:hidden}
+.flux > div{padding:9px 14px;border-bottom:1px solid var(--contour-2);line-height:1.3}
+.flux > .th{font-weight:900;font-size:15px;background:var(--papier-2);border-bottom:2px solid var(--encre);text-transform:uppercase;letter-spacing:.06em}
+.flux b{font-weight:900}
+.flux .proto{font-family:var(--police-mono);font-size:17px;font-weight:700}
+.flux .c10{background:var(--vert-pale)}
+
+/* couverture d'un projet */
+.couv{display:grid;grid-template-columns:520px 1fr;gap:56px;align-items:center;flex:1}
+.vignette{background:var(--c);border:3px solid var(--encre);border-radius:var(--r-carte);box-shadow:10px 10px 0 var(--encre);aspect-ratio:1;display:grid;place-items:center;padding:60px}
+.vignette svg{width:100%;height:auto;overflow:visible}
+.vignette .bob{animation:bob 3.2s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+.couv h1{font-size:76px;line-height:.98;margin:6px 0 14px}
+.couv h1.long{font-size:56px;line-height:1.02}
+.couv .sous{font-size:30px;font-weight:800;color:var(--encre-2);margin:0 0 26px}
+.plan-liste{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:10px 22px;max-width:780px}
+.plan-liste li{display:flex;gap:12px;align-items:center;font-weight:800;font-size:22px}
+.plan-liste li span{width:38px;height:38px;flex:none;border-radius:50%;border:2.5px solid var(--encre);display:grid;place-items:center;font-weight:900;font-size:18px;background:var(--blanc)}
+.statut{display:flex;gap:10px;flex-wrap:wrap;margin-top:26px}
+
+/* sommaire : le quartier en 2D */
+.sommaire{display:grid;grid-template-columns:1fr 560px;gap:44px;flex:1;min-height:0;align-items:center}
+.plan-mini{margin:0;border:3px solid var(--encre);border-radius:8px;background:var(--papier);box-shadow:8px 8px 0 var(--encre);
+  background-image:radial-gradient(var(--contour-2) 1.3px,transparent 1.6px);background-size:22px 22px;position:relative}
+.plan-mini svg{display:block;width:100%;height:auto}
+.plan-mini figcaption{position:absolute;left:14px;top:10px;font-size:14px;font-weight:800;color:var(--encre-2);background:var(--papier);padding:2px 8px;border-radius:6px}
+#mini .sol{fill:var(--papier-2);stroke:var(--encre);stroke-width:3}
+#mini .ombre{fill:var(--encre)}
+#mini .route{stroke:var(--encre-2);fill:none}
+#mini .bord{fill:none;stroke:var(--encre);stroke-width:3}
+#mini .axe{fill:none;stroke:var(--papier);stroke-width:2.5;stroke-dasharray:14 12}
+#mini .place{fill:var(--papier);stroke:var(--encre);stroke-width:3}
+#mini .ilot{fill:var(--jaune);stroke:var(--encre);stroke-width:3}
+#mini .pelouse{fill:var(--vert-pale)}
+#mini .arbre{fill:var(--vert);stroke:var(--encre);stroke-width:3}
+#mini .tronc{stroke:var(--encre);stroke-width:4;stroke-linecap:round}
+#mini .mur{fill:var(--blanc);stroke:var(--encre);stroke-width:3}
+#mini .fenetre{fill:var(--bleu-pale);stroke:var(--encre);stroke-width:2.5}
+#mini .toit,#mini .porte{stroke:var(--encre);stroke-width:3;stroke-linejoin:round}
+#mini .etiquette rect{fill:var(--blanc);stroke:var(--encre);stroke-width:2.5}
+#mini .etiquette text{font:900 19px var(--police);fill:var(--encre)}
+#mini .libre .mur,#mini .libre .toit{fill:var(--papier);stroke-dasharray:8 7}
+#mini .libre .etiquette text{fill:var(--encre-2)}
+#mini .maison{cursor:pointer;outline:none}
+#mini .maison .corps{transition:transform .18s cubic-bezier(.2,.9,.3,1.3)}
+#mini .maison:not(.libre):hover .corps,#mini .maison:not(.libre):focus-visible .corps{transform:translate(-3px,-7px)}
+#mini .maison:focus-visible .mur{stroke:var(--focus);stroke-width:5}
+#mini .libre{cursor:default}
+.sommaire h1{font-size:64px;line-height:.98;margin:4px 0 14px}
+.sommaire .lead{font-size:22px;color:var(--encre-2);margin:0 0 20px}
+.liste-projets{display:grid;gap:12px;margin-bottom:22px}
+.liste-projets button{display:grid;grid-template-columns:54px 1fr;gap:14px;align-items:center;text-align:left;background:var(--blanc);border:2.5px solid var(--encre);
+  border-radius:16px;padding:9px 14px;box-shadow:var(--ombre-decalee);transition:transform .12s,box-shadow .12s;font-size:19px;line-height:1.25}
+.liste-projets button:hover{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--encre);background:var(--jaune-pale)}
+.liste-projets button b{display:block;font-weight:900;font-size:21px}
+.liste-projets button span{color:var(--encre-2);font-weight:700}
+.liste-projets .pastille{width:54px;height:54px;border-radius:12px;border:2.5px solid var(--encre);background:var(--c);display:grid;place-items:center;padding:4px}
+.liste-projets .pastille svg{width:100%;height:auto}
+.liste-projets .a-venir{border-style:dashed;box-shadow:none;background:transparent;cursor:default}
+.liste-projets .a-venir:hover{transform:none;box-shadow:none;background:transparent}
+.liens-quartier{display:flex;gap:14px;flex-wrap:wrap}
+.liens-quartier .btn{font-size:17px}
+
+/* visuels des diapositives « besoin » */
+.ticket{background:var(--blanc);border:2px solid var(--encre);border-radius:12px;padding:16px 20px;box-shadow:var(--ombre-decalee);font-size:20px}
+.ticket .label{font-size:13px}
+.ticket .tt{font-weight:900;font-size:23px;margin:2px 0 8px}
+.ticket ul{margin:0;padding-left:1.1em}
+.ticket.avant{background:var(--rouge-pale)}
+.ticket.apres{background:var(--vert-pale)}
+.barres{display:grid;gap:16px}
+.barre-ligne{display:grid;grid-template-columns:330px 1fr 120px;gap:14px;align-items:center;font-size:20px;font-weight:700}
+.barre-temps{height:34px;border:2px solid var(--encre);border-radius:8px;background:var(--blanc);overflow:hidden}
+.barre-temps i{display:block;height:100%;width:0;background:var(--c);border-right:2px solid var(--encre);transition:width 1.6s cubic-bezier(.3,.7,.2,1)}
+.barre-temps i.rouge{background:var(--rouge)}
+.vu .barre-temps i{width:var(--w)}
+.barre-ligne .val{font-weight:900;font-size:24px;text-align:right}
+.parc{display:grid;grid-template-columns:repeat(5,1fr);gap:14px}
+.pc{border:2.5px solid var(--encre);border-radius:10px;background:var(--blanc);padding:10px 8px 8px;text-align:center;font-weight:900;font-size:18px;position:relative}
+.pc::after{content:"";position:absolute;left:-8px;right:-8px;bottom:-9px;height:7px;border:2.5px solid var(--encre);border-radius:0 0 8px 8px;background:var(--papier-2)}
+.pc small{display:block;font-size:15px;font-weight:800}
+.pc.ok-pc{background:var(--vert-pale)}
+.pc.vieux{background:var(--rouge-pale)}
+.pc.vieux small{color:var(--rouge-texte)}
+.chiffres{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.chiffre{background:var(--blanc);border:2px solid var(--encre);border-radius:14px;padding:12px 16px}
+.chiffre b{display:block;font-size:30px;font-weight:1000;line-height:1.1}
+.chiffre span{font-size:17px;color:var(--encre-2);font-weight:700}
+.chiffre .tag{margin-bottom:6px;font-size:13px}
+
+/* visuels des diapositives « solution » */
+.temoins{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.temoin{border:2px solid var(--encre);border-radius:14px;background:var(--blanc);padding:12px 14px;font-size:18px;line-height:1.3}
+.temoin b{display:block;font-size:20px;font-weight:900;margin-bottom:2px}
+.temoin em{font-style:normal;color:var(--encre-2);font-weight:700}
+.regles{margin:0;padding:0;list-style:none;display:grid;gap:8px;counter-reset:r}
+.regles li{counter-increment:r;position:relative;padding-left:48px;font-size:20px;line-height:1.35;min-height:32px}
+.regles li::before{content:counter(r);position:absolute;left:0;top:-1px;width:32px;height:32px;border-radius:50%;background:var(--encre);color:var(--papier);display:grid;place-items:center;font-weight:900;font-size:16px}
+.module{border-top:8px solid var(--c)}
+.regles.carte{padding:16px 22px}
+/* cartes illustrées (diapositive « solution » d'Aziza) */
+.illustre{padding:12px 18px 16px}
+.illustre .image{height:222px;margin:0 -8px 12px;border:2px solid var(--encre);border-radius:10px;background:var(--papier-2);display:grid;place-items:center;overflow:hidden}
+.illustre .image svg{width:100%;height:100%;display:block}
+.illustre h3{font-size:24px;margin-bottom:4px}
+.illustre p{font-size:18px;line-height:1.35}
+.encadre.compact{font-size:18px;line-height:1.35;padding:12px 16px}
+
+/* fin */
+.slide.finale{background:var(--jaune)}
+.finale .centre{flex:1;display:grid;place-content:center;text-align:center;gap:20px}
+.finale h1{font-size:86px;margin:0}
+.finale .lead{font-size:26px;font-weight:800;color:var(--encre-2);margin:0}
+.finale .liens-quartier{justify-content:center}
+
+/* =====================================================================
+   Mode lecture (téléphone, tablette en portrait) : tout défile, tout est visible.
+   ===================================================================== */
+body.lecture{overflow:auto}
+.lecture #stage{position:static;width:auto;height:auto;transform:none!important;box-shadow:none;font-size:var(--taille-texte);background:var(--papier)}
+.lecture .slide{display:flex;position:relative;inset:auto;padding:34px var(--gouttiere) 30px;border-bottom:3px solid var(--encre)}
+.lecture .f{opacity:1;transform:none}
+.lecture .barre-temps i{width:var(--w)}
+.lecture #barre,.lecture #progres,.lecture .parties{display:none}
+.lecture .tete h2{font-size:clamp(1.6rem,1.2rem + 1.6vw,2.35rem)}
+.lecture .grille-4,.lecture .grille-3,.lecture .grille-2,.lecture .deux-col,.lecture .couv,.lecture .sommaire,.lecture .temoins,.lecture .chiffres{grid-template-columns:1fr}
+.lecture .couv h1,.lecture .sommaire h1,.lecture .finale h1{font-size:clamp(2.1rem,1.4rem + 3vw,3.6rem)}
+.lecture .couv .sous{font-size:1.2rem}
+.lecture .vignette{max-width:220px;padding:30px}
+.lecture .plan-liste{grid-template-columns:1fr}
+.lecture .plan-liste li,.lecture .regles li,.lecture .temoin,.lecture .carte p,.lecture .citation,.lecture .encadre,.lecture .note{font-size:1rem}
+.lecture .carte h3{font-size:1.2rem}
+.lecture .illustre .image{height:auto;aspect-ratio:420/190}
+.lecture .illustre p,.lecture .encadre.compact{font-size:1rem}
+.lecture .slide .bandeau{font-size:1.05rem;margin-top:20px}
+.lecture .defile{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.lecture table.comp{font-size:15px;min-width:640px}
+.lecture .flux{grid-template-columns:1fr;font-size:16px}
+.lecture .flux > .th{display:none}
+.lecture .flux > div:nth-child(3n+1){font-weight:900;background:var(--papier-2);border-top:2px solid var(--encre)}
+.lecture .embed{height:auto!important;box-shadow:none;background:var(--papier-2)}
+.lecture .embed iframe,.lecture .embed .attente{display:none}
+.lecture .embed .alt{display:block;padding:18px;color:var(--encre)}
+.lecture .sous-cadre .aide{display:none}
+.lecture .barre-ligne{grid-template-columns:1fr;gap:4px}
+.lecture .barre-ligne .val{text-align:left}
+.lecture .parc{grid-template-columns:repeat(5,1fr);gap:8px}
+.lecture .pc{font-size:13px;padding:6px 2px}
+.lecture .pc small{font-size:11px}
+.lecture .liste-projets button{font-size:15px}
+.lecture .finale .centre{padding-block:30px}
+@media (prefers-reduced-motion:reduce){.vignette .bob{animation:none}}
+@media print{body{overflow:visible}}
+</style>
+</head>
+<body>
+<div id="stage" role="region" aria-roledescription="diaporama" aria-label="Présentation des projets E6">
+
+<!-- ============================ 0. SOMMAIRE : LE QUARTIER EN 2D ============================ -->
+<section class="slide" id="sommaire" data-titre="Le quartier des projets">
+  <div class="sommaire">
+    <figure class="plan-mini">
+      <svg id="mini" viewBox="0 0 900 640" role="group" aria-label="Plan 2D du quartier : un rond-point et une maison par projet. Choisir une maison ouvre la présentation du projet."></svg>
+      <figcaption>Plan 2D du quartier · clique sur une maison</figcaption>
+    </figure>
+    <div>
+      <span class="label">BTS CIEL option A · Épreuve E6 · Session 2027</span>
+      <h1>Les projets du quartier</h1>
+      <p class="lead">Une maison par apprenti. Pour chaque projet : le contexte, le besoin, ce qui existe, notre solution, l'architecture et la maquette 3D.</p>
+      <div class="liste-projets" id="listeProjets"></div>
+      <div class="liens-quartier">
+        <a class="btn" href="plan-2d.html" target="_blank" rel="noopener">Plan 2D du quartier ↗</a>
+        <a class="btn principal" href="index.html" target="_blank" rel="noopener">Quartier 3D ↗</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================================================================================
+     PROJET 1 · WASSIM
+     ====================================================================================== -->
+<section class="slide projet couverture" data-p="Wassim" data-chapitre="wassim" data-titre="Wassim : couverture">
+  <div class="couv">
+    <div class="vignette" data-illus></div>
+    <div>
+      <span class="label" style="font-size:17px">Projet 1 · Wassim · technicien de support</span>
+      <h1>Diagnostic à distance des imprimantes</h1>
+      <p class="sous">Valorisation des données et ticket enrichi : savoir à distance s'il faut se déplacer.</p>
+      <ol class="plan-liste" data-plan></ol>
+      <div class="statut"><span class="tag papier">Maquette fonctionnelle</span><span class="tag papier">Aucune donnée patient</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="slide projet" data-p="Wassim" data-partie="contexte">
+  <h2>Un technicien, un hôpital, beaucoup d'imprimantes</h2>
+  <div class="corps">
+    <p class="petit" style="margin:0;font-size:21px">Wassim travaille au service informatique d'un <b>centre hospitalier</b> (nom non cité). Voici ce qu'il a dit lors des entretiens des 16 et 23 novembre 2026 (faits rapportés, à confirmer par le tuteur).</p>
+    <div class="grille-4">
+      <div class="carte f"><span class="label">Panne n° 1</span><p class="citation">« Le plus gros problème, c'est les imprimantes. »</p><p class="petit">Allumées, mais elles n'impriment pas. Il vérifie le VLAN, l'encre… toujours les mêmes gestes.</p></div>
+      <div class="carte f"><span class="label">Un manque</span><p class="citation">Aucun dispositif pour lire les imprimantes à distance.</p><p class="petit">Pas de supervision centralisée des imprimantes (type Zabbix). Pour savoir ce qui se passe, il prend la main sur le PC ou se déplace.</p></div>
+      <div class="carte f"><span class="label">Comment il recueille les problèmes</span><p class="citation">Quatre canaux, une seule phrase.</p><p class="petit" style="margin:0 0 8px">Les agents le préviennent, ou viennent au service. Le message reste : « l'imprimante ne marche pas ».</p><p style="margin:0;display:flex;gap:6px;flex-wrap:wrap"><span class="tag papier">GLPI</span><span class="tag papier">téléphone</span><span class="tag papier">mail</span><span class="tag papier">chat GLPI</span></p></div>
+      <div class="carte f"><span class="label">Sa méthode</span><p class="citation">D'abord à distance.</p><p class="petit">Il prend la main sur le PC. Il se déplace si c'est bloqué, parfois pour rien : l'imprimante marche, mais le câble n'est pas branché au PC.</p></div>
+    </div>
+  </div>
+  <p class="bandeau">Le terrain : des imprimantes <b>allumées</b>… qui <b>n'impriment pas</b>.</p>
+</section>
+
+<section class="slide projet" data-p="Wassim" data-partie="besoin">
+  <h2>Un ticket qui ne dit rien</h2>
+  <div class="corps">
+    <div class="deux-col">
+      <div style="display:grid;gap:18px">
+        <div class="ticket avant f"><span class="label">Aujourd'hui · ticket GLPI</span><div class="tt">« L'imprimante ne marche pas. »</div><p class="petit" style="margin:0">Wassim refait à la main les mêmes vérifications : réseau, file d'impression, papier, encre. Parfois, il se déplace pour rien : le câble n'est pas branché au PC.</p></div>
+        <div class="ticket apres f"><span class="label">Ce que le projet vise · ticket enrichi</span><div class="tt">Imprimante cardiologie : le PC ne la voit plus (USB)</div>
+          <ul class="petit"><li>Imprimante en USB : pas de SNMP, seul le PC répond</li><li>PC : périphérique USB absent</li><li>Niveau 1 : vérifier le câble avant de se déplacer</li></ul></div>
+      </div>
+      <div style="display:grid;gap:16px">
+        <div class="encadre accent f"><b>Question du projet.</b> Si un boîtier collé sur l'imprimante voyait ce qui se passe vraiment, et si le ticket arrivait avec sa <b>cause</b> et sa <b>preuve</b>, combien de temps et de déplacements gagnerait-on, sans risque pour les postes ?</div>
+      </div>
+    </div>
+  </div>
+  <p class="bandeau">Le besoin : un ticket qui arrive avec <b>la cause</b> et <b>la preuve</b>.</p>
+</section>
+
+<section class="slide projet" data-p="Wassim" data-partie="existant">
+  <h2>De bons outils. Aucun ne compare.</h2>
+  <div class="corps">
+    <div class="defile"><table class="comp">
+      <thead><tr><th style="width:24%">Outil existant</th><th>Ce qu'il fait bien</th><th>Ce qui lui manque</th></tr></thead>
+      <tbody>
+        <tr class="f"><td><b>Page web de l'imprimante</b></td><td>Montre son état et son niveau d'encre.</td><td>Une imprimante à la fois. N'existe pas pour une imprimante en USB. Peut dire « tout va bien » alors qu'elle est figée.</td></tr>
+        <tr class="f"><td><b>Supervision</b> (Zabbix, Centreon…)</td><td>Lit à distance l'état et le compteur de toutes les imprimantes réseau. <b>Absente du service</b> (dit Wassim, à confirmer).</td><td>Ne voit pas l'USB. Ne regarde pas le PC. N'écrit rien dans le ticket.</td></tr>
+        <tr class="f"><td><b>Lecture SNMP à la main</b> (snmpwalk…)</td><td>Lit l'état et le compteur d'une imprimante réseau.</td><td>Manuel, une imprimante à la fois. Les objets lus changent d'une marque à l'autre.</td></tr>
+        <tr class="f"><td><b>Prise en main à distance</b></td><td>Wassim voit le PC comme s'il y était.</td><td>Seulement après l'appel. Les mêmes vérifications à refaire à la main, ticket après ticket.</td></tr>
+        <tr class="f"><td><b>GLPI</b> (outil de tickets)</td><td>Suit les tickets et la liste du matériel.</td><td>Le ticket ne contient que la phrase de l'utilisateur, qu'il vienne de GLPI, du téléphone, d'un mail ou du chat. Rien ne prouve que la réparation a marché.</td></tr>
+      </tbody>
+    </table></div>
+    <div class="encadre danger f"><b>Ce qui manque partout :</b> un moyen de recueillir à distance l'état de l'imprimante, <b>quel que soit son raccordement</b>, de le comparer à ce que dit le PC et à ce que mesure un capteur, puis de l'écrire dans le ticket. Personne ne dit « elle marche, vérifiez le câble » avant le déplacement.</div>
+  </div>
+  <p class="bandeau">Chaque outil voit <b>un morceau</b>. Personne ne <b>compare</b> les morceaux.</p>
+</section>
+
+<section class="slide projet" data-p="Wassim" data-partie="solution">
+  <h2>Deux outils de terrain, un seul cerveau</h2>
+  <div class="corps">
+    <div class="grille-3">
+      <div class="carte module f"><span class="label"><span class="v">V1</span>Sur l'imprimante</span><h3>Le boîtier</h3><p style="font-size:19px">Un ESP32 avec un accéléromètre (la vibration), un bouton rouge « ça ne marche pas » et un écran à encre : <i>Bac 2 vide</i>, <i>Wassim arrive</i>, <i>Réparé</i>.</p></div>
+      <div class="carte module f"><span class="label"><span class="v">V1</span>Au centre</span><h3>Le cerveau commun</h3><p style="font-size:19px">Un serveur Ubuntu et sa <b>sonde</b> (SNMP pour le réseau, le PC pour l'USB) comparent quatre témoins et écrivent la cause probable dans GLPI. Un tableau de bord montre une pastille par imprimante.</p></div>
+      <div class="carte module f"><span class="label"><span class="v v2">V2</span>Pour aller plus loin</span><h3>Preuve de réparation, PC neufs</h3><p style="font-size:19px">Carte RFID : le serveur envoie une page de test, le compteur doit avancer, le ticket ne se ferme qu'avec cette preuve. Avec un annuaire AD (Samba), trois cartes rangent un PC neuf dans le bon service.</p></div>
+    </div>
+    <div class="temoins f">
+      <div class="temoin"><b>① Vibration</b><em>« Les moteurs tournent. »</em> Accéléromètre du boîtier.</div>
+      <div class="temoin"><b>② Compteur de pages</b><em>« J'ai imprimé 3 pages. »</em> SNMP, comparé aux pages envoyées.</div>
+      <div class="temoin"><b>③ État de l'imprimante</b><em>« Bourrage. »</em> SNMP, imprimante réseau ou Wi-Fi : ce qu'elle croit savoir.</div>
+      <div class="temoin"><b>④ Le PC</b><em>« 5 pages attendent. » ou « Je ne la vois plus. »</em> PowerShell limité (JEA), sans lire les noms. Seul témoin d'une imprimante en USB.</div>
+    </div>
+    <div class="grille-2">
+      <p class="encadre succes f"><b>Sécurité.</b> Le diagnostic à distance passe par un point d'accès <b>JEA</b> : liste fermée de commandes, compte sans droit d'administrateur. Une commande hors liste est refusée et tracée.</p>
+      <p class="encadre info f"><b>Physique.</b> Le seuil de vibration : distinguer « l'imprimante travaille » de « elle est au repos », avec étalonnage et incertitudes.</p>
+    </div>
+  </div>
+  <p class="bandeau">Quatre témoins comparés : le serveur trouve <b>la cause</b> avant que Wassim se déplace.</p>
+</section>
+
+<section class="slide projet" data-p="Wassim" data-partie="solution">
+  <h2>La sonde : trois raccordements, trois diagnostics</h2>
+  <div class="corps">
+    <div class="defile"><table class="comp">
+      <thead><tr><th style="width:22%">Raccordement</th><th style="width:12%">Adresse IP</th><th>La sonde interroge</th><th style="width:16%">Témoin principal</th></tr></thead>
+      <tbody>
+        <tr class="f"><td><b>Réseau filaire</b></td><td>oui</td><td>Ping, ports 9100 et 631, puis SNMP : état, compteur de pages, consommables.</td><td>SNMP</td></tr>
+        <tr class="f"><td><b>Wi-Fi</b></td><td>oui</td><td>Comme le filaire. Panne en plus : l'imprimante n'est pas sur le bon réseau sans fil.</td><td>SNMP</td></tr>
+        <tr class="f"><td><b>USB</b> (Bluetooth ou Wi-Fi Direct : même cas)</td><td>non</td><td>Le <b>PC</b>, par PowerShell JEA en lecture seule : l'imprimante est-elle vue ? Une file est-elle bloquée ?</td><td>Le PC</td></tr>
+      </tbody>
+    </table></div>
+    <div class="grille-2">
+      <p class="encadre accent f"><b>Règle centrale.</b> Le PC ne voit plus l'imprimante : « vérifiez le câble » avant tout déplacement. On écrit « cause probable » : en USB, le boîtier ne peut pas prouver que l'imprimante est en bon état au repos.</p>
+      <p class="encadre info f"><b>À confirmer.</b> Wassim a parlé de Bluetooth ; le Wi-Fi est plus probable. V1 : réseau filaire et USB ; le Wi-Fi vient ensuite.</p>
+    </div>
+  </div>
+  <p class="bandeau">Le bon diagnostic dépend du <b>raccordement</b> : la sonde choisit les bons témoins.</p>
+</section>
+
+<section class="slide projet" data-p="Wassim" data-partie="solution">
+  <h2>Un programme écrit par Wassim, testé avant d'être cru</h2>
+  <div class="corps">
+    <div class="grille-3">
+      <div class="carte module f"><span class="label"><span class="v">1</span>Sans imprimante</span><h3>Simulateur SNMP</h3><p style="font-size:19px">Un fichier de valeurs par scénario : tout va bien, bac vide, bourrage, imprimante figée. Gratuit, rejouable à l'identique.</p></div>
+      <div class="carte module f"><span class="label"><span class="v">2</span>Sur le réseau</span><h3>Appareil simulé</h3><p style="font-size:19px">Une VM ou un Raspberry Pi répond comme une imprimante : on débranche un vrai câble, on provoque de vraies pannes réseau.</p></div>
+      <div class="carte module f"><span class="label"><span class="v">3</span>En dernier</span><h3>Vraie imprimante</h3><p style="font-size:19px">Une fiche de relevé : objet lu, valeur reçue, cohérente ? Le seul moyen de voir les surprises d'un modèle.</p></div>
+    </div>
+    <div class="grille-2">
+      <p class="encadre danger f"><b>Les marques de l'hôpital</b> (HP LaserJet, Konica Minolta ; rapporté, à confirmer) ne renvoient pas tous les mêmes objets SNMP : toner absent ou approximatif, compteur à un autre indice. D'où des <b>profils par marque</b> : objets standards d'abord, objets propres à la marque en secours.</p>
+      <p class="encadre succes f"><b>Honnêteté du dossier.</b> Dix tests écrits avant le code. « Validé sur simulateur, puis sur N imprimante(s) réelle(s). » Le niveau d'encre est un bonus : le projet n'en dépend pas. Lecture seule partout.</p>
+    </div>
+  </div>
+  <p class="bandeau">Un simulateur ne montre pas les surprises des vrais modèles : il faut les <b>relever</b>.</p>
+</section>
+
+<section class="slide projet" data-p="Wassim" data-partie="architecture">
+  <h2>Le schéma réseau de la maquette</h2>
+  <div class="corps" style="grid-template-rows:1fr auto;gap:0">
+    <div class="embed clair" data-src="../Projet apprenti 1/livrables/pages-html/architecture-2d.html?cadre" data-scale=".72" style="height:595px">
+      <iframe title="Schéma réseau pas à pas de la maquette de Wassim" loading="lazy"></iframe>
+      <div class="attente">Chargement du schéma…</div>
+      <div class="alt">Le schéma réseau pas à pas, avec le vrai matériel dessiné : <a href="../Projet apprenti 1/livrables/pages-html/architecture-2d.html">ouvrir le schéma 2D</a>.</div>
+    </div>
+    <div class="sous-cadre"><a class="btn" href="../Projet apprenti 1/livrables/pages-html/architecture-2d.html" target="_blank" rel="noopener">Schéma 2D en grand ↗</a><a class="btn" href="../Projet apprenti 1/livrables/pages-html/architecture-2-5d.html" target="_blank" rel="noopener">Version 2,5D ↗</a><span class="aide">Clique dans le schéma pour le manipuler, à côté pour reprendre les diapositives.</span></div>
+  </div>
+</section>
+
+<section class="slide projet" data-p="Wassim" data-partie="architecture">
+  <h2>Qui parle à qui, et comment</h2>
+  <div class="corps">
+    <div class="flux">
+      <div class="th">Liaison</div><div class="th">Protocole</div><div class="th">Ce qui passe</div>
+      <div class="f"><b>Boîtier → serveur</b></div><div class="f"><span class="proto">MQTT sur TLS (8883)</span>, par le Wi-Fi</div><div class="f">Vibration, bouton ; en retour, le message de l'écran</div>
+      <div class="f"><b>PC → serveur → imprimante</b></div><div class="f"><span class="proto">IPP (631)</span> via CUPS, ou <span class="proto">9100</span></div><div class="f">Le travail d'impression ; CUPS connaît les pages envoyées</div>
+      <div class="f"><b>Serveur → imprimante</b></div><div class="f"><span class="proto">SNMP (161)</span>, v3 si possible</div><div class="f">État, compteur de pages, encre</div>
+      <div class="f"><b>Serveur → PC</b></div><div class="f"><span class="proto">WinRM</span>, point d'accès JEA</div><div class="f">Nombre de documents en attente, jamais leur nom ; imprimante USB vue ou absente</div>
+      <div class="f"><b>Serveur → annuaire <span class="tag papier">V2</span></b></div><div class="f"><span class="proto">LDAP</span> vers Samba (AD simulé)</div><div class="f">Le service du PC, donc le réseau attendu ; rangement des PC neufs</div>
+      <div class="f"><b>Serveur → GLPI, tableau de bord</b></div><div class="f"><span class="proto">API REST</span>, Grafana, en HTTPS</div><div class="f">Tickets, suivis, fiche du PC ; pastilles</div>
+      <div class="f c10"><b>Réseau en place</b></div><div class="f c10"><span class="proto">DHCP, DNS, NTP</span></div><div class="f c10">Adresses, noms, heure juste pour dater les événements (C10)</div>
+    </div>
+  </div>
+  <p class="bandeau">Wassim <b>exploite</b> le réseau en place : il observe, il vérifie, il ne reconfigure rien.</p>
+</section>
+
+<section class="slide projet" data-p="Wassim" data-partie="maquette">
+  <h2>La maquette 3D</h2>
+  <div class="corps" style="gap:0">
+    <div class="embed" data-src="../Projet apprenti 1/livrables/animation-3d/maquette-3d.html" data-scale=".85" style="height:600px">
+      <iframe title="Maquette 3D du projet de Wassim" allow="fullscreen"></iframe>
+      <div class="attente">Chargement de la maquette 3D…</div>
+      <div class="alt">La maquette 3D se regarde sur un ordinateur : <a href="../Projet apprenti 1/livrables/animation-3d/maquette-3d.html">ouvrir la maquette 3D</a>.</div>
+    </div>
+    <div class="sous-cadre"><a class="btn principal" href="../Projet apprenti 1/livrables/animation-3d/maquette-3d.html" target="_blank" rel="noopener">Maquette en plein écran ↗</a><a class="btn" data-quartier3d href="index.html" target="_blank" rel="noopener">La maison dans le quartier 3D ↗</a><a class="btn" data-plan2d href="plan-2d.html" target="_blank" rel="noopener">Plan 2D ↗</a><span class="aide">Glisse pour tourner autour de la maquette.</span></div>
+  </div>
+</section>
+
+<!-- ======================================================================================
+     PROJET 3 · LORENZO
+     ====================================================================================== -->
+<section class="slide projet couverture" data-p="Lorenzo" data-chapitre="lorenzo" data-titre="Lorenzo : couverture">
+  <div class="couv">
+    <div class="vignette" data-illus></div>
+    <div>
+      <span class="label" style="font-size:17px">Projet 3 · Lorenzo · support aux postes de travail</span>
+      <h1>CyberSentinel</h1>
+      <p class="sous">Un radar pour le poste, un leurre pour le réseau.</p>
+      <ol class="plan-liste" data-plan></ol>
+      <div class="statut"><span class="tag papier">Besoin réel, solution à faire valider</span><span class="tag papier">Maquette au lycée, LAN isolé</span><span class="tag papier">Aucune donnée réelle</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="slide projet" data-p="Lorenzo" data-partie="contexte">
+  <h2>Des bureaux partagés, des sessions ouvertes</h2>
+  <div class="corps">
+    <p class="petit" style="margin:0;font-size:21px">Lorenzo fait du support aux postes dans une <b>administration publique</b> (nom non cité) : préparation des PC, aide aux agents. Il intervient surtout sur des <b>PC de bureau</b>.</p>
+    <div class="grille-4">
+      <div class="carte f"><span class="label">Le personnage</span><p class="citation">Martine, gestionnaire</p><p class="petit">Elle travaille dans un bureau partagé. Elle se lève souvent : imprimante, dossier, café.</p></div>
+      <div class="carte f"><span class="label">Autour d'elle</span><p class="citation">Ça passe beaucoup.</p><p class="petit">Collègues, visiteurs, prestataires traversent le bureau et voient les écrans.</p></div>
+      <div class="carte f"><span class="label">Le filet actuel</span><p class="citation">Quelques minutes.</p><p class="petit">Windows se verrouille seul après plusieurs minutes sans clavier ni souris.</p></div>
+      <div class="carte f"><span class="label">Le réseau</span><p class="citation">Des angles morts.</p><p class="petit">La détection d'intrusion n'est jamais parfaite : un signal de plus est utile.</p></div>
+    </div>
+    <p class="note f" style="margin:0">Le tuteur a confirmé que des agents <b>oublient de verrouiller</b> leur session (entretien du 16/11/2026). Réalisation au lycée, sur maquette : elle doit être validée par l'académie.</p>
+  </div>
+  <p class="bandeau">Le terrain : un bureau partagé, une <b>session ouverte</b>, un <b>collègue qui passe</b>.</p>
+</section>
+
+<section class="slide projet" data-p="Lorenzo" data-partie="besoin">
+  <h2>Combien de temps la session reste ouverte ?</h2>
+  <div class="corps">
+    <p style="margin:0;font-size:22px">Martine se lève et oublie <kbd>Win</kbd> + <kbd>L</kbd>. Sa session reste ouverte, avec ses droits et ses dossiers.</p>
+    <div class="barres carte plate">
+      <div class="barre-ligne f"><span>Martine pense à Win + L</span><div class="barre-temps"><i style="--w:0%"></i></div><span class="val">0 s</span></div>
+      <div class="barre-ligne f"><span>Oubli + radar <small class="texte-discret">(objectif)</small></span><div class="barre-temps"><i style="--w:0.7%"></i></div><span class="val">≈ 4 s</span></div>
+      <div class="barre-ligne f"><span>Oubli + filet Windows seul <small class="texte-discret">(exemple)</small></span><div class="barre-temps"><i class="rouge" style="--w:100%"></i></div><span class="val">10 min</span></div>
+    </div>
+    <div class="chiffres">
+      <div class="chiffre f"><span class="tag succes">confirmé par le tuteur</span><b>Des oublis</b><span>de verrouillage dans le service</span></div>
+      <div class="chiffre f"><span class="tag papier">à demander au tuteur</span><b>? min</b><span>délai actuel du verrouillage par inactivité</span></div>
+      <div class="chiffre f"><span class="tag jaune">objectif à mesurer</span><b>&lt; 8 s</b><span>entre le départ et le verrou, dans 95 % des essais</span></div>
+    </div>
+  </div>
+  <p class="bandeau">Le besoin : verrouiller <b>en secondes</b>, pas en minutes, sans rien demander à l'agent.</p>
+</section>
+
+<section class="slide projet" data-p="Lorenzo" data-partie="existant">
+  <h2>Pourquoi pas ce que Windows sait déjà faire ?</h2>
+  <div class="corps">
+    <div class="defile"><table class="comp">
+      <thead><tr><th style="width:23%">Solution</th><th class="c">Rapide après le départ</th><th class="c">Rien à porter</th><th class="c">Marche sur un PC de bureau</th><th class="c">Délais mesurés, journalisés</th><th class="c">Sans matériel en plus</th></tr></thead>
+      <tbody>
+        <tr class="f"><td><b>Win + L</b></td><td class="c moy">~<small>s'il y pense</small></td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c non">✗</td><td class="c ok">✓</td></tr>
+        <tr class="f"><td><b>Verrouillage par inactivité</b></td><td class="c non">✗<small>minutes</small></td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c moy">~</td><td class="c ok">✓</td></tr>
+        <tr class="f"><td><b>Verrouillage dynamique</b> (téléphone Bluetooth)</td><td class="c moy">~<small>≈ 30 s*</small></td><td class="c non">✗<small>téléphone</small></td><td class="c moy">~<small>Bluetooth</small></td><td class="c non">✗</td><td class="c moy">~</td></tr>
+        <tr class="f"><td><b>Présence Windows 11</b> (capteur intégré)</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c non">✗<small>portables récents</small></td><td class="c non">✗</td><td class="c non">✗</td></tr>
+        <tr class="f"><td><b>Retrait de la carte à puce</b></td><td class="c ok">✓</td><td class="c non">✗<small>carte</small></td><td class="c ok">✓</td><td class="c moy">~</td><td class="c non">✗<small>lecteur</small></td></tr>
+        <tr class="f nous"><td>Projet de Lorenzo</td><td class="c ok">✓<small>secondes</small></td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c moy">~<small>boîtier</small></td></tr>
+      </tbody>
+    </table></div>
+    <p class="petit f" style="margin:0;font-size:18px">✓ oui · ~ en partie · ✗ non. * Délai annoncé par Microsoft, à vérifier. <b>Leurres existants :</b> OpenCanary (libre), Thinkst Canary (payant), T-Pot (lourd). Celui de Lorenzo est minimal : une fausse imprimante sur ESP32, qui ne collecte rien.</p>
+  </div>
+  <p class="bandeau">L'inactivité reste <b>le filet</b>. Le radar fait verrouiller <b>plus tôt</b>, jamais plus tard.</p>
+</section>
+
+<section class="slide projet" data-p="Lorenzo" data-partie="solution">
+  <h2>Deux fonctions indépendantes</h2>
+  <div class="corps">
+    <div class="grille-2">
+      <div class="carte module f"><span class="label"><span class="v">V1</span>Module 1 · sous l'écran</span><h3>Le radar qui verrouille</h3>
+        <p style="font-size:19px">Un radar <b>LD2410</b> (24 GHz) et un ESP32 voient que le bureau se vide. Un programme PowerShell sur le poste attend 2 s pour être sûr, puis verrouille la session.</p>
+        <p class="petit" style="font-size:17px">Messages signés (HMAC + compteur) : un faux boîtier est refusé.</p></div>
+      <div class="carte module f"><span class="label"><span class="v">V1</span>Module 2 · sur le réseau</span><h3>Le leurre : une fausse imprimante</h3>
+        <p style="font-size:19px">Un second ESP32 avec une carte Ethernet <b>W5500</b> imite une imprimante (page HTTP). Personne n'a de raison de s'y connecter : chaque visite devient un <b>événement à examiner</b>.</p>
+        <p class="petit" style="font-size:17px">Faible interaction, LAN isolé du lycée, événements envoyés au serveur Ubuntu.</p></div>
+    </div>
+    <ol class="regles carte plate f">
+      <li>Le radar sert <b>seulement à verrouiller</b> : jamais à déverrouiller, jamais à reconnaître quelqu'un.</li>
+      <li>Le verrou reste <b>local</b> : il marche même si le serveur Ubuntu tombe en panne. Boîtier muet = verrouillage.</li>
+      <li>Une connexion au leurre <b>n'est pas une preuve</b> d'intrusion. Elle n'est jamais reliée à une absence ni à un agent.</li>
+    </ol>
+    <p class="encadre info f"><b>Physique.</b> Onde de 24 GHz : λ = c/f ≈ 12,5 mm, donc un déplacement du thorax de 1 mm décale la phase d'environ 1 radian (Δφ = 4π·d/λ). D'où la détection d'une personne immobile. Délais mesurés avec leurs incertitudes.</p>
+  </div>
+  <p class="bandeau">Le radar <b>avance</b> le verrouillage. Le leurre <b>signale</b>, il ne <b>conclut</b> pas.</p>
+</section>
+
+<section class="slide projet" data-p="Lorenzo" data-partie="architecture">
+  <h2>Le schéma réseau de la maquette</h2>
+  <div class="corps" style="grid-template-rows:1fr auto;gap:0">
+    <div class="embed clair" data-src="../Projet apprenti 3/livrables/page-html/architecture-2d.html?cadre" data-scale=".72" style="height:595px">
+      <iframe title="Schéma réseau pas à pas de la maquette de Lorenzo" loading="lazy"></iframe>
+      <div class="attente">Chargement du schéma…</div>
+      <div class="alt">Le schéma réseau pas à pas, avec le vrai matériel dessiné : <a href="../Projet apprenti 3/livrables/page-html/architecture-2d.html">ouvrir le schéma 2D</a>.</div>
+    </div>
+    <div class="sous-cadre"><a class="btn" href="../Projet apprenti 3/livrables/page-html/architecture-2d.html" target="_blank" rel="noopener">Schéma 2D en grand ↗</a><a class="btn" href="../Projet apprenti 3/livrables/page-html/architecture-2-5d.html" target="_blank" rel="noopener">Version 2,5D ↗</a><span class="aide">Clique dans le schéma pour le manipuler, à côté pour reprendre les diapositives.</span></div>
+  </div>
+</section>
+
+<section class="slide projet" data-p="Lorenzo" data-partie="architecture">
+  <h2>Qui parle à qui, et comment</h2>
+  <div class="corps">
+    <div class="flux">
+      <div class="th">Liaison</div><div class="th">Protocole</div><div class="th">Ce qui passe</div>
+      <div class="f"><b>Radar → ESP32</b></div><div class="f"><span class="proto">liaison série (UART)</span></div><div class="f">Présence, mouvement, distance</div>
+      <div class="f"><b>ESP32 → poste Windows</b></div><div class="f"><span class="proto">USB série</span>, signé HMAC + compteur</div><div class="f">« Bureau vide » ou « présence » ; le poste décide et verrouille</div>
+      <div class="f"><b>Poste → serveur Ubuntu</b></div><div class="f"><span class="proto">HTTPS (API)</span></div><div class="f">Événements techniques : verrouillage, boîtier muet</div>
+      <div class="f"><b>Machine du LAN → leurre</b></div><div class="f"><span class="proto">HTTP (80)</span>, Ethernet W5500</div><div class="f">Une visite de la fausse page d'imprimante</div>
+      <div class="f"><b>Leurre → serveur Ubuntu</b></div><div class="f"><span class="proto">HTTPS (API)</span></div><div class="f">Un événement minimal à qualifier, sans nom de personne</div>
+      <div class="f c10"><b>Réseau en place</b></div><div class="f c10"><span class="proto">DHCP, DNS, NTP</span></div><div class="f c10">Adresses, noms, heure juste pour dater les événements (C10)</div>
+    </div>
+    <p class="encadre succes f"><b>Tout ce qui sert à verrouiller est sur le poste</b> : le réseau et Ubuntu ne sont pas sur ce chemin.</p>
+  </div>
+  <p class="bandeau">Deux chemins séparés : le <b>verrou</b> reste local, le <b>leurre</b> parle au serveur.</p>
+</section>
+
+<section class="slide projet" data-p="Lorenzo" data-partie="maquette">
+  <h2>La maquette 3D</h2>
+  <div class="corps" style="gap:0">
+    <div class="embed" data-src="../Projet apprenti 3/livrables/animation-3d/maquette-3d.html" data-scale=".85" style="height:600px">
+      <iframe title="Maquette 3D du projet de Lorenzo" allow="fullscreen"></iframe>
+      <div class="attente">Chargement de la maquette 3D…</div>
+      <div class="alt">La maquette 3D se regarde sur un ordinateur : <a href="../Projet apprenti 3/livrables/animation-3d/maquette-3d.html">ouvrir la maquette 3D</a>.</div>
+    </div>
+    <div class="sous-cadre"><a class="btn principal" href="../Projet apprenti 3/livrables/animation-3d/maquette-3d.html" target="_blank" rel="noopener">Maquette en plein écran ↗</a><a class="btn" data-quartier3d href="index.html" target="_blank" rel="noopener">La maison dans le quartier 3D ↗</a><a class="btn" data-plan2d href="plan-2d.html" target="_blank" rel="noopener">Plan 2D ↗</a><span class="aide">Glisse pour tourner autour de la maquette.</span></div>
+  </div>
+</section>
+
+<!-- ======================================================================================
+     PROJET 4 · AZIZA
+     ====================================================================================== -->
+<section class="slide projet couverture" data-p="Aziza" data-chapitre="aziza" data-titre="Aziza : couverture">
+  <div class="couv">
+    <div class="vignette" data-illus></div>
+    <div>
+      <span class="label" style="font-size:17px">Projet 4 · Aziza · maintenance et parc informatique</span>
+      <h1>Le kit de maintenance signé</h1>
+      <p class="sous">Des PC à jour, des documents archivés, un parc tracé.</p>
+      <ol class="plan-liste" data-plan></ol>
+      <div class="statut"><span class="tag papier">Besoin issu de l'entreprise</span><span class="tag papier">Maquette au lycée</span><span class="tag papier">Données fictives</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="slide projet" data-p="Aziza" data-partie="contexte">
+  <h2>Des PC qui partent sur le terrain</h2>
+  <div class="corps">
+    <p class="petit" style="margin:0;font-size:21px">Aziza travaille dans un service qui entretient les <b>équipements de télécommande d'un réseau électrique ferroviaire</b> (nom non cité) : suivi du parc, montage de PC, câblage, archivage.</p>
+    <div class="grille-4">
+      <div class="carte f"><span class="label">Le kit</span><p class="citation">Un PC par agent</p><p class="petit">Chaque PC porte des documents techniques, des paramètres d'équipements et de petits programmes.</p></div>
+      <div class="carte f"><span class="label">La source</span><p class="citation">Un SharePoint</p><p class="petit">Le kit de référence y est rangé. Il change une à deux fois par mois (à confirmer).</p></div>
+      <div class="carte f"><span class="label">Sur le terrain</span><p class="citation">Seulement la 4G</p><p class="petit">Pas de réseau de l'entreprise dehors : Internet passe par le téléphone de l'agent (confirmé par le tuteur).</p></div>
+      <div class="carte f"><span class="label">Les archives</span><p class="citation">Dispersées</p><p class="petit">Les documents de modification sont difficiles à retrouver (besoin 2 du tuteur).</p></div>
+    </div>
+    <p class="note f" style="margin:0">Le projet <b>ne touche à aucun système du réseau électrique</b>. Maquette au lycée, données fictives ; réalisation au lycée à faire valider par l'académie.</p>
+  </div>
+  <p class="bandeau">Le terrain : <b>dix PC</b> qui partent chaque jour, avec la <b>4G</b> pour seul réseau.</p>
+</section>
+
+<section class="slide projet" data-p="Aziza" data-partie="besoin">
+  <h2>Une nouvelle version, dix PC, aucune preuve</h2>
+  <div class="corps">
+    <div class="deux-col" style="grid-template-columns:1fr 1fr">
+      <div class="carte plate f">
+        <span class="label">Kit v13 publié · mise à jour à la main</span>
+        <div class="parc" style="margin:14px 0 22px">
+          <div class="pc ok-pc">PC 1<small>v13</small></div><div class="pc ok-pc">PC 2<small>v13</small></div><div class="pc ok-pc">PC 3<small>v13</small></div><div class="pc vieux">PC 4<small>v12 parti</small></div><div class="pc ok-pc">PC 5<small>v13</small></div>
+          <div class="pc ok-pc">PC 6<small>v13</small></div><div class="pc ok-pc">PC 7<small>v13</small></div><div class="pc ok-pc">PC 8<small>v13</small></div><div class="pc vieux">PC 9<small>v12 parti</small></div><div class="pc ok-pc">PC 10<small>v13</small></div>
+        </div>
+        <p style="margin:0;font-size:20px">8 PC mis à jour. Les PC 4 et 9 sont partis avec l'ancienne version, <b>et rien ne le signale</b>.</p>
+        <p class="petit" style="margin:6px 0 0;font-size:16px">Simulation d'exemple, pas une mesure.</p>
+      </div>
+      <div style="display:grid;gap:14px">
+        <div class="chiffres" style="grid-template-columns:1fr">
+          <div class="chiffre f"><span class="tag succes">hypothèse du tuteur</span><b>10 PC</b><span>de maintenance sous Windows 11</span></div>
+        </div>
+        <p class="encadre accent f"><b>Mesuré sur la maquette :</b> volume transféré, reprise après coupure, réponse de la borne en moins de 5 s.</p>
+      </div>
+    </div>
+  </div>
+  <p class="bandeau">Le besoin : savoir <b>quel PC a quelle version</b>, et ne jamais partir avec un kit <b>périmé</b>.</p>
+</section>
+
+<section class="slide projet" data-p="Aziza" data-partie="existant">
+  <h2>Pourquoi pas un outil du marché ?</h2>
+  <div class="corps">
+    <div class="grille-3">
+      <div class="carte f">
+        <span class="label">Copier</span><h3>Clé USB, OneDrive, SharePoint</h3>
+        <p><b>Bien :</b> simple, le service l'installe seul. OneDrive et SharePoint gardent l'historique de chaque fichier (jusqu'à 500 versions par défaut).</p>
+        <p><b>Manque :</b> cet historique est <b>fichier par fichier</b>. Pas de kit validé d'un bloc, pas de preuve de version par PC, pas d'alerte « périmé ».</p>
+      </div>
+      <div class="carte f">
+        <span class="label">Gérer le parc</span><h3>Intune, SCCM, PDQ</h3>
+        <p><b>Bien :</b> installent, vérifient les versions, donnent un état par PC.</p>
+        <p><b>Manque :</b> dépendent de la DSI (Intune, SCCM), du réseau interne (PDQ Deploy) ou d'un abonnement (PDQ Connect). Pas d'alerte « kit périmé » en standard.</p>
+      </div>
+      <div class="carte accent f" style="background:var(--jaune-pale)">
+        <span class="label">Le projet</span><h3>Aziza</h3>
+        <p><b>Bien :</b> kit signé d'un bloc, preuve de version par PC, alerte « périmé », contrôle à la sortie. Le service l'installe seul.</p>
+        <p><b>Limite :</b> ne gère que ce kit, pas tout le parc.</p>
+      </div>
+    </div>
+    <p class="petit f" style="margin:0;font-size:18px">Si la DSI gère déjà ces PC avec Intune, l'agent d'Aziza devient un <b>contrôle de conformité</b> à côté.</p>
+  </div>
+  <p class="bandeau">Copier <b>ne prouve rien</b> ; gérer le parc <b>dépend de la DSI</b>.</p>
+</section>
+
+<section class="slide projet" data-p="Aziza" data-partie="solution">
+  <h2>Publier, vérifier, contrôler au départ</h2>
+  <div class="corps" style="gap:18px">
+    <div class="grille-3">
+      <div class="carte module illustre f">
+        <div class="image">
+          <svg viewBox="0 0 420 190" role="img" aria-label="Le kit signé : trois documents (procédure PDF, paramètres XML, outil EXE) et leur catalogue signé avec les empreintes SHA-256">
+            <g transform="translate(18 34) rotate(-8)">
+              <path d="M0 0h80l22 22v116H0z" style="fill:var(--blanc);stroke:var(--encre);stroke-width:2.5;stroke-linejoin:round"/>
+              <path d="M80 0v22h22" style="fill:var(--papier-2);stroke:var(--encre);stroke-width:2.5;stroke-linejoin:round"/>
+              <rect x="10" y="28" width="48" height="22" rx="5" style="fill:var(--rouge-pale);stroke:var(--encre);stroke-width:2"/>
+              <text x="34" y="44" text-anchor="middle" style="font:900 14px var(--police);fill:var(--encre)">PDF</text>
+              <rect x="10" y="62" width="80" height="6" rx="3" style="fill:var(--contour-2)"/><rect x="10" y="76" width="66" height="6" rx="3" style="fill:var(--contour-2)"/><rect x="10" y="90" width="74" height="6" rx="3" style="fill:var(--contour-2)"/><rect x="10" y="104" width="56" height="6" rx="3" style="fill:var(--contour-2)"/>
+              
+            </g>
+            <g transform="translate(96 22) rotate(1)">
+              <path d="M0 0h80l22 22v116H0z" style="fill:var(--blanc);stroke:var(--encre);stroke-width:2.5;stroke-linejoin:round"/>
+              <path d="M80 0v22h22" style="fill:var(--papier-2);stroke:var(--encre);stroke-width:2.5;stroke-linejoin:round"/>
+              <rect x="10" y="28" width="48" height="22" rx="5" style="fill:var(--bleu-pale);stroke:var(--encre);stroke-width:2"/>
+              <text x="34" y="44" text-anchor="middle" style="font:900 14px var(--police);fill:var(--encre)">XML</text>
+              <text x="10" y="74" style="font:700 13px var(--police-mono);fill:var(--encre-2)">&lt;seuil&gt;</text><text x="18" y="92" style="font:700 13px var(--police-mono);fill:var(--encre-2)">42</text>
+              
+            </g>
+            <g transform="translate(176 30) rotate(8)">
+              <path d="M0 0h80l22 22v116H0z" style="fill:var(--blanc);stroke:var(--encre);stroke-width:2.5;stroke-linejoin:round"/>
+              <path d="M80 0v22h22" style="fill:var(--papier-2);stroke:var(--encre);stroke-width:2.5;stroke-linejoin:round"/>
+              <rect x="10" y="28" width="48" height="22" rx="5" style="fill:var(--vert-pale);stroke:var(--encre);stroke-width:2"/>
+              <text x="34" y="44" text-anchor="middle" style="font:900 14px var(--police);fill:var(--encre)">EXE</text>
+              <rect x="14" y="62" width="34" height="34" rx="6" style="fill:var(--papier-2);stroke:var(--encre);stroke-width:2"/><path d="M22 79h18M31 70v18" style="stroke:var(--encre);stroke-width:3;stroke-linecap:round"/>
+              
+            </g>
+            <g transform="translate(262 10)">
+              <rect x="5" y="5" width="146" height="164" rx="8" style="fill:var(--encre)"/>
+              <rect x="0" y="0" width="146" height="164" rx="8" style="fill:var(--blanc);stroke:var(--encre);stroke-width:2.5"/>
+              <path d="M0 8a8 8 0 0 1 8-8h130a8 8 0 0 1 8 8v20H0z" style="fill:var(--jaune);stroke:var(--encre);stroke-width:2.5"/>
+              <text x="73" y="20" text-anchor="middle" style="font:900 13px var(--police);fill:var(--encre)">CATALOGUE v13</text>
+              <text x="10" y="46" style="font:800 13px var(--police);fill:var(--encre-3)">SHA-256</text>
+              <text x="10" y="66" style="font:700 13px var(--police-mono);fill:var(--encre)">a3f9… PDF</text><text x="10" y="86" style="font:700 13px var(--police-mono);fill:var(--encre)">7c21… XML</text><text x="10" y="106" style="font:700 13px var(--police-mono);fill:var(--encre)">e08b… EXE</text>
+              <path d="M98 128l-8 32 14-8 8 14 6-30z" style="fill:var(--rouge);stroke:var(--encre);stroke-width:2;stroke-linejoin:round"/>
+              <circle cx="112" cy="124" r="26" style="fill:var(--jaune);stroke:var(--encre);stroke-width:2.5"/>
+              <circle cx="112" cy="124" r="19" style="fill:none;stroke:var(--encre);stroke-width:1.5;stroke-dasharray:3 3"/>
+              <text x="112" y="129" text-anchor="middle" style="font:1000 13px var(--police);fill:var(--encre)">SIGNÉ</text>
+            </g>
+          </svg>
+        </div>
+        <span class="label"><span class="v">V1</span>Au bureau</span><h3>Le kit signé</h3>
+        <p>Le référent publie le kit. Chaque fichier a une empreinte <b>SHA-256</b>. Le catalogue est <b>signé</b> : lui seul fait foi.</p>
+      </div>
+      <div class="carte module illustre f">
+        <div class="image">
+          <svg viewBox="0 0 420 190" role="img" aria-label="L'agent PowerShell sur le PC de maintenance : il vérifie la signature du catalogue et télécharge les fichiers changés par la 4G avec BITS">
+            <rect x="24" y="8" width="300" height="156" rx="10" style="fill:var(--contour-2);stroke:var(--encre);stroke-width:2.5"/>
+            <rect x="36" y="18" width="276" height="136" rx="4" style="fill:var(--encre)"/>
+            <rect x="36" y="18" width="276" height="22" rx="4" style="fill:var(--focus)"/>
+            <text x="46" y="34" style="font:800 13px var(--police);fill:var(--blanc)">agent-kit.ps1</text>
+            <text x="296" y="34" text-anchor="end" style="font:900 13px var(--police);fill:var(--blanc)">✕</text>
+            <text x="46" y="60" style="font:700 13px var(--police-mono);fill:var(--jaune)">PS&gt; .\agent-kit.ps1</text>
+            <text x="46" y="80" style="font:700 13px var(--police-mono);fill:var(--papier)">Signature  <tspan style="fill:var(--vert-pale)">✓ valide</tspan></text>
+            <text x="46" y="100" style="font:700 13px var(--police-mono);fill:var(--papier)">2 fichiers changés</text>
+            <rect x="46" y="112" width="170" height="14" rx="3" style="fill:none;stroke:var(--papier);stroke-width:1.5"/>
+            <rect x="48" y="114" width="120" height="10" rx="2" style="fill:var(--jaune)"/>
+            <text x="224" y="124" style="font:700 13px var(--police-mono);fill:var(--papier)">BITS 72 %</text>
+            <text x="46" y="146" style="font:700 13px var(--police-mono);fill:var(--bleu)">palier : simulation</text>
+            <path d="M8 164h332l-14 16H22z" style="fill:var(--papier-2);stroke:var(--encre);stroke-width:2.5;stroke-linejoin:round"/>
+            <path d="M330 92c18 0 22 10 30 10" style="fill:none;stroke:var(--encre-2);stroke-width:2.5;stroke-dasharray:5 5"/>
+            <rect x="362" y="58" width="44" height="82" rx="8" style="fill:var(--encre)"/>
+            <rect x="367" y="66" width="34" height="58" rx="3" style="fill:var(--bleu-pale)"/>
+            <text x="384" y="100" text-anchor="middle" style="font:1000 14px var(--police);fill:var(--encre)">4G</text>
+            <circle cx="384" cy="132" r="3" style="fill:var(--contour)"/>
+          </svg>
+        </div>
+        <span class="label"><span class="v">V1</span>Sur chaque PC</span><h3>L'agent PowerShell</h3>
+        <p>Il vérifie le kit et télécharge seulement ce qui a changé, par la 4G, avec reprise après coupure (<b>BITS</b>). Trois paliers : simulation, confirmation, automatique.</p>
+      </div>
+      <div class="carte module illustre f">
+        <div class="image">
+          <svg viewBox="0 0 420 190" role="img" aria-label="La borne RFID de sortie : le PC-04 est présenté au lecteur, l'écran affiche à jour et le voyant vert s'allume ; les trois réponses possibles sont à jour, périmé, vérification impossible">
+            <rect x="12" y="64" width="98" height="66" rx="10" style="fill:var(--contour-2);stroke:var(--encre);stroke-width:2.5"/>
+            <circle cx="61" cy="97" r="7" style="fill:var(--contour)"/>
+            <rect x="80" y="72" width="22" height="22" rx="4" style="fill:var(--jaune-pale);stroke:var(--encre);stroke-width:1.5"/>
+            <rect x="85" y="77" width="12" height="12" rx="2" style="fill:none;stroke:var(--jaune-fonce);stroke-width:1.5"/>
+            <text x="61" y="150" text-anchor="middle" style="font:900 13px var(--police);fill:var(--encre)">PC-04</text>
+            <path d="M114 74a22 22 0 0 1 0 30M120 66a34 34 0 0 1 0 46" style="fill:none;stroke:var(--jaune-fonce);stroke-width:3;stroke-linecap:round"/>
+            <rect x="140" y="10" width="124" height="168" rx="16" style="fill:var(--blanc);stroke:var(--encre);stroke-width:2.5"/>
+            <rect x="154" y="22" width="96" height="62" rx="8" style="fill:var(--papier-2);stroke:var(--contour);stroke-width:2"/>
+            <path d="M182 56a20 20 0 0 1 40 0M190 60a12 12 0 0 1 24 0" style="fill:none;stroke:var(--encre-2);stroke-width:3;stroke-linecap:round"/>
+            <text x="202" y="78" text-anchor="middle" style="font:900 13px var(--police);fill:var(--encre-2)">BADGE ICI</text>
+            <rect x="154" y="92" width="96" height="44" rx="5" style="fill:var(--encre)"/>
+            <text x="202" y="110" text-anchor="middle" style="font:700 13px var(--police-mono);fill:var(--papier)">PC-04 v13</text>
+            <text x="202" y="128" text-anchor="middle" style="font:900 13px var(--police);fill:var(--vert-pale)">À JOUR</text>
+            <circle cx="180" cy="157" r="15" style="fill:var(--vert);opacity:.3"/>
+            <circle cx="180" cy="157" r="9" style="fill:var(--vert);stroke:var(--encre);stroke-width:2"/>
+            <circle cx="224" cy="157" r="9" style="fill:var(--contour-2);stroke:var(--encre);stroke-width:2"/>
+            <g style="font:800 13px var(--police);fill:var(--encre)">
+              <rect x="280" y="40" width="132" height="30" rx="15" style="fill:var(--vert-pale);stroke:var(--encre);stroke-width:2"/><text x="346" y="60" text-anchor="middle">à jour</text>
+              <rect x="280" y="80" width="132" height="30" rx="15" style="fill:var(--rouge-pale);stroke:var(--encre);stroke-width:2"/><text x="346" y="100" text-anchor="middle">périmé</text>
+              <rect x="280" y="120" width="132" height="30" rx="15" style="fill:var(--papier-2);stroke:var(--encre);stroke-width:2"/><text x="346" y="140" text-anchor="middle">vérif. impossible</text>
+            </g>
+          </svg>
+        </div>
+        <span class="label"><span class="v">V1</span>À la sortie</span><h3>La borne RFID</h3>
+        <p>Un ESP32 lit le badge du PC et son dernier rapport : <i>à jour</i>, <i>périmé</i> ou <i>vérification impossible</i>. Jamais « à jour » par défaut.</p>
+      </div>
+    </div>
+    <div class="grille-3" style="grid-template-columns:1fr">
+      <p class="encadre succes f compact"><b>Sécurité.</b> Fichier modifié, catalogue falsifié, faux serveur : quatre tentatives, quatre refus.</p>
+    </div>
+  </div>
+  <p class="bandeau">Un <b>catalogue signé</b>, des PC qui <b>se vérifient seuls</b>, une borne qui <b>contrôle</b> au départ.</p>
+</section>
+
+<section class="slide projet" data-p="Aziza" data-partie="architecture">
+  <h2>Le schéma réseau de la maquette</h2>
+  <div class="corps" style="grid-template-rows:1fr auto;gap:0">
+    <div class="embed clair" data-src="../Projet apprenti 4/apprentie4-aziza/livrables/pages-html/architecture-2d.html?cadre" data-scale=".72" style="height:595px">
+      <iframe title="Schéma réseau pas à pas de la maquette d'Aziza" loading="lazy"></iframe>
+      <div class="attente">Chargement du schéma…</div>
+      <div class="alt">Le schéma réseau pas à pas, avec le vrai matériel dessiné : <a href="../Projet apprenti 4/apprentie4-aziza/livrables/pages-html/architecture-2d.html">ouvrir le schéma 2D</a>.</div>
+    </div>
+    <div class="sous-cadre"><a class="btn" href="../Projet apprenti 4/apprentie4-aziza/livrables/pages-html/architecture-2d.html" target="_blank" rel="noopener">Schéma 2D en grand ↗</a><a class="btn" href="../Projet apprenti 4/apprentie4-aziza/livrables/pages-html/architecture-2-5d.html" target="_blank" rel="noopener">Version 2,5D ↗</a><span class="aide">Clique dans le schéma pour le manipuler, à côté pour reprendre.</span></div>
+  </div>
+</section>
+
+<section class="slide projet" data-p="Aziza" data-partie="architecture">
+  <h2>Qui parle à qui, et comment</h2>
+  <div class="corps">
+    <div class="flux">
+      <div class="th">Liaison</div><div class="th">Protocole</div><div class="th">Ce qui passe</div>
+      <div class="f"><b>Référent → serveur</b></div><div class="f"><span class="proto">SFTP (22)</span></div><div class="f">Publication chiffrée du kit et du catalogue signé</div>
+      <div class="f"><b>Agent du PC ↔ serveur</b></div><div class="f"><span class="proto">HTTPS (443)</span> + <span class="proto">BITS</span>, par la 4G</div><div class="f">Le kit descend (requêtes Range, réponses 206) ; le rapport remonte</div>
+      <div class="f"><b>Borne RFID → serveur</b></div><div class="f"><span class="proto">HTTPS (443)</span></div><div class="f">« Ce PC peut-il partir ? » : dernier rapport, version</div>
+      <div class="f"><b>Lien 4G simulé</b></div><div class="f"><span class="proto">tc netem</span> sur le serveur</div><div class="f">Débit, latence, pertes mesurés sur un vrai téléphone, puis rejoués</div>
+      <div class="f c10"><b>Réseau en place</b></div><div class="f c10"><span class="proto">DHCP, DNS (53), NTP (123)</span></div><div class="f c10">Adresses, noms ; heure juste, sans laquelle un certificat est refusé (C10)</div>
+    </div>
+  </div>
+  <p class="bandeau">Le kit <b>descend</b>, le rapport <b>remonte</b>, la borne <b>demande</b>.</p>
+</section>
+
+<section class="slide projet" data-p="Aziza" data-partie="maquette">
+  <h2>La maquette 3D</h2>
+  <div class="corps" style="gap:0">
+    <div class="embed" data-src="../Projet apprenti 4/apprentie4-aziza/livrables/animation-3d/maquette-3d.html" data-scale=".85" style="height:600px">
+      <iframe title="Maquette 3D du projet d'Aziza" allow="fullscreen"></iframe>
+      <div class="attente">Chargement de la maquette 3D…</div>
+      <div class="alt">La maquette 3D se regarde sur un ordinateur : <a href="../Projet apprenti 4/apprentie4-aziza/livrables/animation-3d/maquette-3d.html">ouvrir la maquette 3D</a>.</div>
+    </div>
+    <div class="sous-cadre"><a class="btn principal" href="../Projet apprenti 4/apprentie4-aziza/livrables/animation-3d/maquette-3d.html" target="_blank" rel="noopener">Maquette en plein écran ↗</a><a class="btn" data-quartier3d href="index.html" target="_blank" rel="noopener">La maison dans le quartier 3D ↗</a><a class="btn" data-plan2d href="plan-2d.html" target="_blank" rel="noopener">Plan 2D ↗</a><span class="aide">Glisse pour tourner autour de la maquette.</span></div>
+  </div>
+</section>
+
+<!-- ============================ FIN ============================ -->
+<section class="slide finale" data-titre="Fin">
+  <div class="centre">
+    <span class="label">Et maintenant</span>
+    <h1>Visitez le quartier</h1>
+    <p class="lead">Chaque maison ouvre sa maquette 3D, son schéma 2D, sa version 2,5D et sa page de projet.</p>
+    <div class="liens-quartier">
+      <a class="btn" href="plan-2d.html" target="_blank" rel="noopener">Plan 2D du quartier ↗</a>
+      <a class="btn principal" href="index.html" target="_blank" rel="noopener">Quartier 3D ↗</a>
+      <button class="btn" type="button" data-aller="0">⌂ Retour au sommaire</button>
+    </div>
+  </div>
+</section>
+
+<nav id="barre" aria-label="Navigation du diaporama">
+  <button class="btn" id="bMaison" type="button" title="Sommaire : le quartier (touche Q)">⌂ Quartier</button>
+  <span class="aide">← → ou clic · F plein écran · P pause · Q quartier</span>
+  <span class="espace"></span>
+  <button class="btn" id="bPrec" type="button" aria-label="Diapositive précédente">←</button>
+  <span id="compteur" aria-live="polite">1 / 1</span>
+  <button class="btn principal" id="bSuiv" type="button">Suivant →</button>
+  <button class="btn" id="bPlein" type="button" aria-label="Plein écran (touche F)">⛶</button>
+</nav>
+<div id="progres"></div>
+</div>
+
+<script>
+{
+  'use strict';
+  const Q = window.QUARTIER, MAISONS = Q.maisons;
+  const stage = document.getElementById('stage');
+  const slides = [...stage.querySelectorAll('.slide')];
+  const N = slides.length;
+  const PARTIES = [
+    ['contexte', 'Contexte'], ['besoin', 'Besoin'], ['existant', 'Solutions existantes'],
+    ['solution', 'Notre solution'], ['architecture', 'Architecture'], ['maquette', 'Maquette 3D']
+  ];
+  /* titres officiels : « Nom du projet » dans la fiche de présentation de chaque apprenti */
+  const TITRES = {
+    Wassim: 'Diagnostic à distance des imprimantes : valorisation des données et ticket enrichi',
+    Lorenzo: 'Poste attentif',
+    Aziza: 'Des PC de maintenance à jour, des documents archivés, un parc tracé'
+  };
+  const titre = m => TITRES[m.who] || m.title;
+  const strip = s => s.replace(/^<svg[^>]*>|<\/svg>$/g, '');
+  const maisonDe = who => MAISONS.find(m => m.who === who);
+  const slotDe = who => MAISONS.findIndex(m => m.who === who) + 1;     // numéro de maison dans le quartier (1, 2, 3…)
+  const chapitre = who => slides.findIndex(s => s.dataset.p === who && s.classList.contains('couverture'));
+
+  /* ---------- habillage des diapositives de projet (couleur, en-tête, plan) ---------- */
+  slides.forEach(s => {
+    const who = s.dataset.p; if (!who) return;
+    const m = maisonDe(who);
+    s.style.setProperty('--c', m.color);
+    const ill = s.querySelector('[data-illus]');
+    if (ill) ill.innerHTML = Q.illus(m.prop, m.color);
+    const plan = s.querySelector('[data-plan]');
+    if (plan) plan.innerHTML = PARTIES.map((p, i) => `<li><span>${i + 1}</span>${p[1]}</li>`).join('');
+    s.querySelectorAll('[data-quartier3d]').forEach(a => a.href = 'index.html?maison=' + slotDe(who));
+    s.querySelectorAll('[data-plan2d]').forEach(a => a.href = 'plan-2d.html?maison=' + slotDe(who));
+    const partie = s.dataset.partie; if (!partie) return;
+    const h2 = s.querySelector('h2');
+    const tete = document.createElement('div'); tete.className = 'tete';
+    const ligne = document.createElement('div'); ligne.className = 'ligne';
+    ligne.innerHTML = `<span class="label"><i aria-hidden="true"></i><span>Projet ${m.n} · ${who} · ${titre(m)}</span></span>`;
+    h2.replaceWith(tete); tete.appendChild(ligne); tete.appendChild(h2);
+    const nav = document.createElement('nav'); nav.className = 'parties'; nav.setAttribute('aria-label', 'Parties du projet');
+    const k = PARTIES.findIndex(p => p[0] === partie);
+    PARTIES.forEach((p, i) => {
+      const b = document.createElement('button'); b.type = 'button'; b.textContent = (i + 1) + ' · ' + p[1];
+      if (i === k) b.setAttribute('aria-current', 'true'); else if (i < k) b.className = 'fait';
+      b.addEventListener('click', () => aller(slides.findIndex(x => x.dataset.p === who && x.dataset.partie === p[0])));
+      nav.appendChild(b);
+    });
+    ligne.appendChild(nav);
+  });
+
+  /* ---------- typographie française : espace insécable avant : ; ? ! » et après « ---------- */
+  (function insecables(racine) {
+    const w = document.createTreeWalker(racine, NodeFilter.SHOW_TEXT);
+    for (let n; (n = w.nextNode());) {
+      if (n.parentElement.closest('script, style, .proto, code, kbd')) continue;
+      n.nodeValue = n.nodeValue.replace(/ ([:;?!»])/g, '\u00A0$1').replace(/« /g, '«\u00A0');
+    }
+  })(stage);
+
+  /* ---------- sommaire : liste des projets ---------- */
+  const liste = document.getElementById('listeProjets');
+  MAISONS.forEach(m => {
+    const b = document.createElement('button'); b.type = 'button'; b.style.setProperty('--c', m.url ? m.color : 'var(--papier)');
+    if (m.url) {
+      b.innerHTML = `<span class="pastille" aria-hidden="true">${Q.illus(m.prop, m.color)}</span><span><b>${m.n} · ${m.who}</b><span>${titre(m)}</span></span>`;
+      b.addEventListener('click', () => aller(chapitre(m.who)));
+    } else {
+      b.className = 'a-venir'; b.disabled = true;
+      b.innerHTML = `<span class="pastille" aria-hidden="true">${Q.illus(null, m.color)}</span><span><b>Maison libre</b><span>Projet de l'apprenti 2 en cours de choix</span></span>`;
+    }
+    liste.appendChild(b);
+  });
+
+  /* ---------- sommaire : le quartier en 2D (même dessin que plan-2d.html, en plus petit) ---------- */
+  (function dessinerQuartier() {
+    const NS = 'http://www.w3.org/2000/svg', svg = document.getElementById('mini');
+    const CX = 450, CY = 345, K = 0.6, RING = 200, PLAZA = 72, HOUSE = 300, COUNT = Math.max(4, MAISONS.length);
+    const el = (tag, attrs, parent, text) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (text != null) e.textContent = text; (parent || svg).appendChild(e); return e; };
+    const pos = (a, r) => [CX + Math.sin(a) * r, CY - Math.cos(a) * r * K];
+    const ell = (r, cls) => el('ellipse', { cx: CX, cy: CY, rx: r, ry: r * K, 'class': cls });
+    const S = MAISONS.map((m, i) => ({ m, a: (i + 0.5) * Math.PI * 2 / COUNT }));
+    el('ellipse', { cx: CX + 9, cy: CY + 9, rx: 430, ry: 290, 'class': 'ombre' });
+    el('ellipse', { cx: CX, cy: CY, rx: 430, ry: 290, 'class': 'sol' });
+    ell(RING + 4, 'pelouse');
+    S.forEach(s => {
+      const p0 = pos(s.a, PLAZA - 6), p1 = pos(s.a, HOUSE - 10);
+      el('line', { x1: p0[0], y1: p0[1], x2: p1[0], y2: p1[1], 'class': 'route', 'stroke-width': 42, style: 'stroke:var(--encre)' });
+      el('line', { x1: p0[0], y1: p0[1], x2: p1[0], y2: p1[1], 'class': 'route', 'stroke-width': 35 });
+    });
+    ell(RING + 27, 'bord'); ell(RING - 27, 'bord');
+    ell(RING, 'route').setAttribute('stroke-width', 51);
+    ell(RING, 'axe');
+    el('ellipse', { cx: CX + 6, cy: CY + 6, rx: PLAZA, ry: PLAZA * K, 'class': 'ombre' });
+    ell(PLAZA, 'place'); ell(30, 'ilot');
+    [[120, 330], [780, 330], [450, 120], [450, 585], [610, 130]].forEach(([x, y]) => {
+      const g = el('g', { transform: `translate(${x} ${y}) scale(.8)`, 'aria-hidden': 'true' });
+      el('line', { x1: 0, y1: 0, x2: 0, y2: -22, 'class': 'tronc' }, g);
+      el('circle', { cx: 5, cy: -33, r: 20, 'class': 'ombre' }, g);
+      el('circle', { cx: 0, cy: -38, r: 20, 'class': 'arbre' }, g);
+    });
+    S.sort((p, q) => pos(p.a, HOUSE)[1] - pos(q.a, HOUSE)[1]).forEach(s => {
+      const m = s.m, libre = !m.url, col = m.color, [x, y] = pos(s.a, HOUSE);
+      const g = el('g', { 'class': 'maison' + (libre ? ' libre' : ''), transform: `translate(${x} ${y + 40}) scale(.82)` });
+      if (!libre) { g.setAttribute('tabindex', '0'); g.setAttribute('role', 'link'); g.setAttribute('aria-label', `Projet ${m.n}, ${m.who} : ${titre(m)}. Ouvrir sa présentation`); }
+      else g.setAttribute('aria-label', 'Maison libre : projet de l\'apprenti 2 en cours de choix');
+      el('path', { d: 'M-82 0V-88L0-140 82-88V0Z', 'class': 'ombre', transform: 'translate(8 6)' }, g);
+      const c = el('g', { 'class': 'corps' }, g);
+      el('rect', { x: -80, y: -88, width: 160, height: 88, 'class': 'mur' }, c);
+      el('path', { d: 'M-94-86 0-142 94-86Z', 'class': 'toit', style: 'fill:' + (libre ? 'var(--papier)' : col) }, c);
+      if (!libre) {
+        el('rect', { x: -66, y: -70, width: 32, height: 24, 'class': 'fenetre' }, c);
+        el('rect', { x: 34, y: -70, width: 32, height: 24, 'class': 'fenetre' }, c);
+        el('rect', { x: -17, y: -50, width: 34, height: 50, 'class': 'porte', style: 'fill:' + col }, c);
+        const pr = el('svg', { x: 84, y: -66, width: 66, height: 66, viewBox: '0 0 110 110', 'aria-hidden': 'true', style: 'overflow:visible' }, c);
+        pr.innerHTML = strip(Q.illus(m.prop, col));
+      } else el('text', { x: 0, y: -24, 'text-anchor': 'middle', style: 'font:900 40px var(--police);fill:var(--encre-3)' }, c, '?');
+      const lab = el('g', { 'class': 'etiquette', transform: 'translate(0 28)' }, c);
+      const txt = libre ? 'Libre' : m.n + ' · ' + m.who, w = 30 + txt.length * 11.5;
+      el('rect', { x: -w / 2 + 4, y: -15, width: w, height: 32, rx: 16, style: 'fill:var(--encre);stroke:none', transform: 'translate(3 3)' }, lab);
+      el('rect', { x: -w / 2, y: -18, width: w, height: 32, rx: 16 }, lab);
+      el('text', { x: 0, y: 4, 'text-anchor': 'middle' }, lab, txt);
+      if (!libre) {
+        const go = () => aller(chapitre(m.who));
+        g.addEventListener('click', go);
+        g.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.stopPropagation(); go(); } });
+      }
+    });
+  })();
+
+  /* ---------- mise à l'échelle et mode lecture ---------- */
+  const lecture = matchMedia('(max-width: 900px)');
+  function ajuster() {
+    document.body.classList.toggle('lecture', lecture.matches);
+    if (lecture.matches) { stage.style.transform = ''; return; }
+    const s = Math.min(innerWidth / 1600, innerHeight / 900);
+    stage.style.transform = `translate(${(innerWidth - 1600 * s) / 2}px, ${(innerHeight - 900 * s) / 2}px) scale(${s})`;
+  }
+  addEventListener('resize', () => { ajuster(); if (!lecture.matches) chargerCadres(cur); });
+
+  /* ---------- cadres intégrés : chargés seulement sur leur diapositive (la 3D consomme la carte graphique) ---------- */
+  function chargerCadres(i) {
+    slides.forEach((s, j) => s.querySelectorAll('.embed').forEach(box => {
+      const fr = box.querySelector('iframe'), att = box.querySelector('.attente');
+      if (j === i && !lecture.matches) {
+        const k = +box.dataset.scale || 1;
+        fr.style.width = (100 / k) + '%'; fr.style.height = (100 / k) + '%'; fr.style.transform = `scale(${k})`;
+        if (!fr.getAttribute('src') || fr.getAttribute('src') === 'about:blank') {
+          att.style.display = ''; fr.onload = () => { att.style.display = 'none'; };
+          fr.src = box.dataset.src;
+        }
+      } else if (fr.getAttribute('src') && fr.getAttribute('src') !== 'about:blank') {
+        fr.src = 'about:blank'; att.style.display = '';
+      }
+    }));
+  }
+
+  /* ---------- bouton pause des schémas réseau (le schéma intégré écoute le message « schema-pause ») ---------- */
+  const boutonsPause = [];
+  slides.forEach(s => {
+    const box = s.querySelector('.embed[data-src*="architecture-2d"]'); if (!box) return;
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'btn jaune'; b.dataset.pause = '';
+    b.textContent = '❚❚ Pause'; b.setAttribute('aria-pressed', 'false'); b.title = 'Mettre le schéma en pause (touche P)';
+    b.addEventListener('click', () => basculerPause(s));
+    s.querySelector('.sous-cadre').prepend(b); boutonsPause.push(b);
+  });
+  function basculerPause(s) {
+    const fr = s.querySelector('.embed[data-src*="architecture-2d"] iframe'); if (!fr || !fr.contentWindow) return;
+    fr.contentWindow.postMessage({ schema: 'pause' }, '*');
+  }
+  function majBoutonPause(fen, enPause) {
+    slides.forEach(s => {
+      const fr = s.querySelector('.embed[data-src*="architecture-2d"] iframe'), b = s.querySelector('[data-pause]');
+      if (!fr || !b || (fen && fr.contentWindow !== fen)) return;
+      b.textContent = enPause ? '▶ Reprendre' : '❚❚ Pause'; b.setAttribute('aria-pressed', String(enPause));
+    });
+  }
+  addEventListener('message', e => { const d = e.data; if (d && d.schema === 'etat') majBoutonPause(e.source, !!d.pause); });
+
+  /* ---------- navigation : un clic = une apparition, puis la diapositive suivante ---------- */
+  let cur = 0;
+  const frags = i => [...slides[i].querySelectorAll('.f')];
+  const compteur = document.getElementById('compteur'), progres = document.getElementById('progres');
+  function afficher(i, tout) {
+    stage.classList.add('instant');
+    slides.forEach((s, j) => s.classList.toggle('active', j === i));
+    frags(i).forEach(f => f.classList.toggle('vu', !!tout));
+    void stage.offsetWidth; stage.classList.remove('instant');
+    cur = i;
+    compteur.textContent = (i + 1) + ' / ' + N;
+    progres.style.width = ((i + 1) / N * 100) + '%';
+    document.getElementById('bSuiv').textContent = i === N - 1 ? 'Fin' : 'Suivant →';
+    const nom = slides[i].dataset.p ? (slides[i].dataset.partie || 'couverture') : '';
+    history.replaceState(null, '', '#' + (i + 1));
+    document.title = 'Présentation des projets' + (slides[i].dataset.p ? ' · ' + slides[i].dataset.p : '');
+    majBoutonPause(null, false);
+    chargerCadres(i);
+  }
+  function aller(i, tout) { if (i >= 0 && i < N) afficher(i, tout); }
+  function suivant() {
+    const f = frags(cur).find(x => !x.classList.contains('vu'));
+    if (f) { f.classList.add('vu'); return; }
+    if (cur < N - 1) afficher(cur + 1, false);
+  }
+  function precedent() {
+    const vus = frags(cur).filter(x => x.classList.contains('vu'));
+    if (vus.length) { vus[vus.length - 1].classList.remove('vu'); return; }
+    if (cur > 0) afficher(cur - 1, true);
+  }
+  function pleinEcran() {
+    if (document.fullscreenElement) document.exitFullscreen();
+    else document.documentElement.requestFullscreen && document.documentElement.requestFullscreen().catch(() => {});
+  }
+  document.getElementById('bSuiv').addEventListener('click', suivant);
+  document.getElementById('bPrec').addEventListener('click', precedent);
+  document.getElementById('bMaison').addEventListener('click', () => aller(0));
+  document.getElementById('bPlein').addEventListener('click', pleinEcran);
+  stage.querySelectorAll('[data-aller]').forEach(b => b.addEventListener('click', () => aller(+b.dataset.aller)));
+
+  addEventListener('keydown', e => {
+    if (lecture.matches || e.ctrlKey || e.metaKey || e.altKey) return;
+    const t = e.target, champ = t && t.closest && t.closest('button, a, [tabindex]');
+    if (['ArrowRight', 'PageDown'].includes(e.key) || (e.key === ' ' && !champ) || (e.key === 'Enter' && !champ)) { e.preventDefault(); suivant(); }
+    else if (['ArrowLeft', 'PageUp', 'Backspace'].includes(e.key)) { e.preventDefault(); precedent(); }
+    else if (e.key === 'Home') aller(0);
+    else if (e.key === 'End') aller(N - 1, true);
+    else if (e.key === 'f' || e.key === 'F') pleinEcran();
+    else if (e.key === 'p' || e.key === 'P') basculerPause(slides[cur]);
+    else if (e.key === 'q' || e.key === 'Q' || e.key === 'Escape') { if (!document.fullscreenElement || e.key !== 'Escape') aller(0); }
+    else if (/^[1-9]$/.test(e.key)) { const m = MAISONS.filter(x => x.url)[+e.key - 1]; if (m) aller(chapitre(m.who)); }
+  });
+  // un clic sur la scène fait avancer, sauf sur un lien, un bouton, une maison ou un cadre intégré
+  stage.addEventListener('click', e => {
+    if (lecture.matches || e.target.closest('a, button, .embed, .maison, #barre, input, select')) return;
+    suivant();
+  });
+
+  /* ---------- démarrage : #12 = diapositive 12, #lorenzo = début du projet de Lorenzo ---------- */
+  ajuster();
+  const h = decodeURIComponent(location.hash.slice(1)).toLowerCase();
+  const parNom = slides.findIndex(s => s.dataset.chapitre === h);
+  aller(parNom >= 0 ? parNom : Math.min(Math.max((parseInt(h, 10) || 1) - 1, 0), N - 1), false);
+
+  addEventListener('hashchange', () => {
+    const k = decodeURIComponent(location.hash.slice(1)).toLowerCase(), c = slides.findIndex(s => s.dataset.chapitre === k);
+    if (c >= 0) aller(c); else if (parseInt(k, 10)) aller(parseInt(k, 10) - 1);
+  });
+  window.__goto = i => aller(i, true);
+  window.__state = () => ({ cur, N, frags: frags(cur).length, vus: frags(cur).filter(x => x.classList.contains('vu')).length });
+}
+</script>
+</body>
+</html>

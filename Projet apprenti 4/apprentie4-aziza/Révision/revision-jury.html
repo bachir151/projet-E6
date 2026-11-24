@@ -1,0 +1,1074 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Réviser le jury</title>
+<meta name="description" content="Projet E6 d'Aziza : les technologies à comprendre pour anticiper les questions du jury, avec schémas animés, fiches et mode quiz.">
+<link rel="stylesheet" href="../../../theme.css">
+<style>
+/* Page de révision : uniquement des variables de theme.css (aucune couleur, police ou ombre en dur). */
+html { scroll-padding-top: 70px; }
+.entete { padding-block: clamp(28px, 6vw, 56px) 20px; }
+.entete .bandeau { margin-top: 18px; max-width: 78ch; }
+.chapeau { max-width: 68ch; font-size: 1.12rem; color: var(--encre-2); }
+
+nav.sommaire { position: sticky; top: 0; z-index: 10; background: var(--papier); border-bottom: 1.5px solid var(--contour-2); }
+nav.sommaire .conteneur { display: flex; gap: 4px; align-items: center; overflow-x: auto; scrollbar-width: none; padding-block: 8px; }
+nav.sommaire a { flex: none; font-weight: 800; text-decoration: none; padding: 6px 12px; border-radius: 999px; color: var(--encre-2); white-space: nowrap; }
+nav.sommaire a:hover { background: var(--jaune-pale); color: var(--encre); }
+.progression { margin-left: auto; flex: none; display: flex; align-items: center; gap: 8px; font-weight: 800; font-size: .9rem; white-space: nowrap; padding-left: 12px; }
+.barre { width: 80px; height: 10px; border: 1.5px solid var(--encre); border-radius: 999px; overflow: hidden; background: var(--blanc); }
+.barre i { display: block; height: 100%; width: 0; background: var(--vert); transition: width .3s ease; }
+
+section.bloc { padding-block: clamp(30px, 5vw, 52px); }
+.intro-bloc { max-width: 70ch; color: var(--encre-2); }
+
+/* ---- Les 5 essentiels ---- */
+.onglets { display: flex; flex-wrap: wrap; gap: 10px; margin: 18px 0 20px; }
+.onglets .bouton { text-transform: none; letter-spacing: 0; }
+.onglets .bouton b { font-weight: 1000; margin-right: 2px; }
+.scene[hidden] { display: none; }
+.scene .carte { padding: clamp(14px, 3vw, 24px); }
+.scene h3 { margin-bottom: 4px; }
+.scene .sous { color: var(--encre-2); margin-bottom: 14px; }
+.scene svg { display: block; width: 100%; height: auto; }
+.figure { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.glisser { display: none; font-size: .85rem; font-weight: 700; color: var(--encre-2); margin: 4px 0 0; }
+@media (max-width: 620px) {
+  .figure svg { min-width: 580px; }
+  .glisser { display: block; }
+}
+.pas { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin: 14px 0 12px; }
+.points { display: flex; gap: 6px; }
+.points span { width: 11px; height: 11px; border-radius: 50%; border: 1.5px solid var(--encre); background: var(--blanc); }
+.points span.on { background: var(--encre); }
+.compteur { font-weight: 800; color: var(--encre-2); font-size: .9rem; }
+.scene .bandeau { min-height: 4.6em; }
+.scene .terminal { margin-top: 12px; }
+.presets { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
+.presets .bouton { text-transform: none; letter-spacing: 0; }
+
+/* éléments SVG */
+[data-s] { transition: opacity .35s ease; }
+.cache { opacity: 0; }
+.t   { font: 800 16px var(--police); fill: var(--encre); }
+.tg  { font: 900 18px var(--police); fill: var(--encre); }
+.tp  { font: 700 14px var(--police); fill: var(--encre-2); }
+.tt  { font: 900 13px var(--police); letter-spacing: .12em; fill: var(--encre-3); }
+.mono { font-family: var(--police-mono); font-weight: 600; }
+.ok  { fill: var(--vert); }
+.ko  { fill: var(--rouge-texte); }
+.clair { fill: var(--papier); }
+.boite   { fill: var(--blanc);    stroke: var(--encre); stroke-width: 1.5; }
+.boite-p { fill: var(--papier-2); stroke: var(--encre); stroke-width: 1.5; }
+.boite-j { fill: var(--jaune);    stroke: var(--encre); stroke-width: 1.5; }
+.boite-v { fill: var(--vert-pale); stroke: var(--vert); stroke-width: 2; }
+.boite-r { fill: var(--rouge-pale); stroke: var(--rouge); stroke-width: 2; }
+.boite-noire { fill: var(--encre); }
+.cadre-ok { fill: none; stroke: var(--vert); stroke-width: 4; }
+.cadre-ko { fill: none; stroke: var(--rouge); stroke-width: 4; }
+.leger { stroke: var(--contour-2); stroke-width: 1.5; fill: none; }
+.tirets { stroke-dasharray: 6 6; }
+.coupe { stroke: var(--rouge); stroke-width: 5; stroke-linecap: round; }
+.remplissage { fill: var(--jaune); transition: width .9s ease; }
+.remplissage.fini { fill: var(--vert); }
+.paquet { fill: var(--jaune); stroke: var(--encre); stroke-width: 1.2; }
+.paquet.perdu { fill: var(--rouge); }
+.ack { fill: var(--bleu); stroke: var(--encre); stroke-width: 1; }
+.voie-ok { stroke: var(--vert); stroke-width: 5; opacity: .45; fill: none; }
+.voie-ok.cache { opacity: 0; }
+
+/* ---- Physique ---- */
+.reglages { display: grid; gap: 14px 22px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); margin: 6px 0 18px; }
+.reglages label { display: block; font-weight: 800; }
+.reglages output { float: right; font-weight: 900; }
+.reglages input[type=range] { width: 100%; accent-color: var(--encre); margin-top: 6px; }
+.resultats { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr)); margin: 16px 0; }
+.chiffre { background: var(--papier-2); border-radius: var(--r-petit); padding: 12px 14px; }
+.chiffre b { display: block; font-size: 1.6rem; font-weight: 1000; line-height: 1.1; }
+.chiffre span { font-size: .88rem; font-weight: 700; color: var(--encre-2); }
+.courbe-froide { fill: none; stroke: var(--rouge); stroke-width: 4; stroke-linecap: round; }
+.courbe-ok { fill: none; stroke: var(--vert); stroke-width: 4; stroke-linecap: round; }
+.ligne-rosee { stroke: var(--bleu); stroke-width: 3; stroke-dasharray: 8 6; }
+.ligne-air { stroke: var(--encre-3); stroke-width: 1.5; stroke-dasharray: 3 5; }
+.axe { stroke: var(--encre); stroke-width: 1.5; }
+.repere { stroke: var(--encre); stroke-width: 2; }
+.table-attente { margin-top: 12px; }
+.table-attente td, .table-attente th { padding: 8px 10px; }
+.formule { font-family: var(--police-mono); font-size: .95rem; background: var(--papier-2); border-radius: var(--r-petit); padding: 10px 14px; overflow-x: auto; }
+
+/* ---- Fiches ---- */
+.outils { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 16px 0 10px; }
+.outils .bouton { text-transform: none; letter-spacing: 0; }
+.outils .sep { width: 1.5px; align-self: stretch; background: var(--contour-2); margin-inline: 4px; }
+.resume-filtre { color: var(--encre-2); font-weight: 700; margin: 6px 0 18px; }
+.fiches { display: grid; gap: 18px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr)); align-items: start; }
+.fiche { display: flex; flex-direction: column; gap: 10px; scroll-margin-top: 80px; }
+.fiche[hidden] { display: none; }
+.fiche .haut { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.fiche .etoiles { font-weight: 900; letter-spacing: .08em; }
+.fiche h3 { margin: 0; }
+.fiche p { margin: 0; }
+.fiche .question { border-top: 1.5px solid var(--contour-2); padding-top: 10px; }
+.fiche .question .label { margin-bottom: 4px; }
+.fiche .reponse { margin: 0; }
+.fiche .reponse p + p { margin-top: 6px; }
+.fiche .verif { font-size: .94rem; }
+.fiche .etat { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 2px; }
+.fiche .voir { display: none; align-self: flex-start; }
+body.quiz .fiche .reponse { display: none; }
+body.quiz .fiche .voir { display: inline-flex; }
+body.quiz .fiche.vue .reponse { display: block; }
+body.quiz .fiche.vue .voir { display: none; }
+.fiche.sue { border-color: var(--vert); }
+.fiche.cible { outline: 4px solid var(--jaune-fonce); outline-offset: 4px; }
+.fiche .bouton[data-etat="revoir"][aria-pressed="true"] { background: var(--rouge-pale); }
+.fiche .bouton[data-etat="sais"][aria-pressed="true"] { background: var(--vert-pale); }
+.vide { display: none; }
+.vide.visible { display: block; }
+
+/* ---- À vérifier, phrases ---- */
+.liste-verif { display: grid; gap: 12px; padding: 0; list-style: none; }
+.liste-verif li { margin: 0; }
+.liste-verif a { font-weight: 800; }
+.phrases { counter-reset: p; display: grid; gap: 14px; padding: 0; list-style: none; }
+.phrases li { counter-increment: p; display: grid; grid-template-columns: auto 1fr; gap: 14px; align-items: start; font-size: 1.12rem; font-weight: 700; }
+.phrases li::before { content: counter(p); display: grid; place-items: center; width: 40px; height: 40px; border: 2.5px solid var(--encre); border-radius: 50%; background: var(--blanc); font-weight: 1000; }
+footer { padding-block: 26px 40px; color: var(--encre-2); font-size: .92rem; }
+
+@media (max-width: 560px) {
+  .progression .barre { display: none; }
+  .outils .sep { display: none; }
+}
+@media print {
+  .onglets, .pas, .presets, .outils, .fiche .etat, .fiche .voir { display: none !important; }
+  .scene[hidden] { display: block; }
+  body.quiz .fiche .reponse { display: block; }
+}
+</style>
+</head>
+<body>
+
+<header class="conteneur entete">
+  <span class="label">Projet E6 · Aziza · préparation de l'oral</span>
+  <h1>Réviser avant le jury</h1>
+  <p class="chapeau">Les technologies du projet « Des PC de maintenance à jour, des documents archivés, un parc tracé », expliquées une par une. Pour chacune : ce qu'il faut savoir dire, la question piège probable et une réponse modèle.</p>
+  <div class="bandeau">D'abord les <b>5 essentiels</b>, en schémas animés. Ensuite <b>35 fiches</b> à filtrer, avec un <b>mode quiz</b> qui cache les réponses. Votre progression reste dans ce navigateur.</div>
+</header>
+
+<nav class="sommaire" aria-label="Sommaire">
+  <div class="conteneur">
+    <a href="#essentiels">Les 5 essentiels</a>
+    <a href="#fiches">Les fiches</a>
+    <a href="#verifier">À vérifier</a>
+    <a href="#phrases">5 phrases</a>
+    <div class="progression" aria-live="polite"><span class="barre" aria-hidden="true"><i id="barre"></i></span><span id="progression-texte">0 / 35 sues</span></div>
+  </div>
+</nav>
+
+<main>
+<!-- ================================================================ -->
+<section class="bloc" id="essentiels">
+  <div class="conteneur">
+    <span class="label">Partie 1</span>
+    <h2>Les 5 essentiels</h2>
+    <p class="intro-bloc">Ce sont les briques qui portent les principes du projet. Le jury y posera ses questions de relance les plus profondes. Avancez étape par étape avec les boutons ou les flèches du clavier.</p>
+
+    <div class="onglets" role="tablist" aria-label="Les 5 essentiels">
+      <button class="bouton petit" role="tab" id="onglet-1" aria-controls="scene-1" aria-selected="true"><b>1</b> Signature et catalogue</button>
+      <button class="bouton petit" role="tab" id="onglet-2" aria-controls="scene-2" aria-selected="false" tabindex="-1"><b>2</b> BITS et reprise</button>
+      <button class="bouton petit" role="tab" id="onglet-3" aria-controls="scene-3" aria-selected="false" tabindex="-1"><b>3</b> TLS dans Wireshark</button>
+      <button class="bouton petit" role="tab" id="onglet-4" aria-controls="scene-4" aria-selected="false" tabindex="-1"><b>4</b> La 4G simulée (netem)</button>
+      <button class="bouton petit" role="tab" id="onglet-5" aria-controls="scene-5" aria-selected="false" tabindex="-1"><b>5</b> Buée et point de rosée</button>
+    </div>
+
+    <!-- ---------- Scène 1 : signature et catalogue ---------- -->
+    <div class="scene" id="scene-1" role="tabpanel" aria-labelledby="onglet-1" data-etapes="9">
+      <div class="carte">
+        <h3>Comment un PC sait que son kit est le bon</h3>
+        <p class="sous">New-FileCatalog, Set-AuthenticodeSignature, Test-FileCatalog : du poste du référent jusqu'au PC de terrain.</p>
+        <div class="figure"><svg viewBox="0 0 640 330" role="img" aria-label="Schéma : le référent calcule les empreintes, signe le catalogue, le kit traverse la 4G, l'agent vérifie.">
+          <text class="tt" x="115" y="26" text-anchor="middle">RÉFÉRENT</text>
+          <text class="tt" x="320" y="26" text-anchor="middle">4G · INTERNET</text>
+          <text class="tt" x="525" y="26" text-anchor="middle">PC DE TERRAIN</text>
+          <line class="leger" x1="232" y1="40" x2="232" y2="320"/>
+          <line class="leger" x1="408" y1="40" x2="408" y2="320"/>
+
+          <!-- fichiers du kit -->
+          <g>
+            <rect class="boite" x="14" y="48" width="134" height="30" rx="6"/><text class="t" x="24" y="69">doc.pdf</text>
+            <rect class="boite" x="14" y="86" width="134" height="30" rx="6"/><text class="t" x="24" y="107">param.xml</text>
+            <rect class="boite-j" x="14" y="124" width="134" height="30" rx="6"/><text class="t" x="24" y="145">catalogue.json</text>
+          </g>
+          <g data-s="1-">
+            <text class="tp mono" x="156" y="69">9f2c…</text>
+            <text class="tp mono" x="156" y="107">a71e…</text>
+            <text class="tp mono" x="156" y="145">3b08…</text>
+            <text class="tt" x="190" y="44" text-anchor="middle">SHA-256</text>
+          </g>
+          <g data-s="2-">
+            <rect class="boite-p" x="14" y="176" width="190" height="64" rx="8"/>
+            <text class="t" x="26" y="200">catalogue.cat</text>
+            <text class="tp" x="26" y="224">3 empreintes · version 13</text>
+          </g>
+          <g data-s="3-">
+            <circle class="boite-j" cx="204" cy="178" r="24"/>
+            <text class="t" x="204" y="183" text-anchor="middle" style="font-size:13px">signé</text>
+            <circle class="trait" cx="30" cy="268" r="9"/><line class="trait" x1="39" y1="268" x2="66" y2="268"/><line class="trait" x1="58" y1="268" x2="58" y2="276"/><line class="trait" x1="50" y1="268" x2="50" y2="275"/>
+            <text class="tp" x="76" y="266">clé privée</text>
+            <text class="tp" x="76" y="284">du référent</text>
+          </g>
+
+          <!-- réseau -->
+          <path class="trait" d="M268 150 a22 22 0 0 1 8 -42 a30 30 0 0 1 54 -14 a24 24 0 0 1 40 18 a20 20 0 0 1 -4 38 z"/>
+          <text class="tp ko" x="320" y="176" text-anchor="middle">pas de confiance</text>
+          <g data-s="4">
+            <rect class="boite-p" x="290" y="200" width="60" height="44" rx="6"/>
+            <rect class="boite" x="298" y="192" width="60" height="44" rx="6"/>
+            <text class="tp" x="328" y="219" text-anchor="middle">kit</text>
+            <text class="tp" x="320" y="268" text-anchor="middle">le kit voyage…</text>
+          </g>
+          <g data-s="8">
+            <text class="t ko" x="320" y="268" text-anchor="middle">1 octet modifié</text>
+            <text class="t ko" x="320" y="288" text-anchor="middle">en route</text>
+          </g>
+
+          <!-- PC -->
+          <rect class="boite" x="466" y="48" width="118" height="78" rx="6"/>
+          <polygon class="boite" points="452,130 598,130 610,144 440,144"/>
+          <text class="t" x="525" y="92" text-anchor="middle">agent</text>
+          <g data-s="5-">
+            <text class="t ok" x="418" y="176">✓ signature intacte</text>
+            <text class="t ok" x="418" y="200">✓ signataire = référent</text>
+          </g>
+          <g data-s="6-"><text class="t ok" x="418" y="224">✓ version 13 &gt; 12</text></g>
+          <g data-s="7">
+            <text class="t ok" x="418" y="248">✓ empreintes identiques</text>
+            <rect class="boite-v" x="418" y="264" width="200" height="38" rx="8"/>
+            <text class="tg" x="518" y="289" text-anchor="middle" style="fill:var(--vert)">kit accepté</text>
+          </g>
+          <g data-s="8">
+            <text class="t ko" x="418" y="248">✗ param.xml : empreinte fausse</text>
+            <rect class="boite-r" x="418" y="264" width="200" height="38" rx="8"/>
+            <text class="tg" x="518" y="289" text-anchor="middle" style="fill:var(--rouge-texte)">kit refusé</text>
+          </g>
+        </svg></div><p class="glisser" aria-hidden="true">← faites glisser le schéma →</p>
+        <div class="pas">
+          <button class="bouton petit" data-act="prec" aria-label="Étape précédente">◀</button>
+          <button class="bouton petit principal" data-act="suiv" aria-label="Étape suivante">Étape suivante ▶</button>
+          <span class="points" aria-hidden="true"></span><span class="compteur"></span>
+        </div>
+        <div class="bandeau" aria-live="polite"></div>
+      </div>
+    </div>
+
+    <!-- ---------- Scène 2 : BITS ---------- -->
+    <div class="scene" id="scene-2" role="tabpanel" aria-labelledby="onglet-2" data-etapes="6" hidden>
+      <div class="carte">
+        <h3>Télécharger malgré les coupures</h3>
+        <p class="sous">BITS (Background Intelligent Transfer Service), les requêtes HTTP <code>Range</code> et la bascule des dossiers.</p>
+        <div class="figure"><svg viewBox="0 0 640 320" role="img" aria-label="Schéma : téléchargement BITS, coupure, reprise avec Range et code 206, puis bascule.">
+          <!-- serveur -->
+          <rect class="boite" x="30" y="40" width="90" height="100" rx="6"/>
+          <line class="trait" x1="42" y1="64" x2="108" y2="64"/><line class="trait" x1="42" y1="88" x2="108" y2="88"/><line class="trait" x1="42" y1="112" x2="108" y2="112"/>
+          <circle class="ok" cx="100" cy="76" r="4"/><circle class="ok" cx="100" cy="100" r="4"/>
+          <text class="t" x="75" y="164" text-anchor="middle">serveur nginx</text>
+          <!-- PC -->
+          <rect class="boite" x="526" y="48" width="96" height="66" rx="6"/>
+          <polygon class="boite" points="514,118 634,118 640,130 508,130"/>
+          <text class="t" x="574" y="164" text-anchor="middle">PC · BITS</text>
+          <!-- lien -->
+          <line class="trait" x1="126" y1="90" x2="506" y2="90"/>
+          <g data-s="2"><line class="coupe" x1="304" y1="74" x2="336" y2="106"/><line class="coupe" x1="336" y1="74" x2="304" y2="106"/>
+            <text class="t ko" x="320" y="130" text-anchor="middle">coupure</text></g>
+          <g data-s="0-1"><text class="tp mono" x="316" y="78" text-anchor="middle">GET → 200 OK · 40 Mo</text></g>
+          <g data-s="3">
+            <text class="tp mono" x="316" y="78" text-anchor="middle">GET  Range: bytes=18874368-</text>
+            <text class="tp mono" x="316" y="112" text-anchor="middle">← 206 Partial Content</text>
+          </g>
+          <!-- barre de progression -->
+          <text class="tp" x="40" y="194">param-equipements.zip · 40 Mo</text>
+          <text class="t" x="600" y="194" text-anchor="end" id="bits-pct">0 %</text>
+          <rect class="boite" x="40" y="204" width="560" height="34" rx="8"/>
+          <rect class="remplissage" id="bits-rempli" x="40" y="204" width="0" height="34" rx="8"/>
+          <g data-s="2-"><line class="repere tirets" x1="292" y1="198" x2="292" y2="246"/>
+            <text class="tp" x="292" y="264" text-anchor="middle">18 Mo déjà reçus : gardés</text></g>
+          <g data-s="4"><text class="t" x="320" y="300" text-anchor="middle">100 % → dossier « preparation » → Test-FileCatalog</text></g>
+          <g data-s="5"><text class="t ok" x="320" y="300" text-anchor="middle">actif → precedent · preparation → actif</text></g>
+        </svg></div><p class="glisser" aria-hidden="true">← faites glisser le schéma →</p>
+        <div class="pas">
+          <button class="bouton petit" data-act="prec" aria-label="Étape précédente">◀</button>
+          <button class="bouton petit principal" data-act="suiv" aria-label="Étape suivante">Étape suivante ▶</button>
+          <span class="points" aria-hidden="true"></span><span class="compteur"></span>
+        </div>
+        <div class="bandeau" aria-live="polite"></div>
+      </div>
+    </div>
+
+    <!-- ---------- Scène 3 : TLS / Wireshark ---------- -->
+    <div class="scene" id="scene-3" role="tabpanel" aria-labelledby="onglet-3" data-etapes="5" hidden>
+      <div class="carte">
+        <h3>Ce que Wireshark voit d'un échange HTTPS</h3>
+        <p class="sous">Utile pour C10 : savoir ce qu'une capture peut prouver, et ce qu'elle ne peut pas prouver.</p>
+        <div class="figure"><svg viewBox="0 0 640 330" role="img" aria-label="Schéma : un paquet en couches ; en clair les adresses et ports ; chiffrés le chemin, les en-têtes et le contenu.">
+          <rect class="boite-p" x="10" y="30" width="96" height="66" rx="6"/><text class="t" x="58" y="58" text-anchor="middle">Ethernet</text><text class="tp" x="58" y="80" text-anchor="middle">MAC</text>
+          <rect class="boite-p" x="106" y="30" width="150" height="66" rx="6"/><text class="t" x="181" y="58" text-anchor="middle">IP</text><text class="tp mono" x="181" y="80" text-anchor="middle">10.0.0.23 → .5</text>
+          <rect class="boite-p" x="256" y="30" width="110" height="66" rx="6"/><text class="t" x="311" y="58" text-anchor="middle">TCP</text><text class="tp mono" x="311" y="80" text-anchor="middle">port 443</text>
+          <rect class="boite-noire" x="366" y="30" width="264" height="66" rx="6"/><text class="t clair" x="498" y="58" text-anchor="middle">TLS</text><text class="tp clair" x="498" y="80" text-anchor="middle" style="fill:var(--papier)">données chiffrées</text>
+          <g data-s="1-"><rect class="cadre-ok" x="6" y="26" width="364" height="74" rx="9"/></g>
+          <g data-s="3-"><rect class="cadre-ko" x="362" y="26" width="272" height="74" rx="9"/></g>
+
+          <g data-s="1-">
+            <text class="tt" x="20" y="134" style="fill:var(--vert)">ON VOIT</text>
+            <text class="t" x="20" y="160">• adresses IP et ports</text>
+            <text class="t" x="20" y="184">• tailles et heures des paquets</text>
+            <text class="t" x="20" y="208">• retransmissions TCP</text>
+          </g>
+          <g data-s="2-">
+            <text class="t" x="20" y="232">• nom du serveur (SNI)</text>
+            <text class="t" x="20" y="256">• certificat : en TLS 1.2 seulement</text>
+          </g>
+          <g data-s="3-">
+            <text class="tt" x="340" y="134" style="fill:var(--rouge-texte)">ON NE VOIT PAS</text>
+            <text class="t" x="340" y="160">• le chemin /kit/fichiers/…</text>
+            <text class="t" x="340" y="184">• les en-têtes : Range, jeton</text>
+            <text class="t" x="340" y="208">• le code réponse (206)</text>
+            <text class="t" x="340" y="232">• le contenu des fichiers</text>
+          </g>
+          <g data-s="4">
+            <rect class="boite-noire" x="10" y="274" width="620" height="44" rx="8"/>
+            <text class="tp mono clair" x="22" y="292" style="fill:var(--jaune);font-size:12px">journal nginx (format avec $http_range) :</text>
+            <text class="tp mono clair" x="22" y="310" style="fill:var(--papier);font-size:12.5px">"GET /kit/fichiers/3b08… HTTP/1.1" 206 23068672 "bytes=18874368-"</text>
+          </g>
+        </svg></div><p class="glisser" aria-hidden="true">← faites glisser le schéma →</p>
+        <div class="pas">
+          <button class="bouton petit" data-act="prec" aria-label="Étape précédente">◀</button>
+          <button class="bouton petit principal" data-act="suiv" aria-label="Étape suivante">Étape suivante ▶</button>
+          <span class="points" aria-hidden="true"></span><span class="compteur"></span>
+        </div>
+        <div class="bandeau" aria-live="polite"></div>
+      </div>
+    </div>
+
+    <!-- ---------- Scène 4 : netem ---------- -->
+    <div class="scene" id="scene-4" role="tabpanel" aria-labelledby="onglet-4" hidden>
+      <div class="carte">
+        <h3>Abîmer le réseau exprès : tc netem</h3>
+        <p class="sous">Une seule machine (le serveur), aucun routeur ni switch à configurer. Choisissez un réglage et regardez les paquets.</p>
+        <div class="presets" role="group" aria-label="Réglages netem">
+          <button class="bouton petit" data-preset="normal" aria-pressed="true">Normal</button>
+          <button class="bouton petit" data-preset="retard" aria-pressed="false">+ retard</button>
+          <button class="bouton petit" data-preset="debit" aria-pressed="false">+ débit limité</button>
+          <button class="bouton petit" data-preset="pertes" aria-pressed="false">+ pertes</button>
+          <button class="bouton petit" data-preset="coupure" aria-pressed="false">Coupure</button>
+          <button class="bouton petit" data-preset="limite" aria-pressed="false">La limite</button>
+        </div>
+        <div class="figure"><svg viewBox="0 70 640 180" role="img" aria-label="Animation : des paquets sortent du serveur, passent par netem, vont vers le PC ; les accusés de réception reviennent sans passer par netem.">
+          <rect class="boite" x="20" y="84" width="90" height="110" rx="6"/>
+          <line class="trait" x1="32" y1="108" x2="98" y2="108"/><line class="trait" x1="32" y1="132" x2="98" y2="132"/><line class="trait" x1="32" y1="156" x2="98" y2="156"/>
+          <text class="t" x="65" y="218" text-anchor="middle">serveur</text>
+          <rect class="boite-j" x="118" y="98" width="70" height="40" rx="6"/>
+          <text class="t" x="153" y="90" text-anchor="middle" style="font-size:14px">netem</text>
+          <rect class="boite" x="530" y="92" width="88" height="62" rx="6"/>
+          <polygon class="boite" points="520,158 628,158 636,170 512,170"/>
+          <text class="t" x="574" y="194" text-anchor="middle">PC · agent</text>
+          <line class="leger tirets" x1="190" y1="118" x2="520" y2="118"/>
+          <line class="leger tirets" x1="520" y1="202" x2="112" y2="202"/>
+          <line class="voie-ok cache" id="voie-retour" x1="520" y1="202" x2="112" y2="202"/>
+          <text class="tp" x="365" y="96" text-anchor="middle">serveur → PC : passe par netem</text>
+          <text class="tp" x="316" y="232" text-anchor="middle" id="label-retour">PC → serveur : netem ne touche pas</text>
+          <g id="paquets"></g>
+          <text class="tp ko" x="355" y="164" text-anchor="middle" id="label-perdu" opacity="0">paquets perdus</text>
+        </svg></div><p class="glisser" aria-hidden="true">← faites glisser le schéma →</p>
+        <div class="bandeau" aria-live="polite" id="netem-legende"></div>
+        <div class="terminal" id="netem-cmd"></div>
+      </div>
+    </div>
+
+    <!-- ---------- Scène 5 : physique ---------- -->
+    <div class="scene" id="scene-5" role="tabpanel" aria-labelledby="onglet-5" hidden>
+      <div class="carte">
+        <h3>Combien de minutes attendre avant d'allumer un PC froid ?</h3>
+        <p class="sous">Loi de refroidissement de Newton + point de rosée (Magnus). Bougez les curseurs : le graphique et le temps d'attente se recalculent.</p>
+        <div class="reglages">
+          <div><label for="p-t0">PC sorti du froid T0 <output id="o-t0"></output></label><input type="range" id="p-t0" min="-15" max="20" step="1" value="0"></div>
+          <div><label for="p-ta">Air du local Ta <output id="o-ta"></output></label><input type="range" id="p-ta" min="15" max="28" step="1" value="20"></div>
+          <div><label for="p-hr">Humidité du local HR <output id="o-hr"></output></label><input type="range" id="p-hr" min="30" max="90" step="1" value="50"></div>
+          <div><label for="p-tau">Constante de temps τ <output id="o-tau"></output></label><input type="range" id="p-tau" min="5" max="60" step="1" value="20"></div>
+        </div>
+        <div class="figure"><svg viewBox="0 0 640 300" role="img" aria-label="Graphique : température du PC en fonction du temps, ligne du point de rosée, temps d'attente." id="graphe"></svg></div><p class="glisser" aria-hidden="true">← faites glisser le graphique →</p>
+        <div class="resultats">
+          <div class="chiffre"><span>Point de rosée Td</span><b id="r-td"></b></div>
+          <div class="chiffre"><span>Attente calculée</span><b id="r-t"></b></div>
+          <div class="chiffre"><span>Encadrement (incertitudes)</span><b id="r-enc"></b></div>
+        </div>
+        <div class="bandeau" aria-live="polite" id="phys-legende"></div>
+        <p class="formule" style="margin-top:14px">T(t) = Ta + (T0 − Ta)·e<sup>−t/τ</sup><br>γ = ln(HR/100) + a·Ta/(b + Ta) · Td = b·γ/(a − γ) · a = 17,62 · b = 243,12 °C<br>t<sub>att</sub> = τ·ln[(T0 − Ta)/(Td − Ta)]</p>
+        <div class="encadre info">
+          <span class="label">Hypothèses de l'encadrement</span>
+          <p>Ta ± 0,2 °C et HR ± 2 % (SHT40), T0 ± 0,5 °C (DS18B20), τ ± 10 %. On calcule l'attente pour toutes les combinaisons et on garde le minimum et le maximum. Précisions des capteurs <b>à vérifier dans les fiches techniques</b>. τ = 20 min est une valeur d'exemple : la vraie valeur sortira des mesures (bloc d'aluminium, puis vrai portable).</p>
+        </div>
+        <span class="label" style="margin-top:16px">Ce qui ira sur l'étiquette du PC (avec les réglages actuels)</span>
+        <table class="table-attente" id="table-attente"><thead><tr><th>Température extérieure</th><th>Attente calculée</th><th>Attente conseillée</th></tr></thead><tbody></tbody></table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================================================================ -->
+<section class="bloc zone-2" id="fiches">
+  <div class="conteneur">
+    <span class="label">Partie 2</span>
+    <h2>Les fiches</h2>
+    <p class="intro-bloc">Une fiche par technologie ou par notion. ★★★ : le jury creusera sûrement · ★★ : probable · ★ : savoir l'expliquer en deux phrases.</p>
+
+    <div class="outils" role="group" aria-label="Filtrer par brique" id="filtres-brique"></div>
+    <div class="outils" role="group" aria-label="Options">
+      <button class="bouton petit" id="opt-prio" aria-pressed="false">★★★ seulement</button>
+      <button class="bouton petit" id="opt-revoir" aria-pressed="false">À revoir seulement</button>
+      <span class="sep" aria-hidden="true"></span>
+      <button class="bouton petit" id="opt-quiz" aria-pressed="false">Mode quiz</button>
+      <button class="bouton petit jaune" id="opt-hasard">Question au hasard</button>
+      <button class="bouton petit" id="opt-raz">Effacer ma progression</button>
+    </div>
+    <p class="resume-filtre" id="resume-filtre" aria-live="polite"></p>
+    <div class="fiches" id="liste-fiches"></div>
+    <p class="note vide" id="vide">Aucune fiche ne correspond à ces filtres.</p>
+  </div>
+</section>
+
+<!-- ================================================================ -->
+<section class="bloc" id="verifier">
+  <div class="conteneur">
+    <span class="label">Partie 3</span>
+    <h2>À vérifier avant le jury</h2>
+    <p class="intro-bloc">Ce que cette page affirme sans l'avoir encore vérifié sur la maquette ou dans une source. À tester ou à confirmer avant de le dire à l'oral.</p>
+    <ul class="liste-verif" id="liste-verif"></ul>
+  </div>
+</section>
+
+<section class="section-finale" id="phrases">
+  <div class="conteneur">
+    <span class="label">Le fil de la soutenance</span>
+    <h2>5 phrases à savoir dire</h2>
+    <ol class="phrases">
+      <li>Avoir un fichier ne prouve pas qu'il est le bon : on compare son empreinte SHA-256 au catalogue.</li>
+      <li>Le réseau n'est pas de confiance : seul le catalogue signé par le référent fait foi.</li>
+      <li>Un PC éteint ne peut rien affirmer : la borne lit son dernier rapport. Serveur muet = « vérification impossible », jamais « à jour ».</li>
+      <li>Sur le terrain, le réseau manque : on ne télécharge que ce qui a changé, et BITS reprend après une coupure.</li>
+      <li>Chaque version a une valeur : rien n'est écrasé, l'historique est l'archive.</li>
+    </ol>
+  </div>
+</section>
+</main>
+
+<footer class="conteneur">
+  Sources : <code>projet.md</code> (spécification d'Aziza) et la liste de 34 questions du jury
+  (<a href="../livrables/questions-jury/Questions_jury_Aziza.pdf">Questions_jury_Aziza.pdf</a>).
+  Les chiffres de la maquette (débit 4G, volumes, τ) seront remplacés par les mesures.
+</footer>
+
+<script>
+(function () {
+  "use strict";
+
+  /* ============ Moteur des scènes à étapes ============ */
+  var legendes = {
+    "scene-1": [
+      "Le kit est un <b>dossier</b> : documents, paramètres, et <b>catalogue.json</b> (numéro de version, date de validité).",
+      "Pour chaque fichier, PowerShell calcule une <b>empreinte SHA-256</b>. Un seul octet change → l'empreinte change complètement.",
+      "<b>New-FileCatalog</b> range toutes les empreintes dans un seul fichier : <b>catalogue.cat</b>. catalogue.json est dedans : la version est donc protégée aussi.",
+      "<b>Set-AuthenticodeSignature</b> : le référent signe le catalogue avec sa <b>clé privée</b>. Signer ne cache rien : cela prouve qui publie.",
+      "Le kit traverse la 4G et Internet. Le réseau <b>n'est pas de confiance</b> : seul le catalogue signé fait foi.",
+      "L'agent vérifie la signature, puis compare l'<b>empreinte du certificat</b> signataire à celle du référent. « Valid » seul ne suffit pas.",
+      "Le numéro de version doit être <b>plus grand</b> que celui installé. Un ancien kit, même bien signé, est refusé (T14).",
+      "<b>Test-FileCatalog</b> recalcule chaque empreinte. Tout est identique : le kit est <b>accepté</b>.",
+      "Variante : <b>un seul octet</b> de param.xml a changé en route. L'empreinte ne correspond plus : <b>kit refusé</b> (T02)."
+    ],
+    "scene-2": [
+      "L'agent demande le fichier modifié. nginx répond <b>200 OK</b> et annonce la taille : <b>40 Mo</b>.",
+      "BITS télécharge en <b>arrière-plan</b>, sans bloquer l'agent ni le travail sur le PC. 45 % reçus…",
+      "<b>Coupure</b> du partage de connexion. BITS garde ce qu'il a reçu et attend. La tâche survit même à un <b>redémarrage</b>.",
+      "Le réseau revient. BITS redemande <b>seulement la suite</b> avec l'en-tête <b>Range</b>. nginx répond <b>206 Partial Content</b>.",
+      "Fichier complet, rangé dans <b>preparation</b>. Rien n'est utilisé avant <b>Test-FileCatalog</b>.",
+      "Vérification réussie : <b>bascule</b> par deux renommages. L'ancien kit reste dans <b>precedent</b> pour le retour arrière (moins de 2 min, T05)."
+    ],
+    "scene-3": [
+      "Un paquet capturé dans Wireshark : des <b>couches</b>, comme des enveloppes glissées les unes dans les autres.",
+      "Restent <b>en clair</b> : adresses, ports, tailles, heures, retransmissions. Assez pour voir une coupure et une reprise.",
+      "Au début de TLS, le <b>nom du serveur (SNI)</b> passe en clair. Le certificat aussi en TLS 1.2, mais plus en TLS 1.3.",
+      "Tout le reste est <b>chiffré</b> : chemin, en-têtes Range et jeton, contenu. Wireshark ne peut pas montrer le code 206.",
+      "Pour prouver la reprise : le <b>journal nginx</b> (code 206, en-tête Range) + Wireshark pour les <b>volumes</b> et les retransmissions."
+    ]
+  };
+  var largeursBits = [0.08, 0.45, 0.45, 0.70, 1, 1];
+
+  function plage(txt) {
+    var m = txt.split("-");
+    var a = parseInt(m[0], 10);
+    var b = m.length === 1 ? a : (m[1] === "" ? Infinity : parseInt(m[1], 10));
+    return [a, b];
+  }
+
+  var scenes = {};
+  Object.keys(legendes).forEach(function (id) {
+    var el = document.getElementById(id);
+    var caps = legendes[id];
+    var n = caps.length;
+    var pts = el.querySelector(".points");
+    for (var i = 0; i < n; i++) pts.appendChild(document.createElement("span"));
+    var etat = { s: 0 };
+    function rendre() {
+      el.querySelectorAll("[data-s]").forEach(function (g) {
+        var p = plage(g.getAttribute("data-s"));
+        g.classList.toggle("cache", !(etat.s >= p[0] && etat.s <= p[1]));
+      });
+      el.querySelector(".bandeau").innerHTML = caps[etat.s];
+      pts.querySelectorAll("span").forEach(function (sp, k) { sp.classList.toggle("on", k <= etat.s); });
+      el.querySelector(".compteur").textContent = "Étape " + (etat.s + 1) + " / " + n;
+      el.querySelector('[data-act="prec"]').disabled = etat.s === 0;
+      var suiv = el.querySelector('[data-act="suiv"]');
+      suiv.textContent = etat.s === n - 1 ? "Recommencer ↺" : "Étape suivante ▶";
+      if (id === "scene-2") {
+        var w = largeursBits[etat.s];
+        var r = document.getElementById("bits-rempli");
+        r.setAttribute("width", (560 * w).toFixed(0));
+        r.classList.toggle("fini", etat.s >= 4);
+        document.getElementById("bits-pct").textContent = Math.round(w * 100) + " %";
+      }
+    }
+    function aller(d) {
+      if (d > 0 && etat.s === n - 1) etat.s = 0;
+      else etat.s = Math.max(0, Math.min(n - 1, etat.s + d));
+      rendre();
+    }
+    el.querySelector('[data-act="prec"]').addEventListener("click", function () { aller(-1); });
+    el.querySelector('[data-act="suiv"]').addEventListener("click", function () { aller(1); });
+    scenes[id] = { aller: aller };
+    rendre();
+  });
+
+  /* ============ Onglets ============ */
+  var onglets = Array.prototype.slice.call(document.querySelectorAll('[role="tab"]'));
+  var actif = "scene-1";
+  function choisir(tab, focus) {
+    onglets.forEach(function (t) {
+      var on = t === tab;
+      t.setAttribute("aria-selected", on ? "true" : "false");
+      t.tabIndex = on ? 0 : -1;
+      document.getElementById(t.getAttribute("aria-controls")).hidden = !on;
+    });
+    actif = tab.getAttribute("aria-controls");
+    if (focus) tab.focus();
+    if (actif === "scene-4") enVue = true;
+    majNetem();
+    if (actif === "scene-5") dessinerPhysique();
+  }
+  onglets.forEach(function (t, i) {
+    t.addEventListener("click", function () { choisir(t, false); });
+    t.addEventListener("keydown", function (e) {
+      if (e.key === "ArrowRight" || e.key === "ArrowLeft") {
+        e.preventDefault();
+        var j = (i + (e.key === "ArrowRight" ? 1 : onglets.length - 1)) % onglets.length;
+        choisir(onglets[j], true);
+      }
+    });
+  });
+  document.addEventListener("keydown", function (e) {
+    var tag = (e.target.tagName || "").toLowerCase();
+    if (tag === "input" || tag === "textarea" || e.target.getAttribute("role") === "tab") return;
+    if (!scenes[actif]) return;
+    var box = document.getElementById("essentiels").getBoundingClientRect();
+    if (box.bottom < 0 || box.top > window.innerHeight) return;
+    if (e.key === "ArrowRight") { e.preventDefault(); scenes[actif].aller(1); }
+    if (e.key === "ArrowLeft") { e.preventDefault(); scenes[actif].aller(-1); }
+  });
+
+  /* ============ Scène 4 : animation netem ============ */
+  var NS = "http://www.w3.org/2000/svg";
+  var reglages = {
+    normal:  { inter: 260, attente: 120, perte: 0,    cmd: "# réseau du lycée tel quel : pas de netem",
+               leg: "Réseau du lycée : <b>rapide</b>, sans perte, sans coupure. Tester seulement ainsi ne prouve rien pour le terrain." },
+    retard:  { inter: 260, attente: 900, perte: 0,    cmd: "sudo tc qdisc add dev eth0 root netem delay 80ms",
+               leg: "<b>delay</b> : chaque paquet attend avant de sortir. C'est la <b>latence</b> de la 4G." },
+    debit:   { inter: 750, attente: 900, perte: 0,    cmd: "sudo tc qdisc change dev eth0 root netem delay 80ms rate 5mbit",
+               leg: "<b>rate</b> : les paquets sortent au compte-gouttes. C'est le <b>débit limité</b> du partage de connexion." },
+    pertes:  { inter: 750, attente: 900, perte: 0.2,  cmd: "sudo tc qdisc change dev eth0 root netem delay 80ms rate 5mbit loss 1%",
+               leg: "<b>loss</b> : certains paquets sont jetés. TCP les renvoie : on voit des <b>retransmissions</b> dans Wireshark. (À l'écran, les pertes sont exagérées.)" },
+    coupure: { inter: 750, attente: 900, perte: 1,    cmd: "sudo tc qdisc change dev eth0 root netem loss 100%",
+               leg: "<b>loss 100 %</b> : plus rien ne passe. On teste la reprise de BITS (T04) et « vérification impossible » (T08)." },
+    limite:  { inter: 750, attente: 900, perte: 0.2,  cmd: "sudo tc qdisc del dev eth0 root    # tout remettre normal après les tests",
+               leg: "Limite : netem n'agit que sur ce qui <b>sort</b> du serveur. Le sens PC → serveur n'est pas touché. Les réponses à la <b>borne</b> sont ralenties aussi : netem est coupé pendant les tests de la borne." }
+  };
+  var preset = "normal";
+  var paquets = [], raf = null, dernier = 0, enVue = true, pageVisible = true;
+  var calque = document.getElementById("paquets");
+  var mouvementReduit = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var TRAJET = 1500;
+
+  function creer(cls, w, h) {
+    var r = document.createElementNS(NS, "rect");
+    r.setAttribute("class", cls); r.setAttribute("width", w); r.setAttribute("height", h); r.setAttribute("rx", 3);
+    calque.appendChild(r); return r;
+  }
+  function lancer(t) {
+    var cfg = reglages[preset];
+    paquets.push({ el: creer("paquet", 20, 12), nais: t, attente: cfg.attente, perdu: Math.random() < cfg.perte, ou: 0.25 + Math.random() * 0.45, type: "d" });
+  }
+  function image(t) {
+    raf = null;
+    if (!enVue || !pageVisible || actif !== "scene-4") return;
+    var cfg = reglages[preset];
+    if (t - dernier > cfg.inter) { lancer(t); dernier = t; }
+    var tombes = 0;
+    paquets = paquets.filter(function (p) {
+      var dt = t - p.nais, x, y, op = 1;
+      if (p.type === "a") {
+        var u = dt / TRAJET;
+        if (u >= 1) { p.el.remove(); return false; }
+        p.el.setAttribute("x", 510 - u * 396); p.el.setAttribute("y", 198); return true;
+      }
+      if (dt < p.attente) { x = 128 + 38 * (dt / p.attente); y = 112; }
+      else {
+        var v = (dt - p.attente) / TRAJET;
+        if (p.perdu && v > p.ou) {
+          var c = (v - p.ou) * 3;
+          x = 172 + p.ou * 336; y = 112 + c * 60; op = Math.max(0, 1 - c);
+          p.el.setAttribute("class", "paquet perdu"); tombes++;
+          if (op <= 0) { p.el.remove(); return false; }
+        } else {
+          if (v >= 1) {
+            p.el.remove();
+            paquets.push({ el: creer("ack", 12, 8), nais: t, type: "a" });
+            return false;
+          }
+          x = 172 + v * 336; y = 112;
+        }
+      }
+      p.el.setAttribute("x", x.toFixed(1)); p.el.setAttribute("y", y.toFixed(1)); p.el.setAttribute("opacity", op.toFixed(2));
+      return true;
+    });
+    document.getElementById("label-perdu").setAttribute("opacity", tombes ? 1 : 0);
+    raf = requestAnimationFrame(image);
+  }
+  function statique() {
+    calque.innerHTML = ""; paquets = [];
+    var cfg = reglages[preset], n = cfg.perte >= 1 ? 0 : (cfg.inter > 300 ? 3 : 7);
+    for (var i = 0; i < n; i++) { var r = creer("paquet", 20, 12); r.setAttribute("x", 210 + i * (280 / Math.max(n, 1))); r.setAttribute("y", 112); }
+    if (cfg.perte > 0) { var q = creer("paquet perdu", 20, 12); q.setAttribute("x", 330); q.setAttribute("y", 140); document.getElementById("label-perdu").setAttribute("opacity", 1); }
+    else document.getElementById("label-perdu").setAttribute("opacity", 0);
+    for (var k = 0; k < 3; k++) { var a = creer("ack", 12, 8); a.setAttribute("x", 180 + k * 110); a.setAttribute("y", 198); }
+  }
+  function choisirPreset(nom) {
+    preset = nom;
+    document.querySelectorAll("[data-preset]").forEach(function (b) { b.setAttribute("aria-pressed", b.getAttribute("data-preset") === nom ? "true" : "false"); });
+    document.getElementById("netem-legende").innerHTML = reglages[nom].leg;
+    document.getElementById("netem-cmd").textContent = "$ " + reglages[nom].cmd;
+    var lim = nom === "limite";
+    document.getElementById("voie-retour").classList.toggle("cache", !lim);
+    document.getElementById("label-retour").style.fontWeight = lim ? "900" : "";
+    if (mouvementReduit) statique();
+  }
+  function majNetem() {
+    if (mouvementReduit) { statique(); return; }
+    if (actif === "scene-4" && enVue && pageVisible && !raf) raf = requestAnimationFrame(image);
+  }
+  document.querySelectorAll("[data-preset]").forEach(function (b) {
+    b.addEventListener("click", function () { choisirPreset(b.getAttribute("data-preset")); });
+  });
+  if ("IntersectionObserver" in window) {
+    new IntersectionObserver(function (e) { enVue = e[e.length - 1].isIntersecting; majNetem(); }).observe(document.getElementById("scene-4"));
+  }
+  document.addEventListener("visibilitychange", function () { pageVisible = !document.hidden; majNetem(); });
+  choisirPreset("normal");
+
+  /* ============ Scène 5 : physique ============ */
+  var A = 17.62, B = 243.12;
+  function nb(x, d) { return x.toLocaleString("fr-FR", { maximumFractionDigits: d === undefined ? 1 : d, minimumFractionDigits: 0 }); }
+  function rosee(ta, hr) { var g = Math.log(hr / 100) + A * ta / (B + ta); return B * g / (A - g); }
+  function attente(t0, ta, hr, tau) {
+    var td = rosee(ta, hr);
+    if (t0 >= td) return 0;
+    return tau * Math.log((t0 - ta) / (td - ta));
+  }
+  function encadrement(t0, ta, hr, tau) {
+    var mn = Infinity, mx = -Infinity;
+    [-0.5, 0.5].forEach(function (d0) { [-0.2, 0.2].forEach(function (da) { [-2, 2].forEach(function (dh) { [-0.1, 0.1].forEach(function (dt) {
+      var v = attente(t0 + d0, ta + da, Math.min(99.9, hr + dh), tau * (1 + dt));
+      mn = Math.min(mn, v); mx = Math.max(mx, v);
+    }); }); }); });
+    return [mn, mx];
+  }
+  function el(nom, attrs, txt) {
+    var e = document.createElementNS(NS, nom);
+    for (var k in attrs) e.setAttribute(k, attrs[k]);
+    if (txt !== undefined) e.textContent = txt;
+    return e;
+  }
+  function v(id) { return parseFloat(document.getElementById(id).value); }
+
+  function dessinerPhysique() {
+    var t0 = v("p-t0"), ta = v("p-ta"), hr = v("p-hr"), tau = v("p-tau");
+    document.getElementById("o-t0").textContent = nb(t0) + " °C";
+    document.getElementById("o-ta").textContent = nb(ta) + " °C";
+    document.getElementById("o-hr").textContent = nb(hr) + " %";
+    document.getElementById("o-tau").textContent = nb(tau) + " min";
+    var td = rosee(ta, hr), ta2 = attente(t0, ta, hr, tau), enc = encadrement(t0, ta, hr, tau);
+    document.getElementById("r-td").textContent = nb(td) + " °C";
+    document.getElementById("r-t").textContent = ta2 > 0 ? nb(ta2, 0) + " min" : "aucune";
+    document.getElementById("r-enc").textContent = enc[1] > 0 ? nb(Math.max(0, enc[0]), 0) + " à " + nb(enc[1], 0) + " min" : "aucune";
+    var leg;
+    if (t0 >= ta) leg = "Le PC n'est pas plus froid que le local : <b>aucune buée</b> possible.";
+    else if (ta2 <= 0) leg = "Le PC (" + nb(t0) + " °C) est déjà plus chaud que le point de rosée (" + nb(td) + " °C) : <b>pas de buée</b>, pas d'attente.";
+    else leg = "Tant que la surface du PC est sous <b>" + nb(td) + " °C</b>, l'air du local y dépose de la buée. Il faut attendre environ <b>" + nb(ta2, 0) + " min</b>, soit " + nb(ta2 / tau, 2) + " τ. Avec les incertitudes : entre " + nb(Math.max(0, enc[0]), 0) + " et <b>" + nb(enc[1], 0) + " min</b> : on conseille la valeur haute.";
+    document.getElementById("phys-legende").innerHTML = leg;
+
+    // graphique
+    var g = document.getElementById("graphe");
+    g.innerHTML = "";
+    var X0 = 58, X1 = 620, Y0 = 250, Y1 = 22;
+    var tmax = Math.max(4 * tau, ta2 * 1.4);
+    var Tbas = Math.floor(Math.min(t0, td) - 2), Thaut = Math.ceil(ta + 2);
+    function px(t) { return X0 + (t / tmax) * (X1 - X0); }
+    function py(T) { return Y0 - (T - Tbas) / (Thaut - Tbas) * (Y0 - Y1); }
+    g.appendChild(el("line", { "class": "axe", x1: X0, y1: Y0, x2: X1, y2: Y0 }));
+    g.appendChild(el("line", { "class": "axe", x1: X0, y1: Y0, x2: X0, y2: Y1 }));
+    var pasT = (Thaut - Tbas) > 24 ? 10 : 5;
+    for (var T = Math.ceil(Tbas / pasT) * pasT; T <= Thaut; T += pasT) {
+      g.appendChild(el("line", { "class": "leger", x1: X0, y1: py(T), x2: X1, y2: py(T) }));
+      g.appendChild(el("text", { "class": "tp", x: X0 - 8, y: py(T) + 5, "text-anchor": "end" }, nb(T || 0)));
+    }
+    var pasX = tmax > 150 ? 50 : (tmax > 60 ? 20 : 10);
+    for (var tt = 0; tt <= tmax; tt += pasX) {
+      g.appendChild(el("text", { "class": "tp", x: px(tt), y: Y0 + 20, "text-anchor": "middle" }, nb(tt)));
+    }
+    g.appendChild(el("text", { "class": "tp", x: X1, y: Y0 + 40, "text-anchor": "end" }, "temps (min)"));
+    g.appendChild(el("text", { "class": "tp", x: X0 + 6, y: Y1 + 2 }, "°C"));
+    // air du local et point de rosée
+    g.appendChild(el("line", { "class": "ligne-air", x1: X0, y1: py(ta), x2: X1, y2: py(ta) }));
+    g.appendChild(el("text", { "class": "tp", x: X1, y: py(ta) - 6, "text-anchor": "end" }, "air du local " + nb(ta) + " °C"));
+    g.appendChild(el("line", { "class": "ligne-rosee", x1: X0, y1: py(td), x2: X1, y2: py(td) }));
+    g.appendChild(el("text", { "class": "t", x: X1, y: py(td) + 20, "text-anchor": "end" }, "point de rosée " + nb(td) + " °C"));
+    // courbe
+    function chemin(a, b) {
+      var d = "", N = 80;
+      for (var i = 0; i <= N; i++) {
+        var t = a + (b - a) * i / N;
+        var T = ta + (t0 - ta) * Math.exp(-t / tau);
+        d += (i ? "L" : "M") + px(t).toFixed(1) + " " + py(T).toFixed(1);
+      }
+      return d;
+    }
+    if (ta2 > 0) g.appendChild(el("path", { "class": "courbe-froide", d: chemin(0, ta2) }));
+    g.appendChild(el("path", { "class": "courbe-ok", d: chemin(Math.max(0, ta2), tmax) }));
+    if (ta2 > 0) {
+      g.appendChild(el("line", { "class": "repere", x1: px(ta2), y1: Y0, x2: px(ta2), y2: py(td) }));
+      g.appendChild(el("circle", { cx: px(ta2), cy: py(td), r: 6, style: "fill:var(--jaune);stroke:var(--encre);stroke-width:2" }));
+      var xl = Math.min(px(ta2) + 10, X1 - 170);
+      g.appendChild(el("text", { "class": "tg", x: xl, y: Y0 - 14 }, "attendre " + nb(ta2, 0) + " min"));
+      var tm = ta2 / 2, Tm = ta + (t0 - ta) * Math.exp(-tm / tau);
+      g.appendChild(el("text", { "class": "t ko", x: px(tm) + 12, y: py(Tm) + 22 }, "buée"));
+    }
+
+    // tableau
+    var tb = document.querySelector("#table-attente tbody");
+    tb.innerHTML = "";
+    [-10, -5, 0, 5, 10].forEach(function (te) {
+      var a = attente(te, ta, hr, tau), e = encadrement(te, ta, hr, tau);
+      var tr = document.createElement("tr");
+      var c = e[1] > 0 ? Math.ceil(e[1] / 5) * 5 + " min" : "aucune";
+      tr.innerHTML = "<td>" + nb(te) + " °C</td><td>" + (a > 0 ? nb(a, 0) + " min" : "aucune") + "</td><td><b>" + c + "</b></td>";
+      tb.appendChild(tr);
+    });
+  }
+  ["p-t0", "p-ta", "p-hr", "p-tau"].forEach(function (id) { document.getElementById(id).addEventListener("input", dessinerPhysique); });
+  dessinerPhysique();
+
+  /* ============ Fiches ============ */
+  var briques = { securite: "Sécurité du kit", agent: "Agent sur le PC", reseau: "Serveur et réseau", borne: "Borne RFID", physique: "Physique", cadre: "Cadre et existant" };
+  var F = [
+    { id: "sha256", b: "securite", p: 3, t: "Empreinte SHA-256",
+      s: "Une empreinte est un résumé de 64 caractères calculé à partir du fichier. Un seul octet change : l'empreinte change complètement. On ne peut ni retrouver le fichier à partir de l'empreinte, ni fabriquer un autre fichier qui donne la même.",
+      q: "Pourquoi SHA-256 et pas MD5, plus rapide ?",
+      r: "MD5 est cassé depuis 2004 : on sait fabriquer deux fichiers différents avec la même empreinte. SHA-1 aussi (2017). SHA-256 n'a aucune collision connue. La vitesse n'est pas un problème : quelques secondes pour tout le kit.",
+      demo: "<code>Get-FileHash doc.pdf -Algorithm SHA256</code>, modifier un octet, recalculer." },
+    { id: "signature", b: "securite", p: 3, t: "Signature numérique",
+      s: "Le référent signe avec sa clé privée, qu'il est le seul à avoir. Tout le monde peut vérifier avec le certificat public. Signer ne cache rien : cela prouve qui a publié et que rien n'a changé depuis.",
+      q: "La clé privée du référent est volée. Que se passe-t-il ?",
+      r: "Le voleur peut signer un faux kit : c'est la limite du système. Prévention : clé non exportable, protégée par mot de passe, sur le seul poste du référent. Réaction : nouveau certificat, nouvelle empreinte attendue installée à la main sur les 10 PC (faisable parce qu'ils sont 10). Les PC hors réseau ne consultent pas de liste de révocation." },
+    { id: "catalogue", b: "securite", p: 3, t: "New-FileCatalog / Test-FileCatalog",
+      s: "Le fichier .cat est la liste « fichier → empreinte » de tout le dossier du kit. <code>-CatalogVersion 2</code> = SHA-256 (la version 1 utilise SHA-1). <code>Test-FileCatalog</code> recalcule chaque empreinte et répond <code>Valid</code> ou <code>ValidationFailed</code>.",
+      q: "Que vérifie exactement Test-FileCatalog ?",
+      r: "Que chaque fichier du dossier a la même empreinte que dans le catalogue : un fichier modifié donne ValidationFailed. Avec <code>-Detailed</code>, il donne aussi le détail des fichiers et la signature du catalogue. Il ne dit pas tout seul <b>qui</b> a signé : l'agent vérifie le signataire à part.",
+      v: "Comportement exact de Test-FileCatalog pour un fichier <b>ajouté</b> ou <b>supprimé</b> dans le dossier : à tester sur la maquette." },
+    { id: "authenticode", b: "securite", p: 3, t: "Authenticode et empreinte du certificat",
+      s: "<code>Get-AuthenticodeSignature</code> répond Valid si la signature est intacte et si le certificat est de confiance pour Windows. Cela ne dit pas que c'est le référent : n'importe quel certificat de confiance passerait.",
+      q: "Comment l'agent sait-il que le catalogue a été signé par le référent, et pas par n'importe qui ?",
+      r: "Deux contrôles : 1) <code>Status</code> = Valid ; 2) <code>SignerCertificate.Thumbprint</code> = empreinte du certificat du référent, écrite dans l'agent. Un catalogue signé par un autre certificat, même valide, est refusé (T03)." },
+    { id: "version", b: "securite", p: 2, t: "Numéro de version anti-retour",
+      s: "Le numéro de version est dans catalogue.json, placé dans le dossier avant New-FileCatalog : il est donc signé comme le reste. L'agent garde le dernier numéro installé dans un petit fichier local.",
+      q: "Un attaquant renvoie un ancien kit, parfaitement signé. Il passe ?",
+      r: "Non. Changer le numéro casserait la signature. L'agent refuse tout numéro plus petit ou égal à celui installé (T14). Le seul retour en arrière permis est local : remettre « precedent », sur décision sur place." },
+    { id: "horodatage", b: "securite", p: 1, t: "Horodatage de la signature",
+      s: "Une signature sans horodatage n'est plus reconnue quand le certificat expire. Le serveur d'horodatage est sur Internet, pas dans le labo.",
+      q: "Votre certificat de labo expire. Les kits signés deviennent-ils invalides ?",
+      r: "Sans horodatage, oui. Sur la maquette, on choisit une durée de certificat plus longue que le projet, et on le dit. En vrai déploiement, on utiliserait l'horodatage de l'autorité de l'entreprise.",
+      v: "À tester : avancer la date de la VM au-delà de l'expiration et regarder la réponse de l'agent." },
+
+    { id: "bits", b: "agent", p: 3, t: "BITS",
+      s: "Service de transfert intégré à Windows. Il télécharge en arrière-plan, garde la tâche même après un redémarrage, et reprend là où il s'est arrêté grâce aux requêtes HTTP <code>Range</code>. Le serveur doit accepter Range et annoncer la taille du fichier (nginx le fait pour les fichiers statiques).",
+      q: "Comment prouvez-vous que BITS reprend après une coupure ?",
+      r: "Le journal nginx montre une requête interrompue, puis une requête avec Range et le code <b>206 Partial Content</b>. Le volume total reçu reste proche de la taille du fichier : rien n'est retéléchargé. Côté PC, <code>Get-BitsTransfer</code> montre les octets reçus avant et après.",
+      v: "Les commandes BITS peuvent échouer dans une tâche planifiée sans session ouverte (erreur 0x800704DD). Tester tôt avec le compte SYSTEM." },
+    { id: "bascule", b: "agent", p: 3, t: "Bascule preparation → actif → precedent",
+      s: "On ne touche jamais au kit actif pendant le téléchargement. Tout arrive dans « preparation », est vérifié, puis deux renommages font la bascule. L'ancien kit reste dans « precedent ».",
+      q: "Le PC s'éteint en pleine bascule. Que se passe-t-il ?",
+      r: "Si le courant coupe entre les deux renommages, il manque « actif ». Au démarrage, l'agent regarde l'état des trois dossiers, revérifie avec Test-FileCatalog, puis termine la bascule ou remet « precedent ». Un kit n'est jamais utilisé sans vérification.",
+      v: "Ce cas n'est pas encore dans la recette T01–T15 : ajouter un test « coupure pendant la bascule »." },
+    { id: "allsigned", b: "agent", p: 2, t: "Stratégie d'exécution AllSigned",
+      s: "Seuls les scripts signés par un éditeur approuvé s'exécutent. Le certificat du référent doit être dans les magasins « Autorités de certification racines » et « Éditeurs approuvés » du PC.",
+      q: "AllSigned empêche-t-il un pirate de lancer un script ?",
+      r: "Non, et Microsoft le dit : la stratégie d'exécution n'est pas une barrière de sécurité. Un utilisateur peut lancer <code>powershell -ExecutionPolicy Bypass</code>. AllSigned évite surtout qu'un script modifié tourne par erreur. La vraie protection : les droits NTFS sur le dossier de l'agent." },
+    { id: "ps51", b: "agent", p: 2, t: "PowerShell 5.1 (et pas 7)",
+      s: "Windows PowerShell 5.1 est livré avec Windows 11. New-FileCatalog, les commandes Authenticode et le module BITS y sont disponibles.",
+      q: "Pourquoi PowerShell 5.1 et pas PowerShell 7 ?",
+      r: "Rien à installer sur des PC que le service ne gère pas entièrement. PowerShell 7 serait un logiciel de plus à maintenir à jour sur 10 PC qui n'ont que la 4G." },
+    { id: "tache", b: "agent", p: 1, t: "Tâche planifiée, journal Windows, droits NTFS",
+      s: "Déclencheurs : démarrage, ouverture de session, toutes les 30 min. L'agent écrit dans le journal Windows (Observateur d'événements). Son jeton est dans <code>C:\\ProgramData\\agent\\</code>, lisible seulement par les administrateurs.",
+      q: "Pourquoi trois déclencheurs ?",
+      r: "Le PC n'a pas toujours le réseau. On vérifie au démarrage, à l'ouverture de session (pour l'alerte « kit périmé ») et régulièrement si le PC reste allumé." },
+    { id: "pull", b: "agent", p: 2, t: "Le PC interroge (pull)",
+      s: "Le serveur ne contacte jamais un PC : c'est l'agent qui demande le catalogue.",
+      q: "Pourquoi le serveur n'envoie-t-il pas la mise à jour dès qu'elle est publiée ?",
+      r: "Le PC est derrière le partage de connexion du téléphone, lui-même derrière la traduction d'adresses (NAT) de l'opérateur. Personne ne peut le joindre depuis Internet. Avantage : aucun port ouvert sur les PC." },
+    { id: "paliers", b: "agent", p: 2, t: "Paliers de sécurité",
+      s: "Simulation (l'agent dit ce qu'il ferait), confirmation (il demande avant d'appliquer), automatique. Documents : automatique avec information après coup. Paramètres et programmes : confirmation.",
+      q: "Votre agent agit sur des PC. Comment éviter qu'une erreur casse dix PC d'un coup ?",
+      r: "Paliers, d'abord un PC pilote, vérification avant toute bascule, retour arrière en moins de 2 minutes (T05). Et l'agent ne touche qu'au dossier du kit, jamais au système." },
+
+    { id: "tls", b: "reseau", p: 3, t: "HTTPS / TLS",
+      s: "TLS chiffre l'échange et prouve l'identité du serveur grâce à son certificat. La poignée de main : le client dit bonjour, le serveur montre son certificat, ils se mettent d'accord sur une clé. Ensuite tout est chiffré.",
+      q: "Votre serveur a un certificat de labo. Comment l'agent et la borne lui font-ils confiance ?",
+      r: "On crée une petite autorité de certification du labo. Son certificat public est installé dans les « Autorités racines » des PC, et copié dans le code de la borne (<code>setCACert</code>). Ce certificat est public : ce n'est pas un secret. Jamais <code>setInsecure()</code>.",
+      v: "L'ESP32 a sans doute besoin de l'heure (NTP) pour contrôler les dates du certificat : à tester." },
+    { id: "wireshark", b: "reseau", p: 3, t: "Wireshark",
+      s: "Outil de capture : il montre chaque paquet couche par couche. Voir l'essentiel n° 3.",
+      q: "En HTTPS, tout est chiffré. Que voyez-vous dans Wireshark ?",
+      r: "Les adresses IP, les ports, les poignées de main TCP et TLS, le nom du serveur (SNI), les tailles et les heures des paquets, les retransmissions pendant les pertes. On ne voit pas le chemin, les en-têtes (Range, jeton), le code 206 ni le contenu : pour eux, c'est le journal nginx." },
+    { id: "netem", b: "reseau", p: 3, t: "tc netem",
+      s: "Outil de Linux qui abîme exprès le réseau du serveur : retard (<code>delay</code>), débit (<code>rate</code>), pertes (<code>loss</code>), coupure (<code>loss 100%</code>). Réglé avec une vraie mesure de partage de connexion. Voir l'essentiel n° 4.",
+      q: "Votre 4G est simulée avec tc netem. Qu'est-ce que netem simule mal ?",
+      r: "Il n'agit que sur ce qui sort du serveur. Par défaut, les pertes sont indépendantes, alors qu'en 4G elles arrivent en rafales (netem sait le faire : <code>loss gemodel</code>). Le débit réel varie sans cesse. Une vraie coupure peut changer l'adresse IP du téléphone et casser la connexion : netem ne le fait pas. D'où la mesure réelle à la visite." },
+    { id: "c10", b: "reseau", p: 3, t: "Exploiter le réseau en place (C10)",
+      s: "C10 = exploiter le réseau existant, pas le configurer. Aucun VLAN, aucune ACL : c'est C09 (E5).",
+      q: "Vous n'avez configuré ni switch ni routeur. Qu'avez-vous fait sur le réseau ?",
+      r: "Relevé de l'adressage, échange DHCP observé (4 messages), résolution DNS du serveur, heure par NTP, captures Wireshark du TLS et des reprises, mesure du débit et de la latence 4G, profils netem, supervision par le tableau de bord (âge des rapports, PC à jour)." },
+    { id: "ntp", b: "reseau", p: 2, t: "NTP (chrony)",
+      s: "chrony garde le serveur à l'heure juste.",
+      q: "Pourquoi l'heure est-elle importante dans votre projet ?",
+      r: "Trois raisons : dater les rapports (un rapport trop ancien donne le rouge à la borne), vérifier les dates des certificats TLS, décider qu'un kit est périmé.",
+      v: "Hors réseau, le PC se fie à sa propre horloge : quelqu'un qui change la date peut fausser l'alerte « kit périmé ». Limite à assumer." },
+    { id: "flask", b: "reseau", p: 2, t: "nginx, Flask, SQLite, jetons",
+      s: "nginx reçoit tout en HTTPS et sert les fichiers. Flask répond à l'API. SQLite garde les PC, les rapports, les sorties, les jetons. Tout POST doit porter un jeton valide dans l'en-tête <code>Authorization</code>.",
+      q: "Votre API est-elle protégée contre l'injection SQL ? Et contre un faux rapport « à jour » ?",
+      r: "Requêtes paramétrées partout (<code>execute(\"… LIKE ?\", (motif,))</code>) : le texte tapé n'est jamais du code. Les pages passent par Jinja2, qui échappe le HTML. Un rapport sans jeton valide est refusé, et la borne ne passe pas au vert (T15)." },
+    { id: "sftp", b: "reseau", p: 1, t: "SFTP pour publier, HTTPS + BITS pour distribuer",
+      s: "SFTP sert seulement au référent, au bureau, pour déposer le kit signé sur le serveur.",
+      q: "Windows 11 a déjà sftp.exe. Pourquoi ne pas distribuer en SFTP ?",
+      r: "sftp.exe ne reprend pas tout seul après une coupure et demande des clés SSH sur chaque PC. Par la 4G, il faudrait aussi un VPN pour joindre le serveur. BITS reprend seul et passe par HTTPS." },
+    { id: "data", b: "reseau", p: 2, t: "Consommation de données",
+      s: "Seuls les fichiers modifiés sont téléchargés. Le catalogue (quelques Ko) est lu toutes les 30 min.",
+      q: "Combien de données consommez-vous sur le forfait des téléphones ?",
+      r: "Calcul : (taille des fichiers modifiés par mise à jour × mises à jour par mois) + catalogue × nombre de vérifications. Chiffres de la visite (question 6) et mesure sur la maquette (T01)." },
+
+    { id: "rfid", b: "borne", p: 3, t: "RFID 13,56 MHz (RC522)",
+      s: "Norme ISO 14443 A. La puce n'a pas de pile : le champ du lecteur l'alimente un instant par induction, elle renvoie son numéro unique (UID, souvent 4 octets). Portée de quelques centimètres.",
+      q: "Un badge RFID se copie facilement. Votre borne ne sert donc à rien ?",
+      r: "Le badge <b>identifie</b>, il ne <b>prouve</b> pas : des cartes « magiques » permettent de copier un UID. La borne trace une sortie (qui, quel PC, quelle version), elle ne contrôle pas un accès. Pour une vraie preuve : cartes à clé secrète ou code PIN, hors projet." },
+    { id: "antimetal", b: "borne", p: 2, t: "Étiquette anti-métal",
+      s: "Une étiquette normale collée sur une coque métallique se lit mal. L'étiquette anti-métal a une fine couche de ferrite.",
+      q: "Pourquoi une étiquette anti-métal ? Est-ce vraiment de la physique ?",
+      r: "Le champ du lecteur crée des courants de Foucault dans le métal. Ils s'opposent au champ et désaccordent l'antenne : la portée chute. La ferrite guide le champ et protège l'antenne. Le test mesure la distance de lecture, avec répétitions et incertitudes." },
+    { id: "esp32", b: "borne", p: 2, t: "ESP32 : SPI, Wi-Fi, mémoire NVS",
+      s: "RC522 branché en SPI (SCK, MOSI, MISO, SS). Alimentation en 3,3 V, jamais en 5 V. Jeton rangé dans la mémoire NVS (bibliothèque Preferences), jamais écrit dans le code.",
+      q: "Quelqu'un vole la borne. A-t-il le jeton ?",
+      r: "La NVS n'est pas chiffrée par défaut : avec la borne en main, on peut lire la mémoire. On révoque alors le jeton de la borne dans SQLite (une ligne). Ce jeton permet seulement de déclarer des sorties, pas de publier un kit." },
+    { id: "etats", b: "borne", p: 3, t: "Les trois états de la borne",
+      s: "Vert = rapport récent et version publiée. Rouge = rapport ancien ou version dépassée. Alternance = serveur injoignable.",
+      q: "Le serveur est arrêté. La borne passe au vert ?",
+      r: "Non : « vérification impossible ». La sortie est mémorisée et envoyée plus tard (T08). Un PC éteint ne parle pas : la borne lit le dernier rapport qu'il a envoyé au serveur." },
+
+    { id: "newton", b: "physique", p: 3, t: "Loi de refroidissement de Newton",
+      s: "T(t) = Ta + (T0 − Ta)·e<sup>−t/τ</sup>. τ dépend de la masse, de la capacité thermique et de la surface d'échange. Au bout de τ, 63 % de l'écart est rattrapé ; au bout de 3τ, 95 %. Voir l'essentiel n° 5.",
+      q: "Votre modèle suppose un corps à température uniforme. Un portable l'est-il ?",
+      r: "Non : coque, batterie et carte n'ont pas la même température. On confronte donc le modèle à un vrai portable, et on conseille la valeur haute de l'encadrement." },
+    { id: "rosee", b: "physique", p: 3, t: "Point de rosée (Magnus)",
+      s: "γ = ln(HR/100) + a·Ta/(b + Ta) ; Td = b·γ/(a − γ) ; a = 17,62 ; b = 243,12 °C. Buée tant que la surface du PC est plus froide que Td. Exemple : 20 °C et 50 % → Td ≈ 9,3 °C.",
+      q: "Pourquoi le point de rosée de l'air du local, et pas celui de l'extérieur ?",
+      r: "La buée se forme quand l'air du local, chaud et humide, touche le PC froid et se refroidit à son contact. L'air extérieur est déjà à la température du PC : il ne condense pas dessus." },
+    { id: "lineaire", b: "physique", p: 2, t: "Linéarisation et τ",
+      s: "ln|T − Ta| = ln|T0 − Ta| − t/τ : une droite en fonction de t.",
+      q: "Comment obtenez-vous τ ?",
+      r: "On trace ln|T − Ta| en fonction du temps et on fait une régression linéaire : la pente vaut −1/τ. Si les points ne sont pas alignés, le modèle est mis en défaut, et c'est un résultat à présenter." },
+    { id: "incertitudes", b: "physique", p: 3, t: "Étalonnage et incertitudes",
+      s: "Type A : dispersion des mesures répétées (écart-type / √n). Type B : fiche technique, résolution (demi-étendue / √3). On les combine : racine de la somme des carrés.",
+      q: "Vous étalonnez avec un thermomètre de référence. Qui vous dit que lui est juste ?",
+      r: "Son certificat d'étalonnage (traçabilité). À défaut, un point fixe : un mélange eau-glace bien agité est à 0 °C." },
+    { id: "capteurs", b: "physique", p: 1, t: "Capteurs SHT40 et DS18B20",
+      s: "SHT40 : température et humidité, bus I²C, adresse 0x44. DS18B20 : température, bus 1-Wire, résistance de 4,7 kΩ entre DATA et 3,3 V.",
+      q: "Pourquoi deux capteurs de température ?",
+      r: "Le DS18B20 se colle sur le bloc ou le PC : il mesure la surface froide. Le SHT40 mesure l'air du local (température et humidité) pour calculer Td. Les comparer côte à côte vérifie aussi leur accord.",
+      v: "Précisions DS18B20 ± 0,5 °C et SHT40 ± 0,2 °C / ± 1,8 à 2 % HR : à vérifier dans les fiches techniques." },
+
+    { id: "existant", b: "cadre", p: 3, t: "Solutions existantes",
+      s: "OneDrive, versions SharePoint, Intune, SCCM, WSUS, robocopy : savoir ce que chacun fait bien et ce qui lui manque ici.",
+      q: "Intune, SCCM, WSUS, OneDrive ou robocopy font déjà ça. Pourquoi réinventer ?",
+      r: "WSUS ne distribue que les mises à jour Microsoft, pas des fichiers métier. Intune et SCCM demandent des PC inscrits et gérés par la DSI. OneDrive synchronise fichier par fichier : pas de kit validé d'un bloc, pas de preuve de version par PC. robocopy a besoin d'un partage réseau, donc d'un VPN par la 4G, et ne prouve rien. Si la DSI gère un jour les PC, l'agent devient un simple contrôle de conformité." },
+    { id: "viepriv", b: "cadre", p: 3, t: "Vie privée des agents",
+      s: "La borne enregistre un badge, un PC, une version, une heure.",
+      q: "Votre borne enregistre qui part avec quel PC. C'est de la surveillance ?",
+      r: "On trace des PC et des versions, pas le travail des agents. En vrai déploiement : information des salariés (Code du travail, L1222-4), consultation du CSE (L2312-38), registre RGPD, durée de conservation courte, données minimales." },
+    { id: "archives", b: "cadre", p: 2, t: "Archives et valeur légale",
+      s: "V2 : dépôt par empreintes, métadonnées dans SQLite, recherche simple. Rien n'est écrasé.",
+      q: "Votre archive a-t-elle une valeur légale ? Peut-on jeter le papier ?",
+      r: "Non. Le projet ne détruit aucun original et ne revendique pas de valeur probante (NF Z42-026). Si l'entreprise a une mission de service public, ses documents peuvent être des archives publiques (Code du patrimoine, L211-4) : détruire le papier demanderait un visa d'élimination." },
+    { id: "lycee", b: "cadre", p: 2, t: "Réalisation au lycée",
+      s: "Arrêté du 25 janvier 2023 : « Pour les apprentis les projets doivent impérativement être développés dans l'entreprise ».",
+      q: "Le texte dit que le projet doit être développé dans l'entreprise. Pourquoi au lycée ?",
+      r: "Le service ne peut ouvrir ni ses PC ni son SharePoint à une maquette. Le besoin vient de l'entreprise (tuteur, 10/11/2026) ; la réalisation au lycée est soumise à la validation de l'académie. Aucune donnée réelle, aucun accès aux systèmes du réseau électrique." },
+    { id: "donnee", b: "cadre", p: 2, t: "Valorisation de la donnée",
+      s: "Les rapports des PC deviennent des indicateurs.",
+      q: "Où est la « valorisation de la donnée » dans ce projet ?",
+      r: "Part des PC à jour, âge du dernier rapport, durée d'une mise à jour, volume consommé : ils alimentent le tableau de bord et l'export CSV vers Excel, que le service utilise déjà. En V2, l'archive retrouve une ancienne version en moins d'une minute (T11)." }
+  ];
+
+  var CLE = "revision-aziza-etat";
+  var progres = {};
+  try { progres = JSON.parse(localStorage.getItem(CLE) || "{}") || {}; } catch (e) { progres = {}; }
+  function sauver() { try { localStorage.setItem(CLE, JSON.stringify(progres)); } catch (e) {} }
+
+  var liste = document.getElementById("liste-fiches");
+  F.forEach(function (f) {
+    var a = document.createElement("article");
+    a.className = "carte fiche";
+    a.id = "fiche-" + f.id;
+    a.dataset.b = f.b; a.dataset.p = f.p;
+    a.innerHTML =
+      '<div class="haut"><span class="tag papier">' + briques[f.b] + '</span><span class="etoiles" aria-label="priorité ' + f.p + ' sur 3">' + "★★★".slice(0, f.p) + '</span></div>' +
+      '<h3>' + f.t + '</h3>' +
+      '<p>' + f.s + '</p>' +
+      (f.demo ? '<p class="texte-discret"><b>À montrer :</b> ' + f.demo + '</p>' : '') +
+      '<div class="question"><span class="label">Question piège</span><p><b>« ' + f.q + ' »</b></p></div>' +
+      '<button class="bouton petit voir" type="button">Voir la réponse</button>' +
+      '<div class="encadre succes reponse"><span class="label">Réponse modèle</span><p>' + f.r + '</p></div>' +
+      (f.v ? '<p class="note verif"><b>À vérifier :</b> ' + f.v + '</p>' : '') +
+      '<div class="etat" role="group" aria-label="Où j\'en suis"><button class="bouton petit" type="button" data-etat="sais" aria-pressed="false">Je sais</button><button class="bouton petit" type="button" data-etat="revoir" aria-pressed="false">À revoir</button></div>';
+    a.querySelector(".voir").addEventListener("click", function () { a.classList.add("vue"); });
+    a.querySelectorAll("[data-etat]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        var e = b.getAttribute("data-etat");
+        if (progres[f.id] === e) delete progres[f.id]; else progres[f.id] = e;
+        sauver(); majFiche(a, f); majProgression(); if (filtres.revoir) filtrer();
+      });
+    });
+    liste.appendChild(a);
+    majFiche(a, f);
+  });
+  function majFiche(a, f) {
+    var e = progres[f.id];
+    a.querySelectorAll("[data-etat]").forEach(function (b) { b.setAttribute("aria-pressed", b.getAttribute("data-etat") === e ? "true" : "false"); });
+    a.classList.toggle("sue", e === "sais");
+  }
+  function majProgression() {
+    var n = F.filter(function (f) { return progres[f.id] === "sais"; }).length;
+    document.getElementById("progression-texte").textContent = n + " / " + F.length + " sues";
+    document.getElementById("barre").style.width = (100 * n / F.length) + "%";
+  }
+
+  // filtres
+  var filtres = { b: "tout", prio: false, revoir: false };
+  var zoneB = document.getElementById("filtres-brique");
+  [["tout", "Tout"]].concat(Object.keys(briques).map(function (k) { return [k, briques[k]]; })).forEach(function (c) {
+    var b = document.createElement("button");
+    b.className = "bouton petit"; b.type = "button"; b.dataset.b = c[0];
+    b.setAttribute("aria-pressed", c[0] === "tout" ? "true" : "false");
+    b.textContent = c[1];
+    b.addEventListener("click", function () {
+      filtres.b = c[0];
+      zoneB.querySelectorAll("button").forEach(function (x) { x.setAttribute("aria-pressed", x === b ? "true" : "false"); });
+      filtrer();
+    });
+    zoneB.appendChild(b);
+  });
+  function bascule(id, cle) {
+    var b = document.getElementById(id);
+    b.addEventListener("click", function () {
+      filtres[cle] = !filtres[cle];
+      b.setAttribute("aria-pressed", filtres[cle] ? "true" : "false");
+      filtrer();
+    });
+  }
+  bascule("opt-prio", "prio");
+  bascule("opt-revoir", "revoir");
+  function visibles() {
+    return F.filter(function (f) {
+      return (filtres.b === "tout" || f.b === filtres.b) && (!filtres.prio || f.p === 3) && (!filtres.revoir || progres[f.id] === "revoir");
+    });
+  }
+  function filtrer() {
+    var ok = {};
+    visibles().forEach(function (f) { ok[f.id] = true; });
+    F.forEach(function (f) { document.getElementById("fiche-" + f.id).hidden = !ok[f.id]; });
+    var n = Object.keys(ok).length;
+    document.getElementById("resume-filtre").textContent = n + " fiche" + (n > 1 ? "s" : "") + " affichée" + (n > 1 ? "s" : "") + (document.body.classList.contains("quiz") ? " · mode quiz : réponses cachées" : "");
+    document.getElementById("vide").classList.toggle("visible", n === 0);
+  }
+
+  var quiz = document.getElementById("opt-quiz");
+  quiz.addEventListener("click", function () {
+    var on = !document.body.classList.contains("quiz");
+    document.body.classList.toggle("quiz", on);
+    quiz.setAttribute("aria-pressed", on ? "true" : "false");
+    document.querySelectorAll(".fiche.vue").forEach(function (x) { x.classList.remove("vue"); });
+    filtrer();
+  });
+  document.getElementById("opt-hasard").addEventListener("click", function () {
+    var v = visibles();
+    if (!v.length) return;
+    if (!document.body.classList.contains("quiz")) quiz.click();
+    var f = v[Math.floor(Math.random() * v.length)];
+    var a = document.getElementById("fiche-" + f.id);
+    document.querySelectorAll(".fiche.cible").forEach(function (x) { x.classList.remove("cible"); });
+    a.classList.remove("vue"); a.classList.add("cible");
+    a.scrollIntoView({ behavior: mouvementReduit ? "auto" : "smooth", block: "center" });
+    a.querySelector(".voir").focus({ preventScroll: true });
+  });
+  document.getElementById("opt-raz").addEventListener("click", function () {
+    if (!window.confirm("Effacer les marques « Je sais » et « À revoir » ?")) return;
+    progres = {}; sauver();
+    F.forEach(function (f) { majFiche(document.getElementById("fiche-" + f.id), f); });
+    majProgression(); filtrer();
+  });
+
+  // liste « à vérifier »
+  var lv = document.getElementById("liste-verif");
+  var generaux = [
+    "Hypothèses chiffrées (fréquence des mises à jour, durée par PC, volume, jours sans réseau) : à confirmer à la visite du service (7–10 décembre).",
+    "Profil netem (retard, débit, pertes) : à régler avec la vraie mesure de partage de connexion faite à la visite.",
+    "Validation de la réalisation au lycée par l'académie : demande en cours.",
+    "Volet physique (condensation, ou plan B RFID) : à valider avec le collègue de physique avant janvier."
+  ];
+  generaux.forEach(function (t) { var li = document.createElement("li"); li.className = "encadre accent"; li.textContent = t; lv.appendChild(li); });
+  F.filter(function (f) { return f.v; }).forEach(function (f) {
+    var li = document.createElement("li"); li.className = "encadre info";
+    li.innerHTML = '<a href="#fiche-' + f.id + '">' + f.t + '</a> — ' + f.v;
+    lv.appendChild(li);
+  });
+
+  majProgression();
+  filtrer();
+})();
+</script>
+</body>
+</html>

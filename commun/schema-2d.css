@@ -103,6 +103,11 @@
 .regles ol{margin:10px 0 0;padding-left:1.3em}
 .regles li{margin:.35em 0}
 
+/* page intégrée (?cadre) : seulement le schéma et la carte d'étape */
+.cadre .tete,.cadre .regles{display:none}
+.cadre .grille{padding-block:16px 16px}
+/* pause : tout ce qui bouge en CSS s'arrête aussi */
+.en-pause #schema *{animation-play-state:paused!important}
 @media (max-width:1060px){.grille{grid-template-columns:1fr}.carte-etape{position:static}}
 @media (max-width:720px){#schema{min-width:760px}.glisse{display:block}.legende{grid-template-columns:1fr}}
 @media (prefers-reduced-motion:reduce){#schema .bulle{animation:none}#schema .led.alt{animation:none}}
