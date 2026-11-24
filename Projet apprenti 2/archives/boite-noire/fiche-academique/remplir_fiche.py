@@ -17,7 +17,7 @@ from docx.oxml.ns import qn
 from docx.shared import Cm, Pt, RGBColor
 
 ICI = os.path.dirname(os.path.abspath(__file__))
-MODELE = os.path.join(ICI, "..", "Fiche presentation projet E6-projet-IR v2.docx")
+MODELE = os.path.join(ICI, "..", "..", "..", "Fiche presentation projet E6-projet-IR v2.docx")  # archivé le 24/11 : modèle resté à la racine du dossier
 SORTIE = os.path.join(ICI, "Fiche_presentation_E6_Yaksan.docx")
 IMG = lambda n: os.path.join(ICI, "schemas", n + ".png")
 

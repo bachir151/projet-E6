@@ -130,6 +130,9 @@ def main():
     cibles = sys.argv[1:] or [str(c) for c in CONTENUS]
     for c in cibles:
         c = pathlib.Path(c).resolve()
+        if not c.exists():
+            print(f"{c.relative_to(RACINE)} : absent, ignoré")
+            continue
         mod = charger(c)
         page = rendre(mod)
         pdf = c.parent / mod.META["pdf"]

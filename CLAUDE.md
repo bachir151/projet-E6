@@ -26,7 +26,7 @@ Ce dépôt sert à concevoir et documenter les projets individuels E6 de 4 appre
 ## Organisation du dépôt
 - `docs/` : cadre E6, état des 4 projets, charte IA, sources vérifiées.
 - `Projet apprenti 1/` : projet « Le service informatique augmenté » (décision du 16/11) ; `fiche-academique/`, `projet-v4/` (document de travail), `questions-jury/`, notes d'entretien ; anciennes versions (chariots, dossier V3) dans `archives/`.
-- `Projet apprenti 2/` : synthèse de 3 pages (PDF), source du projet ; `fiche-academique/` ; `TODO.md`.
+- `Projet apprenti 2/` : **Station de contrôle des postes, de la remise à la restitution** (décision du 24/11, validé par le tuteur) ; source : `projet-station-controle.md`, `TODO.md`. La « Boîte noire du poste » (synthèse, formulaire envoyé le 12/11, page, présentation) et les pistes du 19/11 (carte agent, ALCASAR) sont dans `archives/`.
 - `Projet apprenti 3/` : **CyberSentinel** (décision du 20/11) ; source actuelle : `projet-cybersentinel.md`, `TODO.md`, `livrables/animation-3d/maquette-3d.html`, `livrables/page-html/poste-attentif.html`. Les anciens DOCX/PDF/PPTX et dossiers V2 sont historiques/obsolètes.
 - `Projet apprenti 4/` : fiche technique d'Aziza (PDF) et `apprentie4-aziza/` (spécification `projet.md`, décisions, questions de visite, TODO).
 - `Projet apprenti 4/apprentie4-aziza/livrables/` : fichiers déjà produits (fiche signable, PowerPoint, présentation animée, scripts de génération).

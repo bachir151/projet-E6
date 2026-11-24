@@ -1,5 +1,21 @@
 # Journal de travail – Projets E6
 
+## 24 novembre 2026 — Yaksan (apprenti 2) : station de contrôle des postes
+
+**Décision de l'enseignant :** nouveau projet « Station de contrôle des postes, de la remise à la restitution », **validé par le tuteur**. La « Boîte noire du poste » est archivée, comme les pistes du 19/11 (carte agent, ALCASAR).
+
+**Fait :**
+- Revue de la proposition « QualiPC » : idée gardée (le logiciel déclenche, le capteur vérifie), mais deux affirmations corrigées (« indépendant de Windows » → le verdict ne dépend pas des diagnostics internes ; « sans droits d'administrateur » → vrai sur maquette, mais micro et caméra exigent HTTPS), périmètre resserré, C10 et sécurité ajoutés, risque « reprocher le défaut à l'agent » écarté.
+- Cahier des charges : `Projet apprenti 2/projet-station-controle.md` (V1 ≈ 132 h avec IA : écran, haut-parleurs, micro, clavier/pavé, rapports chaînés ; V2 ≈ 20–25 h : webcam, USB, Ethernet par SNMP). Physique : luminance et gamma (principal), acoustique (court), seuils tirés de la dispersion des mesures.
+- Rangement : `Projet apprenti 2/archives/boite-noire/` (synthèse, formulaire envoyé le 12/11, page HTML, présentation, questions du jury, ancien TODO) et `archives/pistes-19-11/`. Liens réparés (feuille `theme.css` de l'ancienne page, modèle Word du script de l'ancien formulaire) ; `docs/questions-jury/generer.py` ignore désormais un contenu absent.
+- `TODO.md`, `docs/apprentis.md`, `CLAUDE.md` et `README.md` mis à jour.
+
+**À faire :** prévenir l'inspection (formulaire du 12/11 remplacé) ; obtenir les chiffres du besoin auprès du tuteur ; vérifier les portables Windows du lycée et le matériel de physique ; banc d'essai TCS34725/INMP441 ; puis formulaire académique, page HTML, présentation 3Blue1Brown.
+
+**Non vérifié :** fonctions exactes des diagnostics des fabricants (HP, Dell, Lenovo) et des outils de reconditionnement ; accès à l'état de la batterie sans droits d'administrateur ; disponibilité du nom « QualiPC ».
+
+---
+
 ## 20 novembre 2026 — Refonte de Lorenzo : CyberSentinel
 
 **Décision de l'enseignant :** suppression de la gestion des mises à jour. Projet désormais articulé autour de deux démonstrateurs : radar LD2410 + ESP32 pour le verrouillage Windows ; leurre réseau imitant une imprimante HTTP avec ESP32 + W5500, supervision Ubuntu.

@@ -10,7 +10,7 @@ Conception et documentation des projets individuels E6 de quatre apprentis de BT
 |---|---|
 | `docs/` | Cadre E6, état des 4 projets, charte d'usage de l'IA, sources vérifiées |
 | `Projet apprenti 1/` | Dossier V3 (modèle du dossier complet) |
-| `Projet apprenti 2/` | Synthèse de 3 pages (modèle de synthèse) |
+| `Projet apprenti 2/` | Station de contrôle des postes de Yaksan (24/11) ; ancien projet « Boîte noire » et pistes abandonnées dans `archives/` |
 | `Projet apprenti 3/` | CyberSentinel de Lorenzo : projet, maquette 3D, page HTML et plan de travail (anciens livrables encore présents) |
 | `Projet apprenti 4/` | Projet d'Aziza : fiche technique, fiche Word à remplir, `apprentie4-aziza/` |
 | `.claude/commands/` | Commandes réutilisables (revue critique, contrôle d'un dossier) |
@@ -26,6 +26,15 @@ Conception et documentation des projets individuels E6 de quatre apprentis de BT
 - [Plan de travail et tests](Projet%20apprenti%203/TODO.md)
 
 **Statut :** prototypes visuels et documents texte remaniés, mais **aucune réalisation matérielle validée**. L'ancien formulaire académique DOCX/PDF, les questions du jury et l'ancien PowerPoint demeurent obsolètes ; ne pas les présenter comme les documents de la nouvelle version.
+
+## Projet de Yaksan (apprenti 2) — station de contrôle des postes (24/11/2026)
+
+Le PC affiche une couleur ou joue un son ; un capteur posé contre lui (ESP32 : couleur, micro, émetteur sonore) vérifie le résultat. On mesure le portable quand on le remet à un agent, on le remesure quand il est rendu, et on compare. Page de test web (rien à installer), station Ubuntu, rapports chaînés. Volet physique : luminance et gamma de l'écran, acoustique.
+
+- [Cahier des charges](Projet%20apprenti%202/projet-station-controle.md) · [Suivi](Projet%20apprenti%202/TODO.md)
+- Ancien projet « Boîte noire du poste » et pistes du 19/11 : `Projet apprenti 2/archives/`
+
+**Statut :** projet validé par le tuteur ; les trois livrables sont à faire, le formulaire en premier (celui envoyé le 12/11 est à remplacer).
 
 ## Projet d'Aziza (apprentie 4)
 
