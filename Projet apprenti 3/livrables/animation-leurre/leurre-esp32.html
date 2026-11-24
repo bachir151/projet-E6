@@ -10,7 +10,7 @@
 <style>
 /* Animation de cours : le leurre (fausse imprimante) du projet CyberSentinel de Lorenzo.
    Couleurs, polices, ombres : theme.css uniquement (variables). Scène 1600×900, un clic = une étape. */
-html,body{margin:0;height:100%;overflow:hidden;background:var(--papier);line-height:1.3}
+html,body{margin:0;background:var(--papier)} /* la page défile : la scène 1 est dans #anim1 (voir plus bas) */
 #stage{position:absolute;left:50%;top:50%;width:1600px;height:900px;transform-origin:center;background:var(--papier);user-select:none;font-family:var(--police);color:var(--encre)}
 .instant,.instant *{transition:none!important}
 .mono{font-family:var(--police-mono)}
@@ -224,8 +224,227 @@ html,body{margin:0;height:100%;overflow:hidden;background:var(--papier);line-hei
 @keyframes flow{to{stroke-dashoffset:-24}}
 @media (prefers-reduced-motion:reduce){#wires .flow.live,#sw .lk,#leurre .jk,#tower .act,.car{animation:none}}
 </style>
+<style>
+/* =====================================================================
+   ANIMATION 2 — De l'adresse IP à l'identification de l'attaquant.
+   Indépendante de l'animation 1 : classes et identifiants préfixés « a2- »,
+   état JavaScript séparé. Couleurs, polices, ombres : theme.css uniquement.
+   ===================================================================== */
+#anim1{position:relative;height:calc(100vh - 48px);height:calc(100svh - 48px);min-height:300px;overflow:hidden;line-height:1.3}
+.a2-relais{display:flex;align-items:center;justify-content:space-between;gap:14px;height:48px;padding:0 var(--gouttiere);background:var(--encre);color:var(--papier);font-family:var(--police);font-size:.92rem;font-weight:700;line-height:1.2}
+.a2-relais b{color:var(--jaune);font-weight:900}
+.a2-relais a{color:var(--jaune);font-weight:900;text-decoration:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.a2-relais a:hover{text-decoration:underline}
+.a2-relais a:focus-visible{outline:3px solid var(--jaune);outline-offset:3px}
+@media (max-width:760px){.a2-relais .a2-r1{display:none}.a2-relais{justify-content:center}}
+
+#anim2{font-family:var(--police);color:var(--encre);background:var(--papier);line-height:var(--interligne)}
+#anim2 :focus-visible{outline:3px solid var(--focus);outline-offset:3px}
+#anim2 .bouton:focus-visible{outline-offset:5px}
+.a2-tete{padding-top:clamp(32px,6vw,64px);padding-bottom:8px}
+.a2-tete h2{margin-bottom:.3em}
+.a2-chapo{font-size:1.15rem;font-weight:700;color:var(--encre-2);max-width:62ch;margin-bottom:0}
+.a2-niveaux{list-style:none;margin:20px 0 0;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.a2-niveaux li{display:flex;gap:12px;align-items:center;background:var(--blanc);border:1.5px solid var(--contour);border-radius:var(--r-petit);padding:12px 14px;font-weight:900;line-height:1.25}
+.a2-niveaux small{display:block;font-weight:700;color:var(--encre-2);font-size:.86rem;margin-top:2px}
+.a2-num{flex:none;width:36px;height:36px;border-radius:50%;border:2px solid var(--encre);display:grid;place-items:center;font-weight:1000;background:var(--jaune)}
+.a2-niveaux li:nth-child(2) .a2-num{background:var(--bleu)}
+.a2-niveaux li:nth-child(3) .a2-num{background:var(--rouge-pale)}
+@media (max-width:760px){.a2-niveaux{grid-template-columns:minmax(0,1fr)}}
+.a2-sommaire{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px}
+
+.a2-zone{padding-block:clamp(30px,5vw,56px)}
+.a2-zone-tete{display:flex;align-items:flex-start;gap:14px;margin-bottom:20px}
+.a2-lettre{flex:none;width:50px;height:50px;border-radius:50%;background:var(--encre);color:var(--jaune);display:grid;place-items:center;font-weight:1000;font-size:1.45rem}
+.a2-zone-tete h3{font-size:clamp(1.2rem,1rem+1vw,1.6rem);font-weight:1000;text-transform:uppercase;margin:0 0 .2em;line-height:1.1}
+.a2-zone-tete p{margin:0;color:var(--encre-2);font-weight:700}
+
+/* ---------- A. animation réseau ---------- */
+.a2-gA{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:18px;align-items:start}
+.a2-gA>*{min-width:0}
+@media (max-width:980px){.a2-gA{grid-template-columns:minmax(0,1fr)}}
+.a2-scene{margin:0;padding:12px}
+.a2-scene:focus-visible{outline:3px solid var(--focus);outline-offset:3px}
+#a2-svg{display:block;width:100%;height:auto;overflow:visible}
+.a2-cable{fill:none;stroke:var(--encre-2);stroke-width:7;stroke-linecap:round}
+.a2-flux{fill:none;stroke:var(--jaune);stroke-width:3.5;stroke-dasharray:10 14;stroke-linecap:round;opacity:0;transition:opacity .3s}
+.a2-flux.a2-on{opacity:1;animation:a2flux .7s linear infinite}
+.a2-etabli{fill:none;stroke:var(--jaune);stroke-width:18;stroke-linecap:round;opacity:0;transition:opacity .5s}
+.a2-etabli.a2-on{opacity:.85}
+.a2-dev{transition:opacity .6s}
+.a2-cache{opacity:0}
+.a2-pillr{fill:var(--blanc);stroke:var(--encre);stroke-width:2.5}
+.a2-pillt{font-family:var(--police);font-weight:1000;fill:var(--encre);letter-spacing:.06em}
+.a2-ipt{font-family:var(--police-mono);font-weight:800;fill:var(--encre)}
+.a2-stt{font-family:var(--police);font-weight:800;fill:var(--encre-2)}
+.a2-stt.a2-fort{fill:var(--encre);font-weight:900}
+.a2-hlb{transition:stroke .3s,stroke-width .3s}
+.a2-hlb.a2-hl{stroke:var(--jaune-fonce);stroke-width:7}
+.a2-loupe{fill:none;stroke:var(--jaune-fonce);stroke-width:5;opacity:0;transition:opacity .3s}
+.a2-loupe.a2-on{opacity:1}
+.a2-pk rect{stroke:var(--encre);stroke-width:2.5}
+.a2-pk.j rect{fill:var(--jaune)}.a2-pk.b rect{fill:var(--bleu)}.a2-pk.v rect{fill:var(--vert-pale)}.a2-pk.w rect{fill:var(--blanc)}
+.a2-pk text{font-family:var(--police-mono);font-weight:800;font-size:21px;fill:var(--encre)}
+#a2-svg.a2-etroit .a2-pk text{font-size:17px}
+.a2-del{animation:a2clig 1.6s steps(2) infinite}
+.a2-pulse{animation:a2pulse 1.2s ease-out 2}
+.a2-ubuOccupe .a2-del{animation-duration:.18s}
+
+.a2-explic{display:flex;flex-direction:column;gap:12px}
+.a2-explic .label{margin:0}
+.a2-explic h4{font-size:1.35rem;font-weight:1000;margin:0;line-height:1.15}
+.a2-notion{background:var(--jaune);border:2px solid var(--encre);border-radius:var(--r-petit);padding:10px 14px;font-weight:800;margin:0;line-height:1.4}
+.a2-notion b{font-weight:1000}
+.a2-texte{margin:0;color:var(--encre-2);font-weight:600}
+.a2-detail{display:flex;flex-direction:column;gap:10px}
+.a2-detail p{margin:0}
+.a2-in{opacity:0;transform:translateY(8px);transition:opacity .45s,transform .45s;transition-delay:calc(var(--i,0) * 260ms)}
+.a2-vu .a2-in,.a2-vu.a2-in{opacity:1;transform:none}
+.a2-petit{font-size:.9rem;font-weight:700;color:var(--encre-2);line-height:1.45}
+.a2-deux{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}
+.a2-deux>div{background:var(--papier);border:1.5px solid var(--contour-2);border-radius:var(--r-petit);padding:10px 12px;font-weight:700;line-height:1.4}
+.a2-deux b{display:block;font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;color:var(--encre-2);margin-bottom:2px}
+@media (max-width:420px){.a2-deux{grid-template-columns:minmax(0,1fr)}}
+.a2-seq{display:flex;flex-direction:column;gap:8px}
+.a2-seq>div{display:grid;grid-template-columns:52px minmax(0,1fr) 52px;align-items:center;gap:8px}
+.a2-seq .a2-bout{font-weight:900;font-size:.8rem;text-align:center;letter-spacing:.06em}
+.a2-fl{position:relative;border-radius:var(--r-petit);padding:6px 10px;border:2px solid var(--encre);font-weight:700;font-size:.92rem;line-height:1.3}
+.a2-fl code{background:none;border:0;padding:0;font-weight:900}
+.a2-fl.d{background:var(--jaune)}.a2-fl.g{background:var(--bleu)}
+.a2-fl.d::after,.a2-fl.g::before{font-weight:1000}
+.a2-fl.d::after{content:" →"}.a2-fl.g::before{content:"← "}
+.a2-paquet{border:2.5px solid var(--encre);border-radius:var(--r-petit);overflow:hidden;background:var(--blanc);box-shadow:var(--ombre-decalee)}
+.a2-paquet>b{display:block;background:var(--encre);color:var(--papier);font-size:.8rem;letter-spacing:.12em;text-transform:uppercase;padding:5px 12px}
+.a2-champ{display:grid;grid-template-columns:118px minmax(0,1fr);gap:2px 10px;padding:8px 12px;border-top:1.5px solid var(--contour-2);border-left:7px solid var(--contour-2)}
+.a2-champ span{font-weight:900;font-size:.85rem;align-self:center}
+.a2-champ code{background:none;border:0;padding:0;font-weight:800;font-size:1.02rem;overflow-wrap:anywhere}
+.a2-champ small{grid-column:2;font-weight:700;color:var(--encre-2);font-size:.85rem;line-height:1.3}
+.a2-champ.src{background:var(--bleu-pale);border-left-color:var(--bleu)}
+.a2-champ.dst{background:var(--jaune-pale);border-left-color:var(--jaune-fonce)}
+.a2-champ.tcp{background:var(--papier)}
+@media (max-width:420px){.a2-champ{grid-template-columns:minmax(0,1fr)}.a2-champ small{grid-column:1}}
+.a2-bloc{border:2px solid var(--encre);border-radius:var(--r-petit);padding:10px 12px;background:var(--blanc);font-weight:700;line-height:1.4}
+.a2-bloc>b:first-child{display:block;font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;color:var(--encre-2)}
+.a2-bloc.w{background:var(--bleu-pale)}
+.a2-spi{align-self:center;font-weight:900;font-size:.85rem;letter-spacing:.08em;color:var(--encre-2)}
+#anim2 .terminal{margin:0;font-size:.82rem;line-height:1.6;white-space:pre;overflow-x:auto}
+.a2-hi{background:var(--jaune);color:var(--encre);border-radius:3px;padding:0 3px}
+.a2-com{color:var(--contour-2)}
+.a2-verif{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.a2-verif li{display:flex;gap:8px;align-items:flex-start;font-weight:700;line-height:1.4;background:var(--vert-pale);border-radius:var(--r-petit);padding:6px 10px}
+.a2-verif li::before{content:"✓";flex:none;font-weight:1000;color:var(--vert)}
+.a2-alerte{border:2px solid var(--encre);border-left:9px solid var(--jaune-fonce);border-radius:var(--r-petit);background:var(--blanc);padding:10px 14px;box-shadow:var(--ombre-decalee)}
+.a2-alerte-h{display:flex;flex-wrap:wrap;align-items:center;gap:8px;font-weight:900;margin-bottom:6px}
+.a2-alerte dl{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 12px;margin:0}
+.a2-alerte dt{font-weight:800;color:var(--encre-2);font-size:.9rem}
+.a2-alerte dd{margin:0;font-weight:800;overflow-wrap:anywhere}
+.a2-alerte dd code{background:none;border:0;padding:0}
+#anim2 .encadre{margin:0}
+.a2-ctl{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:14px;margin-top:18px}
+.a2-points{display:flex;flex-wrap:wrap;gap:8px;list-style:none;margin:0;padding:0}
+.a2-point{width:42px;height:42px;border-radius:50%;border:2px solid var(--encre);background:var(--blanc);font:1000 1rem var(--police);color:var(--encre);cursor:pointer;transition:background-color .2s}
+.a2-point.a2-fait{background:var(--papier-2)}
+.a2-point[aria-current="step"]{background:var(--jaune);box-shadow:var(--ombre-decalee)}
+.a2-boutons{display:flex;flex-wrap:wrap;gap:10px}
+
+/* ---------- B. laboratoire d'attribution ---------- */
+.a2-choix{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:18px}
+.a2-chaine{display:flex;align-items:stretch;gap:0;margin:0 0 6px;padding:0;list-style:none}
+.a2-noeud{flex:1 1 0;min-width:0;display:flex;flex-direction:column;align-items:center;text-align:center;gap:3px;background:var(--blanc);border:1.5px solid var(--contour);border-radius:var(--r-carte);padding:12px 10px;box-shadow:var(--ombre-douce);line-height:1.25;position:relative}
+.a2-noeud svg{width:52px;height:46px}
+.a2-noeud b{font-weight:900}
+.a2-noeud small{font-weight:700;color:var(--encre-2);font-size:.84rem}
+.a2-ipn{font-family:var(--police-mono);font-weight:800;font-size:.9rem;overflow-wrap:anywhere}
+.a2-noeud.a2-cible{border:3px solid var(--jaune-fonce);background:var(--jaune-pale)}
+.a2-noeud.a2-cible::before{content:"ADRESSE VUE PAR LE LEURRE";position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--jaune);border:2px solid var(--encre);border-radius:99px;padding:1px 9px;font-size:.66rem;font-weight:1000;letter-spacing:.08em;white-space:nowrap}
+.a2-noeud.a2-leu{background:var(--encre);color:var(--papier);border-color:var(--encre)}
+.a2-noeud.a2-leu small{color:var(--contour-2)}
+.a2-voit{margin-top:4px;background:var(--jaune);color:var(--encre);border-radius:99px;padding:2px 10px;font:800 .9rem var(--police-mono)}
+.a2-fleche{flex:0 0 128px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:0 8px;text-align:center}
+.a2-fleche span{font-size:.76rem;font-weight:800;color:var(--encre-2);line-height:1.2}
+.a2-fleche .a2-src{font-family:var(--police-mono);background:var(--bleu-pale);border:1.5px solid var(--encre);border-radius:6px;padding:1px 6px;color:var(--encre);white-space:nowrap;line-height:1.3}
+.a2-fleche .a2-src.a2-change{background:var(--jaune)}
+.a2-trait{position:relative;display:block;width:100%;height:3px;background:var(--encre);border-radius:2px}
+.a2-trait::after{content:"";position:absolute;right:-3px;top:50%;transform:translateY(-50%);border:7px solid transparent;border-left:11px solid var(--encre);border-right:0}
+@media (max-width:760px){
+ .a2-chaine{flex-direction:column}
+ .a2-noeud{flex:none}
+ .a2-noeud.a2-cible{margin-top:12px}
+ .a2-fleche{flex:none;flex-direction:row;height:54px;gap:12px}
+ .a2-trait{width:3px;height:100%;order:-1}
+ .a2-trait::after{right:auto;left:50%;top:auto;bottom:-3px;transform:translateX(-50%);border:7px solid transparent;border-top:11px solid var(--encre);border-bottom:0}
+}
+.a2-gB{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px;margin-top:22px;align-items:start}
+.a2-gB>*{min-width:0}
+@media (max-width:860px){.a2-gB{grid-template-columns:minmax(0,1fr)}}
+.a2-jauge{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+.a2-jauge li{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 10px;align-items:center;border-radius:var(--r-petit);padding:9px 12px;border-left:7px solid var(--contour-2);background:var(--papier)}
+.a2-jauge .a2-q{font-weight:900}
+.a2-jauge p{grid-column:1/-1;margin:0;font-weight:700;color:var(--encre-2);font-size:.93rem;line-height:1.4}
+.a2-jauge li.ok{border-left-color:var(--vert);background:var(--vert-pale)}
+.a2-jauge li.peut{border-left-color:var(--jaune-fonce);background:var(--jaune-pale)}
+.a2-jauge li.non{border-left-color:var(--rouge);background:var(--rouge-pale)}
+.a2-indice{margin-top:12px}
+.a2-indice .terminal{margin:6px 0 0}
+.a2-frise{list-style:none;margin:8px 0 0;padding:0 0 0 18px;border-left:3px solid var(--encre);display:flex;flex-direction:column;gap:6px}
+.a2-frise li{position:relative;font-weight:700;line-height:1.35}
+.a2-frise li::before{content:"";position:absolute;left:-26px;top:5px;width:13px;height:13px;border-radius:50%;background:var(--blanc);border:2.5px solid var(--encre)}
+.a2-frise li b{font-family:var(--police-mono)}
+.a2-frise li.a2-ici{background:var(--jaune);border-radius:6px;padding:2px 8px}
+.a2-frise li.a2-ici::before{background:var(--jaune-fonce)}
+.a2-frise li.a2-gris{color:var(--encre-2)}
+.a2-clef{margin-top:20px}
+
+/* ---------- C. classification Ubuntu ---------- */
+.a2-pipe{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:26px}
+.a2-etage{position:relative;background:var(--blanc);border:1.5px solid var(--contour);border-radius:var(--r-carte);padding:12px 14px;min-height:150px;transition:border-color .3s,box-shadow .3s,background-color .3s;box-shadow:var(--ombre-douce)}
+.a2-etage:not(:last-child)::after{content:"▶";position:absolute;right:-22px;top:50%;transform:translateY(-50%);font-size:1rem;color:var(--encre-2)}
+.a2-etage h4{margin:0 0 6px;font-size:1rem;font-weight:1000;text-transform:uppercase;line-height:1.15;display:flex;gap:8px;align-items:center}
+.a2-etage h4 i{font-style:normal;flex:none;width:26px;height:26px;border-radius:50%;border:2px solid var(--encre);display:grid;place-items:center;font-size:.85rem;background:var(--papier)}
+.a2-etage.a2-actif{border:2.5px solid var(--encre);box-shadow:var(--ombre-decalee-forte)}
+.a2-etage.a2-actif h4 i{background:var(--jaune)}
+.a2-etage .a2-contenu{opacity:.35;transition:opacity .35s;font-weight:700;font-size:.92rem;line-height:1.45}
+.a2-etage.a2-rempli .a2-contenu{opacity:1}
+.a2-etage ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px}
+.a2-req{font-family:var(--police-mono);font-weight:800;font-size:.82rem;display:flex;flex-wrap:wrap;gap:4px 6px;align-items:center}
+.a2-req .tag{font-family:var(--police);font-size:.68rem;padding:0 7px}
+.a2-regle{display:flex;gap:6px;align-items:flex-start}
+.a2-regle .a2-m{flex:none;font-weight:1000;width:18px;text-align:center}
+.a2-regle.a2-oui .a2-m{color:var(--vert)}
+.a2-regle.a2-non{color:var(--encre-2)}
+.a2-niv{display:inline-flex;font-size:.95rem}
+@media (max-width:900px){
+ .a2-pipe{grid-template-columns:minmax(0,1fr);gap:28px}
+ .a2-etage{min-height:0}
+ .a2-etage:not(:last-child)::after{content:"▼";right:auto;left:50%;top:auto;bottom:-24px;transform:translateX(-50%)}
+}
+.a2-gC{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:18px;margin-top:24px;align-items:start}
+.a2-gC>*{min-width:0}
+@media (max-width:860px){.a2-gC{grid-template-columns:minmax(0,1fr)}}
+.a2-regles{list-style:none;margin:0 0 12px;padding:0;display:flex;flex-direction:column;gap:8px}
+.a2-regles li{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px;align-items:center;background:var(--papier);border-radius:var(--r-petit);padding:8px 10px;font-weight:700;line-height:1.35}
+.a2-regles li>b{font-weight:1000}
+.a2-reglage{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 12px;align-items:center;margin-top:8px}
+.a2-reglage label{font-weight:800;font-size:.95rem}
+.a2-reglage output{font-weight:1000;font-family:var(--police-mono);min-width:4ch;text-align:right}
+.a2-reglage input[type=range]{grid-column:1/-1;width:100%;accent-color:var(--encre);height:28px}
+.a2-res{font-weight:800}
+.a2-flash{animation:a2flash .9s ease-out}
+.a2-fin .grille{margin-top:16px}
+.a2-fin .carte h3{font-size:1.15rem}
+
+@keyframes a2flux{to{stroke-dashoffset:-24}}
+@keyframes a2clig{50%{opacity:.2}}
+@keyframes a2pulse{0%{opacity:.3}50%{opacity:1}100%{opacity:1}}
+@keyframes a2flash{0%{background-color:var(--jaune)}100%{background-color:transparent}}
+@media (prefers-reduced-motion:reduce){
+ #anim2 *{transition-delay:0s!important}
+ .a2-flux.a2-on,.a2-del,.a2-pulse,.a2-flash{animation:none}
+}
+</style>
 </head>
 <body>
+<section id="anim1" aria-label="Animation 1 — Comment fonctionne le leurre ESP32 ?">
 <div id="stage">
   <div class="top">
     <div><div class="sur">BTS CIEL · E6 · Projet de Lorenzo · CyberSentinel</div><h1 class="titre">Le leurre ESP32</h1></div>
@@ -407,13 +626,145 @@ html,body{margin:0;height:100%;overflow:hidden;background:var(--papier);line-hei
   <div class="hint">Maquette sur LAN isolé · adresses d'exemple · → / espace : suivant · P : pause · ← : retour · F : plein écran</div>
   <div id="pausebadge">❚❚ PAUSE · appuie sur P ou → pour reprendre</div>
 </div>
+</section>
+
+<!-- =====================================================================
+     ANIMATION 2 — De l'adresse IP à l'identification de l'attaquant
+     (indépendante de l'animation 1 : identifiants « a2- », script séparé)
+     ===================================================================== -->
+<nav class="a2-relais" aria-label="Les deux animations de la page">
+  <span class="a2-r1"><b>Animation 1</b> · Comment fonctionne le leurre ESP32 ?</span>
+  <a href="#anim2">↓ Animation 2 · Comment retrouver l'origine d'une connexion suspecte ?</a>
+</nav>
+
+<main id="anim2" aria-labelledby="a2-titre">
+  <header class="a2-tete conteneur">
+    <span class="label">Animation 2 · Comment retrouver l'origine d'une connexion suspecte ?</span>
+    <h2 id="a2-titre">Une adresse IP ne révèle pas forcément l'attaquant</h2>
+    <p class="a2-chapo">Le leurre a vu une connexion. Que sait-on vraiment ? Il y a trois questions, de la plus facile à la plus difficile.</p>
+    <ol class="a2-niveaux">
+      <li><span class="a2-num">1</span><span>Détecter une connexion<small>Le leurre le fait très bien (zone A).</small></span></li>
+      <li><span class="a2-num">2</span><span>Identifier un équipement<small>Parfois, en croisant d'autres journaux (zone B).</small></span></li>
+      <li><span class="a2-num">3</span><span>Identifier une personne<small>Pas avec une adresse IP seule (zones B et C).</small></span></li>
+    </ol>
+    <nav class="a2-sommaire" aria-label="Zones de l'animation 2">
+      <a class="bouton petit" href="#a2-zoneA">A · L'adresse IP source</a>
+      <a class="bouton petit" href="#a2-zoneB">B · Laboratoire d'attribution</a>
+      <a class="bouton petit" href="#a2-zoneC">C · Classement par Ubuntu</a>
+    </nav>
+  </header>
+
+  <!-- ===== A. animation réseau ===== -->
+  <section class="a2-zone" id="a2-zoneA" aria-labelledby="a2-tA">
+    <div class="conteneur">
+      <div class="a2-zone-tete"><span class="a2-lettre" aria-hidden="true">A</span><div><h3 id="a2-tA">Comment l'ESP32 découvre l'adresse IP source</h3><p>Six étapes. Une seule idée à retenir par étape (en jaune).</p></div></div>
+      <div class="a2-gA">
+        <figure class="a2-scene carte" id="a2-scene" tabindex="0" aria-label="Schéma du réseau : PC inconnu, switch, leurre ESP32 et W5500, serveur Ubuntu. Flèches gauche et droite : étape précédente ou suivante.">
+          <svg id="a2-svg" role="img" aria-labelledby="a2-svgT"><title id="a2-svgT">PC inconnu 10.10.0.73, switch, leurre 10.10.0.80 et serveur Ubuntu 10.10.0.20</title></svg>
+        </figure>
+        <div class="a2-explic carte">
+          <div aria-live="polite" class="a2-explic">
+            <span class="label" id="a2-eNum">Étape 1 sur 6</span>
+            <h4 id="a2-eTitre"></h4>
+            <p class="a2-notion" id="a2-eNotion"></p>
+          </div>
+          <p class="a2-texte" id="a2-eTexte"></p>
+          <div class="a2-detail" id="a2-eDetail"></div>
+        </div>
+      </div>
+      <div class="a2-ctl">
+        <ol class="a2-points" id="a2-points" aria-label="Aller à une étape"></ol>
+        <div class="a2-boutons">
+          <button type="button" class="bouton petit" id="a2-prec">← Précédent</button>
+          <button type="button" class="bouton petit principal" id="a2-suiv">Suivant →</button>
+          <button type="button" class="bouton petit" id="a2-rejouer">↺ Rejouer</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== B. laboratoire d'attribution ===== -->
+  <section class="a2-zone zone-2" id="a2-zoneB" aria-labelledby="a2-tB">
+    <div class="conteneur">
+      <div class="a2-zone-tete"><span class="a2-lettre" aria-hidden="true">B</span><div><h3 id="a2-tB">Laboratoire d'attribution : qui est derrière l'adresse ?</h3><p>Choisis une situation. Regarde quelle adresse arrive vraiment au leurre.</p></div></div>
+      <div class="a2-choix" id="a2-choix" role="group" aria-label="Choisir une situation"></div>
+      <ol class="a2-chaine" id="a2-chaine" aria-label="Chemin de la connexion jusqu'au leurre"></ol>
+      <div class="a2-gB">
+        <div class="carte">
+          <span class="label">Les trois questions</span>
+          <ul class="a2-jauge" id="a2-jauge" aria-live="polite"></ul>
+        </div>
+        <div class="carte">
+          <span class="label" id="a2-bNom"></span>
+          <p class="a2-notion" id="a2-bExpl"></p>
+          <div class="a2-indice" id="a2-bExtra"></div>
+          <div class="encadre info a2-indice"><span class="label">Piste d'enquête</span><p id="a2-bPiste"></p></div>
+        </div>
+      </div>
+      <p class="bandeau a2-clef">Une adresse IP est un <b>indice technique</b> pour orienter une enquête. Ce n'est <b>pas une preuve suffisante</b> pour identifier une personne.</p>
+    </div>
+  </section>
+
+  <!-- ===== C. classement par Ubuntu ===== -->
+  <section class="a2-zone" id="a2-zoneC" aria-labelledby="a2-tC">
+    <div class="conteneur">
+      <div class="a2-zone-tete"><span class="a2-lettre" aria-hidden="true">C</span><div><h3 id="a2-tC">Comment Ubuntu classe les événements</h3><p>Événement reçu → analyse → classement → alerte éventuelle. Choisis un exemple.</p></div></div>
+      <div class="a2-choix" id="a2-exemples" role="group" aria-label="Choisir un exemple">
+        <button type="button" class="bouton petit" data-ex="1" aria-pressed="false">1 · Consultation simple</button>
+        <button type="button" class="bouton petit" data-ex="2" aria-pressed="false">2 · Accès à /admin</button>
+        <button type="button" class="bouton petit" data-ex="3" aria-pressed="false">3 · Visites répétées</button>
+      </div>
+      <ol class="a2-pipe" id="a2-pipe">
+        <li class="a2-etage"><h4><i>1</i>Événement reçu</h4><div class="a2-contenu" id="a2-c1">En attente d'un exemple.</div></li>
+        <li class="a2-etage"><h4><i>2</i>Analyse</h4><div class="a2-contenu" id="a2-c2">Les règles seront testées une par une.</div></li>
+        <li class="a2-etage"><h4><i>3</i>Classement</h4><div class="a2-contenu" id="a2-c3">—</div></li>
+        <li class="a2-etage"><h4><i>4</i>Alerte éventuelle</h4><div class="a2-contenu" id="a2-c4">—</div></li>
+      </ol>
+      <p class="sr-only" aria-live="polite" id="a2-cAnnonce"></p>
+      <div class="a2-gC">
+        <div class="carte">
+          <span class="label">Les règles (réglables)</span>
+          <ul class="a2-regles">
+            <li><b>R1</b><span>Toute connexion au leurre</span><span class="tag info">OBSERVATION</span></li>
+            <li><b>R2</b><span>Ressource « sensible » demandée : <code>/admin</code>, <code>/config</code>, <code>/scan</code>, <code>/carnet</code></span><span class="tag jaune">À EXAMINER</span></li>
+            <li><b>R3</b><span>Même adresse : au moins <b id="a2-nTxt">3</b> ressources sensibles différentes en <b id="a2-tTxt">5</b> min</span><span class="tag danger">PRIORITAIRE</span></li>
+          </ul>
+          <div class="a2-reglage">
+            <label for="a2-N">Seuil de R3 : nombre de ressources</label><output id="a2-Nout" for="a2-N">3</output>
+            <input type="range" id="a2-N" min="2" max="6" step="1" value="3">
+            <label for="a2-T">Fenêtre de R3 : durée en minutes</label><output id="a2-Tout" for="a2-T">5 min</output>
+            <input type="range" id="a2-T" min="1" max="10" step="1" value="5">
+          </div>
+          <pre class="terminal" id="a2-conf" aria-label="Fichier de règles"></pre>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:14px">
+          <div class="encadre accent"><span class="label">Le niveau vient des règles</span><p>Ubuntu ne « devine » rien. Il applique des règles écrites par Lorenzo. Change le seuil ou la fenêtre : l'exemple 3 peut changer de niveau.</p></div>
+          <div class="encadre info"><span class="label">À évaluer sur la maquette</span><p>Rejouer des scénarios normaux (technicien, scanner d'inventaire) et des attaques simulées. Compter les fausses alertes et les attaques ratées. Puis régler le seuil et la fenêtre.</p></div>
+          <div class="encadre danger"><span class="label">Jamais une preuve automatique</span><p>Même « prioritaire », une alerte demande seulement à un humain de regarder vite. Un technicien qui teste laisse la même trace qu'un attaquant.</p></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section-finale a2-fin" aria-labelledby="a2-tFin">
+    <div class="conteneur">
+      <span class="label">À retenir</span>
+      <h2 id="a2-tFin">Détecter, identifier, attribuer : trois choses différentes</h2>
+      <div class="grille">
+        <div class="carte"><h3>1 · Détecter une connexion</h3><p><b>Oui.</b> Le leurre lit l'adresse source dans chaque connexion. Il n'a besoin d'aucune liste à l'avance.</p></div>
+        <div class="carte"><h3>2 · Identifier un équipement</h3><p><b>Parfois.</b> Il faut croiser d'autres journaux : DHCP, NAT, proxy, table MAC du switch, avec des horloges à l'heure (NTP).</p></div>
+        <div class="carte"><h3>3 · Identifier un attaquant</h3><p><b>Pas avec une IP seule.</b> Un PC peut être piloté à distance, un compte peut être volé. C'est le travail d'une enquête humaine.</p></div>
+      </div>
+    </div>
+  </section>
+</main>
 
 <script>
 {
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const stage=$('#stage');
 let scale=1;
-function fit(){scale=Math.min(innerWidth/1600,innerHeight/900);stage.style.transform=`translate(-50%,-50%) scale(${scale})`}
+function fit(){const box=stage.parentNode;scale=Math.min(box.clientWidth/1600,box.clientHeight/900);stage.style.transform=`translate(-50%,-50%) scale(${scale})`}
 addEventListener('resize',fit);fit();
 const esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 
@@ -460,11 +811,11 @@ let paused=false,frozen=[];
 function startT(o){o.t0=performance.now();o.t=setTimeout(()=>{pend.delete(o);o.r()},o.rem)}
 const wait=ms=>fast?Promise.resolve():new Promise(r=>{const o={r,rem:ms,t:null};pend.add(o);if(!paused)startT(o)});
 function pause(){if(paused||!running)return;paused=true;pend.forEach(o=>{if(o.t!=null){clearTimeout(o.t);o.t=null;o.rem=Math.max(0,o.rem-(performance.now()-o.t0))}});
- frozen=document.getAnimations().filter(a=>a.playState==='running');frozen.forEach(a=>{try{a.pause()}catch(e){}});pui()}
+ frozen=stage.getAnimations({subtree:true}).filter(a=>a.playState==='running');frozen.forEach(a=>{try{a.pause()}catch(e){}});pui()}
 function resume(){if(!paused)return;paused=false;frozen.forEach(a=>{try{a.play()}catch(e){}});frozen=[];pend.forEach(o=>{if(o.t==null)startT(o)});pui()}
 function pui(){const b=$('#pause');b.textContent=paused?'▶':'❚❚';b.title=paused?'Reprendre (P)':'Pause (P)';b.setAttribute('aria-label',b.title);b.disabled=!running&&!paused;$('#pausebadge').classList.toggle('show',paused)}
 const isCss=a=>(typeof CSSAnimation!=='undefined'&&a instanceof CSSAnimation)||(typeof CSSTransition!=='undefined'&&a instanceof CSSTransition);
-function skip(){resume();fast=true;pend.forEach(o=>{clearTimeout(o.t);o.r()});pend.clear();document.getAnimations().forEach(a=>{if(!isCss(a))try{a.finish()}catch(e){}})}
+function skip(){resume();fast=true;pend.forEach(o=>{clearTimeout(o.t);o.r()});pend.clear();stage.getAnimations({subtree:true}).forEach(a=>{if(!isCss(a))try{a.finish()}catch(e){}})}
 function pos(el){const r=el.getBoundingClientRect(),s=stage.getBoundingClientRect();return{x:(r.left+r.width/2-s.left)/scale,y:(r.top+r.height/2-s.top)/scale}}
 async function anim(el,kf,ms,o={}){const a=el.animate(kf,{duration:D(ms),easing:o.easing||'ease-in-out',fill:'forwards'});try{await a.finished}catch(e){}return a}
 
@@ -555,7 +906,7 @@ const BRUIT=[['10.10.0.54','10.10.0.20','TLS','Application Data','t'],['10.10.0.
 
 /* ---------- état initial ---------- */
 function reset(){
- document.getAnimations().forEach(a=>{if(!isCss(a))a.cancel()});
+ stage.getAnimations({subtree:true}).forEach(a=>{if(!isCss(a))a.cancel()});
  pend.forEach(o=>clearTimeout(o.t));pend.clear();paused=false;frozen=[];
  $('#fx').innerHTML='';for(const k in W){liveN[k]=0;$('#f'+W[k]).classList.remove('live')}
  cp={x:310,y:420};cur.style.opacity=0;cur.style.transform=`translate(${cp.x}px,${cp.y}px)`;
@@ -683,7 +1034,10 @@ $('#restart').addEventListener('click',e=>{e.stopPropagation();goto(0)});
 function full(){try{const d=document;if(d.fullscreenElement)d.exitFullscreen();else d.documentElement.requestFullscreen().catch(()=>{})}catch(e){}}
 $('#fs').addEventListener('click',e=>{e.stopPropagation();full()});
 stage.addEventListener('click',e=>{if(!e.target.closest('button'))next()});
+const sec1=$('#anim1');
+function vue1(){const r=sec1.getBoundingClientRect();return r.top<innerHeight/2&&r.bottom>innerHeight/2}
 addEventListener('keydown',e=>{
+ if(!vue1()||(e.target.closest&&e.target.closest('#anim2')))return;
  const k=e.key;
  if(['ArrowRight','PageDown',' ','Enter'].includes(k)){e.preventDefault();next()}
  else if(['ArrowLeft','PageUp','Backspace'].includes(k)){e.preventDefault();prev()}
@@ -693,6 +1047,404 @@ addEventListener('keydown',e=>{
 });
 reset();setSub(0);ui();
 window.__goto=goto;window.__state=()=>({step,running,N});
+}
+</script>
+<script>
+/* =====================================================================
+   ANIMATION 2 — script indépendant (aucune variable partagée avec l'animation 1).
+   Pas d'animations Web (el.animate) : mouvements par requestAnimationFrame
+   et transitions CSS, pour ne jamais toucher aux animations de la scène 1.
+   ===================================================================== */
+{
+const q=s=>document.querySelector(s), qa=(s,r=document)=>[...r.querySelectorAll(s)];
+const RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const NS='http://www.w3.org/2000/svg';
+const echap=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const attendre=ms=>new Promise(r=>setTimeout(r,RM?0:ms));
+const cl=(el,c,on)=>{if(el)el.classList.toggle(c,!!on)};
+
+/* =========================== A. ANIMATION RÉSEAU =========================== */
+const svg=q('#a2-svg');
+const LAY={
+ large:{vb:[1000,580],fs:28,
+  pc:[165,185,1.25],sw:[490,250,1.15],leu:[820,100,.72],ubu:[840,397,1.1],
+  lab:{pc:[165,318],sw:[490,320],leu:[820,194],ubu:[840,520]},
+  cab:{pc:'M268 192C320 192 310 250 352 250',leu:'M672 99C620 99 660 240 628 240',ubu:'M712 397C660 397 680 262 628 262'}},
+ etroit:{vb:[400,600],fs:21,
+  pc:[120,85,.85],sw:[200,270,1],leu:[105,440,.42],ubu:[300,440,.7],
+  lab:{pc:[300,72],sw:[300,214],leu:[105,512],ubu:[300,512]},
+  cab:{pc:'M120 145V244',leu:'M105 403C105 350 150 350 150 296',ubu:'M300 383C300 340 250 340 250 296'}}
+};
+let lay=null,layNom='';
+
+/* dessins du matériel (coordonnées locales, centrés sur 0,0) */
+function dPC(){return `
+ <rect x="-85" y="-70" width="170" height="112" rx="10" class="fi"/>
+ <rect x="-76" y="-62" width="152" height="90" rx="4" class="fw"/>
+ <rect x="-76" y="-62" width="152" height="16" rx="4" class="fp2"/>
+ <rect x="-70" y="-41" width="140" height="13" rx="6.5" class="fp2"/>
+ <rect x="-60" y="-19" width="74" height="8" rx="4" class="fc2"/>
+ <rect x="-60" y="-6" width="104" height="8" rx="4" class="fc2"/>
+ <rect x="-60" y="7" width="86" height="8" rx="4" class="fc2"/>
+ <circle cx="0" cy="35" r="2.5" class="fi3"/>
+ <path d="M-18 42h36l8 20h-52z" class="fc"/>
+ <rect x="-50" y="60" width="100" height="9" rx="4.5" class="fc2"/>
+ <g><circle cx="78" cy="-66" r="20" class="fj si" stroke-width="2.5"/><text x="78" y="-58" text-anchor="middle" style="font:1000 24px var(--police);fill:var(--encre)">?</text></g>`}
+function dSwitch(){
+ const o=[`<g transform="translate(-130 -26) scale(.788)"><rect x="0" y="0" width="330" height="66" rx="6" class="fc2 si" stroke-width="2"/><rect x="8" y="7" width="314" height="52" rx="4" class="fi2"/>`];
+ for(let r=0;r<2;r++)for(let c=0;c<12;c++){const x=20+c*20+(c>5?10:0),y=12+r*24;
+  o.push(`<rect x="${x}" y="${y}" width="16" height="16" rx="1.5" class="fi"/><rect x="${x+5}" y="${y+(r?11:1)}" width="6" height="4" class="fi3"/><rect x="${x+1}" y="${y+(r?1:12)}" width="4" height="3" class="fv a2-del" style="animation-delay:-${((r*12+c)*.37%1.6).toFixed(2)}s"/>`)}
+ o.push(`<rect x="276" y="14" width="38" height="14" rx="2" class="fc"/><rect x="276" y="38" width="38" height="14" rx="2" class="fc"/><circle cx="268" cy="30" r="2.5" class="fv"/></g>`);
+ return o.join('')}
+function dLeurre(){
+ const L=['<g transform="translate(-205 -85)">'];
+ L.push(`<rect id="a2-w5500" x="22" y="34" width="112" height="108" rx="6" class="fb si a2-hlb" stroke-width="2"/>`);
+ L.push(`<rect x="70" y="72" width="36" height="36" rx="2" class="fi"/>`);
+ for(let i=0;i<9;i++)L.push(`<rect x="${68+i*4.4}" y="68" width="2" height="4" class="fc2"/><rect x="${68+i*4.4}" y="108" width="2" height="4" class="fc2"/>`);
+ L.push(`<rect x="0" y="52" width="58" height="62" rx="3" class="fc2 si" stroke-width="2"/><rect x="5" y="64" width="34" height="38" rx="2" class="fi"/><rect x="12" y="64" width="20" height="8" class="fi3"/>`);
+ L.push(`<rect x="44" y="57" width="9" height="6" class="fv a2-del"/><rect x="44" y="103" width="9" height="6" class="fjf a2-del" style="animation-delay:-.6s"/>`);
+ for(let i=0;i<6;i++)L.push(`<rect x="122" y="${50+i*14}" width="8" height="8" class="fi"/>`);
+ const wc=['sj','sr','si2','sv','sjf','sb'];
+ for(let i=0;i<6;i++){const y=54+i*14,x2=176+i*12;L.push(`<path d="M128 ${y}C150 ${y} ${x2} 20 ${x2} 40" class="fn ${wc[i]}" stroke-width="3" stroke-linecap="round"/>`)}
+ L.push(`<rect id="a2-esp" x="150" y="38" width="250" height="100" rx="6" class="fi si a2-hlb" stroke-width="0"/>`);
+ for(let i=0;i<19;i++)L.push(`<rect x="${164+i*12}" y="42" width="7" height="7" class="fc2"/><rect x="${164+i*12}" y="127" width="7" height="7" class="fc2"/>`);
+ L.push(`<rect x="140" y="76" width="16" height="24" rx="2" class="fc2 si" stroke-width="1"/>`);
+ L.push(`<circle cx="214" cy="112" r="4.5" class="fr"/><circle cx="230" cy="112" r="4.5" class="fb a2-del"/>`);
+ L.push(`<rect x="262" y="56" width="134" height="66" rx="3" class="fi2"/><rect x="266" y="60" width="92" height="58" rx="3" class="fc2"/><text x="312" y="95" text-anchor="middle" style="font:900 17px var(--police);fill:var(--encre-2)">ESP32</text>`);
+ L.push(`<path d="M364 64h26v8h-22v8h22v8h-22v8h22v8h-22v8h22" class="fn sjf" stroke-width="2.5"/>`);
+ L.push(`<text x="78" y="30" text-anchor="middle" style="font:900 17px var(--police);fill:var(--encre-2)">W5500</text></g>`);
+ return L.join('')}
+function dUbuntu(){
+ const T=[`<rect x="-125" y="-80" width="58" height="160" rx="6" class="fi2 si" stroke-width="2"/><rect x="-118" y="-70" width="44" height="22" rx="3" class="fi"/><rect x="-118" y="-42" width="44" height="9" rx="2" class="fi"/>`];
+ for(let r=0;r<6;r++)for(let c=0;c<4;c++)T.push(`<circle cx="${-110+c*9.5}" cy="${-20+r*9}" r="2.2" class="fi"/>`);
+ T.push(`<circle cx="-96" cy="62" r="6" class="fc si" stroke-width="1.5"/><circle cx="-110" cy="-59" r="2.6" class="fv a2-del"/><circle cx="-101" cy="-59" r="2.6" class="fjf a2-del" style="animation-delay:-.7s"/>`);
+ T.push(`<rect x="-52" y="-76" width="177" height="114" rx="9" class="fi"/><rect x="-44" y="-68" width="161" height="92" rx="3" class="fw"/><rect x="-44" y="-68" width="161" height="17" class="fi2"/>`);
+ T.push(`<text x="-37" y="-55" style="font:900 12px var(--police);fill:var(--papier)">Supervision</text>`);
+ T.push(`<rect x="-37" y="-44" width="147" height="28" rx="4" class="fp"/><text x="36" y="-26" text-anchor="middle" style="font:800 12px var(--police);fill:var(--encre-2)">aucun événement</text>`);
+ T.push(`<g id="a2-ubuAl" class="a2-dev a2-cache"><rect x="-37" y="-44" width="147" height="28" rx="4" class="fj si" stroke-width="1.5"/><text x="36" y="-25" text-anchor="middle" style="font:1000 13px var(--police);fill:var(--encre)">À EXAMINER</text></g>`);
+ T.push(`<rect x="-37" y="-8" width="110" height="7" rx="3" class="fc2"/><rect x="-37" y="5" width="80" height="7" rx="3" class="fc2"/>`);
+ T.push(`<path d="M22 38h30l6 16h-42z" class="fc"/><rect x="2" y="52" width="70" height="7" rx="3.5" class="fc2"/>`);
+ return T.join('')}
+
+function grp(id,[x,y,s],inner,extra=''){return `<g id="${id}" transform="translate(${x} ${y}) scale(${s})" ${extra}>${inner}</g>`}
+function etiquette(id,[x,y],nom,ip,statut,fs){
+ const dy=fs*1.42;let h=`<g id="${id}" class="a2-dev"><g class="a2-pill"><rect class="a2-pillr" rx="${fs*.75}"/><text class="a2-pillt" x="${x}" y="${y}" text-anchor="middle" dominant-baseline="central" style="font-size:${fs*.82}px">${nom}</text></g>`;
+ if(ip)h+=`<text class="a2-ipt" x="${x}" y="${y+dy}" text-anchor="middle" dominant-baseline="central" style="font-size:${fs*.9}px">${ip}</text>`;
+ if(statut!==null)h+=`<text class="a2-stt" id="${id}-st" x="${x}" y="${y+dy*(ip?2:1)}" text-anchor="middle" dominant-baseline="central" style="font-size:${fs*.78}px">${statut}</text>`;
+ return h+'</g>'}
+
+function dessiner(){
+ const w=svg.parentNode.clientWidth;const nom=w<520?'etroit':'large';
+ if(nom===layNom)return false;layNom=nom;lay=LAY[nom];
+ const [W,H]=lay.vb,c=lay.cab,f=lay.fs;
+ svg.setAttribute('viewBox',`0 0 ${W} ${H}`);cl(svg,'a2-etroit',nom==='etroit');
+ const titre=svg.querySelector('title').outerHTML;
+ svg.innerHTML=titre+
+  `<path class="a2-etabli" d="${c.pc}"/><path class="a2-etabli" d="${c.leu}"/>`+
+  ['pc','leu','ubu'].map(k=>`<path class="a2-cable" id="a2-c-${k}" d="${c[k]}"/>`).join('')+
+  ['pc','leu','ubu'].map(k=>`<path class="a2-flux" data-c="${k}" d="${c[k]}"/>`).join('')+
+  grp('a2-gsw',lay.sw,dSwitch(),'role="presentation"')+
+  grp('a2-gpc',lay.pc,dPC(),'class="a2-dev"')+
+  grp('a2-gleu',lay.leu,dLeurre())+
+  grp('a2-gubu',lay.ubu,dUbuntu())+
+  `<circle class="a2-loupe" id="a2-loupe" cx="${lay.sw[0]}" cy="${lay.sw[1]}" r="${nom==='etroit'?40:62}"/>`+
+  etiquette('a2-lpc',lay.lab.pc,'PC INCONNU','10.10.0.73',null,f)+
+  etiquette('a2-lsw',lay.lab.sw,'SWITCH','',nom==='large'?'du labo':null,f)+
+  etiquette('a2-lleu',lay.lab.leu,'LEURRE','10.10.0.80','',f)+
+  etiquette('a2-lubu',lay.lab.ubu,'UBUNTU','10.10.0.20',null,f)+
+  `<g id="a2-fx"></g>`;
+ qa('.a2-pill',svg).forEach(g=>{const t=g.querySelector('text'),b=t.getBBox(),r=g.querySelector('rect'),px=f*.55,py=f*.28;
+  r.setAttribute('x',b.x-px);r.setAttribute('y',b.y-py);r.setAttribute('width',b.width+2*px);r.setAttribute('height',b.height+2*py)});
+ return true}
+
+/* déplacement d'un paquet le long des câbles */
+function points(seg){
+ if(!Array.isArray(seg))return [seg.p];
+ const [id,rev]=seg,p=svg.querySelector('#a2-c-'+id),L=p.getTotalLength(),a=[];
+ for(let i=0;i<=32;i++){const r=p.getPointAtLength(L*i/32);a.push([r.x,r.y])}
+ return rev?a.reverse():a}
+const trajet=segs=>segs.reduce((a,s)=>a.concat(points(s)),[]);
+function paquet(txt,cls){
+ const g=document.createElementNS(NS,'g');g.setAttribute('class','a2-pk '+cls);g.style.opacity=0;
+ g.innerHTML=`<rect rx="9"/><text text-anchor="middle" dominant-baseline="central">${echap(txt)}</text>`;
+ q('#a2-fx').append(g);const b=g.querySelector('text').getBBox(),r=g.querySelector('rect'),w=b.width+22,h=b.height+12;
+ r.setAttribute('x',-w/2);r.setAttribute('y',-h/2);r.setAttribute('width',w);r.setAttribute('height',h);return g}
+function deplacer(g,pts,ms,t,{debut=true,fin=true}={}){
+ return new Promise(res=>{
+  const L=[0];for(let i=1;i<pts.length;i++)L.push(L[i-1]+Math.hypot(pts[i][0]-pts[i-1][0],pts[i][1]-pts[i-1][1]));
+  const T=L[L.length-1]||1;let t0=null;
+  const f=now=>{
+   if(t!==jeton){res(false);return}
+   if(t0===null)t0=now;const k=Math.min(1,(now-t0)/ms),d=k*T;let i=1;while(i<L.length-1&&L[i]<d)i++;
+   const u=(d-L[i-1])/Math.max(1e-6,L[i]-L[i-1]),x=pts[i-1][0]+(pts[i][0]-pts[i-1][0])*u,y=pts[i-1][1]+(pts[i][1]-pts[i-1][1])*u;
+   g.setAttribute('transform',`translate(${x.toFixed(1)} ${y.toFixed(1)})`);
+   g.style.opacity=(debut&&k<.07)?k/.07:(fin&&k>.93)?(1-k)/.07:1;
+   if(k<1)requestAnimationFrame(f);else res(true)};
+  requestAnimationFrame(f)})}
+function flux(ks,on){ks.forEach(k=>{const f=svg.querySelector(`.a2-flux[data-c="${k}"]`);cl(f,'a2-on',on)})}
+async function envoyer(txt,cls,segs,ms,t){
+ if(RM||t!==jeton)return;const ks=segs.filter(Array.isArray).map(s=>s[0]);
+ const g=paquet(txt,cls);flux(ks,true);await deplacer(g,trajet(segs),ms,t);g.remove();if(t===jeton)flux(ks,false)}
+function leuPoint(lx,ly){const [x,y,s]=lay.leu;return {p:[x+(lx-205)*s,y+(ly-85)*s]}}
+
+/* état visible à la fin de chaque étape */
+const DEPART={pc:0,leu:'attend sur le port 80',fort:0,etabli:0,hl:'',alerte:0};
+function appliquer(e){
+ cl(q('#a2-gpc'),'a2-cache',!e.pc);cl(q('#a2-lpc'),'a2-cache',!e.pc);
+ const st=q('#a2-lleu-st');st.textContent=e.leu;cl(st,'a2-fort',e.fort);
+ qa('.a2-etabli',svg).forEach(p=>cl(p,'a2-on',e.etabli));
+ cl(q('#a2-w5500'),'a2-hl',e.hl==='w');cl(q('#a2-esp'),'a2-hl',e.hl==='e');
+ cl(q('#a2-ubuAl'),'a2-cache',!e.alerte);cl(q('#a2-loupe'),'a2-on',false);
+ qa('.a2-flux',svg).forEach(f=>cl(f,'a2-on',false));qa('#a2-fx>*').forEach(n=>n.remove());
+ cl(q('#a2-gubu'),'a2-ubuOccupe',false)}
+
+const ETAPES=[
+ {titre:"Un ordinateur inconnu apparaît",
+  notion:"Le leurre ne connaît <b>pas</b> cette adresse à l'avance.",
+  texte:"Un PC se branche sur le réseau du labo. Il a reçu l'adresse 10.10.0.73 (par DHCP ou réglée à la main). Personne ne l'a donnée au leurre, et il n'en a pas besoin.",
+  detail:`<div class="a2-deux a2-in" style="--i:0"><div><b>Le PC sait</b>Mon adresse : <code>10.10.0.73</code></div><div><b>Le leurre sait</b>Visiteurs prévus : <i>aucun</i>. Il écoute le port 80 et il attend.</div></div>
+   <p class="a2-petit a2-in" style="--i:1">Le leurre n'a pas de liste d'adresses à surveiller : c'est le visiteur qui viendra à lui.</p>`,
+  etat:{...DEPART,pc:1},
+  anim:async t=>{appliquer({...DEPART,pc:1});await attendre(700);if(t!==jeton)return;flux(['pc'],true);await attendre(1400);if(t===jeton)flux(['pc'],false)}},
+ {titre:"Le PC contacte le leurre",
+  notion:"Une connexion TCP s'ouvre en <b>3 messages</b>. C'est le PC qui commence.",
+  texte:"Le PC veut la page http://10.10.0.80/admin. Avant d'envoyer sa demande, il ouvre une connexion TCP sur le port 80 : c'est la « poignée de main ».",
+  detail:`<div class="a2-seq">
+    <div class="a2-in" style="--i:0"><span class="a2-bout">PC</span><span class="a2-fl d"><code>SYN</code> · « Je voudrais te parler, port 80. »</span><span class="a2-bout">LEURRE</span></div>
+    <div class="a2-in" style="--i:1"><span class="a2-bout">PC</span><span class="a2-fl g"><code>SYN-ACK</code> · « D'accord, je t'écoute. »</span><span class="a2-bout">LEURRE</span></div>
+    <div class="a2-in" style="--i:2"><span class="a2-bout">PC</span><span class="a2-fl d"><code>ACK</code> · « C'est parti. »</span><span class="a2-bout">LEURRE</span></div></div>
+   <p class="a2-petit a2-in" style="--i:3">Côté leurre, c'est la puce <b>W5500</b> qui répond, toute seule. (Avant, le PC a trouvé l'adresse MAC du leurre par ARP : voir l'animation 1.)</p>`,
+  etat:{...DEPART,pc:1,leu:'connexion ouverte',etabli:1},
+  anim:async t=>{
+   await envoyer('SYN','j',[['pc',0],['leu',1]],1300,t);
+   await envoyer('SYN-ACK','b',[['leu',0],['pc',1]],1300,t);
+   await envoyer('ACK','j',[['pc',0],['leu',1]],1300,t)}},
+ {titre:"Observation du paquet IP",
+  notion:"Chaque paquet porte <b>deux adresses</b> : la source (qui envoie) et la destination (à qui).",
+  texte:"Comme une lettre : l'adresse du destinataire sert à l'acheminer ; l'adresse de l'expéditeur sert à lui répondre.",
+  detail:`<div class="a2-paquet a2-in" style="--i:0"><b>Le paquet, vu de l'intérieur</b>
+    <div class="a2-champ src a2-in" style="--i:1"><span>IP source</span><code>10.10.0.73</code><small>qui envoie : l'adresse où répondre</small></div>
+    <div class="a2-champ dst a2-in" style="--i:2"><span>IP destination</span><code>10.10.0.80</code><small>à qui : le leurre</small></div>
+    <div class="a2-champ tcp a2-in" style="--i:3"><span>TCP</span><code>port 51544 → port 80</code><small>quelle application (80 = web)</small></div>
+    <div class="a2-champ a2-in" style="--i:4"><span>Données</span><code>GET /admin HTTP/1.1</code><small>la demande HTTP elle-même</small></div></div>
+   <p class="a2-petit a2-in" style="--i:5">La source est écrite par l'émetteur. Mais pour une connexion TCP complète, mentir est difficile : la réponse part vers cette adresse.</p>`,
+  etat:{...DEPART,pc:1,leu:'requête reçue',etabli:1},
+  anim:async t=>{
+   if(RM)return;const g=paquet('GET /admin','j'),ctr={p:[lay.sw[0],lay.sw[1]-4]};flux(['pc'],true);
+   await deplacer(g,trajet([['pc',0],ctr]),1100,t,{fin:false});if(t!==jeton){g.remove();return}flux(['pc'],false);
+   cl(q('#a2-loupe'),'a2-on',true);await attendre(1300);if(t!==jeton)return;cl(q('#a2-loupe'),'a2-on',false);
+   flux(['leu'],true);await deplacer(g,trajet([ctr,['leu',1]]),1000,t,{debut:false});g.remove();if(t===jeton)flux(['leu'],false)}},
+ {titre:"L'ESP32 récupère l'adresse",
+  notion:"Le serveur n'a pas besoin de connaître l'adresse avant : il la <b>lit dans la connexion</b> qui arrive.",
+  texte:"À l'ouverture de la connexion, la puce W5500 range l'adresse du correspondant dans un registre. L'ESP32 la lit par le bus SPI, en une ligne de code.",
+  detail:`<div class="a2-bloc w a2-in" style="--i:0"><b>Puce W5500</b>Registre <code>Sn_DIPR</code> du socket : <b>10.10.0.73</b><br><span class="a2-petit">rempli tout seul quand la connexion s'établit (mode serveur TCP)</span></div>
+   <span class="a2-spi a2-in" style="--i:1">↓ bus SPI</span>
+   <pre class="terminal a2-in" style="--i:2">EthernetClient client = serveur.available();
+IPAddress ip = client.remoteIP();
+<span class="a2-com">// ip vaut maintenant</span> <span class="a2-hi">10.10.0.73</span></pre>
+   <p class="a2-petit a2-in" style="--i:3">L'adresse vient de l'en-tête IP, pas du texte HTTP : le visiteur ne la « déclare » pas. <code>remoteIP()</code> existe dans la bibliothèque Ethernet d'Arduino (version 2 et plus).</p>`,
+  etat:{...DEPART,pc:1,leu:'client : 10.10.0.73',fort:1,etabli:1,hl:'e'},
+  anim:async t=>{
+   cl(q('#a2-w5500'),'a2-hl',true);await attendre(900);if(t!==jeton||RM)return;
+   const g=paquet('10.10.0.73','b');await deplacer(g,[leuPoint(78,88).p,leuPoint(300,88).p],1000,t);g.remove();if(t!==jeton)return;
+   cl(q('#a2-w5500'),'a2-hl',false);cl(q('#a2-esp'),'a2-hl',true);await attendre(300)}},
+ {titre:"Transmission à Ubuntu",
+  notion:"L'ESP32 <b>rapporte</b> un fait ; Ubuntu vérifie qu'il vient bien du leurre.",
+  texte:"L'ESP32 écrit un petit événement et l'envoie à l'API du serveur Ubuntu. Le message est signé : un faux appareil ne pourrait pas en fabriquer.",
+  detail:`<pre class="terminal a2-in" style="--i:0">POST /api/evenements   <span class="a2-com">(vers 10.10.0.20)</span>
+X-Signature: hmac-sha256=9c41…e07b
+{ "capteur": "leurre-01",
+  "ip_source": "<span class="a2-hi">10.10.0.73</span>",
+  "heure": "2026-11-22T10:42:07+01:00",
+  "ressource": "GET /admin",
+  "compteur": 118 }</pre>
+   <ul class="a2-verif"><li class="a2-in" style="--i:1">Signature HMAC valide : le message vient d'un appareil qui connaît la clé.</li><li class="a2-in" style="--i:2">Compteur 118, plus grand que le dernier reçu (117) : ce n'est pas un vieux message rejoué.</li></ul>
+   <p class="a2-petit a2-in" style="--i:3">HTTPS si l'ESP32 le supporte bien (à mesurer) ; sinon signature HMAC + compteur, comme pour le radar.</p>`,
+  etat:{...DEPART,pc:1,leu:'client : 10.10.0.73',fort:1},
+  anim:async t=>{appliquer({...DEPART,pc:1,leu:'client : 10.10.0.73',fort:1});await envoyer('événement signé','v',[['leu',0],['ubu',1]],2000,t)}},
+ {titre:"Apparition de l'alerte",
+  notion:"C'est un <b>événement à examiner</b>, pas une preuve d'intrusion.",
+  texte:"Ubuntu range l'événement dans sa base et l'affiche. Le technicien voit trois faits : une adresse, une heure, une ressource demandée.",
+  detail:`<div class="a2-alerte a2-in" style="--i:0"><div class="a2-alerte-h"><span class="tag jaune">À EXAMINER</span>Supervision · leurre-01</div>
+    <dl><dt>IP observée</dt><dd><code>10.10.0.73</code></dd><dt>Horodatage</dt><dd>22/11/2026 · 10:42:07 <span class="a2-petit">(horloge NTP)</span></dd><dt>Ressource</dt><dd><code>GET /admin</code></dd><dt>Capteur</dt><dd>leurre-01 (fausse imprimante)</dd></dl></div>
+   <div class="encadre danger a2-in" style="--i:1"><p><b>Ce que l'alerte ne dit pas :</b> qui était derrière le PC, ni s'il voulait nuire.</p></div>
+   <p class="a2-in" style="--i:2"><a class="bouton petit jaune" href="#a2-zoneB">Qui est derrière 10.10.0.73 ? → zone B</a></p>`,
+  etat:{...DEPART,pc:1,leu:'client : 10.10.0.73',fort:1,alerte:1},
+  anim:async t=>{cl(q('#a2-gubu'),'a2-ubuOccupe',true);await attendre(800);if(t!==jeton)return;cl(q('#a2-gubu'),'a2-ubuOccupe',false);
+   const a=q('#a2-ubuAl');cl(a,'a2-cache',false);a.classList.remove('a2-pulse');void a.getBBox();a.classList.add('a2-pulse')}}
+];
+const N=ETAPES.length;
+let etape=1,jeton=0,lance=false;
+
+/* points d'étape */
+q('#a2-points').innerHTML=ETAPES.map((e,i)=>`<li><button type="button" class="a2-point" data-n="${i+1}" aria-label="Étape ${i+1} : ${echap(e.titre)}">${i+1}</button></li>`).join('');
+
+function panneau(n){
+ const e=ETAPES[n-1];
+ q('#a2-eNum').textContent=`Étape ${n} sur ${N}`;q('#a2-eTitre').textContent=e.titre;q('#a2-eNotion').innerHTML=e.notion;q('#a2-eTexte').textContent=e.texte;
+ const d=q('#a2-eDetail');d.classList.remove('a2-vu');d.innerHTML=e.detail;
+ requestAnimationFrame(()=>requestAnimationFrame(()=>d.classList.add('a2-vu')));
+ qa('.a2-point').forEach(b=>{const k=+b.dataset.n;if(k===n)b.setAttribute('aria-current','step');else b.removeAttribute('aria-current');cl(b,'a2-fait',k<n)});
+ q('#a2-prec').disabled=n===1;q('#a2-suiv').disabled=n===N}
+async function aller(n,anim=true){
+ n=Math.max(1,Math.min(N,n));etape=n;const t=++jeton;lance=true;
+ panneau(n);appliquer(n===1?DEPART:ETAPES[n-2].etat);
+ if(anim&&!RM){try{await ETAPES[n-1].anim(t)}catch(err){console.error(err)}}
+ if(t===jeton)appliquer(ETAPES[n-1].etat)}
+
+q('#a2-prec').addEventListener('click',()=>aller(etape-1));
+q('#a2-suiv').addEventListener('click',()=>aller(etape+1));
+q('#a2-rejouer').addEventListener('click',()=>aller(1));
+q('#a2-points').addEventListener('click',e=>{const b=e.target.closest('.a2-point');if(b)aller(+b.dataset.n)});
+q('#a2-scene').addEventListener('keydown',e=>{
+ if(e.key==='ArrowRight'){e.preventDefault();aller(etape+1)}
+ else if(e.key==='ArrowLeft'){e.preventDefault();aller(etape-1)}});
+
+dessiner();panneau(1);appliquer(DEPART);
+addEventListener('resize',()=>{if(dessiner()){jeton++;appliquer(lance?ETAPES[etape-1].etat:DEPART)}});
+/* l'étape 1 se joue quand la zone A devient visible */
+if('IntersectionObserver' in window){
+ const io=new IntersectionObserver(es=>{if(es.some(x=>x.isIntersecting)&&!lance){io.disconnect();aller(1)}},{threshold:.45});
+ io.observe(q('#a2-scene'));
+}else aller(1);
+
+/* ======================== B. LABORATOIRE D'ATTRIBUTION ======================== */
+const ICO={
+ inconnu:`<svg viewBox="0 0 52 46" aria-hidden="true"><circle cx="22" cy="13" r="9" class="fi2"/><path d="M5 44c0-10 7-17 17-17s17 7 17 17z" class="fi2"/><circle cx="41" cy="11" r="9" class="fj si" stroke-width="1.5"/><text x="41" y="15.5" text-anchor="middle" style="font:1000 13px var(--police);fill:var(--encre)">?</text></svg>`,
+ pirate:`<svg viewBox="0 0 52 46" aria-hidden="true"><circle cx="20" cy="13" r="9" class="fi"/><path d="M3 44c0-10 7-17 17-17s17 7 17 17z" class="fi"/><path d="M38 10a10 10 0 0 1 0 14M43 5a17 17 0 0 1 0 24" class="fn sr" stroke-width="3" stroke-linecap="round"/></svg>`,
+ pc:`<svg viewBox="0 0 52 46" aria-hidden="true"><rect x="4" y="3" width="44" height="30" rx="4" class="fi"/><rect x="8" y="7" width="36" height="22" rx="2" class="fw"/><rect x="11" y="11" width="20" height="3" rx="1.5" class="fc2"/><rect x="11" y="17" width="28" height="3" rx="1.5" class="fc2"/><path d="M21 33h10l2 7H19z" class="fc"/><rect x="14" y="40" width="24" height="4" rx="2" class="fc2"/></svg>`,
+ routeur:`<svg viewBox="0 0 52 46" aria-hidden="true"><path d="M14 22V6M38 22V6" class="fn si" stroke-width="3" stroke-linecap="round"/><rect x="3" y="21" width="46" height="18" rx="4" class="fi2 si" stroke-width="2"/><circle cx="11" cy="30" r="2.5" class="fv"/><circle cx="19" cy="30" r="2.5" class="fv"/><rect x="28" y="27" width="16" height="6" rx="1.5" class="fi"/></svg>`,
+ proxy:`<svg viewBox="0 0 52 46" aria-hidden="true"><rect x="12" y="3" width="28" height="40" rx="4" class="fi2 si" stroke-width="2"/><rect x="17" y="9" width="18" height="5" rx="1.5" class="fi"/><rect x="17" y="18" width="18" height="5" rx="1.5" class="fi"/><circle cx="26" cy="34" r="3" class="fv"/><path d="M2 14h8M42 30h8" class="fn si" stroke-width="3" stroke-linecap="round"/></svg>`,
+ cle:`<svg viewBox="0 0 52 46" aria-hidden="true"><rect x="4" y="8" width="44" height="30" rx="5" class="fw si" stroke-width="2"/><circle cx="16" cy="21" r="5" class="fi2"/><path d="M8 33c1-5 4-7 8-7s7 2 8 7" class="fi2"/><rect x="28" y="16" width="15" height="3" rx="1.5" class="fc"/><rect x="28" y="23" width="11" height="3" rx="1.5" class="fc"/></svg>`,
+ leurre:`<svg viewBox="0 0 52 46" aria-hidden="true"><rect x="2" y="12" width="18" height="22" rx="2" class="fb si" stroke-width="1.5"/><rect x="18" y="10" width="32" height="26" rx="3" class="fi2 sw" stroke-width="1.5"/><rect x="31" y="15" width="15" height="16" rx="2" class="fc2"/><circle cx="24" cy="30" r="2" class="fj"/></svg>`
+};
+const SCEN=[
+ {id:'depart',bouton:'Cas de départ',nom:'Cas de départ : réseau du labo, adresse fixe',
+  chaine:[{ico:'inconnu',t:'Quelqu’un',s:'au clavier'},{ico:'pc',t:'PC de test',ip:'10.10.0.73',s:'adresse fixe'}],
+  fl:[{t:'utilise'},{src:'10.10.0.73'}],vu:'10.10.0.73',cible:1,
+  niv:[['ok','OUI','Le leurre a bien reçu une connexion.'],['ok','OUI, SANS DOUTE','L’inventaire du labo dit que .73 est le PC de test.'],['non','NON','Qui était au clavier ? L’adresse ne le dit pas.']],
+  expl:'Même dans le cas le plus simple, une adresse IP désigne une <b>carte réseau</b>, pas une personne.',
+  piste:'Inventaire des adresses du labo, journal des sessions du poste, planning de la salle.',extra:''},
+ {id:'dhcp',bouton:'PC avec DHCP',nom:'PC avec DHCP : l’adresse peut changer',
+  chaine:[{ico:'inconnu',t:'Quelqu’un',s:'au clavier'},{ico:'pc',t:'Portable B',ip:'10.10.0.73',s:'bail DHCP depuis 10:31'}],
+  fl:[{t:'utilise'},{src:'10.10.0.73'}],vu:'10.10.0.73',cible:1,
+  niv:[['ok','OUI','La connexion est bien notée, à 10:42:07.'],['peut','À VÉRIFIER','Il faut le journal DHCP à l’heure exacte : adresse IP + adresse MAC.'],['non','NON','Même le bon portable ne dit pas qui l’utilisait.']],
+  expl:'Le DHCP <b>prête</b> une adresse pour un temps (un bail). La même adresse peut désigner un autre appareil une heure plus tard.',
+  piste:'Journal du serveur DHCP, horloges synchronisées par NTP, table MAC du switch pour retrouver la prise.',
+  extra:`<span class="label">Indice : la même adresse, deux appareils</span><ol class="a2-frise">
+   <li class="a2-gris"><b>09:05</b> Portable A reçoit 10.10.0.73 (bail d’1 h)</li>
+   <li class="a2-gris"><b>10:05</b> Bail terminé : le portable A est parti</li>
+   <li><b>10:31</b> Portable B reçoit 10.10.0.73</li>
+   <li class="a2-ici"><b>10:42</b> Visite du leurre depuis 10.10.0.73</li></ol>
+   <p class="a2-petit" style="margin-top:8px">Si l’horloge du leurre retardait de 40 min (pas de NTP), il noterait 10:02… et on accuserait le portable A.</p>`},
+ {id:'nat',bouton:'Derrière un NAT',nom:'Connexion derrière un NAT : l’adresse est traduite',
+  chaine:[{ico:'inconnu',t:'Quelqu’un',s:'au clavier'},{ico:'pc',t:'Portable invité',ip:'192.168.50.23',s:'réseau invité'},{ico:'routeur',t:'Routeur NAT',ip:'10.10.0.1',s:'remplace l’adresse source'}],
+  fl:[{t:'utilise'},{src:'192.168.50.23'},{src:'10.10.0.1',change:1}],vu:'10.10.0.1',cible:2,
+  niv:[['ok','OUI','Une connexion est arrivée.'],['non','NON','Le leurre voit le routeur. Plusieurs appareils sortent avec la même adresse.'],['non','NON','On ne sait même pas quel appareil, encore moins qui.']],
+  expl:'Le routeur NAT <b>remplace</b> l’adresse source par la sienne. Le leurre voit l’adresse traduite, pas celle du PC.',
+  piste:'Journal de traduction du routeur (s’il est activé) : adresse et port source, à l’heure exacte.',
+  extra:`<span class="label">Indice : la table de traduction du routeur</span><pre class="terminal">Intérieur            Extérieur         Destination
+<span class="a2-hi">192.168.50.23:51544</span>  10.10.0.1:40001   10.10.0.80:80
+192.168.50.31:50112  10.10.0.1:40002   10.10.0.54:445</pre>
+   <p class="a2-petit" style="margin-top:8px">Même chose pour une machine virtuelle en mode NAT : le leurre voit le PC hôte.</p>`},
+ {id:'proxy',bouton:'Via un proxy',nom:'Connexion via un proxy : le proxy parle à la place du PC',
+  chaine:[{ico:'inconnu',t:'Quelqu’un',s:'au clavier'},{ico:'pc',t:'PC',ip:'10.10.0.73'},{ico:'proxy',t:'Proxy web',ip:'10.10.0.30',s:'refait la demande à sa place'}],
+  fl:[{t:'utilise'},{src:'10.10.0.73'},{src:'10.10.0.30',change:1}],vu:'10.10.0.30',cible:2,
+  niv:[['ok','OUI','Une connexion est arrivée, depuis le proxy.'],['non','NON','On voit le proxy. Il faut ses journaux pour connaître le vrai PC.'],['non','NON','Le proxy relaie tout le monde.']],
+  expl:'Un proxy ouvre <b>sa propre connexion</b> vers le leurre. Le leurre voit l’adresse du proxy.',
+  piste:'Journaux du proxy : qui a demandé quoi, et quand. Parfois le compte, si le proxy demande une authentification.',
+  extra:`<span class="label">Indice : la requête reçue par le leurre</span><pre class="terminal">GET /admin HTTP/1.1
+Host: 10.10.0.80
+<span class="a2-hi">X-Forwarded-For: 10.10.0.73</span></pre>
+   <p class="a2-petit" style="margin-top:8px">Certains proxys ajoutent cet en-tête. Mais un client peut l’écrire lui-même, avec n’importe quelle valeur : c’est une déclaration, pas une preuve.</p>`},
+ {id:'compromis',bouton:'PC compromis',nom:'PC professionnel compromis : le PC sert de relais',
+  chaine:[{ico:'pirate',t:'Attaquant',s:'à distance, inconnu'},{ico:'pc',t:'PC-COMPTA-03',ip:'10.10.0.73',s:'session de Martine · logiciel malveillant'}],
+  fl:[{t:'pilote à distance'},{src:'10.10.0.73'}],vu:'10.10.0.73',cible:1,
+  niv:[['ok','OUI','La connexion vient bien de 10.10.0.73.'],['ok','OUI','C’est bien ce PC qui a envoyé les paquets.'],['non','NON','Le PC est piloté. Martine n’y est peut-être pour rien.']],
+  expl:'Le leurre voit le <b>PC compromis</b>, pas l’identité de son utilisatrice, ni celle de l’attaquant qui le pilote.',
+  piste:'Isoler le poste, analyser ses processus et ses connexions. Ne jamais accuser l’utilisatrice sur la seule base de l’adresse.',
+  extra:`<div class="encadre accent"><span class="label">Règle CyberSentinel</span><p>Le tableau de bord ne relie pas un événement du leurre à la présence ou à l’absence de quelqu’un devant un poste.</p></div>`},
+ {id:'compte',bouton:'Compte volé',nom:'Compte professionnel volé : des identifiants valides',
+  chaine:[{ico:'inconnu',t:'Quelqu’un',s:'a volé un mot de passe'},{ico:'cle',t:'Compte m.durand',s:'identifiants valides'},{ico:'pc',t:'PC-73',ip:'10.10.0.73',s:'session ouverte par m.durand'}],
+  fl:[{t:'tape'},{t:'ouvre une session'},{src:'10.10.0.73'}],vu:'10.10.0.73',cible:2,
+  niv:[['ok','OUI','La connexion vient de 10.10.0.73.'],['ok','OUI','Avec les journaux du poste : le PC-73.'],['non','NON','On connaît le compte, pas la personne. Un mot de passe volé marche pour n’importe qui.']],
+  expl:'Des identifiants valides prouvent qu’on connaissait le mot de passe, <b>pas qui l’a tapé</b>.',
+  piste:'Demander à m.durand si c’était elle, regarder les autres connexions du compte, changer le mot de passe.',
+  extra:`<span class="label">Indice : le journal de connexion Windows</span><pre class="terminal">10:40:51  Ouverture de session réussie
+          Compte : <span class="a2-hi">m.durand</span>   Poste : PC-73
+10:42:07  Visite du leurre depuis 10.10.0.73</pre>
+   <p class="a2-petit" style="margin-top:8px">Une double authentification (MFA) rend ce vol plus difficile.</p>`}
+];
+const NIVQ=['1 · Connexion détectée\u00a0?','2 · Équipement identifié\u00a0?','3 · Personne identifiée\u00a0?'];
+const TAGC={ok:'succes',peut:'jaune',non:'danger'};
+q('#a2-choix').innerHTML=SCEN.map((s,i)=>`<button type="button" class="bouton petit" data-s="${i}" aria-pressed="false">${s.bouton}</button>`).join('');
+function scenario(i){
+ const s=SCEN[i];
+ qa('#a2-choix .bouton').forEach(b=>b.setAttribute('aria-pressed',String(+b.dataset.s===i)));
+ const items=[];let k=0;
+ s.chaine.forEach((n,j)=>{
+  items.push(`<li class="a2-noeud a2-in${j===s.cible?' a2-cible':''}" style="--i:${k++}">${ICO[n.ico]}<b>${n.t}</b>${n.ip?`<span class="a2-ipn">${n.ip}</span>`:''}${n.s?`<small>${n.s}</small>`:''}</li>`);
+  const f=s.fl[j];items.push(`<li class="a2-fleche a2-in" style="--i:${k++}" aria-hidden="${f.src?'false':'true'}">${f.src?`<span class="a2-src${f.change?' a2-change':''}">source<br>${f.src}</span>`:`<span>${f.t}</span>`}<i class="a2-trait"></i></li>`)});
+ items.push(`<li class="a2-noeud a2-leu a2-in" style="--i:${k}">${ICO.leurre}<b>Leurre</b><span class="a2-ipn">10.10.0.80</span><span class="a2-voit">voit ${s.vu}</span></li>`);
+ const ch=q('#a2-chaine');ch.classList.remove('a2-vu');ch.innerHTML=items.join('');
+ q('#a2-jauge').innerHTML=s.niv.map((v,j)=>`<li class="${v[0]}"><span class="a2-q">${NIVQ[j]}</span><span class="tag ${TAGC[v[0]]}">${v[1]}</span><p>${v[2]}</p></li>`).join('');
+ q('#a2-bNom').textContent=s.nom;q('#a2-bExpl').innerHTML=s.expl;q('#a2-bPiste').textContent=s.piste;
+ const ex=q('#a2-bExtra');ex.innerHTML=s.extra;ex.hidden=!s.extra;
+ requestAnimationFrame(()=>requestAnimationFrame(()=>ch.classList.add('a2-vu')))}
+q('#a2-choix').addEventListener('click',e=>{const b=e.target.closest('.bouton');if(b)scenario(+b.dataset.s)});
+scenario(0);
+
+/* ========================= C. CLASSEMENT PAR UBUNTU ========================= */
+const SENS=['/admin','/config','/scan','/carnet'];
+const EX={
+ 1:{req:[['10:12:03','GET /']]},
+ 2:{req:[['10:42:07','GET /admin']]},
+ 3:{req:[['10:42:07','GET /admin'],['10:42:40','GET /config'],['10:43:15','GET /scan'],['10:44:02','GET /carnet']]}
+};
+const NIV={1:['info','OBSERVATION','Noté dans le journal. Pas de notification.'],
+ 2:['jaune','À EXAMINER','Ajouté à la liste du technicien, à regarder dans la journée.'],
+ 3:['danger','ALERTE PRIORITAIRE','Notification immédiate au technicien. Il examine vite, sans conclure trop vite.']};
+let exC=0,jetonC=0;
+const sec=h=>{const [a,b,c]=h.split(':').map(Number);return a*3600+b*60+c};
+const chemin=r=>r[1].split(' ')[1];
+const reglages=()=>({N:+q('#a2-N').value,T:+q('#a2-T').value});
+function maxSensibles(req,T){
+ const s=req.filter(r=>SENS.includes(chemin(r))).map(r=>({t:sec(r[0]),p:chemin(r)}));let m=0;
+ for(const a of s){m=Math.max(m,new Set(s.filter(b=>b.t>=a.t&&b.t-a.t<=T*60).map(b=>b.p)).size)}return m}
+function classer(ex){const {N,T}=reglages(),r2=ex.req.some(r=>SENS.includes(chemin(r))),n=maxSensibles(ex.req,T),r3=n>=N;return {r2,r3,n,N,T,niv:r3?3:r2?2:1}}
+function contenus(ex){
+ const c=classer(ex),v=NIV[c.niv];
+ q('#a2-c1').innerHTML=`<ul>${ex.req.map(r=>`<li class="a2-req">${r[0]} · ${r[1]}${SENS.includes(chemin(r))?' <span class="tag jaune">sensible</span>':''}</li>`).join('')}</ul><span class="a2-petit">depuis 10.10.0.73 · capteur leurre-01</span>`;
+ const R=(ok,txt)=>`<li class="a2-regle ${ok?'a2-oui':'a2-non'}"><span class="a2-m">${ok?'✓':'–'}</span><span>${txt}</span></li>`;
+ q('#a2-c2').innerHTML=`<ul>${R(true,'R1 : connexion au leurre')}${R(c.r2,'R2 : ressource sensible')}${R(c.r3,`R3 : ${c.n} ressource${c.n>1?'s':''} sensible${c.n>1?'s':''} en ${c.T} min (seuil ${c.N})`)}</ul>`;
+ q('#a2-c3').innerHTML=`<span class="tag ${v[0]} a2-niv">${v[1]}</span><br><span class="a2-petit">règle la plus haute qui s’applique</span>`;
+ q('#a2-c4').innerHTML=`<p style="margin:0">${v[2]}</p><p class="a2-petit" style="margin:4px 0 0">Ce n’est pas une preuve de malveillance.</p>`;
+ return c}
+async function exemple(i){
+ exC=i;const t=++jetonC;
+ qa('#a2-exemples .bouton').forEach(b=>b.setAttribute('aria-pressed',String(+b.dataset.ex===i)));
+ const c=contenus(EX[i]);const et=qa('#a2-pipe .a2-etage');
+ et.forEach(e=>{e.classList.remove('a2-actif','a2-rempli')});
+ for(let k=0;k<et.length;k++){
+  if(t!==jetonC)return;et.forEach(e=>e.classList.remove('a2-actif'));et[k].classList.add('a2-actif','a2-rempli');await attendre(750)}
+ if(t!==jetonC)return;
+ q('#a2-cAnnonce').textContent=`Exemple ${i} : classé ${NIV[c.niv][1].toLowerCase()}.`}
+q('#a2-exemples').addEventListener('click',e=>{const b=e.target.closest('.bouton');if(b)exemple(+b.dataset.ex)});
+function conf(){const {N,T}=reglages();
+ q('#a2-Nout').textContent=N;q('#a2-Tout').textContent=T+' min';q('#a2-nTxt').textContent=N;q('#a2-tTxt').textContent=T;
+ q('#a2-conf').innerHTML=`<span class="a2-com"># regles.yaml (sur le serveur Ubuntu)</span>
+sensibles: [/admin, /config, /scan, /carnet]
+prioritaire:
+  ressources_differentes: <span class="a2-hi">${N}</span>
+  fenetre_minutes: <span class="a2-hi">${T}</span>`}
+function reglage(){conf();if(!exC)return;const avant=q('#a2-c3').textContent;const c=contenus(EX[exC]);
+ qa('#a2-pipe .a2-etage').forEach(e=>e.classList.add('a2-rempli'));
+ if(q('#a2-c3').textContent!==avant){const e=q('#a2-c3');e.classList.remove('a2-flash');void e.offsetWidth;e.classList.add('a2-flash');
+  q('#a2-cAnnonce').textContent=`Avec ces réglages, l’exemple ${exC} devient : ${NIV[c.niv][1].toLowerCase()}.`}}
+q('#a2-N').addEventListener('input',reglage);q('#a2-T').addEventListener('input',reglage);
+conf();
+
+window.__a2={aller,etat:()=>({etape,jeton,layNom}),scenario,exemple};
 }
 </script>
 </body>

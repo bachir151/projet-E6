@@ -32,6 +32,8 @@ Ce fichier en est le résumé de travail pour Claude Code. Schéma : `livrables/
 | Boîtier de sacoche | ESP32-S3 + e-ink 2,9″, SHT40, DS18B20, ADXL345, LiPo (peut afficher « attendre encore X min ») | Extension |
 | Lien SharePoint réel | Microsoft Graph | Extension |
 
+**Qui parle à qui** : nginx reçoit tout en HTTPS (port 443) et transmet l'API à Flask (reverse proxy ; hypothèse à confirmer avec Aziza). Les PC des techniciens (rapports, téléchargement BITS) et la borne ESP32 passent tous par nginx. Flask n'est jamais exposé seul. Le PC du référent publie le kit signé en SFTP, pas par nginx.
+
 **Pourquoi un lien simulé et pas un vrai partage de connexion** : le serveur est sur le réseau du lycée ; par la vraie 4G, il faudrait l'exposer sur Internet. Le vrai partage de connexion sert à **mesurer** (débit, latence, pertes), netem sert à **reproduire** ces mesures et à couper à volonté (T04, T08). Les tests de la borne se font netem coupé.
 
 ## Lien « 4G » simulé : ce que fait `tc netem` (en mots simples)
@@ -59,6 +61,13 @@ Déclenchement (démarrage, ouverture de session, toutes les 30 min) → catalog
 - Chaque PC et la borne ont un **jeton** propre, enregistré dans SQLite côté serveur. Flask refuse toute requête `POST` sans jeton valide (en-tête `Authorization`).
 - PC : jeton dans un fichier sous `C:\ProgramData\agent\`, lisible seulement par les administrateurs (droits NTFS).
 - Borne : jeton enregistré une fois avec la bibliothèque `Preferences` de l'ESP32 (mémoire NVS), **jamais écrit dans le code** (liste rouge de la charte IA).
+- **Création du jeton** (proposition, à valider avec Aziza) :
+  1. L'administrateur lance sur le serveur `python creer_jeton.py PC-04`.
+  2. Le script tire 32 octets au hasard : `secrets.token_hex(32)` (64 caractères impossibles à deviner).
+  3. SQLite garde le **hash SHA-256** du jeton (pas le jeton), avec le nom du PC et la date.
+  4. Le jeton est affiché **une seule fois**. L'administrateur le copie dans `C:\ProgramData\agent\jeton.txt` (droits NTFS : administrateurs seulement). Pour la borne : écriture unique en NVS au flashage.
+- **Vérification** : le PC envoie le jeton dans `Authorization`. Flask hache le jeton reçu et le compare à la base avec `hmac.compare_digest`. Un jeton lié à un seul PC : un jeton volé ne sert que pour ce PC.
+- Limites : copie manuelle (suppose un administrateur de confiance à l'installation) ; pas de rotation prévue ; **révocation** = supprimer la ligne côté serveur. Extension possible : certificat client (mTLS).
 - Limite assumée : le badge RFID **identifie**, il ne **prouve** pas (un badge simple se copie). Il trace une sortie, il ne contrôle pas un accès.
 
 ## API du serveur
