@@ -188,7 +188,7 @@
     <ol>
       <li><b>Une imprimante peut mentir</b> : « prête » en SNMP ne prouve rien. Le serveur croise quatre témoins (vibration, compteur de pages, état SNMP, file du PC).</li>
       <li><b>Le compteur est la preuve</b> : un ticket n'est fermé que si le compteur de pages a avancé et que l'imprimante a vibré.</li>
-      <li><b>Le système propose, l'humain valide</b> : aucun redémarrage sans le clic du technicien (palier 2).</li>
+      <li><b>Le système conseille, l'humain agit</b> : en V1, le serveur ne modifie ni ne redémarre l'imprimante (lecture seule, palier 1). Agir à sa place est une extension.</li>
       <li><b>Le diagnostic ne fait que ce qui est permis</b> : liste fermée de commandes (JEA), refus tracés, compte GLPI sans droit de suppression.</li>
     </ol>
   </div>
@@ -338,7 +338,7 @@ var tkRows = [], tkOffer, tkOfferTxt, tkHead;
   }
   tkOffer = el('g', { style: 'display:none' }, f);
   el('rect', { x: 8, y: 55, width: 104, height: 10, rx: 5, 'class': 'tr', style: 'fill:var(--jaune);stroke-width:.8' }, tkOffer);
-  tkOfferTxt = txt(tkOffer, 60, 61.8, 'Proposé : redémarrer cardio-2 · Valider ?', 'font-size:4.8px;font-weight:900', 'middle');
+  tkOfferTxt = txt(tkOffer, 60, 61.8, 'Conseil : redémarrer cardio-2', 'font-size:4.8px;font-weight:900', 'middle');
   box(g, 400, 72, 38, 80, 16, 2, 'gris');
   box(g, 488, 76, 38, 9, 12, 2, 'gris');
 })();
@@ -576,7 +576,7 @@ function render() {
   tkHead.style.fill = s.head;
   tkRows.forEach(function (r, i) { var t = TK[s.tk[i]]; r.dot.style.fill = t ? t[2] : 'var(--papier-2)'; r.t1.textContent = t ? t[0] : (i === 0 && !s.tk.length ? 'aucun ticket ouvert' : ''); r.t2.textContent = t ? t[1] : ''; });
   tkOffer.style.display = s.offer ? '' : 'none';
-  tkOfferTxt.textContent = s.offer === 2 ? '✔ validé par le technicien' : 'Proposé : redémarrer cardio-2 · Valider ?';
+  tkOfferTxt.textContent = s.offer === 2 ? '✔ pris en charge par le technicien' : 'Conseil : redémarrer cardio-2';
   secLines.forEach(function (t, i) { var l = s.sec[i]; t.textContent = l ? l[0] : ''; t.style.fill = l ? l[1] : 'var(--blanc)'; });
   btnTop.style.fill = s.btn ? 'color-mix(in srgb,var(--rouge) 60%,var(--blanc))' : 'var(--rouge)';
   Object.keys(CARDS).forEach(function (k) { var o = cardOffset(k, s.cards[k]); CARDS[k].pos = o; CARDS[k].g.setAttribute('transform', 'translate(' + r1(o[0]) + ' ' + r1(o[1]) + ')'); });
@@ -648,16 +648,15 @@ var STEPS = [
     await go(DOWN, { kind: 'mqtt', label: 'écran : BLOQUÉE' });
     set({ ep: ['BLOQUÉE', 'ticket 1234 · Wassim prévenu'] }); bip();
   } },
-{ t: '4. Palier 2 : le technicien valide, le compteur prouve', on: ['tec', 'sw', 'srv', 'prn', 'ap'],
-  x: '<p>Le système <b>propose</b> de redémarrer l\'imprimante. Il n\'agit pas seul : le technicien <b>valide d\'un clic</b> (palier 2).</p><p>L\'imprimante redémarre et imprime les 5 pages : elle <b>vibre</b> et son <b>compteur</b> avance de 5. Ces deux mesures sont la <b>preuve</b> : le ticket est fermé « résolu, preuve : compteur +5/5 et vibration ».</p><p>Personne ne s\'est déplacé.</p>',
+{ t: '4. Palier 1 : le système conseille, le technicien agit, le compteur prouve', on: ['tec', 'sw', 'srv', 'prn', 'ap'],
+  x: '<p>Le système <b>conseille</b> dans le ticket : « redémarrer l\'imprimante ». Il n\'agit pas : en V1, il lit l\'imprimante (SNMP en <b>lecture seule</b>) et ne la modifie jamais (palier 1).</p><p>Le technicien, ou la secrétaire guidée par l\'écran du boîtier, <b>redémarre</b> l\'imprimante. Elle imprime les 5 pages : elle <b>vibre</b> et son <b>compteur</b> avance de 5. Ces deux mesures sont la <b>preuve</b> : le ticket est fermé « résolu, preuve : compteur +5/5 et vibration ».</p><p>Aucun déplacement à l\'aveugle : la cause et le geste étaient connus.</p>',
   run: async function () {
     set({ offer: 1 });
-    bubble('tec', A.tec, ['#Palier 2', 'le système propose,', 'le technicien décide'], B_TEC);
+    bubble('tec', A.tec, ['#Palier 1', 'le système conseille,', 'le technicien agit'], B_TEC);
     await sleep(1800);
     set({ offer: 2 });
-    await go(R('tec', 'srv'), { kind: 'glpi', label: 'validé : redémarrer' });
+    await go(R('tec', 'srv'), { kind: 'glpi', label: 'pris en charge' });
     unbubble('tec');
-    await go(R('srv', 'prn'), { kind: 'snmp', label: 'SNMP SET · redémarrage' });
     set({ lcd: ['Redémarrage…', 'var(--jaune)'] });
     await sleep(1600);
     set({ lcd: ['Prête', 'var(--vert)'] });

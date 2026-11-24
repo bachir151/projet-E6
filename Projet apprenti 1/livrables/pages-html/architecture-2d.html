@@ -72,7 +72,7 @@
     <ol>
       <li><b>Une imprimante peut mentir</b> : « prête » en SNMP ne prouve rien. Le serveur croise quatre témoins (vibration, compteur de pages, état SNMP, file du PC).</li>
       <li><b>Le compteur est la preuve</b> : un ticket n'est fermé que si le compteur de pages a avancé et que l'imprimante a vibré.</li>
-      <li><b>Le système propose, l'humain valide</b> : aucun redémarrage sans le clic du technicien (palier 2).</li>
+      <li><b>Le système conseille, l'humain agit</b> : en V1, le serveur ne modifie ni ne redémarre l'imprimante (lecture seule, palier 1). Agir à sa place est une extension.</li>
       <li><b>Le diagnostic ne fait que ce qui est permis</b> : liste fermée de commandes (JEA), refus tracés, compte GLPI sans droit de suppression.</li>
     </ol>
   </div>
@@ -98,8 +98,8 @@ var TXT = [
 "x": "<p>La secrétaire relance une impression. Le travail arrive… mais <b>rien ne vibre</b> et <b>aucune feuille ne sort</b>.</p><p>Pourtant, en SNMP, l'imprimante répond « <b>prête</b> » : elle se trompe. Son <b>compteur de pages</b>, lui, n'a pas bougé. Le serveur demande aussi au PC, par un point d'accès PowerShell limité (<b>JEA</b>), si des documents y sont bloqués : non.</p><p>Le programme <b>Python du serveur</b> interprète les réponses SNMP et les croise avec les événements MQTT. Conclusion : <b>imprimante probablement figée</b>. Python appelle l’API HTTPS de GLPI sur le serveur : le ticket s'ouvre avec la cause, et l'écran du boîtier prévient sur place.</p>"
 },
 {
-"t": "4. Palier 2 : le technicien valide, le compteur prouve",
-"x": "<p>Le système <b>propose</b> de redémarrer l'imprimante. Il n'agit pas seul : le technicien <b>valide d'un clic</b> (palier 2).</p><p>L'imprimante redémarre et imprime les 5 pages : elle <b>vibre</b> et son <b>compteur</b> avance de 5. Ces deux mesures sont la <b>preuve</b> : le ticket est fermé « résolu, preuve : compteur +5/5 et vibration ».</p><p>Personne ne s'est déplacé.</p>"
+"t": "4. Palier 1 : le système conseille, le technicien agit, le compteur prouve",
+"x": "<p>Le système <b>conseille</b> dans le ticket : « redémarrer l'imprimante ». Il n'agit pas : en V1, il lit l'imprimante (SNMP en <b>lecture seule</b>) et ne la modifie jamais (palier 1).</p><p>Le technicien, ou la secrétaire guidée par l'écran du boîtier, <b>redémarre</b> l'imprimante. Elle imprime les 5 pages : elle <b>vibre</b> et son <b>compteur</b> avance de 5. Ces deux mesures sont la <b>preuve</b> : le ticket est fermé « résolu, preuve : compteur +5/5 et vibration ».</p><p>Aucun déplacement à l'aveugle : la cause et le geste étaient connus.</p>"
 },
 {
 "t": "5. L'humidité du local (V2)",
@@ -197,13 +197,13 @@ window.SCHEMA = {
         ep(S, 'BLOQUÉE'); S.led('box', 'rouge');
       } },
     { t: TXT[4].t, x: TXT[4].x, on: ['tec', 'sw', 'srv', 'prn', 'box', 'ap'],
-      init: function (S) { glpi(S, [['● 1234 cardio-2 figée', 'var(--rouge)'], ['  proposé : redémarrer', 'var(--jaune-fonce)'], ['  [ Valider ? ]', 'var(--focus)']]); ep(S, 'BLOQUÉE'); S.led('box', 'rouge'); },
+      init: function (S) { glpi(S, [['● 1234 cardio-2 figée', 'var(--rouge)'], ['  conseil : redémarrer', 'var(--jaune-fonce)'], ['  [ Je m\'en occupe ]', 'var(--focus)']]); ep(S, 'BLOQUÉE'); S.led('box', 'rouge'); },
       run: async function (S) {
-        S.bulle('tec', ['#Palier 2', 'le système propose,', 'le technicien décide'], { cote: 'gauche', dy: -20 });
+        S.bulle('tec', ['#Palier 1', 'le système conseille,', 'le technicien agit'], { cote: 'gauche', dy: -20 });
         await S.sleep(1800);
-        glpi(S, [['● 1234 cardio-2 figée', 'var(--rouge)'], ['  ✔ validé par le technicien', 'var(--vert)']]);
-        await S.go(['tec', 'sw', 'srv'], 'blanc', 'validé : redémarrer');
-        await S.go(['srv', 'sw', 'prn'], 'vert', 'SNMP SET · redémarrage');
+        glpi(S, [['● 1234 cardio-2 figée', 'var(--rouge)'], ['  ✔ pris en charge', 'var(--vert)']]);
+        await S.go(['tec', 'sw', 'srv'], 'blanc', 'pris en charge');
+        S.bulle('prn', ['#Sur place', 'on redémarre', 'l\'imprimante à la main'], { cote: 'haut', dy: -20 });
         lcd(S, 'Redémarre', 'var(--jaune)'); await S.sleep(1500); lcd(S, 'Prête');
         await feuilles(S, 5);
         await S.go(UP, 'jaune', 'MQTT · vib 0,41 g');

@@ -323,7 +323,7 @@ async function icon(Icon, color) {
   await I(s, fa.FaPrint, BLUE, 6.4, 1.3, 0.5, A(6, 0, "pi"));
   T(s, "Le boîtier affiche : « Vérifiez le câble »", { x: 6.2, y: 1.95, w: 3.3, h: 0.6, fontSize: 14, color: BLUE, objectName: A(6, 0, "pt") });
   T(s, "L'utilisateur est informé sur place. Wassim ne se déplace qu'ensuite, et si besoin.", { x: 6.2, y: 2.75, w: 3.3, h: 1.0, fontSize: 14, color: WHITE, objectName: A(7, 0, "pu") });
-  s.addNotes("Quatrième principe : le résultat de la sonde est écrit dans le ticket GLPI, à paliers. Palier 1 : un geste simple, ici vérifier le câble. Palier 2 : un déplacement si le problème persiste. L'écran à encre électronique du boîtier donne aussi un message à l'utilisateur. Le serveur ne ferme jamais un ticket sans preuve.");
+  s.addNotes("Quatrième principe : le résultat de la sonde est écrit dans le ticket GLPI, à paliers. Niveau 1 : un geste simple, ici vérifier le câble. Niveau 2 : un déplacement si le problème persiste. L'écran à encre électronique du boîtier donne aussi un message à l'utilisateur. Le serveur ne ferme jamais un ticket sans preuve.");
 
   s = content("Principe 5 · Prouver la réparation (V2)", "3 · La solution");
   const V2 = [[fa.FaIdCard, "Wassim pose sa carte RFID", "arrivée, départ, durée"], [fa.FaPrint, "Page de test envoyée", "le compteur doit avancer de 1"], [fa.FaCheck, "Ticket fermé avec la preuve", "pas de fermeture sans preuve"]];
@@ -358,8 +358,8 @@ async function icon(Icon, color) {
   const FG = [["état SNMP : « prêt »", GRN], ["vibration : aucune", RED], ["compteur : immobile (0 / 5)", RED], ["PC : 5 pages envoyées", GREY]];
   FG.forEach((f, i) => T(s, f[0], { x: 3.3, y: 1.45 + i * 0.5, w: 4.5, h: 0.45, fontSize: 16, color: f[1], objectName: A(i + 1, 0, "f" + i) }));
   T(s, "Cause probable : imprimante figée. L'état « prêt » est contredit par les mesures.", { x: 0.6, y: 3.7, w: 8.8, h: 0.6, fontSize: 16, bold: true, color: YEL, objectName: A(5, 0, "c") });
-  T(s, "Palier 2 : le serveur propose un redémarrage. Wassim valide ; le compteur avance : réparation prouvée.", { x: 0.6, y: 4.4, w: 8.8, h: 0.7, fontSize: 14, color: GRN, objectName: A(6, 0, "p") });
-  s.addNotes("Scénario 2 : la panne qu'aucun outil actuel ne voit. L'imprimante dit prête. Mais la vibration est nulle et le compteur n'avance pas alors que le PC a envoyé cinq pages. Le serveur conclut : figée. Le redémarrage est proposé à Wassim, qui valide : c'est le palier 2, avec confirmation humaine.");
+  T(s, "Palier 1 : le serveur conseille un redémarrage ; on le fait à la main. Le compteur avance : réparation prouvée.", { x: 0.6, y: 4.4, w: 8.8, h: 0.7, fontSize: 14, color: GRN, objectName: A(6, 0, "p") });
+  s.addNotes("Scénario 2 : la panne qu'aucun outil actuel ne voit. L'imprimante dit prête. Mais la vibration est nulle et le compteur n'avance pas alors que le PC a envoyé cinq pages. Le serveur conclut : figée. Il conseille un redémarrage dans le ticket et sur l'écran du boîtier ; la secrétaire ou Wassim le fait à la main. C'est le palier 1 : le serveur ne modifie jamais l'imprimante. Le compteur et la vibration prouvent ensuite la réparation.");
 
   // ======================= 6. ARCHITECTURE =======================
   s = section(5, "Architecture et sécurité", "Qui parle à qui, et ce que le système n'a pas le droit de faire.", "5 · Architecture");
@@ -381,14 +381,14 @@ async function icon(Icon, color) {
   s.addNotes("Le serveur Ubuntu héberge la sonde, les règles et GLPI. Il lit l'imprimante en SNMP, reçoit les mesures du boîtier par MQTT chiffré, et interroge le PC par JEA en lecture seule. Le PC Windows de la maquette est une machine virtuelle. L'annuaire AD (Samba) et la station des PC neufs sont prévus en V2.");
 
   s = content("Le système touche des PC. Il reste borné.", "5 · Architecture");
-  const PAL = [["1 · Simulation", "il écrit ce qu'il ferait, sans le faire", BLUE], ["2 · Confirmation humaine", "Wassim valide chaque action", YEL], ["3 · Automatique (V2)", "seulement si les indicateurs sont atteints", GRN]];
+  const PAL = [["1 · Il conseille (V1)", "il écrit ce qu'il ferait, sans le faire", BLUE], ["2 · Confirmation (extension)", "Wassim valide chaque action", YEL], ["3 · Automatique (extension)", "seulement si les indicateurs sont atteints", GRN]];
   PAL.forEach((p, i) => card(s, 0.5 + i * 3.1, 1.3, 2.9, 1.5, p[0], p[1], p[2], A(i + 1, 0, "p" + i)));
   bullets(s, 0.7, 3.2, 8.8, [
     "JEA : une liste fermée de commandes, compte sans droit d'administrateur. Hors liste : refusé et tracé.",
     "Compte GLPI : ne supprime rien, ne ferme qu'avec une preuve.",
     "SNMPv2c circule en clair : LAN de laboratoire seulement, noté dans le dossier.",
   ], 4, 14, 0.62);
-  s.addNotes("Le système agit sur des machines, donc trois paliers de sécurité. Simulation d'abord. Puis confirmation humaine. L'automatique n'est visé qu'en V2 et seulement si les indicateurs le permettent. JEA limite les commandes du PC à une liste fermée. Question de sécurité posée au jury : le diagnostic à distance peut-il faire plus que ce qu'on lui permet ? La démonstration : une commande hors liste est refusée et tracée.");
+  s.addNotes("Le système agit sur des machines, donc trois paliers de sécurité. En V1, le système reste au palier 1 : il conseille, il n'agit pas. La confirmation humaine, puis l'automatique, sont des extensions, seulement si les indicateurs le permettent. JEA limite les commandes du PC à une liste fermée. Question de sécurité posée au jury : le diagnostic à distance peut-il faire plus que ce qu'on lui permet ? La démonstration : une commande hors liste est refusée et tracée.");
 
   s = content("Vie privée : on regarde les machines, pas les gens", "5 · Architecture");
   const VP = [["Aucun contenu", "le script compte les documents, jamais leur nom", GRN], ["Ni caméra ni micro", "le boîtier mesure une vibration et lit un badge", GRN], ["Aucune donnée réelle", "maquette au lycée, contexte anonymisé", GRN]];
@@ -454,9 +454,9 @@ async function icon(Icon, color) {
   s.addNotes("Huitième partie : ce qui est promis, ce qui est visé, et les limites.");
 
   s = content("Une V1 complète, une V2 visée", "8 · Parcours");
-  card(s, 0.5, 1.2, 4.4, 2.7, "V1 · obligatoire", "boîtier (vibration, bouton, écran)\nsonde : SNMP et PC, profils par marque\nserveur : comparaison des témoins\nticket GLPI aux paliers 1 et 2\ntableau de bord", GRN, A(1, 0, "v1"), 13);
-  card(s, 5.1, 1.2, 4.4, 2.7, "V2 · visée", "carte RFID du technicien\npreuve de réparation\nencre surveillée avant la panne\nhumidité du local, capteur de feuilles\nannuaire AD (Samba) et station des PC neufs, palier 3", YEL, A(2, 0, "v2"), 13);
-  T(s, "Extensions : redémarrage à distance, SNMPv3, Wi-Fi, cartes RFID sécurisées.", { x: 0.6, y: 4.2, w: 8.8, h: 0.5, fontSize: 14, color: GREY, objectName: A(3, 0, "ext") });
+  card(s, 0.5, 1.2, 4.4, 2.7, "V1 · obligatoire", "boîtier (vibration, bouton, écran)\nsonde : SNMP et PC, profils par marque\nserveur : comparaison des témoins\nticket GLPI au palier 1 (il conseille)\ntableau de bord", GRN, A(1, 0, "v1"), 13);
+  card(s, 5.1, 1.2, 4.4, 2.7, "V2 · visée", "carte RFID du technicien\npreuve de réparation\nencre surveillée avant la panne\nhumidité du local, capteur de feuilles\nannuaire AD (Samba) et station des PC neufs", YEL, A(2, 0, "v2"), 13);
+  T(s, "Extensions : redémarrage à distance (paliers 2 et 3), SNMPv3, Wi-Fi, cartes RFID sécurisées.", { x: 0.6, y: 4.2, w: 8.8, h: 0.5, fontSize: 14, color: GREY, objectName: A(3, 0, "ext") });
   s.addNotes("La V1 est complète et obligatoire. La V2 est visée selon l'avancement. Les extensions ne sont pas promises. La sonde fait partie de la V1.");
 
   s = content("Limites, dites franchement", "8 · Parcours");

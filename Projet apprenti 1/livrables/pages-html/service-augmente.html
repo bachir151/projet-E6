@@ -421,8 +421,8 @@ footer{padding:30px 0;font-size:.9rem;color:var(--encre-3)}
   <h3>L'imprimante de cardiologie est figée. Que fait le système ?</h3>
   <div class="choix" role="group" aria-label="Niveau de confiance">
    <button class="btn petit" data-niv="1" aria-pressed="true">1 · Il conseille</button>
-   <button class="btn petit" data-niv="2" aria-pressed="false">2 · Il propose</button>
-   <button class="btn petit" data-niv="3" aria-pressed="false">3 · Il agit seul (V2)</button>
+   <button class="btn petit" data-niv="2" aria-pressed="false">2 · Il propose (extension)</button>
+   <button class="btn petit" data-niv="3" aria-pressed="false">3 · Il agit seul (extension)</button>
   </div>
   <div class="grid2">
    <div><p id="n-texte"></p><p class="small" id="n-suite"></p></div>
@@ -478,9 +478,9 @@ footer{padding:30px 0;font-size:.9rem;color:var(--encre-3)}
  <div class="eyebrow">09 — Parcours</div>
  <h2>Une V1 complète, une V2 visée.</h2>
  <div class="grid3 mt">
-  <div class="card accent version"><h3>V1 <span class="tag jaune">obligatoire</span></h3><ul><li>Boîtier : vibration, bouton, écran</li><li>SNMP : état et compteur de pages</li><li>Serveur : comparaison des quatre témoins</li><li>Vérifications réseau, bon VLAN lu dans l'AD</li><li>Tickets GLPI aux niveaux 1 et 2, retour sur l'écran</li><li>Tableau de bord</li></ul></div>
-  <div class="card version"><h3>V2 <span class="tag papier">visée</span></h3><ul><li>Carte RFID du technicien, preuve de réparation</li><li>Encre surveillée avant la panne</li><li>Humidité du local (SHT31)</li><li>Station des PC neufs</li><li>Niveau 3 (il agit seul, la nuit)</li><li>Capteur de feuilles pour contrôler le compteur</li></ul></div>
-  <div class="card a-venir version"><h3>Extensions</h3><ul><li>Redémarrage à distance de l'imprimante figée</li><li>Fausse imprimante servant de piège</li><li>Cartes RFID sécurisées</li><li>SNMP version 3</li><li>Étagère des cartouches</li></ul></div>
+  <div class="card accent version"><h3>V1 <span class="tag jaune">obligatoire</span></h3><ul><li>Boîtier : vibration, bouton, écran</li><li>SNMP : état et compteur de pages</li><li>Serveur : comparaison des quatre témoins</li><li>Vérifications réseau, bon VLAN lu dans l'AD</li><li>Ticket GLPI au niveau 1 (il conseille), retour sur l'écran</li><li>Tableau de bord</li></ul></div>
+  <div class="card version"><h3>V2 <span class="tag papier">visée</span></h3><ul><li>Carte RFID du technicien, preuve de réparation</li><li>Encre surveillée avant la panne</li><li>Humidité du local (SHT31)</li><li>Station des PC neufs</li><li>Capteur de feuilles pour contrôler le compteur</li></ul></div>
+  <div class="card a-venir version"><h3>Extensions</h3><ul><li>Niveaux 2 et 3 : redémarrage à distance de l'imprimante figée (il propose, puis il agit seul)</li><li>Fausse imprimante servant de piège</li><li>Cartes RFID sécurisées</li><li>SNMP version 3</li><li>Étagère des cartouches</li></ul></div>
  </div>
 
  <h3 class="mt" style="margin-bottom:0">Comment savoir si ça marche</h3>
@@ -585,10 +585,10 @@ var CAS = {
              ticket: 'Cause probable : bourrage après la page 2\nNiveau 1 : écran « Feuille coincée » ; déplacement si non résolu en 10 min' },
   figee:   { vib: 'Non', forme: 'plat', cpt: 0, etat: '« Ça va »', pc: 'Rien en attente', sens: 'danger',
              titre: 'Imprimante figée', texte: 'Elle dit que tout va bien, mais rien ne bouge et le compteur n\'avance pas. C\'est le cas décrit par Wassim : seule la comparaison le voit.', ecran: 'Bloquée – Wassim arrive',
-             ticket: 'Cause probable : imprimante figée (état « ça va » contredit par vibration et compteur)\nNiveau 2 : redémarrage proposé à Wassim' },
+             ticket: 'Cause probable : imprimante figée (état « ça va » contredit par vibration et compteur)\nConseil : redémarrer l\'imprimante (geste à la main)\nNiveau 2 : si elle reste figée, déplacement' },
   pc:      { vib: 'Non', forme: 'plat', cpt: 0, etat: '« Ça va »', pc: '5 pages bloquées', sens: 'info',
              titre: 'Le problème est dans le PC', texte: 'L\'imprimante attend, mais rien ne lui arrive : les pages sont bloquées dans la file de Windows. Inutile de se déplacer vers l\'imprimante.', ecran: 'Prête',
-             ticket: 'Cause probable : file d\'impression bloquée sur PC-CARDIO-03\nNiveau 2 : relancer le service d\'impression (commande de la liste JEA)' },
+             ticket: 'Cause probable : file d\'impression bloquée sur PC-CARDIO-03\nConseil : relancer le service d\'impression sur le poste (geste de Wassim)' },
   cable:   { vib: 'Non', forme: 'plat', cpt: null, etat: 'Imprimante en USB : pas de SNMP', pc: 'Imprimante absente', sens: 'info',
              titre: 'Le PC ne voit plus l\'imprimante', texte: 'Le PC ne trouve plus le périphérique USB. Cause la plus probable : le câble n\'est pas branché. Avant de se déplacer, on demande à l\'utilisateur de le vérifier.', ecran: 'Vérifiez le câble',
              ticket: 'Cause probable : imprimante absente de PC-CARDIO-03 (périphérique USB non détecté)\nNiveau 1 : demander de vérifier le câble USB ; pas de déplacement avant ce geste\nNiveau 2 : si le PC ne la voit toujours pas après 10 min, déplacement' },
@@ -683,8 +683,8 @@ var JOUR = [
     tb: { cardio: [V, 'prête'], pedia: [V, 'prête'], radio: [V, 'prête'], pc: [V, 'en service – Cardiologie'], leurre: [G, 'silence'] }, ecranT: 'Écran de la station', ecran: 'PC 5CG12 prêt' },
   { h: '9 h 10', tags: ['V1', 'quatre témoins'], titre: 'Nadia imprime. Rien ne sort.', texte: 'Pas de vibration, le compteur n\'avance pas, mais l\'imprimante répond « tout va bien ». Le serveur conclut : imprimante figée. Ticket ouvert, pastille rouge.',
     tb: { cardio: [R, 'figée · ticket ouvert'], pedia: [V, 'prête'], radio: [V, 'prête'], pc: [V, 'en service'], leurre: [G, 'silence'] }, ecranT: 'Boîtier · cardiologie', ecran: 'Bloquée – Wassim arrive' },
-  { h: '9 h 11', tags: ['V1', 'niveau 2'], titre: 'Le système propose, Wassim décide', texte: 'Niveau 2 : le système propose « redémarrer l\'imprimante ». Wassim clique depuis son bureau. (Le redémarrage à distance est une extension ; sinon, prise connectée du commerce.)',
-    tb: { cardio: [J, 'redémarrage lancé par Wassim'], pedia: [V, 'prête'], radio: [V, 'prête'], pc: [V, 'en service'], leurre: [G, 'silence'] }, ecranT: 'Boîtier · cardiologie', ecran: 'Redémarrage…' },
+  { h: '9 h 11', tags: ['V1', 'niveau 1'], titre: 'Le système conseille, on redémarre à la main', texte: 'Niveau 1 : le ticket dit « redémarrer l\'imprimante » et l\'écran du boîtier le répète. La secrétaire, ou Wassim, l\'éteint et la rallume. Le serveur ne la modifie jamais : le redémarrage à distance est une extension.',
+    tb: { cardio: [J, 'redémarrée à la main'], pedia: [V, 'prête'], radio: [V, 'prête'], pc: [V, 'en service'], leurre: [G, 'silence'] }, ecranT: 'Boîtier · cardiologie', ecran: 'Redémarrage…' },
   { h: '9 h 14', tags: ['V1', 'preuve'], titre: 'Réparé, preuve à l\'appui', texte: 'L\'imprimante repart, elle vibre, son compteur avance de 3. Le ticket se ferme avec cette preuve. Wassim ne s\'est pas déplacé.',
     tb: { cardio: [V, 'prête · ticket fermé'], pedia: [V, 'prête'], radio: [V, 'prête'], pc: [V, 'en service'], leurre: [G, 'silence'] }, ecranT: 'Boîtier · cardiologie', ecran: 'Réparé' },
   { h: '10 h 05', tags: ['V1', 'réglé sur place'], titre: 'Bac vide en pédiatrie', texte: 'L\'écran du boîtier affiche « Bac 2 vide ». La secrétaire remet du papier, la vibration revient, le compteur avance. Ticket « résolu sur place ». Personne ne s\'est déplacé.',
@@ -840,9 +840,9 @@ flux('');
 var NIV = {
   1: { t: 'Il écrit « il faudrait la redémarrer » dans le ticket, sans rien faire. Wassim lit et agit lui-même.', s: 'On passe au niveau 2 quand ses conseils sont justes pendant toute une période d\'essai.',
        l: '[09:10:12] serveur  imprimante figée (vibration 0, compteur +0, état « ça va »)\n[09:10:13] GLPI     ticket #142 ouvert\n[09:10:13] GLPI     suivi : « conseil : redémarrer l\'imprimante »\n[09:10:13] action   aucune' },
-  2: { t: 'Il prépare l\'action. Wassim clique pour la lancer, depuis son bureau.', s: 'On passe au niveau 3 seulement si Wassim n\'a jamais eu à refuser et si les indicateurs sont atteints.',
+  2: { t: 'Extension. Il prépare l\'action. Wassim clique pour la lancer, depuis son bureau.', s: 'En V1, le serveur ne modifie jamais l\'imprimante. On passerait au niveau 3 seulement si Wassim n\'a jamais eu à refuser et si les indicateurs sont atteints.',
        l: '[09:10:12] serveur  imprimante figée\n[09:10:13] GLPI     ticket #142 · action proposée : redémarrer\n[09:11:02] Wassim   action acceptée\n[09:11:03] serveur  redémarrage envoyé\n[09:14:20] preuve   vibration + compteur +3 · ticket fermé' },
-  3: { t: 'Il agit seul, la nuit uniquement, et le note dans le ticket. Toujours réversible : on peut revenir au niveau 2.', s: 'Le journal montre chaque décision et qui l\'a prise.',
+  3: { t: 'Extension. Il agit seul, la nuit uniquement, et le note dans le ticket. Toujours réversible : on peut revenir au niveau 2.', s: 'Le journal montre chaque décision et qui l\'a prise.',
        l: '[02:31:40] serveur  imprimante figée (hors heures de service)\n[02:31:41] serveur  redémarrage automatique (niveau 3)\n[02:34:55] preuve   page de test · compteur +1\n[02:34:56] GLPI     ticket #143 ouvert et fermé avec la preuve' }
 };
 function niveau(n) {
