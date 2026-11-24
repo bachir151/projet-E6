@@ -224,11 +224,11 @@ footer{padding:30px 0;font-size:.9rem;color:var(--encre-3)}
  <div class="grid4 mt">
   <article class="card danger"><div class="eyebrow">Panne n° 1</div><p class="quote">« Le plus gros problème, c'est les imprimantes. »</p><p>Allumées, mais elles n'impriment pas. Il vérifie le VLAN, l'encre… toujours les mêmes gestes.</p></article>
   <article class="card"><div class="eyebrow">Tâche fréquente</div><p class="quote">« Sans le domaine, on ne peut rien faire. »</p><p>Le PC d'un nouveau médecin : domaine, bon service de l'AD, script d'installation. Une erreur de service arrive vite.</p></article>
-  <article class="card"><div class="eyebrow">Les tickets</div><p class="quote">« Il y a trop de tickets. »</p><p>Ils arrivent mal décrits : « l'imprimante ne marche pas ». Certains utilisateurs viennent directement au service.</p></article>
-  <article class="card"><div class="eyebrow">Sa méthode</div><p class="quote">D'abord à distance.</p><p>Il prend la main sur le PC. Il se déplace seulement si c'est vraiment bloqué. Un bon diagnostic évite des déplacements.</p></article>
+  <article class="card"><div class="eyebrow">Les tickets</div><p class="quote">« Il y a trop de tickets. »</p><p>Ils arrivent mal décrits : « l'imprimante ne marche pas ». Par GLPI, mais aussi par téléphone, par mail ou par le chat de GLPI. Certains utilisateurs viennent directement au service.</p></article>
+  <article class="card"><div class="eyebrow">Sa méthode</div><p class="quote">D'abord à distance.</p><p>Il prend la main sur le PC. Il se déplace si c'est bloqué. Parfois pour rien : l'imprimante marche, mais le câble n'est pas branché au PC. Un bon diagnostic évite ces déplacements.</p></article>
  </div>
  <div class="bandeau"><strong>Question du projet :</strong> si un petit boîtier collé sur l'imprimante voyait ce qui se passe vraiment, et si le ticket arrivait avec <b>sa cause et sa preuve</b>, combien de déplacements et de temps gagnerait-on, <b>sans prendre de risque</b> sur les postes ?</div>
- <p class="small" style="margin-top:12px">Besoin exprimé par l'apprenti, pas encore validé par l'entreprise. Les chiffres (part des tickets « imprimante », nombre de PC neufs par mois) sont à demander au tuteur.</p>
+ <p class="small" style="margin-top:12px">Besoin exprimé par l'apprenti (entretiens des 16 et 23 novembre), pas encore validé par l'entreprise. Les chiffres (part des tickets « imprimante », part des déplacements inutiles, nombre de PC neufs par mois) sont à demander au tuteur.</p>
 </div></section>
 
 <!-- ============================================================ 02 -->
@@ -239,13 +239,13 @@ footer{padding:30px 0;font-size:.9rem;color:var(--encre-3)}
   <thead><tr><th>Outil existant</th><th>Ce qu'il fait bien</th><th>Ce qui lui manque</th></tr></thead>
   <tbody>
    <tr><td><b>Page web de l'imprimante</b></td><td>Montre son état et son niveau d'encre.</td><td>Une imprimante à la fois. Elle peut dire « tout va bien » alors qu'elle est figée.</td></tr>
-   <tr><td><b>Supervision</b> (Centreon, Zabbix…)</td><td>Surveille toutes les imprimantes du réseau.</td><td>Lit l'état et le compteur de pages, mais ne les compare pas à ce qui a été envoyé. Ne sent pas si la machine travaille. Ne regarde pas le PC. Lourde à installer.</td></tr>
+   <tr><td><b>Supervision</b> (Centreon, Zabbix…)</td><td>Surveille toutes les imprimantes du réseau. <b>Absente du service</b> pour les imprimantes (dit Wassim, à confirmer).</td><td>Ne verrait que les imprimantes en réseau, pas celles branchées en USB. Lit l'état et le compteur de pages, mais ne les compare pas à ce qui a été envoyé. Ne sent pas si la machine travaille. Ne regarde pas le PC. Lourde à installer.</td></tr>
    <tr><td><b>Prise en main à distance</b></td><td>Wassim voit le PC comme s'il y était.</td><td>Les mêmes vérifications à refaire à la main, ticket après ticket.</td></tr>
-   <tr><td><b>GLPI</b> (outil de tickets)</td><td>Suit les tickets et la liste du matériel.</td><td>Le ticket ne contient que la phrase de l'utilisateur. Personne ne prouve que la réparation a marché.</td></tr>
+   <tr><td><b>GLPI</b> (outil de tickets)</td><td>Suit les tickets et la liste du matériel.</td><td>Le ticket ne contient que la phrase de l'utilisateur, qu'il vienne de GLPI, du téléphone, d'un mail ou du chat. Personne ne prouve que la réparation a marché.</td></tr>
    <tr><td><b>Script d'installation actuel</b></td><td>Installe les applications rapidement.</td><td>Le service et le profil se choisissent à la main. GLPI n'est pas mis à jour tout seul.</td></tr>
   </tbody>
  </table></div>
- <div class="callout accent"><strong>Ce qui manque partout :</strong> un témoin physique (« la machine travaille-t-elle vraiment ? »), une comparaison entre les pages envoyées et les pages imprimées, et un lien automatique entre le terrain, l'AD et GLPI.</div>
+ <div class="callout accent"><strong>Ce qui manque partout :</strong> un témoin physique (« la machine travaille-t-elle vraiment ? »), une comparaison entre les pages envoyées et les pages imprimées, et un lien automatique entre le terrain, l'AD et GLPI. Et personne ne dit « l'imprimante marche, vérifiez le câble » avant le déplacement.</div>
 </div></section>
 
 <!-- ============================================================ 03 -->
@@ -276,6 +276,7 @@ footer{padding:30px 0;font-size:.9rem;color:var(--encre-3)}
    <button class="btn petit" data-cas="bourrage" aria-pressed="false">Bourrage</button>
    <button class="btn petit" data-cas="figee" aria-pressed="false">Imprimante figée</button>
    <button class="btn petit" data-cas="pc" aria-pressed="false">Bloqué dans le PC</button>
+   <button class="btn petit" data-cas="cable" aria-pressed="false">Câble USB débranché</button>
    <button class="btn petit" data-cas="reseau" aria-pressed="false">Hors réseau</button>
   </div>
   <div class="temoins">
@@ -290,6 +291,8 @@ footer{padding:30px 0;font-size:.9rem;color:var(--encre-3)}
   </div>
   <pre class="terminal ticket" id="t-ticket" aria-live="polite"></pre>
  </div>
+
+ <div class="callout info"><strong>Trois façons de brancher l'imprimante, trois diagnostics.</strong> <b>Réseau filaire ou Wi-Fi :</b> elle a une adresse IP, donc ping et SNMP marchent ; le Wi-Fi ajoute une panne possible, « elle n'est pas sur le bon réseau sans fil ». <b>USB :</b> pas d'adresse IP, pas de SNMP ; <b>seul le PC lu par JEA</b> voit la panne. <b>Bluetooth ou Wi-Fi Direct :</b> même chose qu'en USB. Wassim a parlé de Bluetooth ; le Wi-Fi est plus probable (à confirmer par le tuteur). La V1 teste l'USB et le réseau filaire ; le Wi-Fi vient ensuite.</div>
 
  <div class="callout info"><strong>Pourquoi le compteur plutôt qu'un capteur de feuilles ?</strong> Un capteur infrarouge au-dessus de la sortie était prévu. Il est retiré de la V1 (décision du 22/11/2026) : dans les 10 pannes de test, aucune n'a besoin de lui pour trouver la bonne cause. Il est aussi difficile à placer (sortie sous le scanner, pile de feuilles qui monte, lumière du local). Le compteur se lit par le réseau, sans rien fixer. Le capteur revient en V2 <b>pour contrôler le compteur</b>.</div>
 
@@ -586,6 +589,9 @@ var CAS = {
   pc:      { vib: 'Non', forme: 'plat', cpt: 0, etat: '« Ça va »', pc: '5 pages bloquées', sens: 'info',
              titre: 'Le problème est dans le PC', texte: 'L\'imprimante attend, mais rien ne lui arrive : les pages sont bloquées dans la file de Windows. Inutile de se déplacer vers l\'imprimante.', ecran: 'Prête',
              ticket: 'Cause probable : file d\'impression bloquée sur PC-CARDIO-03\nNiveau 2 : relancer le service d\'impression (commande de la liste JEA)' },
+  cable:   { vib: 'Non', forme: 'plat', cpt: null, etat: 'Imprimante en USB : pas de SNMP', pc: 'Imprimante absente', sens: 'info',
+             titre: 'Le PC ne voit plus l\'imprimante', texte: 'Le PC ne trouve plus le périphérique USB. Cause la plus probable : le câble n\'est pas branché. Avant de se déplacer, on demande à l\'utilisateur de le vérifier.', ecran: 'Vérifiez le câble',
+             ticket: 'Cause probable : imprimante absente de PC-CARDIO-03 (périphérique USB non détecté)\nNiveau 1 : demander de vérifier le câble USB ; pas de déplacement avant ce geste\nNiveau 2 : si le PC ne la voit toujours pas après 10 min, déplacement' },
   reseau:  { vib: 'Non', forme: 'plat', cpt: null, etat: 'Ne répond pas', pc: '—', sens: 'danger',
              titre: 'Pas dans le réseau attendu', texte: 'Le serveur cherche où ça bloque : ping, DNS, DHCP, ports 9100 et 631, puis il compare avec l\'AD.', ecran: 'Hors réseau',
              ticket: 'Vérifications : ping NON · DNS OK · bail DHCP dans le réseau RADIOLOGIE\nCause probable : l\'imprimante est dans le réseau de la radiologie ;\n  d\'après l\'AD, elle devrait être dans celui de la cardiologie\nAucune modification du réseau : vérification seulement' }

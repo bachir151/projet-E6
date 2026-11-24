@@ -253,11 +253,14 @@ R.texte("Wassim est technicien support au service informatique d’un centre hos
         "les imprimantes »", "g"), ". Elles sont allumées mais n’impriment pas ; il vérifie si elles sont dans le "
         "bon VLAN, s’il manque de l’encre. Sa deuxième tâche fréquente : ", ("préparer le PC d’un nouveau "
         "médecin", "g"), " (le mettre dans le domaine, le ranger dans le bon service de l’annuaire AD, installer "
-        "les applications avec un script). Il trouve aussi qu’il y a trop de tickets, souvent mal décrits.")
+        "les applications avec un script). Il trouve aussi qu’il y a trop de tickets, souvent mal décrits. Les tickets sont gérés dans GLPI, mais les "
+        "agents appellent aussi, écrivent un mail ou passent par le chat de GLPI. Le service n’a pas de supervision "
+        "centralisée des imprimantes. Selon les bureaux, l’imprimante est reliée au PC par un câble USB, en réseau "
+        "ou en sans-fil. (Faits rapportés par l’apprenti, à confirmer par le tuteur.)")
 R.titre("Le problème")
 R.texte("Un ticket « l’imprimante ne marche pas » ne dit rien de la cause. L’imprimante elle-même peut répondre "
         "« tout va bien » alors qu’elle est figée. Le technicien refait à la main les mêmes vérifications, se "
-        "déplace souvent pour rien, et personne ne prouve que la réparation a marché. Pour les PC neufs, le choix du "
+        "déplace parfois pour rien (par exemple : l’imprimante marche, mais son câble n’est pas branché au PC), et personne ne prouve que la réparation a marché. Pour les PC neufs, le choix du "
         "service et du profil se fait de mémoire, et la fiche du PC dans l’outil de tickets est souvent oubliée.")
 R.texte(("Question posée par le projet : ", "g"), "si un petit boîtier collé sur l’imprimante voyait ce qui se "
         "passe vraiment, et si le ticket arrivait avec sa cause et sa preuve, combien de déplacements et de temps "
@@ -268,14 +271,15 @@ R.tableau(
     ["Solution", "Ce qu’elle apporte", "Pourquoi elle ne suffit pas"],
     [
         ["Page web de l’imprimante", "État, niveau d’encre", "Une imprimante à la fois ; peut dire « tout va bien » alors qu’elle est figée"],
-        ["Supervision (Centreon, Zabbix…)", "Toutes les imprimantes du réseau", "Lit l’état et le compteur de pages sans les comparer à ce qui a été envoyé ; ne sent pas si la machine travaille ; ne regarde pas le PC qui imprime"],
+        ["Supervision (Centreon, Zabbix…) : absente du service pour les imprimantes (à confirmer)", "Toutes les imprimantes du réseau", "Ne voit pas les imprimantes en USB ; lit l’état et le compteur de pages sans les comparer à ce qui a été envoyé ; ne sent pas si la machine travaille ; ne regarde pas le PC qui imprime"],
         ["Prise en main à distance", "Le technicien voit le PC", "Vérifications manuelles, ticket après ticket"],
-        ["Outil de tickets (GLPI)", "Suivi, historique, liste du matériel", "Le ticket ne contient que la phrase de l’utilisateur ; aucune preuve de réparation"],
+        ["Outil de tickets (GLPI)", "Suivi, historique, liste du matériel", "Le ticket ne contient que la phrase de l’utilisateur (GLPI, téléphone, mail ou chat) ; aucune preuve de réparation"],
         ["Script d’installation actuel", "Installe vite les applications", "Service et profil choisis à la main ; GLPI non mis à jour"],
     ],
     [4.2, 5.0, 8.8])
 R.texte(("Constat : ", "g"), "aucun outil ne compare ce que dit l’imprimante avec ce qui se passe physiquement "
-        "(vibration, pages vraiment imprimées), ni avec ce que le PC a envoyé. C’est pourtant cette comparaison qui donne la cause.")
+        "(vibration, pages vraiment imprimées), ni avec ce que le PC a envoyé. Aucun ne dit « l’imprimante marche, "
+        "vérifiez le câble » avant un déplacement. C’est pourtant cette comparaison qui donne la cause.")
 R.titre("Principe de la solution")
 R.puce(("Le boîtier", "g"), " (ESP32), collé sur l’imprimante : un accéléromètre sent si elle vibre, un gros bouton « ça ne marche pas » ouvre un ticket, un écran à "
        "encre électronique donne des nouvelles (« Bac 2 vide », « Wassim arrive », « Réparé »).")
@@ -364,7 +368,7 @@ R.titre("Exigences et indicateurs mesurés sur la maquette (objectifs à valider
 R.tableau(
     ["Exigence", "Mesure sur la maquette", "Objectif", "Étape"],
     [
-        ["E1 – Bonne cause", "10 pannes provoquées (papier retiré, feuille bloquée, câble, mauvais réseau, imprimante figée, file bloquée)", "Cause juste dans au moins 9 cas", "V1"],
+        ["E1 – Bonne cause", "10 pannes provoquées (papier retiré, feuille bloquée, câble USB débranché, mauvais réseau, imprimante figée, file bloquée)", "Cause juste dans au moins 9 cas", "V1"],
         ["E2 – Pas de fausse alerte", "1 h d’impressions normales", "Aucun ticket", "V1"],
         ["E3 – Rapide", "Temps entre l’impression ratée et le ticket", "Moins d’1 minute", "V1"],
         ["E4 – Pages comptées", "Compteur SNMP sur 100 pages ; 10 pages de test", "Au plus 1 écart ; 10 sur 10", "V1"],
@@ -385,7 +389,9 @@ R.tableau(
     [3.6, 7.6, 6.8])
 R.titre("Questions au tuteur (hypothèses à confirmer)")
 R.puce("Quelle part des tickets concerne les imprimantes ? les PC neufs ? (ordre de grandeur sur un mois)")
-R.puce("Les imprimantes sont-elles en réseau, dans un VLAN à part, publiées dans l’AD ?")
+R.puce("Les imprimantes sont-elles en réseau (filaire ou Wi-Fi), en USB, ou en Bluetooth / Wi-Fi Direct ? Dans un VLAN à part, publiées dans l’AD ?")
+R.puce("Quelle part des déplacements est inutile (câble non branché, par exemple) ? Combien de temps prend un déplacement, aller-retour compris ?")
+R.puce("Par quels canaux arrivent les tickets (GLPI, téléphone, mail, chat) ? Le mail crée-t-il déjà un ticket tout seul ?")
 R.puce("Le technicien a-t-il le droit de lire l’état des imprimantes (SNMP) ?")
 R.puce("Combien de profils d’installation existent (médecin, secrétaire, infirmier…) ?")
 
@@ -524,7 +530,7 @@ R.puce(("C01 Communiquer : ", "g"), "revues de projet, échanges avec le tuteur,
        "sur l’écran du boîtier, bilan « adopter ou non », dossier technique, soutenance avec démonstration.")
 R.puce(("C03 Gérer un projet : ", "g"), "analyse du besoin, planning en 11 tâches, journal de bord, passage V1 → V2 "
        "et d’un palier à l’autre décidé sur indicateurs, suivi des risques et du budget.")
-R.puce(("C08 Coder : ", "g"), "C++ sur ESP32 (capteurs, interruptions, MQTT, écran, RFID), Python (règles, SNMP, "
+R.puce(("C08 Coder : ", "g"), "C++ sur ESP32 (capteurs, interruptions, MQTT, écran, RFID), Python (sonde de l’imprimante avec profils par marque et mode simulé, règles, SNMP, "
        "pilotage WinRM, LDAP, API REST de GLPI), SQL, PowerShell (JEA, préparation des PC).")
 R.puce(("C10 Exploiter un réseau : ", "g"), "réservation DHCP et nom DNS pour le serveur et les boîtiers ; heure NTP "
        "commune ; vérifications réseau d’une imprimante (ping, DNS, DHCP, ports 9100 et 631) ; lecture de l’AD pour "
@@ -565,7 +571,7 @@ R.tableau(
         ["2", "Maquette : GLPI, CUPS, machines virtuelles Windows 11 dans le domaine Samba, imprimante", "12", "C10"],
         ["3", "Boîtier : vibration, bouton, écran, MQTT", "27", "C08"],
         ["4", "Physique : étalonnage, vibration, délai de démarrage, humidité (V2), incertitudes", "12", "physique"],
-        ["5", "Serveur : règles de comparaison, SNMP (état, compteur), vérifications réseau", "22", "C08 · revue 2"],
+        ["5", "Serveur : sonde de l’imprimante (SNMP, PC pour l’USB, profils par marque, simulateur), règles de comparaison, vérifications réseau", "22", "C08 · revue 2"],
         ["6", "PowerShell : file d’impression par JEA ; lecture de l’AD", "14", "C08, C10"],
         ["7", "Exploitation du réseau : DHCP, DNS, NTP, SNMP, captures", "8", "C10"],
         ["8", "GLPI : tickets à paliers, retour sur l’écran, tableau de bord", "16", "C08"],
@@ -593,8 +599,8 @@ R.puce("On fige l’imprimante, puis on imprime : rien ne vibre, le compteur n�
        "affiche « Bloquée ».")
 R.puce("Le technicien valide le redémarrage (palier 2) ; l’imprimante vibre et son compteur avance, le ticket est "
        "résolu avec la preuve et l’écran affiche « Réparé ».")
-R.puce("Autres pannes provoquées : papier retiré, feuille bloquée, câble débranché, imprimante dans le mauvais réseau, "
-       "documents bloqués dans le PC. À chaque fois, la bonne cause est écrite dans le ticket.")
+R.puce("Autres pannes provoquées : papier retiré, feuille bloquée, câble USB débranché (le PC ne voit plus l’imprimante : le ticket dit de vérifier le câble avant tout "
+       "déplacement), imprimante dans le mauvais réseau, documents bloqués dans le PC. À chaque fois, la bonne cause est écrite dans le ticket.")
 R.puce("Une commande hors de la liste JEA est ", ("refusée et tracée", "g"), " ; le compte GLPI ne peut rien "
        "supprimer.")
 R.puce("(V2) Trois cartes posées sur la station : le PC neuf entre dans le domaine, directement dans le bon service, "

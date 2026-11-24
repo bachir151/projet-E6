@@ -757,6 +757,12 @@ Fixer ensuite la période de lecture, proposée au départ à 5 secondes, et un 
 
 **Validation :** une page réelle entraîne une variation comprise du compteur ; les états et les limites du modèle sont consignés. Les niveaux d'encre ne sont retenus que s'ils sont exploitables.
 
+### 8.5 Tester sans imprimante
+
+Si le modèle n'est pas encore disponible, développer avec un **simulateur SNMP** (par exemple snmpsim) qui sert un fichier de valeurs par scénario : tout va bien, bac vide, bourrage, imprimante figée. Les valeurs sont écrites d'après la RFC 3805. Pour tester les pannes réseau réelles, un appareil simulé sur le LAN (VM Ubuntu ou Raspberry Pi, avec le service SNMP de Linux) donne une vraie adresse IP.
+
+Un simulateur ne révèle pas les différences entre modèles. Dès qu'une vraie imprimante est disponible, refaire les relevés des § 8.3 et 8.4 et consigner, par modèle, les objets lus et leurs valeurs. Cahier des charges de la sonde : `sonde/CAHIER-DES-CHARGES.md`.
+
 ## 9. Installer MQTT sur la VM 2
 
 ### 9.1 Installer le serveur de messages
@@ -1095,6 +1101,7 @@ Le script ne réessaie pas un `POST` après timeout. Le serveur peut avoir cré�
 | Collecte SNMP | IP et OID relevés | Compteur, état, qualité et date de mesure |
 | Lecture LDAP | Nom du PC | OU ou état « annuaire indisponible » |
 | Suivi d'impression | CUPS et file Windows | Travail demandé, en attente, terminé ou inconnu |
+| Raccordement vu par le PC | Lecture JEA (imprimante présente ? USB ?) | Vue, absente ou inconnue ; seul témoin pour une imprimante en USB |
 | Moteur de règles | Témoins récents | Cause probable et niveau de confiance |
 | Client GLPI | Incident local | Ticket créé ou mis à jour |
 | Affichage | État de l'incident | Message MQTT vers l'e-ink |
@@ -1109,6 +1116,7 @@ Chaque collecte doit avoir un timeout. Une panne de Samba ne doit pas bloquer la
 | État indiquant manque de papier | Bac à vérifier | OID et décodage validés sur le modèle |
 | Travail attendu, pas de vibration, compteur stable, SNMP « prêt », file Windows vide | Imprimante probablement figée | Délai d'attente dépassé, travail bien arrivé, mesures fiables |
 | Documents encore en attente sur le PC | Blocage possible côté poste ou transfert | Collecte Windows récente ; le nombre seul ne prouve pas la cause |
+| Imprimante en USB que le PC ne voit plus | Branchement à vérifier | Collecte Windows récente ; message « vérifier le câble » avant tout déplacement, sans affirmer que l'imprimante est en bon état |
 | Absence de réponse SNMP | Supervision de l'imprimante indisponible | Faire les tests réseau avant de conclure à une panne matérielle |
 | Adresse hors du réseau attendu pour le service | Adressage ou réseau à vérifier | Association PC/imprimante connue et plan à jour |
 

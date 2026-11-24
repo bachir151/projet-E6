@@ -23,9 +23,9 @@
 <body>
 <header class="wrap large tete">
   <div>
-    <span class="label">Projet 1 · Wassim · le service informatique augmenté</span>
+    <span class="label">Projet 1 · Wassim · supervision instrumentée des imprimantes</span>
     <h1>Le schéma réseau pas à pas</h1>
-    <p class="lead">La maquette du lycée, à plat : le matériel vu de face et les liens réseau. Chaque point qui circule est un message. Clique sur <b>Suivant</b> pour suivre leur trajet, étape par étape.</p>
+    <p class="lead">La maquette, à plat : le matériel vu de face et les liens réseau. Chaque point qui circule est un message. Clique sur <b>Suivant</b> pour suivre leur trajet, étape par étape.</p>
   </div>
   <nav class="liens" aria-label="Autres pages du projet"><a class="btn petit" href="architecture-2-5d.html">Version 2,5D</a><a class="btn petit" href="../animation-3d/maquette-3d.html">Maquette 3D ↗</a></nav>
 </header>
@@ -39,14 +39,14 @@
     <figcaption class="reperes-tech">
       <h2>Qui fait quoi et comment les informations circulent</h2>
       <div class="reperes-grille">
-        <div class="repere"><h3>Hôte Ubuntu · deux VM serveurs</h3><p><b>VM 1 : Samba AD et DNS.</b> Elle héberge le domaine et classe les PC par service. <b>VM 2 : Python, Mosquitto, CUPS, GLPI et MariaDB.</b> Les deux VM sont hébergées sur la machine Ubuntu.</p></div>
-        <div class="repere"><h3>Poste Ubuntu du technicien · OpenRSAT</h3><p><b>OpenRSAT administre Samba AD</b> : comptes, PC, services et DNS. Le navigateur consulte <b>GLPI sur VM 2 en HTTPS</b>. OpenRSAT est une interface d’administration ; le domaine fonctionne sur VM 1.</p></div>
-        <div class="repere"><h3>PC physique de la secrétaire</h3><p><b>Ordinateur séparé, Windows 11 Pro ou Entreprise.</b> Il rejoint le domaine de VM 1, avec le DNS de Samba. Il imprime via <b>CUPS sur VM 2</b>. Sa file d’impression peut être lue par <b>WinRM HTTPS / JEA</b>.</p></div>
-        <div class="repere"><h3>Imprimante réseau · SNMP et IPP</h3><p><b>Python sur VM 2 interroge l’imprimante en SNMP</b> et interprète ses réponses : état, compteur et consommables. <b>IPP transporte les travaux d’impression</b>. L’imprimante ne rejoint pas le domaine Samba.</p></div>
-        <div class="repere"><h3>ESP32 · Wi-Fi et MQTT avec TLS</h3><p>Le boîtier transmet vibration, bouton et badge (V2) à <b>Mosquitto sur VM 2</b>, qui échange les messages avec Python. Python renvoie le texte de l’<b>écran e-ink</b> par le même chemin. Le <b>bouton</b> signale une panne ; le <b>badge (V2)</b> trace l’arrivée et le départ. Le <b>SHT31 (V2)</b> mesure l’humidité et la température pour étudier le risque de bourrage. L’e-ink conserve le dernier message, même sans courant.</p></div>
-        <div class="repere"><h3>Python → API GLPI → MariaDB</h3><p><b>Un programme Python, organisé en plusieurs fichiers</b>, collecte et croise les témoins. Il consulte aussi Samba par <b>LDAPS</b> pour connaître le service du PC. Il demande à <b>l’API REST de GLPI en HTTPS</b> de créer ou compléter un ticket ; <b>GLPI écrit dans sa propre base MariaDB</b>.</p></div>
+        <div class="repere"><h3>Hôte Ubuntu · un serveur (VM)</h3><p><b>Une VM : Python (la sonde et les règles), Mosquitto, CUPS, GLPI et MariaDB</b>, avec le DNS et l’heure de la maquette. <b>V2 : une seconde VM, Samba AD</b>, classe les PC par service et sert à ranger les PC neufs.</p></div>
+        <div class="repere"><h3>Poste Ubuntu du technicien</h3><p>Le navigateur consulte <b>GLPI sur le serveur en HTTPS</b>. En V2, <b>OpenRSAT</b> administre Samba AD : comptes, PC et services.</p></div>
+        <div class="repere"><h3>PC physique de la secrétaire</h3><p><b>Ordinateur séparé, Windows 11 Pro ou Entreprise.</b> En V1, il utilise un <b>compte local</b>, sans domaine (V2 : il rejoint le domaine Samba). Il imprime via <b>CUPS sur le serveur</b>. Sa file d’impression peut être lue par <b>WinRM HTTPS / JEA</b>.</p></div>
+        <div class="repere"><h3>Imprimante réseau · SNMP et IPP</h3><p><b>Python sur le serveur interroge l’imprimante en SNMP</b> et interprète ses réponses : état, compteur et consommables. <b>IPP transporte les travaux d’impression</b>. L’imprimante ne rejoint aucun domaine. Une imprimante en USB n’a pas d’adresse : seul le PC la voit, par JEA.</p></div>
+        <div class="repere"><h3>ESP32 · Wi-Fi et MQTT avec TLS</h3><p>Le boîtier transmet vibration, bouton et badge (V2) à <b>Mosquitto sur le serveur</b>, qui échange les messages avec Python. Python renvoie le texte de l’<b>écran e-ink</b> par le même chemin. Le <b>bouton</b> signale une panne ; le <b>badge (V2)</b> trace l’arrivée et le départ. Le <b>SHT31 (V2)</b> mesure l’humidité et la température pour étudier le risque de bourrage. L’e-ink conserve le dernier message, même sans courant.</p></div>
+        <div class="repere"><h3>Python → API GLPI → MariaDB</h3><p><b>Un programme Python, organisé en plusieurs fichiers</b>, collecte et croise les témoins. Le réseau attendu pour le service vient d’un tableau PC ↔ imprimante ↔ réseau dans l’inventaire GLPI (V2 : Samba par <b>LDAPS</b>). Il demande à <b>l’API REST de GLPI en HTTPS</b> de créer ou compléter un ticket ; <b>GLPI écrit dans sa propre base MariaDB</b>.</p></div>
       </div>
-      <p class="repere-flux"><b>Impression :</b> PC secrétaire → CUPS (VM 2) → imprimante.<br><b>Diagnostic :</b> SNMP + événements MQTT → Python (VM 2) → API GLPI → base MariaDB.<br><b>Retour sur place :</b> Python → MQTT/TLS → ESP32 → écran e-ink.</p>
+      <p class="repere-flux"><b>Impression :</b> PC secrétaire → CUPS (serveur) → imprimante.<br><b>Diagnostic :</b> SNMP + événements MQTT → Python (serveur) → API GLPI → base MariaDB.<br><b>Retour sur place :</b> Python → MQTT/TLS → ESP32 → écran e-ink.</p>
     </figcaption>
   </figure>
 
@@ -60,7 +60,7 @@
       <button class="btn principal" id="bNext" type="button">Suivant ▶</button>
     </div>
     <div id="points" role="group" aria-label="Aller à une étape"></div>
-    <p class="aide"><kbd>←</kbd> <kbd>→</kbd> étapes · <kbd>R</kbd> rejouer · <kbd>E</kbd> étiquettes</p>
+    <p class="aide"><kbd>←</kbd> <kbd>→</kbd> étapes · <kbd>R</kbd> rejouer · <kbd>P</kbd> pause · <kbd>E</kbd> étiquettes</p>
     <ul class="legende" aria-label="Légende"><li><i style="background:var(--jaune)"></i>MQTT/TLS (boîtier)</li><li><i style="background:var(--bleu)"></i>IPP (impression)</li><li><i style="background:var(--vert)"></i>SNMP, JEA</li><li><i style="background:var(--blanc)"></i>HTTPS · consultation GLPI</li><li><i style="background:var(--rouge)"></i>refus, panne</li><li><s class="wifi"></s>Wi-Fi</li><li><s></s>Ethernet</li><li><s class="fixe"></s>fixé dessus</li></ul>
   </aside>
 </main>
@@ -83,7 +83,7 @@
 var TXT = [
 {
 "t": "Vue d'ensemble",
-"x": "<p>La maquette du lycée, vue de biais. Au fond, le <b>réseau en place</b> : serveur Ubuntu, switch, borne Wi-Fi et <b>poste du technicien</b> (GLPI).</p><p>Au milieu, une <b>imprimante réseau</b> avec, collé dessus, le <b>boîtier ESP32</b> et ses capteurs. À gauche, le <b>PC de la secrétaire</b>. Devant à droite, le <b>banc de physique</b>.</p><p>Les points qui circulent sont des <b>messages réseau</b>. Clique sur <b>Suivant</b>.</p>"
+"x": "<p>La maquette, vue de biais. Au fond, le <b>réseau en place</b> : serveur Ubuntu, switch, borne Wi-Fi et <b>poste du technicien</b> (GLPI).</p><p>Au milieu, une <b>imprimante réseau</b> avec, collé dessus, le <b>boîtier ESP32</b> et ses capteurs. À gauche, le <b>PC de la secrétaire</b>. Devant à droite, le <b>banc de physique</b>.</p><p>Les points qui circulent sont des <b>messages réseau</b>. Clique sur <b>Suivant</b>.</p>"
 },
 {
 "t": "1. Le boîtier, de près",
@@ -95,7 +95,7 @@ var TXT = [
 },
 {
 "t": "3. La panne : l'imprimante figée",
-"x": "<p>La secrétaire relance une impression. Le travail arrive… mais <b>rien ne vibre</b> et <b>aucune feuille ne sort</b>.</p><p>Pourtant, en SNMP, l'imprimante répond « <b>prête</b> » : elle se trompe. Son <b>compteur de pages</b>, lui, n'a pas bougé. Le serveur demande aussi au PC, par un point d'accès PowerShell limité (<b>JEA</b>), si des documents y sont bloqués : non.</p><p>Le programme <b>Python de VM 2</b> interprète les réponses SNMP et les croise avec les événements MQTT. Conclusion : <b>imprimante probablement figée</b>. Python appelle l’API HTTPS de GLPI sur VM 2 : le ticket s'ouvre avec la cause, et l'écran du boîtier prévient sur place.</p>"
+"x": "<p>La secrétaire relance une impression. Le travail arrive… mais <b>rien ne vibre</b> et <b>aucune feuille ne sort</b>.</p><p>Pourtant, en SNMP, l'imprimante répond « <b>prête</b> » : elle se trompe. Son <b>compteur de pages</b>, lui, n'a pas bougé. Le serveur demande aussi au PC, par un point d'accès PowerShell limité (<b>JEA</b>), si des documents y sont bloqués : non.</p><p>Le programme <b>Python du serveur</b> interprète les réponses SNMP et les croise avec les événements MQTT. Conclusion : <b>imprimante probablement figée</b>. Python appelle l’API HTTPS de GLPI sur le serveur : le ticket s'ouvre avec la cause, et l'écran du boîtier prévient sur place.</p>"
 },
 {
 "t": "4. Palier 2 : le technicien valide, le compteur prouve",
@@ -103,7 +103,7 @@ var TXT = [
 },
 {
 "t": "5. L'humidité du local (V2)",
-"x": "<p>Le <b>SHT31</b> mesure l'humidité de l'air autour de l'imprimante. Air trop humide : le papier absorbe de l'eau, gonfle et se coince plus souvent. Au-delà du <b>seuil</b> (ici 65 %), le serveur ouvre un <b>ticket préventif</b>.</p><p><b>Physique :</b> au lycée, Wassim garde des feuilles 48 h à humidité basse, puis haute (≈ 75 %, au-dessus d'eau salée), et les <b>pèse</b>. Le seuil vient de ces mesures, avec leurs incertitudes.</p><p>Les valeurs affichées sont des <b>exemples</b> : les vraies viendront des essais.</p>"
+"x": "<p>Le <b>SHT31</b> mesure l'humidité de l'air autour de l'imprimante. Air trop humide : le papier absorbe de l'eau, gonfle et se coince plus souvent. Au-delà du <b>seuil</b> (ici 65 %), le serveur ouvre un <b>ticket préventif</b>.</p><p><b>Physique :</b> sur le banc de mesure, Wassim garde des feuilles 48 h à humidité basse, puis haute (≈ 75 %, au-dessus d'eau salée), et les <b>pèse</b>. Le seuil vient de ces mesures, avec leurs incertitudes.</p><p>Les valeurs affichées sont des <b>exemples</b> : les vraies viendront des essais.</p>"
 },
 {
 "t": "6. Le gros bouton rouge",
@@ -118,7 +118,7 @@ var TXT = [
 "x": "<p>La question de sécurité de Wassim : « <b>le diagnostic à distance peut-il faire plus que ce qu'on lui permet ?</b> »</p><p>Sur le PC, un point d'accès PowerShell limité (<b>JEA</b>) n'accepte qu'une <b>liste fermée</b> de commandes, avec un compte sans droit d'administrateur. <code>Get-PrintJob</code> passe. Une commande hors liste est <b>refusée et tracée</b>.</p><p>De même, le compte du serveur dans GLPI ne peut <b>rien supprimer</b>.</p>"
 }
 ];
-TXT[0].x = "<p>La machine <b>Ubuntu héberge deux VM</b> : <b>VM 1, Samba AD et DNS</b> pour le domaine ; <b>VM 2, Python, Mosquitto, CUPS et GLPI</b> pour le diagnostic et les tickets.</p><p>Le <b>PC de la secrétaire est un ordinateur physique séparé</b>, sous Windows 11 Pro ou Entreprise, membre du domaine. Le technicien utilise <b>OpenRSAT sous Ubuntu</b> pour administrer Samba et son <b>navigateur HTTPS</b> pour consulter GLPI.</p><p>Les points animés suivent le réseau. Les appels <b>Python → API GLPI → MariaDB</b> restent dans VM 2. Les étiquettes sous le dessin détaillent chaque rôle.</p>";
+TXT[0].x = "<p>Le <b>serveur Ubuntu</b> (une VM) héberge <b>Python, Mosquitto, CUPS et GLPI</b> pour le diagnostic et les tickets, avec le DNS et l'heure de la maquette. En <b>V2</b>, une seconde VM hébergera Samba AD.</p><p>Le <b>PC de la secrétaire est un ordinateur physique séparé</b>, sous Windows 11 Pro ou Entreprise, avec un compte local. Le technicien utilise le <b>navigateur HTTPS</b> pour consulter GLPI.</p><p>Les points animés suivent le réseau. Les appels <b>Python → API GLPI → MariaDB</b> restent sur le serveur. Les étiquettes sous le dessin détaillent chaque rôle.</p>";
 var UP = ['box', 'ap', 'sw', 'srv'], DOWN = UP.slice().reverse();
 function glpi(S, rows) { S.ecran('tec', [['GLPI · imprimantes', 'var(--focus)']].concat(rows.length ? rows : [['aucun ticket ouvert', 'var(--encre-2)']]), 'clair'); }
 function ep(S, t) { S.q('box', '.epaper').textContent = t; }
@@ -135,21 +135,21 @@ async function imprimer(S) {
 }
 window.SCHEMA = {
   noeuds: [
-    { id: 'ap', k: 'ap', x: 600, y: 60, nom: 'Borne Wi-Fi', sous: 'réseau du lycée', cote: 'droite' },
-    { id: 'sw', k: 'switch', x: 600, y: 230, nom: 'Switch du lycée', sous: 'réseau en place', cote: 'bas' },
-    { id: 'srv', k: 'serveur', x: 1010, y: 230, nom: 'Hôte Ubuntu · 2 VM', sous: 'VM1 Samba · VM2 Python / GLPI' },
-    { id: 'sec', k: 'pc', x: 190, y: 230, nom: 'PC physique · secrétaire', sous: 'Windows 11 Pro / Entreprise · domaine' },
-    { id: 'tec', k: 'pc', x: 1010, y: 560, nom: 'Technicien · Ubuntu', sous: 'OpenRSAT · navigateur GLPI' },
+    { id: 'ap', k: 'ap', x: 600, y: 60, nom: 'Borne Wi-Fi', sous: 'réseau en place', cote: 'droite' },
+    { id: 'sw', k: 'switch', x: 600, y: 230, nom: 'Switch ProCurve', sous: 'réseau en place', cote: 'bas' },
+    { id: 'srv', k: 'serveur', x: 1010, y: 230, nom: 'Serveur Ubuntu · 1 VM', sous: 'Python · GLPI · MQTT · CUPS' },
+    { id: 'sec', k: 'pc', x: 190, y: 230, nom: 'PC physique · secrétaire', sous: 'Windows 11 Pro / Entreprise · compte local' },
+    { id: 'tec', k: 'pc', x: 1010, y: 560, nom: 'Technicien · Ubuntu', sous: 'navigateur GLPI' },
     { id: 'prn', k: 'imprimante', x: 620, y: 560, nom: 'Imprimante réseau', sous: 'IPP : imprimer · SNMP : superviser' },
-    { id: 'box', k: 'boitier', x: 360, y: 560, nom: 'Boîtier ESP32', sous: 'MQTT/TLS ↔ VM2 · écran e-ink' },
+    { id: 'box', k: 'boitier', x: 360, y: 560, nom: 'Boîtier ESP32', sous: 'MQTT/TLS ↔ serveur · écran e-ink' },
     { id: 'banc', k: 'banc-papier', x: 130, y: 560, nom: 'Banc de physique', sous: 'humidité et pesée' }
   ],
   liens: [
-    ['sec', 'sw', 'eth', 'Domaine · IPP · JEA'],
+    ['sec', 'sw', 'eth', 'IPP · JEA'],
     ['sw', 'srv', 'eth', ''],
     ['ap', 'sw', 'eth', ''],
     ['sw', 'prn', 'eth', 'IPP · SNMP', { via: [[620, 330]], t: 0.75 }],
-    ['sw', 'tec', 'eth', 'HTTPS GLPI · LDAP AD', { via: [[800, 230], [800, 560]] }],
+    ['sw', 'tec', 'eth', 'HTTPS GLPI', { via: [[800, 230], [800, 560]] }],
     ['box', 'ap', 'wifi', 'Wi-Fi · MQTT (TLS)', { via: [[360, 60]], t: 0.2 }],
     ['box', 'prn', 'fixe', 'collé']
   ],
@@ -264,7 +264,7 @@ window.SCHEMA = {
         S.bulle('sec', ['#Point JEA', 'commande hors liste → refusée', 'refus tracé dans le journal'], { cote: 'haut', dy: -20, cls: 'alerte' });
         await S.go(['sec', 'sw', 'srv'], 'rouge', 'refusé · tracé');
         await S.go(['srv', 'sw', 'tec'], 'rouge', 'HTTPS · refus de suppression');
-        S.bulle('tec', ['#GLPI sur VM 2', 'compte du serveur :', 'créer et commenter,', 'jamais supprimer'], { cote: 'gauche', dy: -20, cls: 'alerte' });
+        S.bulle('tec', ['#GLPI sur le serveur', 'compte du serveur :', 'créer et commenter,', 'jamais supprimer'], { cote: 'gauche', dy: -20, cls: 'alerte' });
       } }
   ]
 };
