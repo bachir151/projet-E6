@@ -14,6 +14,8 @@
 
 **Non vérifié :** fonctions exactes des diagnostics des fabricants (HP, Dell, Lenovo) et des outils de reconditionnement ; accès à l'état de la batterie sans droits d'administrateur ; disponibilité du nom « QualiPC ».
 
+**Suite (24/11) — formulaire académique de Yaksan :** `Projet apprenti 2/fiche-academique/Fiche_presentation_E6_Yaksan.docx` et `.pdf` (15 p.), sur le modèle de Wassim (22/11). Parties 1 à 6 ; partie 7 laissée à la commission. Schémas : synoptique, exigences E1–E8, contexte, cas d'utilisation, séquence « restitution du PC-042 », Gantt (150 h, 11 tâches, R1 29/01, R2 19/03, R3 07/05, remise 14/05). Rendu contrôlé avec LibreOffice (aucun débordement ; titres et petits tableaux non coupés). Choix à confirmer : « Idée : Lycée » ; « Projet développé : Entreprise » comme pour les autres. À compléter à la main : coordonnées de l'entreprise, nom et fonction du tuteur ; table des matières à mettre à jour dans Word.
+
 ---
 
 ## 20 novembre 2026 — Refonte de Lorenzo : CyberSentinel

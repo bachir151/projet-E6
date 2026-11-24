@@ -8,7 +8,11 @@
 - [ ] Demande de validation de la réalisation au lycée à l'académie
 
 ## Les trois livrables (tous à faire)
-- [ ] Formulaire académique (`Fiche presentation projet E6-projet-IR v2.docx`) : parties 1 à 6, SysML, Gantt du 1er janvier au 15 mai ; DOCX + PDF ; modèle : `Projet apprenti 3/fiche-academique/` → **en premier** (commission)
+- [x] Formulaire académique : `fiche-academique/Fiche_presentation_E6_Yaksan.docx` et `.pdf` (15 p., 24/11) ; parties 1 à 6, synoptique, 4 schémas SysML, Gantt du 1er janvier au 15 mai. Régénérer : `python3 schemas.py && node rendu.js && python3 remplir_fiche.py`, puis `soffice --headless --convert-to pdf`
+  - [ ] À compléter à la main : adresse, site, téléphone, mail de l'entreprise ; nom et fonction du tuteur
+  - [ ] Dans Word : mettre à jour la table des matières ; vérifier la mise en page (contrôlée seulement avec LibreOffice)
+  - [ ] Choix à confirmer : « Idée : Lycée » coché (projet proposé par l'équipe pédagogique, validé par le tuteur) ; « Projet développé : Entreprise » coché comme pour les autres apprentis, alors que le texte dit « maquette au lycée »
+  - [ ] Remplacer les hypothèses chiffrées (20 à 40 PC par an, 5 à 10 min, 1 sur 10) par les chiffres du tuteur
 - [ ] Page HTML interactive (modèle : `Projet apprenti 3/livrables/page-html/poste-attentif.html`, liée à `theme.css`)
 - [ ] Présentation 3Blue1Brown (modèle : `Projet apprenti 4/apprentie4-aziza/livrables/powerpoint-3b1b/`)
 - [ ] En plus : questions du jury (`questions-jury/contenu.py`, puis `python3 docs/questions-jury/generer.py`)
