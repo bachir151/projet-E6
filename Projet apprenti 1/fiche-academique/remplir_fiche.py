@@ -215,7 +215,7 @@ harmoniser_cases(d)
 
 # ================================================================== EN-TÊTE
 remplacer_marque(T[0].cell(3, 0).paragraphs[0], " à attribuer par la commission")
-remplacer_marque(T[0].cell(3, 1).paragraphs[0], "Supervision instrumentée des imprimantes : de la panne au ticket", gras=True)
+remplacer_marque(T[0].cell(3, 1).paragraphs[0], "Diagnostic à distance des imprimantes : valorisation des données et ticket enrichi", gras=True)
 
 t = T[1]
 cocher(cases(t.cell(0, 1).paragraphs[0])[0])          # projet nouveau : oui

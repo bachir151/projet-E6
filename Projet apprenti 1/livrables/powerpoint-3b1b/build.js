@@ -33,7 +33,7 @@ async function icon(Icon, color) {
 (async () => {
   const pres = new pptxgen();
   pres.layout = "LAYOUT_16x9";
-  pres.title = "Projet E6 – Supervision instrumentée des imprimantes : de la panne au ticket";
+  pres.title = "Projet E6 – Diagnostic à distance des imprimantes : valorisation des données et ticket enrichi";
   pres.author = "Wassim – BTS CIEL option A";
   pres.theme = { headFontFace: THEME.headFontFace, bodyFontFace: THEME.bodyFontFace };
 
@@ -192,7 +192,7 @@ async function icon(Icon, color) {
   let s = pres.addSlide({ masterName: "TITRE", sectionTitle: "Ouverture" });
   T(s, "BTS CIEL option A · Épreuve E6 · Session 2027", { x: 0.6, y: 0.55, w: 6, h: 0.3, fontSize: 12, color: GREY });
   T(s, [{ text: "Faut-il " }, { text: "se déplacer", options: { color: YEL } }, { text: " ?" }], { x: 0.6, y: 1.25, w: 5.6, h: 1.2, fontSize: 44 });
-  T(s, "Supervision instrumentée des imprimantes : de la panne au ticket", { x: 0.6, y: 2.75, w: 5.4, h: 1.0, fontSize: 17, color: GREY });
+  T(s, "Diagnostic à distance des imprimantes : valorisation des données et ticket enrichi", { x: 0.6, y: 2.75, w: 5.4, h: 1.0, fontSize: 17, color: GREY });
   T(s, "Wassim · apprenti · besoin issu du service, réalisation au lycée sur maquette", { x: 0.6, y: 4.55, w: 8.6, h: 0.3, fontSize: 12, color: GREY });
   printer(s, 6.5, 1.5, 2.8, { label: "« Elle ne marche pas »" });
   T(s, "?", { x: 7.5, y: 3.35, w: 0.8, h: 0.8, fontSize: 48, bold: true, color: YEL, align: "center", objectName: A(1, 0, "q") });

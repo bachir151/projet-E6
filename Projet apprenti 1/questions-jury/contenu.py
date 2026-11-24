@@ -1,10 +1,10 @@
 # Questions difficiles du jury – Wassim (apprenti 1)
-# Projet « Supervision instrumentée des imprimantes : de la panne au ticket » (décisions des 16 et 24/11/2026)
+# Projet « Diagnostic à distance des imprimantes : valorisation des données et ticket enrichi » (décisions des 16 et 24/11/2026)
 # Généré par : python3 docs/questions-jury/generer.py "Projet apprenti 1/questions-jury/contenu.py"
 
 META = {
     "titre": "Questions difficiles du jury – projet de Wassim",
-    "sous_titre": "« Supervision instrumentée des imprimantes : de la panne au ticket » : boîtier, sonde (SNMP, PC par JEA), quatre témoins, GLPI ; V2 : annuaire Samba et station des PC neufs · apprenti 1",
+    "sous_titre": "« Diagnostic à distance des imprimantes : valorisation des données et ticket enrichi » : boîtier, sonde (SNMP, PC par JEA), quatre témoins, GLPI ; V2 : annuaire Samba et station des PC neufs · apprenti 1",
     "pied": "Questions du jury – apprenti 1 – document de préparation, ne pas diffuser",
     "pdf": "Questions_jury_Wassim.pdf",
     "cadre": [

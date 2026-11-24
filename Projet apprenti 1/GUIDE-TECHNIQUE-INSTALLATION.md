@@ -2,7 +2,7 @@
 
 Date : 24 novembre 2026. **Mise à jour : la V1 se fait sans annuaire.** Samba et l'AD (sections 3 à 6) passent en V2. Le DNS et l'heure de la maquette sont fournis par le serveur (§ 2.5).
 
-Ce guide explique comment construire la maquette de « Supervision instrumentée des imprimantes : de la panne au ticket », depuis la première machine virtuelle jusqu'au ticket GLPI. **Ordre en V1 : serveur Ubuntu (VM 2) → PC Windows en compte local → GLPI → imprimante (SNMP) → ESP32 → programme Python et sonde → essais de bout en bout.** **V2 : VM 1 Samba AD → jonction du PC au domaine → station des PC neufs.** Les noms « VM 1 » et « VM 2 » sont gardés pour ne pas casser les références : en V1, il n'y a que la VM 2, appelée aussi « le serveur ».
+Ce guide explique comment construire la maquette de « Diagnostic à distance des imprimantes : valorisation des données et ticket enrichi », depuis la première machine virtuelle jusqu'au ticket GLPI. **Ordre en V1 : serveur Ubuntu (VM 2) → PC Windows en compte local → GLPI → imprimante (SNMP) → ESP32 → programme Python et sonde → essais de bout en bout.** **V2 : VM 1 Samba AD → jonction du PC au domaine → station des PC neufs.** Les noms « VM 1 » et « VM 2 » sont gardés pour ne pas casser les références : en V1, il n'y a que la VM 2, appelée aussi « le serveur ».
 
 Les commandes sont des instructions à exécuter sur les machines indiquées. Elles n'ont pas été exécutées sur une maquette matérielle lors de la rédaction. Les adresses, noms et comptes ci-dessous sont des choix pour le laboratoire ; les remplacer ensemble si le réseau du lycée impose un autre plan. Le modèle exact d'imprimante et les références des modules ESP32 restent à relever avant le câblage.
 
