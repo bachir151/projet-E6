@@ -3,7 +3,7 @@
 > **Statut : analyse, rien n'est décidé.** Point de départ : cinq pistes proposées à l'enseignant (refroidissement, écran, station d'accueil, armoire de prêt, mise en veille).
 > **Faits nouveaux rapportés, à faire confirmer par le tuteur** : Yaksan n'a **pas de droits d'administrateur** ; il contrôle les portables rendus par les agents ; il a signalé un **problème de fermeture du capot**. Contrainte de l'enseignant : ESP32 + capteurs + base de données + tableau de bord, et **pas de mesure électrique**.
 > **Question ouverte** : cette piste remplace-t-elle la carte agent (`nouveau-projet-carte.md`) et ALCASAR (`piste-alcasar.md`) ?
-> **Texte incomplet** : la proposition annonçait un banc « autour de quatre axes », mais la liste des axes manque.
+> **Les quatre axes de la proposition** (reçus le 25/11) : optique (écran), acoustique (micro et haut-parleurs), thermique (refroidissement), informatique (réseau et périphériques). Avis au § 8.
 
 ## 1. Deux doublons à éviter
 | Piste | Doublon avec | Pourquoi |
@@ -94,3 +94,19 @@ ESP32 ; 2 sondes de température étalonnées (par exemple DS18B20 ou SHT4x) ; a
 2. Voit-on des portables qui chauffent, des ventilateurs bruyants, des aérations encrassées ?
 3. Le problème du capot : que se passe-t-il exactement (PC chaud dans le sac, batterie vide, écran externe éteint) ?
 4. Combien de modèles de portables dans le parc ?
+
+## 8. Les quatre axes de la proposition (avis du 25/11)
+Station centrale (ESP32 + serveur Ubuntu + historique) et quatre axes : optique (écran), acoustique (micro et haut-parleurs), thermique (refroidissement), informatique (réseau et périphériques).
+
+**Bonne architecture, mauvais équilibre si les quatre axes pèsent pareil.** En 150 h, quatre mesures physiques étalonnées avec incertitudes, c'est trop : on obtient quatre tests « marche / marche pas » et une physique mince partout. Le professeur de physique attend **un** modèle confronté aux mesures.
+
+| Axe | Physique | Doublon | Besoin | Place proposée |
+|---|---|---|---|---|
+| Thermique | forte (`Q·ΔT`) | Aziza si on mesure τ | à confirmer | **V1, physique principale** |
+| Informatique | aucune | non | fort (Wi-Fi, ports USB, réseau) | **V1, porte le C10** (script en mode utilisateur, NTP, DNS, DHCP, captures) |
+| Optique | bonne (photométrie, étalonnage au luxmètre) | non | faible | **V2, mesure courte** |
+| Acoustique | spectre = doublon Wassim ; niveau seul = maigre | Wassim | faible (une oreille suffit) | **Extension**, test fonctionnel sans physique |
+
+Il manque aussi le **capot fermé**, le seul problème venu de Yaksan : à garder en V2 (rattaché aux axes thermique et informatique).
+
+Point fort à garder : **comparer le même PC à la remise et à la restitution** (valorisation de la donnée : écart mesuré, et non « il a l'air d'aller »).
