@@ -123,3 +123,10 @@ Point fort à garder : **comparer le même PC à la remise et à la restitution*
 | Extensions | à définir | — |
 
 Reste ouvert : le besoin doit maintenant venir du tuteur (PC qui chauffent, écrans usés, ports ou Wi-Fi en panne au retour). Le problème du capot n'est plus l'appui du récit.
+
+## 10. Décision de l'enseignant (25/11, suite) : ALCASAR en V2
+- **Carte agent abandonnée** (`nouveau-projet-carte.md` devient historique). **ALCASAR gardé en V2**, rattaché à l'axe connectivité : « le PC rendu passe-t-il le portail captif ? ».
+- Lien naturel : ALCASAR est envisagé par le tuteur (réponse du 19/11). C'est le besoin le plus solide du projet.
+- **Attention aux heures** : la V2 (≈ 35 h) ne peut pas porter le pilote ALCASAR complet de `piste-alcasar.md` (visiteur robot, test de charge, injecteur de pannes, physique Wi-Fi) **et** l'optique.
+- Version réduite proposée : ALCASAR installé sur la maquette (procédure fournie, ≈ 6 h) ; la station ajoute un test « portail » au contrôle de connectivité (DNS, redirection, authentification, page atteinte, temps de chaque étape) ; captures de la redirection et de l'authentification (C10) ; journaux d'ALCASAR exportés dans le journal chaîné. ≈ 20 h. Optique ramenée à ≈ 15 h (luminosité et uniformité ; couleurs en extension).
+- Extensions : couleurs de l'écran ; visiteur robot ESP32 ; test de charge du portail.
