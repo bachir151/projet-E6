@@ -36,10 +36,10 @@ var Q = window.QUARTIER = {
     url: '../Projet apprenti 4/apprentie4-aziza/livrables/animation-3d/maquette-3d.html',
     url25: '../Projet apprenti 4/apprentie4-aziza/livrables/pages-html/architecture-2-5d.html',
     url2d: '../Projet apprenti 4/apprentie4-aziza/livrables/pages-html/architecture-2d.html' },
-  { who: '', n: 0, color: '#7f8c96', prop: null,
-    title: 'À venir', sub: 'emplacement réservé',
-    desc: 'Cette maison est vide pour l’instant. La prochaine maquette viendra ici.',
-    url: null },
+  { who: 'Yaksan', n: 2, color: '#4fb3ff', prop: 'station',
+    title: 'Station de contrôle des portables', sub: 'refroidissement · connectivité · écran',
+    desc: 'Un portable rendu passe sur la station : un ESP32 mesure l’air soufflé et la lumière de l’écran, un script sans droits teste le réseau. Chaque fiche entre dans un journal qui ne s’efface pas. Maquette 3D à venir.',
+    url: null },   /* pas encore de maquette 3D : la maison reste « à venir » dans le quartier ; son chapitre existe dans presentation-projets.html */
   ],
   /* les trois vues d'une maquette : champ de l'URL, nom du bouton (et nom court sur téléphone), suffixe du titre */
   vues: [
@@ -80,6 +80,12 @@ Q.illus = function (kind, col) {
      ${sh('M12 32h86v56H12z')}<path d="M12 32h86v56H12z" fill="${col}"/><path d="M12 52h86" fill="none"/>
      <path d="M48 48h14v10H48z" fill="${W}"/>
      <g class="bob">${sh('M74 58a14 14 0 1 0 0.1 0z')}<circle cx="74" cy="72" r="14" fill="${W}"/><path d="M67 72l5 5 9-10" fill="none"/></g>` + foot;
+  if (kind === 'station') return head +   /* portable sur le banc : air chaud qui sort, sonde, thermomètre */
+    `<ellipse cx="52" cy="97" rx="42" ry="5" fill="${K}" stroke="none"/>
+     ${sh('M20 30h56v40H20z')}<path d="M20 30h56v40H20z" fill="${W}"/><path d="M28 38h40v24H28z" fill="${col}"/>
+     <path d="M10 76h76l-6 12H16z" fill="${W}"/><path d="M28 82h40" fill="none"/>
+     <g class="bob" fill="none"><path d="M86 70c6-4 6-10 0-14"/><path d="M94 74c9-7 9-17 0-24"/></g>
+     <g class="bob">${sh('M94 2a5 5 0 0 1 5 5v18a8 8 0 1 1-10 0V7a5 5 0 0 1 5-5z')}<path d="M94 2a5 5 0 0 1 5 5v18a8 8 0 1 1-10 0V7a5 5 0 0 1 5-5z" fill="${W}"/><circle cx="94" cy="31" r="4" fill="var(--rouge,#C8372D)"/><path d="M94 27V12" fill="none" stroke="var(--rouge,#C8372D)"/></g>` + foot;
   return head +   /* emplacement libre : maison en pointillés */
     `<ellipse cx="55" cy="96" rx="38" ry="5" fill="${K}" stroke="none" opacity=".35"/>
      <path d="M20 52 55 22l35 30v40H20z" fill="none" stroke-dasharray="7 6"/>

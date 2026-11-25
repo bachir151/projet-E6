@@ -438,6 +438,228 @@ body.lecture{overflow:auto}
 </section>
 
 <!-- ======================================================================================
+     PROJET 2 · YAKSAN (nouveau projet du 25/11/2026 : source = Projet apprenti 2/projet-station-controle.md)
+     ====================================================================================== -->
+<section class="slide projet couverture" data-p="Yaksan" data-chapitre="yaksan" data-titre="Yaksan : couverture">
+  <div class="couv">
+    <div class="vignette" data-illus></div>
+    <div>
+      <span class="label" style="font-size:17px">Projet 2 · Yaksan · support et accueil des agents</span>
+      <h1 class="long">Station de contrôle de santé des portables</h1>
+      <p class="sous">Un portable rendu, trois contrôles chiffrés, une trace qui ne s'efface pas.</p>
+      <ol class="plan-liste" data-plan></ol>
+      <div class="statut"><span class="tag papier">Besoin à faire valider par le tuteur</span><span class="tag papier">Maquette au lycée</span><span class="tag papier">Aucune donnée réelle</span><span class="tag jaune">Maquette 3D à venir</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="slide projet" data-p="Yaksan" data-partie="contexte">
+  <h2>Des portables qui partent, des portables qui reviennent</h2>
+  <div class="corps">
+    <p class="petit" style="margin:0;font-size:21px">Yaksan travaille au service informatique de proximité d'une <b>administration de l'État</b> (nom non cité) : support aux agents, accueil des arrivants, <b>remise et restitution des portables</b>.</p>
+    <div class="grille-4">
+      <div class="carte f"><span class="label">Sa mission</span><p class="citation">Remettre et reprendre les portables.</p><p class="petit">Un agent part ou change de poste : il rend son PC. Le PC est ensuite prêté à quelqu'un d'autre.</p></div>
+      <div class="carte f"><span class="label">Le contrôle actuel</span><p class="citation">« Il a l'air d'aller. »</p><p class="petit">On allume, on regarde, on range. Rien n'est mesuré, rien n'est gardé.</p></div>
+      <div class="carte f"><span class="label">Sa limite</span><p class="citation">Pas de droits d'administrateur.</p><p class="petit">Windows ne lui montre ni la température du processeur, ni la vitesse du ventilateur.</p></div>
+      <div class="carte f"><span class="label">Un projet du service</span><p class="citation">Un portail captif envisagé.</p><p class="petit">Le tuteur a cité ALCASAR, pas encore en place. Il trouve sa place en V2.</p></div>
+    </div>
+    <p class="note f" style="margin:0">Faits rapportés, <b>à confirmer par le tuteur</b>. Le besoin est une <b>proposition</b> faite au service. Réalisation au lycée, sur maquette : elle doit être validée par l'académie.</p>
+  </div>
+  <p class="bandeau">Le terrain : des <b>portables rendus</b>, un contrôle <b>à l'œil</b>, un technicien <b>sans droits</b>.</p>
+</section>
+
+<section class="slide projet" data-p="Yaksan" data-partie="besoin">
+  <h2>Un PC rendu « qui a l'air d'aller »</h2>
+  <div class="corps">
+    <div class="grille-2">
+      <div class="ticket avant f"><span class="label">Fiche de restitution · aujourd'hui</span><p class="tt">PC rendu par Sophie. État : RAS.</p>
+        <ul><li>Ventilateur encrassé ? <b>pas vu</b></li><li>Écran qui a perdu de la lumière ? <b>pas vu</b></li><li>Un port USB mort ? <b>pas testé</b></li><li>Si Sophie conteste plus tard : <b>aucune trace</b></li></ul></div>
+      <div class="ticket apres f"><span class="label">Fiche de restitution · avec la station</span><p class="tt">PC rendu par Sophie · contrôle de 8 min</p>
+        <ul><li>Refroidissement : air à 52 °C (réf. 42 °C), débit −40 % → <b>à nettoyer</b></li><li>Réseau : Wi-Fi, câble, DHCP, DNS, heure, 3 ports USB → <b>bon</b></li><li>Écran (V2) : −15 % depuis la remise → <b>bon</b></li><li>Fiche scellée dans le journal chaîné</li></ul></div>
+    </div>
+    <div class="chiffres">
+      <div class="chiffre f"><span class="tag papier">à demander au tuteur</span><b>? PC / mois</b><span>rendus au service</span></div>
+      <div class="chiffre f"><span class="tag papier">à demander au tuteur</span><b>? modèles</b><span>de portables dans le parc (une référence par modèle)</span></div>
+      <div class="chiffre f"><span class="tag jaune">objectif à mesurer</span><b>≤ 10 min</b><span>pour un contrôle complet, verdict compris</span></div>
+    </div>
+    <p class="petit f" style="margin:0;font-size:17px">Valeurs de la fiche inventées pour l'exemple.</p>
+  </div>
+  <p class="bandeau">Le besoin : un état <b>chiffré</b> et une <b>trace</b> à chaque restitution, <b>sans droits d'administrateur</b>.</p>
+</section>
+
+<section class="slide projet" data-p="Yaksan" data-partie="existant">
+  <h2>Ce qui existe voit le PC de l'intérieur, ou pas du tout</h2>
+  <div class="corps">
+    <div class="defile"><table class="comp">
+      <thead><tr><th style="width:26%">Solution</th><th class="c">Résultat chiffré</th><th class="c">Sans droits d'administrateur</th><th class="c">Flux d'air mesuré</th><th class="c">Lumière de l'écran mesurée</th><th class="c">Historique et trace</th></tr></thead>
+      <tbody>
+        <tr class="f"><td><b>Contrôle à l'œil</b></td><td class="c non">✗</td><td class="c ok">✓</td><td class="c non">✗</td><td class="c non">✗</td><td class="c non">✗</td></tr>
+        <tr class="f"><td><b>Diagnostic du constructeur</b> (au démarrage)</td><td class="c moy">~<small>réussi / échoué</small></td><td class="c moy">~<small>à vérifier</small></td><td class="c moy">~<small>ventilateur tourne</small></td><td class="c non">✗<small>pixels seulement</small></td><td class="c non">✗</td></tr>
+        <tr class="f"><td><b>Logiciel de surveillance</b> (températures)</td><td class="c ok">✓</td><td class="c non">✗<small>droits requis</small></td><td class="c moy">~<small>capteurs internes</small></td><td class="c non">✗</td><td class="c non">✗</td></tr>
+        <tr class="f"><td><b>Rapports Windows</b> (batterie, journaux)</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c non">✗</td><td class="c non">✗</td><td class="c moy">~<small>sur le PC</small></td></tr>
+        <tr class="f nous"><td>Projet de Yaksan</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c ok">✓<small>capteur extérieur</small></td><td class="c ok">✓<small>V2</small></td><td class="c ok">✓<small>journal chaîné</small></td></tr>
+      </tbody>
+    </table></div>
+    <p class="petit f" style="margin:0;font-size:18px">✓ oui · ~ en partie · ✗ non. Tableau fait à partir de connaissances générales, <b>à vérifier</b> sur les outils réellement installés dans le service.</p>
+  </div>
+  <p class="bandeau">Les capteurs de l'ESP32 voient <b>de l'extérieur</b> ce que Windows <b>cache</b> à un compte sans droits.</p>
+</section>
+
+<section class="slide projet" data-p="Yaksan" data-partie="solution">
+  <h2>Trois contrôles, un seul socle</h2>
+  <div class="corps">
+    <div class="grille-3">
+      <div class="carte module f"><span class="label"><span class="v">V1</span>Thermique</span><h3>Le PC refroidit-il bien ?</h3>
+        <p style="font-size:19px">Le PC travaille fort quelques minutes. Un <b>ESP32</b> mesure l'air qui sort : sa <b>température</b> et sa <b>vitesse</b>.</p>
+        <p class="petit" style="font-size:17px">Un compteur Windows, lisible sans droits (à vérifier), dit si le processeur ralentit pour ne pas chauffer.</p></div>
+      <div class="carte module f"><span class="label"><span class="v">V1</span>Connectivité · <span class="v v2">V2</span>portail</span><h3>Le PC communique-t-il bien ?</h3>
+        <p style="font-size:19px">Un script sans droits teste le Wi-Fi, le câble, <b>DHCP</b>, <b>DNS</b>, l'heure (<b>NTP</b>) et les ports USB.</p>
+        <p class="petit" style="font-size:17px">V2 : le PC passe-t-il le portail captif <b>ALCASAR</b> ? Chaque étape est chronométrée.</p></div>
+      <div class="carte module f"><span class="label"><span class="v v2">V2</span>Optique</span><h3>L'écran est-il en bon état ?</h3>
+        <p style="font-size:19px">Un capteur de lumière mesure <b>5 zones</b> de l'écran en blanc puis en noir : luminosité et uniformité.</p>
+        <p class="petit" style="font-size:17px">On compare avec la mesure faite à la <b>remise</b> du même PC.</p></div>
+    </div>
+    <div class="carte plate f" style="padding:14px 22px"><p style="margin:0;font-size:20px"><b>Le socle (V1)</b> : un serveur Ubuntu reçoit les mesures, les range dans une base <b>SQLite</b> et affiche un <b>tableau de bord</b> : une fiche par PC, des courbes, un verdict « bon / à surveiller / à nettoyer ».</p></div>
+    <p class="petit f" style="margin:0;font-size:18px"><span class="v ext">Extensions</span>couleurs de l'écran, visiteur robot ESP32 qui passe le portail toutes les 5 min, test de charge du portail.</p>
+  </div>
+  <p class="bandeau">La station <b>mesure</b> et <b>garde</b>. Elle ne <b>touche</b> à rien sur le PC.</p>
+</section>
+
+<section class="slide projet" data-p="Yaksan" data-partie="solution">
+  <h2>De la physique qui fixe les seuils, une trace qui ne s'efface pas</h2>
+  <div class="corps">
+    <div class="deux-col">
+      <div class="carte module f"><span class="label">Physique principale · V1</span><h3>L'énergie emportée par l'air</h3>
+        <p style="font-size:20px;font-family:var(--police-mono);font-weight:700;margin:6px 0 10px">P = ρ · c<sub>p</sub> · Q · ΔT &nbsp;avec&nbsp; Q = v · S</p>
+        <p style="font-size:18px">Exemple : grille de 12 cm², air à 2 m/s, 10 °C de plus que la pièce → <b>≈ 29 W</b> emportés (à vérifier sur la maquette).</p>
+        <p style="font-size:18px"><b>Modèle testé</b> : à charge fixe, Q · ΔT reste constant tant que le processeur ne ralentit pas. Aération bouchée à 0, 25, 50, 75 %.</p>
+        <p class="petit" style="font-size:17px">Montée en température ΔT(t) = ΔT∞ · (1 − e<sup>−t/τ</sup>) : les premières minutes prédisent la fin, le contrôle est plus court. Étalonnage des sondes, incertitudes sur 10 passages. Court, en V2 : lumière de l'écran, étalonnée au luxmètre.</p></div>
+      <ol class="regles carte plate f">
+        <li><b>Palier 1</b> : la station mesure et donne un avis. Elle ne modifie <b>aucun réglage</b> du PC.</li>
+        <li><b>Aucun droit d'administrateur</b> dans les scripts : ce qui marche au lycée marchera au service.</li>
+        <li><b>Journal chaîné</b> : chaque fiche porte l'empreinte SHA-256 de la précédente. Démonstration : « ligne effacée détectée ».</li>
+        <li><b>Vie privée</b> : la fiche dit quel PC, quand, rendu par qui. Rien d'autre sur l'agent. Personnes fictives sur la maquette.</li>
+      </ol>
+    </div>
+  </div>
+  <p class="bandeau">Sa question de sécurité : « quelqu'un a-t-il <b>effacé</b> ou <b>modifié</b> ce qui s'est passé ? »</p>
+</section>
+
+<section class="slide projet" data-p="Yaksan" data-partie="architecture">
+  <h2>Le schéma réseau de la maquette</h2>
+  <div class="corps" style="gap:12px">
+    <div class="carte plate f" style="padding:10px 14px">
+      <svg viewBox="0 0 1440 580" role="img" aria-labelledby="yk-titre" style="display:block;width:100%;height:auto">
+        <title id="yk-titre">Schéma de la maquette de Yaksan : le portable sur le banc avec l'ESP32 et ses capteurs, une borne Wi-Fi, un switch, le serveur Ubuntu, le routeur et, en V2, le portail ALCASAR en coupure.</title>
+        <!-- zone du banc -->
+        <rect x="14" y="14" width="566" height="552" rx="22" style="fill:var(--papier-2);stroke:var(--encre-3);stroke-width:2.5;stroke-dasharray:10 8"/>
+        <text x="36" y="52" text-anchor="start" style="font:900 22px var(--police);fill:var(--encre)">LE BANC DE CONTRÔLE</text>
+        <!-- liaisons (dessinées d'abord, sous le matériel) -->
+        <path d="M300 138 C 380 70, 520 70, 615 84" style="fill:none;stroke:var(--encre-2);stroke-width:3;stroke-dasharray:4 9;stroke-linecap:round"/>
+        <text x="530" y="122" text-anchor="middle" style="font:800 15px var(--police);fill:var(--encre-2)">Wi-Fi (PC)</text>
+        <path d="M572 452 C 630 420, 610 220, 640 116" style="fill:none;stroke:var(--encre-2);stroke-width:3;stroke-dasharray:4 9;stroke-linecap:round"/>
+        <text x="592" y="488" text-anchor="start" style="font:800 15px var(--police);fill:var(--encre-2)">Wi-Fi (ESP32)</text>
+        <path d="M368 262 C 500 262, 600 322, 680 328" class="trait"/>
+        <text x="430" y="252" text-anchor="middle" style="font:800 15px var(--police);fill:var(--encre-2)">Ethernet</text>
+        <path d="M700 112 V300" class="trait"/>
+        <path d="M910 328 H1010" class="trait"/>
+        <path d="M860 358 V496 H1230" class="trait"/>
+        <path d="M1325 152 V470" style="fill:none;stroke:var(--encre);stroke-width:3;stroke-dasharray:9 6"/>
+        <text x="1312" y="318" text-anchor="end" style="font:800 15px var(--police);fill:var(--encre-2)">V2 : en coupure</text>
+        <path d="M505 340 V430" class="trait"/>
+        <!-- portable -->
+        <g transform="translate(60 130)">
+          <path d="M8 8h300v190H8z" transform="translate(6 6)" style="fill:var(--encre)"/>
+          <rect x="8" y="8" width="300" height="190" rx="10" style="fill:var(--blanc);stroke:var(--encre);stroke-width:3"/>
+          <rect x="24" y="24" width="268" height="158" rx="4" style="fill:var(--bleu-pale);stroke:var(--encre);stroke-width:2.5"/>
+          <path d="M-14 204h344l-22 34H8z" style="fill:var(--blanc);stroke:var(--encre);stroke-width:3;stroke-linejoin:round"/>
+          <path d="M120 222h76" class="trait"/>
+          <text x="158" y="112" text-anchor="middle" style="font:900 22px var(--police);fill:var(--encre)">PC Windows rendu</text>
+          <text x="158" y="140" text-anchor="middle" style="font:700 17px var(--police);fill:var(--encre-2)">script en compte utilisateur</text>
+          <rect x="230" y="36" width="46" height="34" rx="6" style="fill:var(--jaune-pale);stroke:var(--encre);stroke-width:2.5;stroke-dasharray:6 4"/>
+          <text x="253" y="58" text-anchor="middle" style="font:900 13px var(--police);fill:var(--encre)">lux</text>
+          <g style="fill:none;stroke:var(--rouge);stroke-width:3.5;stroke-linecap:round"><path d="M334 214c14-8 14-22 0-30"/><path d="M352 222c22-12 22-34 0-46"/><path d="M370 230c30-17 30-47 0-62"/></g>
+        </g>
+        <!-- sonde : température et vitesse de l'air -->
+        <g transform="translate(470 300)">
+          <rect x="0" y="0" width="70" height="40" rx="8" style="fill:var(--blanc);stroke:var(--encre);stroke-width:3"/>
+          <circle cx="20" cy="20" r="8" style="fill:var(--rouge-pale);stroke:var(--encre);stroke-width:2.5"/>
+          <circle cx="48" cy="20" r="8" style="fill:var(--bleu-pale);stroke:var(--encre);stroke-width:2.5"/>
+        </g>
+        <text x="494" y="402" text-anchor="end" style="font:800 15px var(--police);fill:var(--encre-2)">T° + vitesse de l'air</text>
+        <!-- ESP32 -->
+        <g transform="translate(440 430)">
+          <rect x="6" y="6" width="132" height="70" rx="6" style="fill:var(--encre)"/>
+          <rect x="0" y="0" width="132" height="70" rx="6" style="fill:var(--vert);stroke:var(--encre);stroke-width:3"/>
+          <rect x="34" y="14" width="64" height="42" rx="3" style="fill:var(--encre-2);stroke:var(--encre);stroke-width:2"/>
+          <text x="66" y="41" text-anchor="middle" style="font:900 15px var(--police);fill:var(--papier)">ESP32</text>
+          <g style="stroke:var(--encre);stroke-width:2.5"><path d="M10 8v6M10 22v6M10 36v6M10 50v6M122 8v6M122 22v6M122 36v6M122 50v6"/></g>
+        </g>
+        <text x="36" y="550" text-anchor="start" style="font:700 16px var(--police);fill:var(--encre-2)">Sondes étalonnées · capteur de lumière sur l'écran (V2, pointillés)</text>
+        <!-- borne Wi-Fi -->
+        <g transform="translate(620 60)">
+          <path d="M30 0v-36M104 0v-36" style="stroke:var(--encre);stroke-width:5;stroke-linecap:round"/>
+          <rect x="6" y="6" width="134" height="52" rx="14" style="fill:var(--encre)"/>
+          <rect x="0" y="0" width="134" height="52" rx="14" style="fill:var(--blanc);stroke:var(--encre);stroke-width:3"/>
+          <circle cx="30" cy="26" r="5" style="fill:var(--vert)"/><circle cx="48" cy="26" r="5" style="fill:var(--vert)"/>
+        </g>
+        <text x="772" y="92" text-anchor="start" style="font:900 18px var(--police);fill:var(--encre)">Borne Wi-Fi</text>
+        <!-- switch HP -->
+        <g transform="translate(680 300)">
+          <rect x="6" y="6" width="230" height="58" rx="6" style="fill:var(--encre)"/>
+          <rect x="0" y="0" width="230" height="58" rx="6" style="fill:var(--papier-2);stroke:var(--encre);stroke-width:3"/>
+          <g style="fill:var(--encre-2)"><rect x="18" y="16" width="18" height="14"/><rect x="42" y="16" width="18" height="14"/><rect x="66" y="16" width="18" height="14"/><rect x="90" y="16" width="18" height="14"/><rect x="114" y="16" width="18" height="14"/><rect x="138" y="16" width="18" height="14"/><rect x="162" y="16" width="18" height="14"/><rect x="186" y="16" width="18" height="14"/></g>
+          <circle cx="24" cy="44" r="3.5" style="fill:var(--vert)"/><circle cx="48" cy="44" r="3.5" style="fill:var(--vert)"/><circle cx="72" cy="44" r="3.5" style="fill:var(--vert)"/>
+        </g>
+        <text x="795" y="288" text-anchor="middle" style="font:900 18px var(--police);fill:var(--encre)">Switch HP ProCurve</text>
+        <!-- serveur Ubuntu -->
+        <g transform="translate(1010 200)">
+          <rect x="7" y="7" width="120" height="190" rx="10" style="fill:var(--encre)"/>
+          <rect x="0" y="0" width="120" height="190" rx="10" style="fill:var(--blanc);stroke:var(--encre);stroke-width:3"/>
+          <path d="M18 30h84M18 50h84M18 70h84" class="trait"/>
+          <circle cx="60" cy="150" r="12" style="fill:var(--jaune);stroke:var(--encre);stroke-width:2.5"/>
+        </g>
+        <text x="1070" y="186" text-anchor="middle" style="font:900 18px var(--police);fill:var(--encre)">Serveur Ubuntu</text>
+        <text x="1070" y="424" text-anchor="middle" style="font:700 15px var(--police);fill:var(--encre-2)">SQLite · journal chaîné</text>
+        <text x="1070" y="446" text-anchor="middle" style="font:700 15px var(--police);fill:var(--encre-2)">tableau de bord · DNS · NTP</text>
+        <!-- ALCASAR (V2) -->
+        <g transform="translate(1220 60)">
+          <rect x="0" y="0" width="210" height="92" rx="12" style="fill:var(--bleu-pale);stroke:var(--encre);stroke-width:3;stroke-dasharray:9 6"/>
+          <text x="105" y="38" text-anchor="middle" style="font:900 19px var(--police);fill:var(--encre)">ALCASAR</text>
+          <text x="105" y="64" text-anchor="middle" style="font:700 15px var(--police);fill:var(--encre-2)">portail captif · V2</text>
+        </g>
+        <!-- routeur Cisco -->
+        <g transform="translate(1230 470)">
+          <rect x="6" y="6" width="190" height="52" rx="6" style="fill:var(--encre)"/>
+          <rect x="0" y="0" width="190" height="52" rx="6" style="fill:var(--papier-2);stroke:var(--encre);stroke-width:3"/>
+          <g style="fill:var(--encre-2)"><rect x="16" y="18" width="22" height="16"/><rect x="44" y="18" width="22" height="16"/><rect x="72" y="18" width="22" height="16"/></g>
+          <circle cx="160" cy="26" r="5" style="fill:var(--vert)"/>
+        </g>
+        <text x="1325" y="556" text-anchor="middle" style="font:900 18px var(--police);fill:var(--encre)">Routeur Cisco ISR 4331</text>
+      </svg>
+    </div>
+    <p class="petit f" style="margin:0;font-size:17px">Schéma de principe, dessiné pour cette présentation. Le réseau est <b>déjà configuré</b> au lycée : Yaksan l'<b>exploite</b> (adressage, réservations DHCP, noms DNS, NTP, captures). La maquette 3D et le schéma 2D pas à pas restent à faire.</p>
+  </div>
+</section>
+
+<section class="slide projet" data-p="Yaksan" data-partie="architecture">
+  <h2>Qui parle à qui, et comment</h2>
+  <div class="corps">
+    <div class="flux">
+      <div class="th">Liaison</div><div class="th">Protocole</div><div class="th">Ce qui passe</div>
+      <div class="f"><b>Capteurs → ESP32</b></div><div class="f"><span class="proto">I²C, 1-Wire, analogique</span></div><div class="f">Température de l'air soufflé et de la pièce, vitesse de l'air, lumière (V2)</div>
+      <div class="f"><b>ESP32 → serveur Ubuntu</b></div><div class="f"><span class="proto">MQTT ou HTTPS</span>, Wi-Fi</div><div class="f">Mesures horodatées, une par seconde</div>
+      <div class="f"><b>PC → serveur Ubuntu</b></div><div class="f"><span class="proto">HTTPS (API)</span></div><div class="f">Compteurs (charge, ralentissement), résultats des tests réseau et USB</div>
+      <div class="f c10"><b>PC ↔ réseau en place</b></div><div class="f c10"><span class="proto">DHCP, DNS, NTP</span></div><div class="f c10">Ce qui est testé : adresse reçue, noms trouvés, heure juste (C10)</div>
+      <div class="f c10"><b>ESP32, PC, serveur</b></div><div class="f c10"><span class="proto">NTP</span></div><div class="f c10">Une seule heure pour aligner deux séries de mesures ; écart d'horloge mesuré</div>
+      <div class="f"><b>PC → portail ALCASAR</b> <span class="v v2">V2</span></div><div class="f"><span class="proto">HTTP → redirection, HTTPS</span></div><div class="f">Passage du portail, chaque étape chronométrée ; captures Wireshark</div>
+      <div class="f"><b>Technicien → serveur</b></div><div class="f"><span class="proto">HTTPS</span></div><div class="f">Tableau de bord, fiches, vérification du journal chaîné</div>
+    </div>
+  </div>
+  <p class="bandeau">L'heure est <b>indispensable</b> : sans NTP, impossible de croiser les mesures de l'ESP32 et celles du PC.</p>
+</section>
+
+<!-- ======================================================================================
      PROJET 3 · LORENZO
      ====================================================================================== -->
 <section class="slide projet couverture" data-p="Lorenzo" data-chapitre="lorenzo" data-titre="Lorenzo : couverture">
@@ -838,13 +1060,16 @@ body.lecture{overflow:auto}
   const TITRES = {
     Wassim: 'Diagnostic à distance des imprimantes : valorisation des données et ticket enrichi',
     Lorenzo: 'Poste attentif',
-    Aziza: 'Des PC de maintenance à jour, des documents archivés, un parc tracé'
+    Aziza: 'Des PC de maintenance à jour, des documents archivés, un parc tracé',
+    Yaksan: 'Station de contrôle de santé des portables'
   };
   const titre = m => TITRES[m.who] || m.title;
   const strip = s => s.replace(/^<svg[^>]*>|<\/svg>$/g, '');
   const maisonDe = who => MAISONS.find(m => m.who === who);
   const slotDe = who => MAISONS.findIndex(m => m.who === who) + 1;     // numéro de maison dans le quartier (1, 2, 3…)
   const chapitre = who => slides.findIndex(s => s.dataset.p === who && s.classList.contains('couverture'));
+  const aChapitre = m => !!m.who && chapitre(m.who) >= 0;              // une maison sans maquette 3D peut avoir son chapitre
+  const partiesDe = who => PARTIES.filter(p => slides.some(x => x.dataset.p === who && x.dataset.partie === p[0]));
 
   /* ---------- habillage des diapositives de projet (couleur, en-tête, plan) ---------- */
   slides.forEach(s => {
@@ -854,7 +1079,7 @@ body.lecture{overflow:auto}
     const ill = s.querySelector('[data-illus]');
     if (ill) ill.innerHTML = Q.illus(m.prop, m.color);
     const plan = s.querySelector('[data-plan]');
-    if (plan) plan.innerHTML = PARTIES.map((p, i) => `<li><span>${i + 1}</span>${p[1]}</li>`).join('');
+    if (plan) plan.innerHTML = partiesDe(who).map((p, i) => `<li><span>${i + 1}</span>${p[1]}</li>`).join('');
     s.querySelectorAll('[data-quartier3d]').forEach(a => a.href = 'index.html?maison=' + slotDe(who));
     s.querySelectorAll('[data-plan2d]').forEach(a => a.href = 'plan-2d.html?maison=' + slotDe(who));
     const partie = s.dataset.partie; if (!partie) return;
@@ -864,8 +1089,8 @@ body.lecture{overflow:auto}
     ligne.innerHTML = `<span class="label"><i aria-hidden="true"></i><span>Projet ${m.n} · ${who} · ${titre(m)}</span></span>`;
     h2.replaceWith(tete); tete.appendChild(ligne); tete.appendChild(h2);
     const nav = document.createElement('nav'); nav.className = 'parties'; nav.setAttribute('aria-label', 'Parties du projet');
-    const k = PARTIES.findIndex(p => p[0] === partie);
-    PARTIES.forEach((p, i) => {
+    const PP = partiesDe(who), k = PP.findIndex(p => p[0] === partie);
+    PP.forEach((p, i) => {
       const b = document.createElement('button'); b.type = 'button'; b.textContent = (i + 1) + ' · ' + p[1];
       if (i === k) b.setAttribute('aria-current', 'true'); else if (i < k) b.className = 'fait';
       b.addEventListener('click', () => aller(slides.findIndex(x => x.dataset.p === who && x.dataset.partie === p[0])));
@@ -885,9 +1110,9 @@ body.lecture{overflow:auto}
 
   /* ---------- sommaire : liste des projets ---------- */
   const liste = document.getElementById('listeProjets');
-  MAISONS.forEach(m => {
-    const b = document.createElement('button'); b.type = 'button'; b.style.setProperty('--c', m.url ? m.color : 'var(--papier)');
-    if (m.url) {
+  MAISONS.slice().sort((x, y) => (x.n || 99) - (y.n || 99)).forEach(m => {
+    const b = document.createElement('button'); b.type = 'button'; b.style.setProperty('--c', aChapitre(m) ? m.color : 'var(--papier)');
+    if (aChapitre(m)) {
       b.innerHTML = `<span class="pastille" aria-hidden="true">${Q.illus(m.prop, m.color)}</span><span><b>${m.n} · ${m.who}</b><span>${titre(m)}</span></span>`;
       b.addEventListener('click', () => aller(chapitre(m.who)));
     } else {
@@ -925,7 +1150,7 @@ body.lecture{overflow:auto}
       el('circle', { cx: 0, cy: -38, r: 20, 'class': 'arbre' }, g);
     });
     S.sort((p, q) => pos(p.a, HOUSE)[1] - pos(q.a, HOUSE)[1]).forEach(s => {
-      const m = s.m, libre = !m.url, col = m.color, [x, y] = pos(s.a, HOUSE);
+      const m = s.m, libre = !aChapitre(m), col = m.color, [x, y] = pos(s.a, HOUSE);
       const g = el('g', { 'class': 'maison' + (libre ? ' libre' : ''), transform: `translate(${x} ${y + 40}) scale(.82)` });
       if (!libre) { g.setAttribute('tabindex', '0'); g.setAttribute('role', 'link'); g.setAttribute('aria-label', `Projet ${m.n}, ${m.who} : ${titre(m)}. Ouvrir sa présentation`); }
       else g.setAttribute('aria-label', 'Maison libre : projet de l\'apprenti 2 en cours de choix');
@@ -1052,7 +1277,7 @@ body.lecture{overflow:auto}
     else if (e.key === 'f' || e.key === 'F') pleinEcran();
     else if (e.key === 'p' || e.key === 'P') basculerPause(slides[cur]);
     else if (e.key === 'q' || e.key === 'Q' || e.key === 'Escape') { if (!document.fullscreenElement || e.key !== 'Escape') aller(0); }
-    else if (/^[1-9]$/.test(e.key)) { const m = MAISONS.filter(x => x.url)[+e.key - 1]; if (m) aller(chapitre(m.who)); }
+    else if (/^[1-9]$/.test(e.key)) { const m = MAISONS.filter(aChapitre).sort((x, y) => x.n - y.n)[+e.key - 1]; if (m) aller(chapitre(m.who)); }
   });
   // un clic sur la scène fait avancer, sauf sur un lien, un bouton, une maison ou un cadre intégré
   stage.addEventListener('click', e => {
