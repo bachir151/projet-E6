@@ -68,13 +68,13 @@ La fiche d'une page à faire signer par l'entreprise reste utile quand le tuteur
 ### Composants existants (à réutiliser, ne pas recréer)
 | Composant | Classe | Remarque |
 |---|---|---|
-| Carte | `.carte` (alias `.card`) | variantes `.plate`, `.a-venir`, + `.danger/.succes/.info/.accent` (filet en haut) |
+| Carte | `.carte` (alias `.card`) | variantes `.plate`, `.a-venir`, + `.danger/.succes/.info/.accent` (contour encre, fond pâle, ombre décalée ; plus de filet coloré) |
 | Tag | `.tag` (alias `.pill`) | variantes `.papier`, `.jaune`, `.info`, `.danger`, `.succes` |
 | Bouton | `.bouton` (alias `.btn`) | `.principal` (encre), `.jaune`, `.petit` ; `aria-pressed="true"` = jaune |
 | Bandeau de sous-titres | `.bandeau` | fond encre ; `<b>`/`<strong>`/`.cle` en jaune |
 | Section finale | `.section-finale` | fond jaune |
 | Étiquette | `.label` (alias `.eyebrow`, `.kicker`) | gris, gras, majuscules espacées |
-| Encadré | `.encadre` (alias `.callout`) | + classe sémantique pour la couleur du filet |
+| Encadré | `.encadre` (alias `.callout`) | carte blanche à contour encre et ombre décalée ; le premier `<b>` devient une pastille colorée selon la classe sémantique. **Jamais de bande colorée à gauche** (style par défaut à proscrire) |
 | Note | `.note` | papier jaune pâle |
 | Terminal | `.terminal` | bloc de code sombre |
 | Zone secondaire | `.zone-2` | fond `--papier-2` |

@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Schéma réseau pas à pas</title>
+<meta name="description" content="Projet de Yaksan : le schéma réseau à plat de la maquette, avec le trajet des messages, étape par étape.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="../../../theme.css">
+<link rel="stylesheet" href="../../../commun/schema-2d.css">
+</head>
+<body>
+<header class="wrap large tete">
+  <div>
+    <span class="label">Projet 2 · Yaksan · Analyse post-incident des postes de travail</span>
+    <h1>Le schéma réseau pas à pas</h1>
+    <p class="lead">La maquette, à plat : le matériel vu de face et les liens réseau. Chaque point qui circule est un message. Clique sur <b>Suivant</b> pour suivre une installation qui échoue, puis son explication.</p>
+  </div>
+</header>
+
+<main class="wrap large grille">
+  <figure class="scene-cadre">
+    <div class="defile"><svg id="schema" class="focus" role="img" aria-label="Schéma réseau de la maquette de Yaksan : poste Windows, boîtier témoin, switch, routeur, serveur et poste du support, avec le trajet des messages"></svg></div>
+    <div class="outils"><button class="btn petit" id="bLab" type="button" aria-pressed="true">Étiquettes</button></div>
+    <figcaption class="glisse">← Glisse pour voir tout le schéma →</figcaption>
+  </figure>
+
+  <aside class="carte-etape" aria-live="polite">
+    <div class="label" id="eNum"></div>
+    <h2 id="eTitre"></h2>
+    <div id="eTexte"></div>
+    <div class="commandes">
+      <button class="btn" id="bPrev" type="button" aria-label="Étape précédente">◀</button>
+      <button class="btn" id="bReplay" type="button">↻ Rejouer</button>
+      <button class="btn principal" id="bNext" type="button">Suivant ▶</button>
+    </div>
+    <div id="points" role="group" aria-label="Aller à une étape"></div>
+    <p class="aide"><kbd>←</kbd> <kbd>→</kbd> étapes · <kbd>R</kbd> rejouer · <kbd>P</kbd> pause · <kbd>E</kbd> étiquettes</p>
+    <ul class="legende" aria-label="Légende"><li><i style="background:var(--blanc)"></i>battement, récit (USB)</li><li><i style="background:var(--jaune)"></i>installation</li><li><i style="background:var(--bleu)"></i>HTTPS, API</li><li><i style="background:var(--vert)"></i>DHCP, DNS, NTP</li><li><i style="background:var(--rouge)"></i>arrêt, échec</li><li><s></s>Ethernet</li><li><s class="usb"></s>USB</li><li><s class="fixe"></s>capteurs collés</li></ul>
+  </aside>
+</main>
+
+<section class="section-finale regles">
+  <div class="wrap">
+    <span class="label">Le fil de la soutenance</span>
+    <h2>Les 4 règles du projet</h2>
+    <ol>
+      <li><b>Windows sait qu'il s'est mal arrêté, pas pourquoi</b> : le boîtier témoin voit ce que Windows ne peut pas écrire.</li>
+      <li><b>Le récit survit à la coupure</b> : horloge, carte mémoire et réserve d'énergie dans le boîtier.</li>
+      <li><b>Cause probable ou « non concluant »</b> : si les sources ne sont pas d'accord, le programme le dit.</li>
+      <li><b>Lecture seule</b> : le système explique, il ne répare rien sur le poste.</li>
+    </ol>
+  </div>
+</section>
+
+<script>
+var TXT = [
+  { t: "Vue d'ensemble",
+    x: "<p>À gauche, le <b>poste Windows</b> d'un agent : l'écran et la tour, avec ses voyants. Dessous, le <b>boîtier témoin</b> (ESP32) : relié au PC en USB, il a deux petits capteurs de lumière <b>collés sur les voyants</b>. On n'ouvre pas le PC.</p><p>Au centre et à droite, le <b>réseau en place</b> : routeur, switch, <b>serveur Ubuntu</b> et <b>poste du support</b>.</p><p>Scénario simulé, adresses d'exemple. Clique sur <b>Suivant</b>.</p>" },
+  { t: '1. Le boîtier témoin',
+    x: "<p>Chaque seconde, un petit programme PowerShell envoie un <b>battement</b> au boîtier par USB : « je suis vivant ».</p><p>Le boîtier regarde aussi le <b>voyant d'alimentation</b> et le <b>voyant du disque</b>. Il a sa propre horloge, une carte mémoire et une réserve d'énergie : il peut écrire même quand tout s'éteint.</p>" },
+  { t: '2. Une installation commence',
+    x: "<p>L'outil de déploiement lance une <b>mise à jour obligatoire</b> d'un logiciel.</p><p>Le programme du poste prévient le boîtier : « installation en cours ». Le boîtier l'écrit dans son récit, avec l'heure.</p>" },
+  { t: "3. Le PC se fige, l'agent force l'arrêt",
+    x: "<p>Le PC ne répond plus. Le voyant reste allumé, mais <b>le battement s'arrête</b> : le boîtier note « PC figé ».</p><p>Deux minutes plus tard, l'agent maintient le bouton : le voyant s'éteint <b>sans message d'arrêt</b> de Windows. Le boîtier note « arrêt au bouton ». Windows, lui, n'a rien pu écrire.</p>" },
+  { t: '4. Au redémarrage, le programme explique',
+    x: "<p>Le programme du poste lit le <b>récit du boîtier</b> par USB, puis les <b>journaux de Windows</b> : arrêt inattendu (Kernel-Power 41) et échec de l'installation (MsiInstaller).</p><p>Il croise les heures. Conclusion : <b>installation interrompue par un arrêt au bouton, après un blocage du PC</b>. Si les sources ne sont pas d'accord, il écrit « non concluant ».</p>" },
+  { t: '5. Le support lit la cause',
+    x: "<p>Le poste envoie la conclusion au <b>serveur Ubuntu</b> en HTTPS, avec un jeton. Si le serveur ne répond pas, elle attend dans une file.</p><p>Le technicien ouvre la page du support : la cause probable, les preuves, et ce qu'il faut faire. Plus besoin de réparer à l'aveugle.</p>" },
+  { t: '6. Et si le courant est coupé ?',
+    x: "<p>Coupure : le boîtier perd <b>son alimentation au même instant</b> que le PC. Sa réserve d'énergie lui laisse quelques secondes pour écrire « coupure de courant » et l'heure.</p><p>C'est ce qui la distingue d'un arrêt au bouton, où le boîtier reste alimenté. Les seuils et la durée de la réserve se <b>mesurent</b> sur la maquette.</p>" },
+  { t: '7. Le réseau en place (C10)',
+    x: "<p>Le routeur donne l'adresse du poste (<b>DHCP</b>), traduit le nom du serveur (<b>DNS</b>) et donne l'heure (<b>NTP</b>).</p><p>L'heure est essentielle : le récit du boîtier et les journaux de Windows doivent être sur la même horloge pour être croisés. Yaksan <b>exploite</b> ce réseau, il ne le reconfigure pas.</p>" }
+];
+var USB = ['box', 'tour'];
+function poste(S, lignes, fond) { S.ecran('pc', lignes, fond || 'clair'); }
+function page(S, lignes) { S.ecran('tec', [['Support · causes des incidents', 'var(--focus)']].concat(lignes.length ? lignes : [['aucun incident', 'var(--encre-2)']]), 'clair'); }
+async function battements(S, nb) { for (var i = 0; !nb || i < nb; i++) { S.bg(S.go(['tour', 'box'], 'blanc', null, { size: 6, speed: 140, noTrace: true })); await S.sleep(1000); } }
+async function disque(S) { for (var on = false; ; on = !on) { S.led('tour', on ? 'orange' : '', 1); await S.sleep(on ? 180 : 420); } }
+window.SCHEMA = {
+  noeuds: [
+    { id: 'rt', k: 'routeur', x: 600, y: 60, nom: 'Routeur Cisco ISR 4331', sous: 'DHCP · DNS · NTP', cote: 'droite' },
+    { id: 'sw', k: 'switch', x: 600, y: 230, nom: 'Switch HP ProCurve', sous: 'réseau en place', cote: 'bas' },
+    { id: 'srv', k: 'serveur', x: 1010, y: 230, nom: 'Serveur Ubuntu', sous: 'API HTTPS · SQLite · page web' },
+    { id: 'tec', k: 'pc', x: 1010, y: 540, nom: 'Poste du support', sous: 'navigateur · page des causes' },
+    { id: 'pc', k: 'pc', x: 150, y: 236, nom: "Écran de l'agent", sous: 'Windows 11', cote: 'haut' },
+    { id: 'tour', k: 'tour', x: 330, y: 236, nom: 'Tour du PC', sous: 'agent PowerShell · 10.10.0.42' },
+    { id: 'box', k: 'temoin', x: 330, y: 540, nom: 'Boîtier témoin', sous: 'ESP32 · horloge · carte SD · 1 F' },
+    { id: 'agt', k: 'personne', x: 150, y: 540, nom: 'Agent', sous: 'personnage fictif', cache: true }
+  ],
+  liens: [
+    ['rt', 'sw', 'eth', ''],
+    ['sw', 'srv', 'eth', ''],
+    ['tour', 'sw', 'eth', 'Ethernet'],
+    ['sw', 'tec', 'eth', 'HTTPS', { via: [[800, 230], [800, 540]], t: 0.6 }],
+    ['pc', 'tour', 'fixe', ''],
+    ['box', 'tour', 'fixe', 'capteurs sur les voyants', { via: [[460, 540], [460, 222]], t: 0.45 }],
+    ['box', 'tour', 'usb', 'USB série', { t: 0.35 }]
+  ],
+  init: function (S) {
+    poste(S, [['Bureau', 'var(--focus)'], ['dossier-carrière.pdf'], ['…']]);
+    page(S, []);
+    S.led('tour', 'vert', 0); S.led('tour', '', 1); S.led('box', 'vert');
+  },
+  etapes: [
+    { t: TXT[0].t, x: TXT[0].x, all: true,
+      run: async function (S) {
+        S.bg(disque(S));
+        for (var n = 1; ; n++) {
+          S.bg(S.go(USB.slice().reverse(), 'blanc', null, { size: 6, speed: 140 }));
+          if (n % 5 === 0) S.bg(S.go(['tour', 'sw', 'srv'], 'bleu', null, { size: 6 }));
+          await S.sleep(1000);
+        }
+      } },
+    { t: TXT[1].t, x: TXT[1].x, on: ['box', 'tour', 'pc'],
+      run: async function (S) {
+        S.bg(disque(S));
+        S.bulle('box', ['#Boîtier témoin', '>ESP32 relié au PC par USB série', '>2 capteurs de lumière : voyant ⏻ et voyant du disque', '>horloge DS3231 · carte microSD', '>réserve d\'énergie : supercondensateur 1 F', 'alimenté par son propre chargeur USB'], { cote: 'droite', dx: 150, dy: -10 });
+        for (;;) { await S.go(['tour', 'box'], 'blanc', 'battement · 1/s', { speed: 110 }); await S.sleep(500); }
+      } },
+    { t: TXT[2].t, x: TXT[2].x, on: ['box', 'tour', 'pc'],
+      run: async function (S) {
+        S.bg(disque(S)); S.bg(battements(S));
+        poste(S, [['Mise à jour obligatoire', 'var(--jaune-fonce)'], ['Logiciel métier 4.2'], ['installation… 35 %']], 'clair');
+        await S.go(['tour', 'box'], 'jaune', '« installation en cours »', { speed: 90 });
+        S.led('box', 'orange');
+        S.bulle('box', ['#Récit du boîtier', '10:02:14 battement OK', '10:02:31 installation en cours'], { cote: 'droite', dx: 150, dy: -10 });
+      } },
+    { t: TXT[3].t, x: TXT[3].x, on: ['box', 'tour', 'pc', 'agt'],
+      init: function (S) { S.montre('agt', true); S.led('box', 'orange'); poste(S, [['Mise à jour obligatoire', 'var(--jaune-fonce)'], ['Logiciel métier 4.2'], ['installation… 61 %']], 'clair'); },
+      run: async function (S) {
+        await battements(S, 2);
+        S.etat('tour', 'ne répond plus', 'alerte');
+        S.bulle('box', ['#Récit du boîtier', '10:02:31 installation en cours', '10:04:02 plus de battement, voyant allumé', '→ PC figé'], { cote: 'droite', dx: 150, dy: -10, cls: 'alerte' });
+        await S.sleep(2600);
+        S.etat('agt', 'maintient le bouton 5 s', 'info');
+        await S.sleep(1600);
+        S.led('tour', '', 0); S.led('tour', '', 1); poste(S, [], 'sombre'); S.etat('tour', 'éteint', 'alerte');
+        S.bulle('box', ['#Récit du boîtier', '10:04:02 PC figé', '10:06:10 voyant éteint, sans message d\'arrêt', '→ arrêt au bouton'], { cote: 'droite', dx: 150, dy: -10, cls: 'alerte' });
+      } },
+    { t: TXT[4].t, x: TXT[4].x, on: ['box', 'tour', 'pc'],
+      init: function (S) { S.led('box', 'vert'); },
+      run: async function (S) {
+        poste(S, [['Redémarrage…', 'var(--encre-2)']], 'sombre');
+        await S.sleep(900);
+        S.led('tour', 'vert', 0); poste(S, [['Analyse de l\'incident', 'var(--focus)'], ['lecture du récit…']], 'clair');
+        await S.go(['box', 'tour'], 'blanc', 'récit · 4 lignes', { speed: 80 });
+        poste(S, [['Analyse de l\'incident', 'var(--focus)'], ['récit du boîtier ✔'], ['journaux Windows…']], 'clair');
+        S.bulle('tour', ['#Journaux de Windows', '10:06 arrêt inattendu (Kernel-Power 41)', '10:06 installation : échec (MsiInstaller)'], { cote: 'droite', dx: 120, dy: -70 });
+        await S.sleep(2200);
+        poste(S, [['Cause probable', 'var(--rouge)'], ['installation interrompue'], ['arrêt au bouton après blocage']], 'clair');
+        S.bulle('pc', ['#Conclusion', 'installation interrompue', 'par un arrêt au bouton,', 'après un blocage du PC'], { cote: 'bas', dy: 40, cls: 'ok' });
+      } },
+    { t: TXT[5].t, x: TXT[5].x, on: ['tour', 'sw', 'srv', 'tec'],
+      run: async function (S) {
+        await S.go(['tour', 'sw', 'srv'], 'bleu', 'HTTPS · jeton · conclusion');
+        await S.sleep(300);
+        await S.go(['tec', 'sw', 'srv'], 'bleu', 'GET /incidents', { size: 6 });
+        await S.go(['srv', 'sw', 'tec'], 'bleu', null, { size: 6 });
+        page(S, [['PC-42 · 10:06', 'var(--encre)'], ['installation interrompue', 'var(--rouge)'], ['arrêt au bouton après blocage', 'var(--encre-2)']]);
+        S.bulle('tec', ['#Ce que lit le technicien', 'cause probable + preuves', 'relancer l\'installation', 'chercher pourquoi le PC se fige'], { cote: 'haut', dx: -80, dy: -10, cls: 'ok' });
+      } },
+    { t: TXT[6].t, x: TXT[6].x, on: ['box', 'tour', 'pc'],
+      run: async function (S) {
+        S.bg(disque(S)); await battements(S, 2);
+        S.etat('box', 'coupure !', 'alerte');
+        S.led('tour', '', 0); S.led('tour', '', 1); poste(S, [], 'sombre'); S.led('box', 'rouge');
+        S.bulle('box', ['#Réserve d\'énergie', 'quelques secondes pour écrire :', '« 14:20:07 coupure de courant »'], { cote: 'droite', dx: 150, dy: -10, cls: 'alerte' });
+        await S.sleep(2500); S.led('box', '');
+      } },
+    { t: TXT[7].t, x: TXT[7].x, on: ['rt', 'sw', 'tour', 'srv'],
+      run: async function (S) {
+        await S.go(['tour', 'sw', 'rt'], 'vert', 'DHCP · adresse ?', { size: 6 });
+        await S.go(['rt', 'sw', 'tour'], 'vert', '10.10.0.42', { size: 6 });
+        await S.go(['tour', 'sw', 'rt'], 'vert', 'DNS · srv.labo ?', { size: 6 });
+        await S.go(['rt', 'sw', 'tour'], 'vert', '10.10.0.20', { size: 6 });
+        await S.go(['tour', 'sw', 'rt'], 'vert', 'NTP · heure ?', { size: 6 });
+        await S.go(['rt', 'sw', 'tour'], 'vert', '10:06:10', { size: 6 });
+        S.bulle('tour', ['#Même horloge partout', 'récit du boîtier et journaux', 'de Windows comparables'], { cote: 'droite', dx: 120, dy: -70, cls: 'ok' });
+      } }
+  ]
+};
+</script>
+<script src="../../../commun/schema-2d.js"></script>
+</body>
+</html>

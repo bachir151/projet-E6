@@ -104,8 +104,11 @@
 .regles li{margin:.35em 0}
 
 /* page intégrée (?cadre) : seulement le schéma et la carte d'étape */
-.cadre .tete,.cadre .regles{display:none}
-.cadre .grille{padding-block:16px 16px}
+.cadre .tete,.cadre .regles,.cadre .reperes-tech{display:none}
+.cadre .grille{padding:8px 12px;max-width:none;grid-template-columns:minmax(0,1fr) 330px;gap:16px}
+.cadre .scene-cadre{box-shadow:5px 5px 0 var(--encre)}
+.cadre #schema{height:calc(100vh - 46px);width:100%}
+.cadre .carte-etape{max-height:calc(100vh - 30px);overflow:auto;box-shadow:5px 5px 0 var(--jaune),5px 5px 0 3px var(--encre)}
 /* pause : tout ce qui bouge en CSS s'arrête aussi */
 .en-pause #schema *{animation-play-state:paused!important}
 @media (max-width:1060px){.grille{grid-template-columns:1fr}.carte-etape{position:static}}

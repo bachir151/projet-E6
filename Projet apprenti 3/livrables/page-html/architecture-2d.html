@@ -12,7 +12,7 @@
 <body>
 <header class="wrap large tete">
   <div>
-    <span class="label">Projet 3 · Lorenzo · CyberSentinel</span>
+    <span class="label">Projet 3 · Lorenzo · Capteur de présence authentifié</span>
     <h1>Le schéma réseau pas à pas</h1>
     <p class="lead">La maquette, à plat : le matériel vu de face et les liens réseau. Chaque point qui circule est un message. Clique sur <b>Suivant</b> pour suivre leur trajet, étape par étape.</p>
   </div>
@@ -60,7 +60,7 @@
 var TXT = [
 {
 "t": "Vue d'ensemble",
-"x": "<p><b>CyberSentinel</b> réunit deux défenses. À gauche, un <b>radar LD2410</b> et un ESP32 verrouillent le poste de Martine quand elle s'absente. À droite, un <b>second ESP32 Ethernet (W5500)</b> joue une <b>fausse imprimante</b> et note qui consulte son faux service web.</p><p>Au fond, le <b>réseau isolé du labo</b> : routeur, switch, serveur Ubuntu et poste de supervision.</p><p>Scénario simulé, adresses d'exemple. Clique sur <b>Suivant</b>.</p>"
+"x": "<p>Le <b>capteur de présence authentifié</b> réunit deux défenses. À gauche, un <b>radar LD2410</b> et un ESP32 verrouillent le poste de Martine quand elle s'absente. À droite, un <b>second ESP32 Ethernet (W5500)</b> joue une <b>fausse imprimante</b> et note qui consulte son faux service web.</p><p>Au fond, le <b>réseau isolé du labo</b> : routeur, switch, serveur Ubuntu et poste de supervision.</p><p>Scénario simulé, adresses d'exemple. Clique sur <b>Suivant</b>.</p>"
 },
 {
 "t": "1. Le boîtier, pièce par pièce",
@@ -107,9 +107,9 @@ var TXT = [
 "x": "<p>Ubuntu reçoit l'événement du leurre et l'affiche avec celui du <b>verrouillage Windows</b>. Ce sont <b>deux événements distincts</b> : l'absence de Martine ne prouve <b>aucun lien</b> avec l'accès au leurre.</p><p>L'alerte est « <b>à qualifier</b> » par le technicien. Les essais comparent le délai d'alerte, les faux positifs (scans autorisés) et le comportement si le serveur est arrêté.</p><p><b>Pas de détection magique</b> : seuls les accès dirigés vers le leurre sont vus.</p>"
 }
 ];
-TXT[0].x = '<p><b>CyberSentinel</b> réunit deux défenses. À gauche, le <b>boîtier radar</b> (LD2410 + ESP32) branché en USB sur le <b>poste de Martine</b> : il verrouille la session quand elle s\'absente. Au centre, un <b>second ESP32 Ethernet (W5500)</b> joue une <b>fausse imprimante</b>.</p><p>En haut et à droite, le <b>réseau isolé du labo</b> : routeur, switch, serveur Ubuntu, poste de supervision et PC de test.</p><p>Scénario simulé, adresses d\'exemple. Clique sur <b>Suivant</b>.</p>';
+TXT[0].x = '<p>Le <b>capteur de présence authentifié</b> réunit deux défenses. À gauche, le <b>boîtier radar</b> (LD2410 + ESP32) branché en USB sur le <b>poste de Martine</b> : il verrouille la session quand elle s\'absente. Au centre, un <b>second ESP32 Ethernet (W5500)</b> joue une <b>fausse imprimante</b>.</p><p>En haut et à droite, le <b>réseau isolé du labo</b> : routeur, switch, serveur Ubuntu, poste de supervision et PC de test.</p><p>Scénario simulé, adresses d\'exemple. Clique sur <b>Suivant</b>.</p>';
 TXT[9].x = TXT[9].x.replace('En pointillés : ce que le réseau croit voir. ', '');
-function ps(S, lines) { S.ecran('pc', [['Service CyberSentinel', 'var(--bleu)']].concat(lines)); }
+function ps(S, lines) { S.ecran('pc', [['Service de verrouillage', 'var(--bleu)']].concat(lines)); }
 function sup(S, rows) { S.ecran('sup', [['Supervision · événements', 'var(--focus)']].concat(rows.length ? rows : [['aucun événement', 'var(--encre-2)']]), 'clair'); }
 async function radar(S) { for (;;) { S.bg(S.onde('radar', 'droite', 150)); await S.sleep(1100); } }
 var USB = ['radar', 'pc'];

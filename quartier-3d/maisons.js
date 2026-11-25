@@ -10,7 +10,7 @@
    (boutons « Version 2,5D » et « Version 2D » ; facultatifs), et `urlPage` celui de
    sa page HTML interactive (bouton « Page du projet » ; facultatif). Les maisons se répartissent
    seules autour du carrefour (4 places au minimum).
-   `prop` = petit objet devant la porte : 'printer', 'radar', 'kit' ou null.
+   `prop` = petit objet devant la porte : 'printer', 'radar', 'kit', 'boite' ou null.
    `color` = couleur d'identité du projet (la même en 2D et en 3D).
    Script classique (pas un module) : fonctionne aussi en ouvrant le fichier directement.
    ===================================================================== */
@@ -24,6 +24,11 @@ var Q = window.QUARTIER = {
     url25: '../Projet apprenti 1/livrables/pages-html/architecture-2-5d.html',
     url2d: '../Projet apprenti 1/livrables/pages-html/architecture-2d.html',
     urlPage: '../Projet apprenti 1/livrables/pages-html/service-augmente.html' },
+  { who: 'Yaksan', n: 2, color: '#4ea8ff', prop: 'boite',
+    title: 'Analyse post-incident des postes de travail', sub: 'la boîte noire du poste',
+    desc: 'Un boîtier témoin voit comment le PC s’est arrêté, même quand Windows n’a rien pu écrire. Au redémarrage, le poste croise ce récit avec ses journaux et explique l’installation ratée.',
+    url: '../Projet apprenti 2/livrables/animation-3d/maquette-3d.html',
+    url2d: '../Projet apprenti 2/livrables/page-html/architecture-2d.html' },
   { who: 'Lorenzo', n: 3, color: '#c18cff', prop: 'radar',
     title: 'CyberSentinel', sub: 'un radar pour le poste, un leurre pour le réseau',
     desc: 'Un radar LD2410 voit que l’agent est parti et le poste Windows se verrouille seul. Un second ESP32 joue une fausse imprimante : toute connexion devient un signal à examiner.',
@@ -36,10 +41,6 @@ var Q = window.QUARTIER = {
     url: '../Projet apprenti 4/apprentie4-aziza/livrables/animation-3d/maquette-3d.html',
     url25: '../Projet apprenti 4/apprentie4-aziza/livrables/pages-html/architecture-2-5d.html',
     url2d: '../Projet apprenti 4/apprentie4-aziza/livrables/pages-html/architecture-2d.html' },
-  { who: '', n: 0, color: '#7f8c96', prop: null,
-    title: 'À venir', sub: 'emplacement réservé',
-    desc: 'Cette maison est vide pour l’instant. La prochaine maquette viendra ici.',
-    url: null },
   ],
   /* les trois vues d'une maquette : champ de l'URL, nom du bouton (et nom court sur téléphone), suffixe du titre */
   vues: [
@@ -80,6 +81,12 @@ Q.illus = function (kind, col) {
      ${sh('M12 32h86v56H12z')}<path d="M12 32h86v56H12z" fill="${col}"/><path d="M12 52h86" fill="none"/>
      <path d="M48 48h14v10H48z" fill="${W}"/>
      <g class="bob">${sh('M74 58a14 14 0 1 0 0.1 0z')}<circle cx="74" cy="72" r="14" fill="${W}"/><path d="M67 72l5 5 9-10" fill="none"/></g>` + foot;
+  if (kind === 'boite') return head +
+    `<ellipse cx="55" cy="97" rx="40" ry="5" fill="${K}" stroke="none"/>
+     ${sh('M14 30h82v58H14z')}<path d="M14 30h82v58H14z" fill="${col}"/>
+     <path d="M24 40h62v30H24z" fill="${W}"/><path d="M28 56h12l5-10 7 20 6-14 4 4h14" fill="none"/>
+     <path d="M24 78h26M60 78h26" fill="none"/>
+     <g class="bob"><circle cx="86" cy="22" r="7" fill="var(--rouge,#C8372D)"/></g>` + foot;
   return head +   /* emplacement libre : maison en pointillés */
     `<ellipse cx="55" cy="96" rx="38" ry="5" fill="${K}" stroke="none" opacity=".35"/>
      <path d="M20 52 55 22l35 30v40H20z" fill="none" stroke-dasharray="7 6"/>
