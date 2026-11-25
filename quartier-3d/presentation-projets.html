@@ -194,7 +194,8 @@ table.comp tr:last-child td{border-bottom:0}
 .regles{margin:0;padding:0;list-style:none;display:grid;gap:8px;counter-reset:r}
 .regles li{counter-increment:r;position:relative;padding-left:48px;font-size:20px;line-height:1.35;min-height:32px}
 .regles li::before{content:counter(r);position:absolute;left:0;top:-1px;width:32px;height:32px;border-radius:50%;background:var(--encre);color:var(--papier);display:grid;place-items:center;font-weight:900;font-size:16px}
-.module{border-top:8px solid var(--c)}
+.module{border:2px solid var(--encre);box-shadow:var(--ombre-decalee)}
+.module .label::before{content:"";display:inline-block;width:12px;height:12px;border-radius:50%;background:var(--c);border:1.5px solid var(--encre);margin-right:8px;vertical-align:-1px}
 .regles.carte{padding:16px 22px}
 /* cartes illustrées (diapositive « solution » d'Aziza) */
 .illustre{padding:12px 18px 16px}
@@ -264,7 +265,7 @@ body.lecture{overflow:auto}
     <div>
       <span class="label">BTS CIEL option A · Épreuve E6 · Session 2027</span>
       <h1>Les projets du quartier</h1>
-      <p class="lead">Une maison par apprenti. Pour chaque projet : le contexte, le besoin, ce qui existe, notre solution, l'architecture et la maquette 3D.</p>
+      <p class="lead">Une maison par apprenti. Pour chaque projet : le contexte, le besoin, ce qui existe, le projet, l'architecture et la maquette 3D.</p>
       <div class="liste-projets" id="listeProjets"></div>
       <div class="liens-quartier">
         <a class="btn" href="plan-2d.html" target="_blank" rel="noopener">Plan 2D du quartier ↗</a>
@@ -355,7 +356,6 @@ body.lecture{overflow:auto}
     </div>
     <div class="grille-2">
       <p class="encadre succes f"><b>Sécurité.</b> Le diagnostic à distance passe par un point d'accès <b>JEA</b> : liste fermée de commandes, compte sans droit d'administrateur. Une commande hors liste est refusée et tracée.</p>
-      <p class="encadre info f"><b>Physique.</b> Le seuil de vibration : distinguer « l'imprimante travaille » de « elle est au repos », avec étalonnage et incertitudes.</p>
     </div>
   </div>
   <p class="bandeau">Quatre témoins comparés : le serveur trouve <b>la cause</b> avant que Wassim se déplace.</p>
@@ -399,7 +399,7 @@ body.lecture{overflow:auto}
 <section class="slide projet" data-p="Wassim" data-partie="architecture">
   <h2>Le schéma réseau de la maquette</h2>
   <div class="corps" style="grid-template-rows:1fr auto;gap:0">
-    <div class="embed clair" data-src="../Projet apprenti 1/livrables/pages-html/architecture-2d.html?cadre" data-scale=".72" style="height:595px">
+    <div class="embed clair" data-src="../Projet apprenti 1/livrables/pages-html/architecture-2d.html?cadre" data-scale=".78" style="height:605px">
       <iframe title="Schéma réseau pas à pas de la maquette de Wassim" loading="lazy"></iframe>
       <div class="attente">Chargement du schéma…</div>
       <div class="alt">Le schéma réseau pas à pas, avec le vrai matériel dessiné : <a href="../Projet apprenti 1/livrables/pages-html/architecture-2d.html">ouvrir le schéma 2D</a>.</div>
@@ -425,10 +425,22 @@ body.lecture{overflow:auto}
   <p class="bandeau">Wassim <b>exploite</b> le réseau en place : il observe, il vérifie, il ne reconfigure rien.</p>
 </section>
 
+<section class="slide projet" data-p="Wassim" data-partie="architecture">
+  <h2>Le diagnostic en 4 indices</h2>
+  <div class="corps" style="grid-template-rows:1fr auto;gap:0">
+    <div class="embed clair" data-src="../Projet apprenti 1/livrables/laboratoire-diagnostic/simple.html?cadre" data-scale="1" style="height:600px">
+      <iframe title="Laboratoire interactif de diagnostic des imprimantes (simulation)" loading="lazy"></iframe>
+      <div class="attente">Chargement du laboratoire…</div>
+      <div class="alt">Sept situations simulées, de l'impression normale à l'imprimante figée : <a href="../Projet apprenti 1/livrables/laboratoire-diagnostic/simple.html">ouvrir le laboratoire de diagnostic</a>.</div>
+    </div>
+    <div class="sous-cadre"><a class="btn principal" href="../Projet apprenti 1/livrables/laboratoire-diagnostic/simple.html" target="_blank" rel="noopener">Laboratoire en grand ↗</a><span class="aide">Clique dans le laboratoire pour le piloter (Espace, ←, →), à côté pour reprendre les diapositives.</span></div>
+  </div>
+</section>
+
 <section class="slide projet" data-p="Wassim" data-partie="maquette">
   <h2>La maquette 3D</h2>
   <div class="corps" style="gap:0">
-    <div class="embed" data-src="../Projet apprenti 1/livrables/animation-3d/maquette-3d.html" data-scale=".85" style="height:600px">
+    <div class="embed" data-src="../Projet apprenti 1/livrables/animation-3d/maquette-3d.html?cadre" data-scale=".85" style="height:600px">
       <iframe title="Maquette 3D du projet de Wassim" allow="fullscreen"></iframe>
       <div class="attente">Chargement de la maquette 3D…</div>
       <div class="alt">La maquette 3D se regarde sur un ordinateur : <a href="../Projet apprenti 1/livrables/animation-3d/maquette-3d.html">ouvrir la maquette 3D</a>.</div>
@@ -438,7 +450,7 @@ body.lecture{overflow:auto}
 </section>
 
 <!-- ======================================================================================
-     PROJET 2 · YAKSAN (nouveau projet du 25/11/2026 : source = Projet apprenti 2/projet-station-controle.md)
+     PROJET 2 · YAKSAN (nouveau projet du 25/11/2026 : source = Projet apprenti 2/projet-station-controle.md ; remplace la « boîte noire » de ce matin)
      ====================================================================================== -->
 <section class="slide projet couverture" data-p="Yaksan" data-chapitre="yaksan" data-titre="Yaksan : couverture">
   <div class="couv">
@@ -448,7 +460,7 @@ body.lecture{overflow:auto}
       <h1 class="long">Station de contrôle de santé des portables</h1>
       <p class="sous">Un portable rendu, trois contrôles chiffrés, une trace qui ne s'efface pas.</p>
       <ol class="plan-liste" data-plan></ol>
-      <div class="statut"><span class="tag papier">Besoin à faire valider par le tuteur</span><span class="tag papier">Maquette au lycée</span><span class="tag papier">Aucune donnée réelle</span><span class="tag jaune">Maquette 3D à venir</span></div>
+      <div class="statut"><span class="tag papier">Besoin à faire valider par le tuteur</span><span class="tag papier">Aucune donnée réelle</span><span class="tag papier">Maquette 3D à venir</span></div>
     </div>
   </div>
 </section>
@@ -463,7 +475,7 @@ body.lecture{overflow:auto}
       <div class="carte f"><span class="label">Sa limite</span><p class="citation">Pas de droits d'administrateur.</p><p class="petit">Windows ne lui montre ni la température du processeur, ni la vitesse du ventilateur.</p></div>
       <div class="carte f"><span class="label">Un projet du service</span><p class="citation">Un portail captif envisagé.</p><p class="petit">Le tuteur a cité ALCASAR, pas encore en place. Il trouve sa place en V2.</p></div>
     </div>
-    <p class="note f" style="margin:0">Faits rapportés, <b>à confirmer par le tuteur</b>. Le besoin est une <b>proposition</b> faite au service. Réalisation au lycée, sur maquette : elle doit être validée par l'académie.</p>
+    <p class="note f" style="margin:0">Faits rapportés, <b>à confirmer par le tuteur</b>. Le besoin est une <b>proposition</b> faite au service.</p>
   </div>
   <p class="bandeau">Le terrain : des <b>portables rendus</b>, un contrôle <b>à l'œil</b>, un technicien <b>sans droits</b>.</p>
 </section>
@@ -526,20 +538,21 @@ body.lecture{overflow:auto}
 </section>
 
 <section class="slide projet" data-p="Yaksan" data-partie="solution">
-  <h2>De la physique qui fixe les seuils, une trace qui ne s'efface pas</h2>
+  <h2>Mesurer, garder, ne rien toucher</h2>
   <div class="corps">
-    <div class="deux-col">
-      <div class="carte module f"><span class="label">Physique principale · V1</span><h3>L'énergie emportée par l'air</h3>
-        <p style="font-size:20px;font-family:var(--police-mono);font-weight:700;margin:6px 0 10px">P = ρ · c<sub>p</sub> · Q · ΔT &nbsp;avec&nbsp; Q = v · S</p>
-        <p style="font-size:18px">Exemple : grille de 12 cm², air à 2 m/s, 10 °C de plus que la pièce → <b>≈ 29 W</b> emportés (à vérifier sur la maquette).</p>
-        <p style="font-size:18px"><b>Modèle testé</b> : à charge fixe, Q · ΔT reste constant tant que le processeur ne ralentit pas. Aération bouchée à 0, 25, 50, 75 %.</p>
-        <p class="petit" style="font-size:17px">Montée en température ΔT(t) = ΔT∞ · (1 − e<sup>−t/τ</sup>) : les premières minutes prédisent la fin, le contrôle est plus court. Étalonnage des sondes, incertitudes sur 10 passages. Court, en V2 : lumière de l'écran, étalonnée au luxmètre.</p></div>
-      <ol class="regles carte plate f">
-        <li><b>Palier 1</b> : la station mesure et donne un avis. Elle ne modifie <b>aucun réglage</b> du PC.</li>
-        <li><b>Aucun droit d'administrateur</b> dans les scripts : ce qui marche au lycée marchera au service.</li>
-        <li><b>Journal chaîné</b> : chaque fiche porte l'empreinte SHA-256 de la précédente. Démonstration : « ligne effacée détectée ».</li>
-        <li><b>Vie privée</b> : la fiche dit quel PC, quand, rendu par qui. Rien d'autre sur l'agent. Personnes fictives sur la maquette.</li>
-      </ol>
+    <div class="chiffres">
+      <div class="chiffre f"><b>9 sur 10</b><span>aérations bouchées détectées, sans fausse alerte sur un PC propre (objectif)</span></div>
+      <div class="chiffre f"><b>≤ 10 min</b><span>pour un contrôle complet, verdict compris (objectif)</span></div>
+      <div class="chiffre f"><b>0</b><span>fiche effacée ou modifiée sans être détectée</span></div>
+    </div>
+    <div class="grille-3">
+      <div class="carte f"><span class="label"><span class="v">V1</span>Obligatoire</span><h3>Le socle et deux contrôles</h3><p style="font-size:19px">Refroidissement et connectivité. Serveur, base, tableau de bord. Journal chaîné des fiches.</p></div>
+      <div class="carte f"><span class="label"><span class="v v2">V2</span>Visée</span><h3>L'écran et le portail</h3><p style="font-size:19px">Lumière de l'écran, comparée à la remise. Passage du portail captif ALCASAR, étape par étape.</p></div>
+      <div class="carte a-venir f"><span class="label"><span class="v ext">+</span>Extensions</span><h3>Aller plus loin</h3><p style="font-size:19px">Couleurs de l'écran. Visiteur robot qui passe le portail toutes les 5 min. Test de charge du portail.</p></div>
+    </div>
+    <div class="grille-2">
+      <p class="encadre succes f"><b>Sécurité.</b> Chaque fiche porte l'empreinte de la précédente : une fiche effacée ou modifiée est détectée.</p>
+      <p class="encadre info f"><b>Lecture seule.</b> La station mesure et donne un avis, sans droits d'administrateur. Elle ne change aucun réglage du PC.</p>
     </div>
   </div>
   <p class="bandeau">Sa question de sécurité : « quelqu'un a-t-il <b>effacé</b> ou <b>modifié</b> ce qui s'est passé ? »</p>
@@ -638,7 +651,7 @@ body.lecture{overflow:auto}
         <text x="1325" y="556" text-anchor="middle" style="font:900 18px var(--police);fill:var(--encre)">Routeur Cisco ISR 4331</text>
       </svg>
     </div>
-    <p class="petit f" style="margin:0;font-size:17px">Schéma de principe, dessiné pour cette présentation. Le réseau est <b>déjà configuré</b> au lycée : Yaksan l'<b>exploite</b> (adressage, réservations DHCP, noms DNS, NTP, captures). La maquette 3D et le schéma 2D pas à pas restent à faire.</p>
+    <p class="petit f" style="margin:0;font-size:17px">Schéma de principe. Le réseau est <b>déjà en place</b> : Yaksan l'<b>exploite</b> (adressage, réservations DHCP, noms DNS, NTP, captures). Le schéma 2D pas à pas et la maquette 3D du nouveau projet restent à faire.</p>
   </div>
 </section>
 
@@ -667,27 +680,28 @@ body.lecture{overflow:auto}
     <div class="vignette" data-illus></div>
     <div>
       <span class="label" style="font-size:17px">Projet 3 · Lorenzo · support aux postes de travail</span>
-      <h1>CyberSentinel</h1>
+      <h1>Capteur de présence authentifié</h1>
       <p class="sous">Un radar pour le poste, un leurre pour le réseau.</p>
       <ol class="plan-liste" data-plan></ol>
-      <div class="statut"><span class="tag papier">Besoin réel, solution à faire valider</span><span class="tag papier">Maquette au lycée, LAN isolé</span><span class="tag papier">Aucune donnée réelle</span></div>
+      <div class="statut"><span class="tag papier">Besoin réel, solution à faire valider</span><span class="tag papier">Maquette, LAN isolé</span><span class="tag papier">Aucune donnée réelle</span></div>
     </div>
   </div>
 </section>
 
 <section class="slide projet" data-p="Lorenzo" data-partie="contexte">
-  <h2>Des bureaux partagés, des sessions ouvertes</h2>
+  <h2>Qui utilise les accès de l'agent ?</h2>
   <div class="corps">
-    <p class="petit" style="margin:0;font-size:21px">Lorenzo fait du support aux postes dans une <b>administration publique</b> (nom non cité) : préparation des PC, aide aux agents. Il intervient surtout sur des <b>PC de bureau</b>.</p>
+    <p class="petit" style="margin:0;font-size:21px">Lorenzo fait du support aux postes dans une <b>administration publique</b> (nom non cité). Ses deux sujets posent la même question : est-ce bien l'agent qui utilise <b>sa session</b> ou <b>ses identifiants</b> ?</p>
     <div class="grille-4">
-      <div class="carte f"><span class="label">Le personnage</span><p class="citation">Martine, gestionnaire</p><p class="petit">Elle travaille dans un bureau partagé. Elle se lève souvent : imprimante, dossier, café.</p></div>
-      <div class="carte f"><span class="label">Autour d'elle</span><p class="citation">Ça passe beaucoup.</p><p class="petit">Collègues, visiteurs, prestataires traversent le bureau et voient les écrans.</p></div>
-      <div class="carte f"><span class="label">Le filet actuel</span><p class="citation">Quelques minutes.</p><p class="petit">Windows se verrouille seul après plusieurs minutes sans clavier ni souris.</p></div>
-      <div class="carte f"><span class="label">Le réseau</span><p class="citation">Des angles morts.</p><p class="petit">La détection d'intrusion n'est jamais parfaite : un signal de plus est utile.</p></div>
+      <div class="carte f"><span class="label">Sujet 1 · Le poste</span><p class="citation">Martine quitte son bureau</p><p class="petit">Bureau partagé. Elle part chercher une impression sans verrouiller son PC. Quelqu'un peut ouvrir un dossier sous son nom.</p></div>
+      <div class="carte f"><span class="label">Sujet 1 · La règle</span><p class="citation">Verrouiller dès le départ</p><p class="petit">L'ANSSI recommande de verrouiller sa session dès qu'on quitte son poste. Sinon, elle reste ouverte jusqu'au verrouillage automatique de Windows.</p></div>
+      <div class="carte f"><span class="label">Sujet 2 · Exemple public</span><p class="citation">DGFiP · Des identifiants volés</p><p class="petit">Juin et juillet 2026 : un intrus entre dans la messagerie e-contact avec des identifiants compromis. Selon le Sénat : près de 350 000 particuliers et 250 000 professionnels concernés.</p></div>
+      <div class="carte f"><span class="label">Sujet 2 · Exemple public</span><p class="citation">Quand le vol a-t-il été découvert ?</p><p class="petit">Les accès frauduleux sont coupés après leur signalement. Mais la copie des données n'est découverte que le 12 août 2026, quand l'attaquant revendique le vol.</p></div>
     </div>
-    <p class="note f" style="margin:0">Le tuteur a confirmé que des agents <b>oublient de verrouiller</b> leur session (entretien du 16/11/2026). Réalisation au lycée, sur maquette : elle doit être validée par l'académie.</p>
+    <p class="note f" style="margin:0"><b>Limite du leurre :</b> un intrus qui va directement au vrai service ne touche pas le leurre, qui reste silencieux. La maquette n'aurait donc pas détecté l'attaque de la DGFiP.</p>
+    <p class="f" style="margin:0;font-size:15px;line-height:1.4;color:var(--encre-2)">Sources : <a href="https://messervices.cyber.gouv.fr/documents-guides/guide_hygiene_informatique_anssi.pdf" target="_blank" rel="noopener">ANSSI, Guide d'hygiène informatique, règle 2</a> · <a href="https://cyber.gouv.fr/actualites/lanssi-publie-le-rapport-dincident-sur-les-cyberattaques-ayant-touche-la-dgfip/" target="_blank" rel="noopener">ANSSI, rapport sur les cyberattaques ayant touché la DGFiP, 29/09/2026</a> · <a href="https://www.senat.fr/fileadmin/Commissions/Finances/2026-2027/PLF_2027/NP/NP_GFP_TFP_Cas_immo_PLF_2027.pdf" target="_blank" rel="noopener">Sénat, commission des finances, e-contact, p. 24</a></p>
   </div>
-  <p class="bandeau">Le terrain : un bureau partagé, une <b>session ouverte</b>, un <b>collègue qui passe</b>.</p>
+  <p class="bandeau">Sur la maquette, le radar permet de <b>verrouiller le poste</b> après une absence confirmée. Sur le réseau, une visite du service leurre déclenche <b>une alerte à vérifier</b>.</p>
 </section>
 
 <section class="slide projet" data-p="Lorenzo" data-partie="besoin">
@@ -701,8 +715,8 @@ body.lecture{overflow:auto}
     </div>
     <div class="chiffres">
       <div class="chiffre f"><span class="tag succes">confirmé par le tuteur</span><b>Des oublis</b><span>de verrouillage dans le service</span></div>
-      <div class="chiffre f"><span class="tag papier">à demander au tuteur</span><b>? min</b><span>délai actuel du verrouillage par inactivité</span></div>
-      <div class="chiffre f"><span class="tag jaune">objectif à mesurer</span><b>&lt; 8 s</b><span>entre le départ et le verrou, dans 95 % des essais</span></div>
+      <div class="chiffre f"><b>? min</b><span>délai actuel du verrouillage par inactivité</span></div>
+      <div class="chiffre f"><b>&lt; 8 s</b><span>entre le départ et le verrou, dans 95 % des essais</span></div>
     </div>
   </div>
   <p class="bandeau">Le besoin : verrouiller <b>en secondes</b>, pas en minutes, sans rien demander à l'agent.</p>
@@ -711,18 +725,15 @@ body.lecture{overflow:auto}
 <section class="slide projet" data-p="Lorenzo" data-partie="existant">
   <h2>Pourquoi pas ce que Windows sait déjà faire ?</h2>
   <div class="corps">
-    <div class="defile"><table class="comp">
-      <thead><tr><th style="width:23%">Solution</th><th class="c">Rapide après le départ</th><th class="c">Rien à porter</th><th class="c">Marche sur un PC de bureau</th><th class="c">Délais mesurés, journalisés</th><th class="c">Sans matériel en plus</th></tr></thead>
-      <tbody>
-        <tr class="f"><td><b>Win + L</b></td><td class="c moy">~<small>s'il y pense</small></td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c non">✗</td><td class="c ok">✓</td></tr>
-        <tr class="f"><td><b>Verrouillage par inactivité</b></td><td class="c non">✗<small>minutes</small></td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c moy">~</td><td class="c ok">✓</td></tr>
-        <tr class="f"><td><b>Verrouillage dynamique</b> (téléphone Bluetooth)</td><td class="c moy">~<small>≈ 30 s*</small></td><td class="c non">✗<small>téléphone</small></td><td class="c moy">~<small>Bluetooth</small></td><td class="c non">✗</td><td class="c moy">~</td></tr>
-        <tr class="f"><td><b>Présence Windows 11</b> (capteur intégré)</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c non">✗<small>portables récents</small></td><td class="c non">✗</td><td class="c non">✗</td></tr>
-        <tr class="f"><td><b>Retrait de la carte à puce</b></td><td class="c ok">✓</td><td class="c non">✗<small>carte</small></td><td class="c ok">✓</td><td class="c moy">~</td><td class="c non">✗<small>lecteur</small></td></tr>
-        <tr class="f nous"><td>Projet de Lorenzo</td><td class="c ok">✓<small>secondes</small></td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c moy">~<small>boîtier</small></td></tr>
-      </tbody>
-    </table></div>
-    <p class="petit f" style="margin:0;font-size:18px">✓ oui · ~ en partie · ✗ non. * Délai annoncé par Microsoft, à vérifier. <b>Leurres existants :</b> OpenCanary (libre), Thinkst Canary (payant), T-Pot (lourd). Celui de Lorenzo est minimal : une fausse imprimante sur ESP32, qui ne collecte rien.</p>
+    <div class="grille-3" style="gap:16px">
+      <div class="carte f"><p class="citation" style="font-size:22px;margin-bottom:8px">Win + L</p><p class="petit" style="font-size:18px;margin:0 0 4px"><b class="texte-succes">✓</b> Immédiat et gratuit.</p><p class="petit" style="font-size:18px;margin:0"><b class="texte-danger">✗</b> Il faut y penser à chaque départ.</p></div>
+      <div class="carte f"><p class="citation" style="font-size:22px;margin-bottom:8px">Verrouillage par inactivité</p><p class="petit" style="font-size:18px;margin:0 0 4px"><b class="texte-succes">✓</b> Automatique, déjà dans Windows.</p><p class="petit" style="font-size:18px;margin:0"><b class="texte-danger">✗</b> La session reste ouverte plusieurs minutes.</p></div>
+      <div class="carte f"><p class="citation" style="font-size:22px;margin-bottom:8px">Verrouillage dynamique</p><p class="petit" style="font-size:18px;margin:0 0 4px"><b class="texte-succes">✓</b> Automatique, avec le téléphone Bluetooth.</p><p class="petit" style="font-size:18px;margin:0"><b class="texte-danger">✗</b> Il faut garder son téléphone sur soi ; ≈ 30 s*.</p></div>
+      <div class="carte f"><p class="citation" style="font-size:22px;margin-bottom:8px">Présence Windows 11</p><p class="petit" style="font-size:18px;margin:0 0 4px"><b class="texte-succes">✓</b> Rapide, rien à porter.</p><p class="petit" style="font-size:18px;margin:0"><b class="texte-danger">✗</b> Seulement sur des portables récents, pas sur un PC de bureau.</p></div>
+      <div class="carte f"><p class="citation" style="font-size:22px;margin-bottom:8px">Retrait de la carte à puce</p><p class="petit" style="font-size:18px;margin:0 0 4px"><b class="texte-succes">✓</b> Immédiat.</p><p class="petit" style="font-size:18px;margin:0"><b class="texte-danger">✗</b> Il faut une carte, un lecteur, et penser à la retirer.</p></div>
+      <div class="carte f" style="border-width:2.5px;background:var(--jaune-pale)"><p class="citation" style="font-size:22px;margin-bottom:8px">Projet de Lorenzo</p><p class="petit" style="font-size:18px;margin:0 0 4px"><b class="texte-succes">✓</b> Quelques secondes, rien à porter, sur un PC de bureau, délais mesurés.</p><p class="petit" style="font-size:18px;margin:0"><b class="texte-danger">✗</b> Un petit boîtier à ajouter.</p></div>
+    </div>
+    <p class="petit f" style="margin:0;font-size:18px">* Délai annoncé par Microsoft, à vérifier. <b>Leurres existants :</b> OpenCanary (libre), Thinkst Canary (payant), T-Pot (lourd). Celui de Lorenzo est minimal : une fausse imprimante sur ESP32, qui ne collecte rien.</p>
   </div>
   <p class="bandeau">L'inactivité reste <b>le filet</b>. Le radar fait verrouiller <b>plus tôt</b>, jamais plus tard.</p>
 </section>
@@ -736,22 +747,20 @@ body.lecture{overflow:auto}
         <p class="petit" style="font-size:17px">Messages signés (HMAC + compteur) : un faux boîtier est refusé.</p></div>
       <div class="carte module f"><span class="label"><span class="v">V1</span>Module 2 · sur le réseau</span><h3>Le leurre : une fausse imprimante</h3>
         <p style="font-size:19px">Un second ESP32 avec une carte Ethernet <b>W5500</b> imite une imprimante (page HTTP). Personne n'a de raison de s'y connecter : chaque visite devient un <b>événement à examiner</b>.</p>
-        <p class="petit" style="font-size:17px">Faible interaction, LAN isolé du lycée, événements envoyés au serveur Ubuntu.</p></div>
+        <p class="petit" style="font-size:17px">Faible interaction, LAN isolé, événements envoyés au serveur Ubuntu.</p></div>
     </div>
     <ol class="regles carte plate f">
       <li>Le radar sert <b>seulement à verrouiller</b> : jamais à déverrouiller, jamais à reconnaître quelqu'un.</li>
       <li>Le verrou reste <b>local</b> : il marche même si le serveur Ubuntu tombe en panne. Boîtier muet = verrouillage.</li>
       <li>Une connexion au leurre <b>n'est pas une preuve</b> d'intrusion. Elle n'est jamais reliée à une absence ni à un agent.</li>
     </ol>
-    <p class="encadre info f"><b>Physique.</b> Onde de 24 GHz : λ = c/f ≈ 12,5 mm, donc un déplacement du thorax de 1 mm décale la phase d'environ 1 radian (Δφ = 4π·d/λ). D'où la détection d'une personne immobile. Délais mesurés avec leurs incertitudes.</p>
   </div>
-  <p class="bandeau">Le radar <b>avance</b> le verrouillage. Le leurre <b>signale</b>, il ne <b>conclut</b> pas.</p>
 </section>
 
 <section class="slide projet" data-p="Lorenzo" data-partie="architecture">
   <h2>Le schéma réseau de la maquette</h2>
   <div class="corps" style="grid-template-rows:1fr auto;gap:0">
-    <div class="embed clair" data-src="../Projet apprenti 3/livrables/page-html/architecture-2d.html?cadre" data-scale=".72" style="height:595px">
+    <div class="embed clair" data-src="../Projet apprenti 3/livrables/page-html/architecture-2d.html?cadre" data-scale=".78" style="height:605px">
       <iframe title="Schéma réseau pas à pas de la maquette de Lorenzo" loading="lazy"></iframe>
       <div class="attente">Chargement du schéma…</div>
       <div class="alt">Le schéma réseau pas à pas, avec le vrai matériel dessiné : <a href="../Projet apprenti 3/livrables/page-html/architecture-2d.html">ouvrir le schéma 2D</a>.</div>
@@ -780,7 +789,7 @@ body.lecture{overflow:auto}
 <section class="slide projet" data-p="Lorenzo" data-partie="maquette">
   <h2>La maquette 3D</h2>
   <div class="corps" style="gap:0">
-    <div class="embed" data-src="../Projet apprenti 3/livrables/animation-3d/maquette-3d.html" data-scale=".85" style="height:600px">
+    <div class="embed" data-src="../Projet apprenti 3/livrables/animation-3d/maquette-3d.html?cadre" data-scale=".85" style="height:600px">
       <iframe title="Maquette 3D du projet de Lorenzo" allow="fullscreen"></iframe>
       <div class="attente">Chargement de la maquette 3D…</div>
       <div class="alt">La maquette 3D se regarde sur un ordinateur : <a href="../Projet apprenti 3/livrables/animation-3d/maquette-3d.html">ouvrir la maquette 3D</a>.</div>
@@ -797,10 +806,10 @@ body.lecture{overflow:auto}
     <div class="vignette" data-illus></div>
     <div>
       <span class="label" style="font-size:17px">Projet 4 · Aziza · maintenance et parc informatique</span>
-      <h1>Le kit de maintenance signé</h1>
+      <h1>Maintien en condition opérationnelle d'un parc de PC</h1>
       <p class="sous">Des PC à jour, des documents archivés, un parc tracé.</p>
       <ol class="plan-liste" data-plan></ol>
-      <div class="statut"><span class="tag papier">Besoin issu de l'entreprise</span><span class="tag papier">Maquette au lycée</span><span class="tag papier">Données fictives</span></div>
+      <div class="statut"><span class="tag papier">Besoin issu de l'entreprise</span><span class="tag papier">Maquette</span><span class="tag papier">Données fictives</span></div>
     </div>
   </div>
 </section>
@@ -815,7 +824,7 @@ body.lecture{overflow:auto}
       <div class="carte f"><span class="label">Sur le terrain</span><p class="citation">Seulement la 4G</p><p class="petit">Pas de réseau de l'entreprise dehors : Internet passe par le téléphone de l'agent (confirmé par le tuteur).</p></div>
       <div class="carte f"><span class="label">Les archives</span><p class="citation">Dispersées</p><p class="petit">Les documents de modification sont difficiles à retrouver (besoin 2 du tuteur).</p></div>
     </div>
-    <p class="note f" style="margin:0">Le projet <b>ne touche à aucun système du réseau électrique</b>. Maquette au lycée, données fictives ; réalisation au lycée à faire valider par l'académie.</p>
+    <p class="note f" style="margin:0">Le projet <b>ne touche à aucun système du réseau électrique</b>. Maquette, données fictives.</p>
   </div>
   <p class="bandeau">Le terrain : <b>dix PC</b> qui partent chaque jour, avec la <b>4G</b> pour seul réseau.</p>
 </section>
@@ -983,7 +992,7 @@ body.lecture{overflow:auto}
 <section class="slide projet" data-p="Aziza" data-partie="architecture">
   <h2>Le schéma réseau de la maquette</h2>
   <div class="corps" style="grid-template-rows:1fr auto;gap:0">
-    <div class="embed clair" data-src="../Projet apprenti 4/apprentie4-aziza/livrables/pages-html/architecture-2d.html?cadre" data-scale=".72" style="height:595px">
+    <div class="embed clair" data-src="../Projet apprenti 4/apprentie4-aziza/livrables/pages-html/architecture-2d.html?cadre" data-scale=".78" style="height:605px">
       <iframe title="Schéma réseau pas à pas de la maquette d'Aziza" loading="lazy"></iframe>
       <div class="attente">Chargement du schéma…</div>
       <div class="alt">Le schéma réseau pas à pas, avec le vrai matériel dessiné : <a href="../Projet apprenti 4/apprentie4-aziza/livrables/pages-html/architecture-2d.html">ouvrir le schéma 2D</a>.</div>
@@ -1010,7 +1019,7 @@ body.lecture{overflow:auto}
 <section class="slide projet" data-p="Aziza" data-partie="maquette">
   <h2>La maquette 3D</h2>
   <div class="corps" style="gap:0">
-    <div class="embed" data-src="../Projet apprenti 4/apprentie4-aziza/livrables/animation-3d/maquette-3d.html" data-scale=".85" style="height:600px">
+    <div class="embed" data-src="../Projet apprenti 4/apprentie4-aziza/livrables/animation-3d/maquette-3d.html?cadre" data-scale=".85" style="height:600px">
       <iframe title="Maquette 3D du projet d'Aziza" allow="fullscreen"></iframe>
       <div class="attente">Chargement de la maquette 3D…</div>
       <div class="alt">La maquette 3D se regarde sur un ordinateur : <a href="../Projet apprenti 4/apprentie4-aziza/livrables/animation-3d/maquette-3d.html">ouvrir la maquette 3D</a>.</div>
@@ -1054,22 +1063,25 @@ body.lecture{overflow:auto}
   const N = slides.length;
   const PARTIES = [
     ['contexte', 'Contexte'], ['besoin', 'Besoin'], ['existant', 'Solutions existantes'],
-    ['solution', 'Notre solution'], ['architecture', 'Architecture'], ['maquette', 'Maquette 3D']
+    ['solution', 'Le projet'], ['architecture', 'Architecture'], ['maquette', 'Maquette 3D']
   ];
   /* titres officiels : « Nom du projet » dans la fiche de présentation de chaque apprenti */
   const TITRES = {
     Wassim: 'Diagnostic à distance des imprimantes : valorisation des données et ticket enrichi',
-    Lorenzo: 'CyberSentinel',
-    Aziza: 'Des PC de maintenance à jour, des documents archivés, un parc tracé',
-    Yaksan: 'Station de contrôle de santé des portables'
+    Yaksan: 'Station de contrôle de santé des portables',
+    Lorenzo: 'Capteur de présence authentifié',
+    Aziza: "Maintien en condition opérationnelle d'un parc de PC"
   };
   const titre = m => TITRES[m.who] || m.title;
+  /* nom d'une partie propre à un projet (sinon : nom commun de PARTIES) */
+  const nomPartie = (who, p) => p[1];
+  /* parties présentes pour un projet (un projet sans maquette 3D n'affiche pas cette partie) */
+  const aChapitre = m => !!m.who && slides.some(s => s.dataset.p === m.who && s.classList.contains('couverture'));   // une maison sans maquette 3D peut avoir son chapitre
+  const partiesDe = who => PARTIES.filter(p => slides.some(x => x.dataset.p === who && x.dataset.partie === p[0]));
   const strip = s => s.replace(/^<svg[^>]*>|<\/svg>$/g, '');
   const maisonDe = who => MAISONS.find(m => m.who === who);
   const slotDe = who => MAISONS.findIndex(m => m.who === who) + 1;     // numéro de maison dans le quartier (1, 2, 3…)
   const chapitre = who => slides.findIndex(s => s.dataset.p === who && s.classList.contains('couverture'));
-  const aChapitre = m => !!m.who && chapitre(m.who) >= 0;              // une maison sans maquette 3D peut avoir son chapitre
-  const partiesDe = who => PARTIES.filter(p => slides.some(x => x.dataset.p === who && x.dataset.partie === p[0]));
 
   /* ---------- habillage des diapositives de projet (couleur, en-tête, plan) ---------- */
   slides.forEach(s => {
@@ -1079,7 +1091,7 @@ body.lecture{overflow:auto}
     const ill = s.querySelector('[data-illus]');
     if (ill) ill.innerHTML = Q.illus(m.prop, m.color);
     const plan = s.querySelector('[data-plan]');
-    if (plan) plan.innerHTML = partiesDe(who).map((p, i) => `<li><span>${i + 1}</span>${p[1]}</li>`).join('');
+    if (plan) plan.innerHTML = partiesDe(who).map((p, i) => `<li><span>${i + 1}</span>${nomPartie(who, p)}</li>`).join('');
     s.querySelectorAll('[data-quartier3d]').forEach(a => a.href = 'index.html?maison=' + slotDe(who));
     s.querySelectorAll('[data-plan2d]').forEach(a => a.href = 'plan-2d.html?maison=' + slotDe(who));
     const partie = s.dataset.partie; if (!partie) return;
@@ -1089,9 +1101,9 @@ body.lecture{overflow:auto}
     ligne.innerHTML = `<span class="label"><i aria-hidden="true"></i><span>Projet ${m.n} · ${who} · ${titre(m)}</span></span>`;
     h2.replaceWith(tete); tete.appendChild(ligne); tete.appendChild(h2);
     const nav = document.createElement('nav'); nav.className = 'parties'; nav.setAttribute('aria-label', 'Parties du projet');
-    const PP = partiesDe(who), k = PP.findIndex(p => p[0] === partie);
-    PP.forEach((p, i) => {
-      const b = document.createElement('button'); b.type = 'button'; b.textContent = (i + 1) + ' · ' + p[1];
+    const PS = partiesDe(who), k = PS.findIndex(p => p[0] === partie);
+    PS.forEach((p, i) => {
+      const b = document.createElement('button'); b.type = 'button'; b.textContent = (i + 1) + ' · ' + nomPartie(who, p);
       if (i === k) b.setAttribute('aria-current', 'true'); else if (i < k) b.className = 'fait';
       b.addEventListener('click', () => aller(slides.findIndex(x => x.dataset.p === who && x.dataset.partie === p[0])));
       nav.appendChild(b);
@@ -1110,7 +1122,7 @@ body.lecture{overflow:auto}
 
   /* ---------- sommaire : liste des projets ---------- */
   const liste = document.getElementById('listeProjets');
-  MAISONS.slice().sort((x, y) => (x.n || 99) - (y.n || 99)).forEach(m => {
+  MAISONS.forEach(m => {
     const b = document.createElement('button'); b.type = 'button'; b.style.setProperty('--c', aChapitre(m) ? m.color : 'var(--papier)');
     if (aChapitre(m)) {
       b.innerHTML = `<span class="pastille" aria-hidden="true">${Q.illus(m.prop, m.color)}</span><span><b>${m.n} · ${m.who}</b><span>${titre(m)}</span></span>`;

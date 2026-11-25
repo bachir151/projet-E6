@@ -129,10 +129,15 @@ caption { caption-side: bottom; font-size: .88rem; color: var(--encre-3); paddin
 /* -- note : petit papier jaune pâle -- */
 .note { background: var(--jaune-pale); border-radius: var(--r-note); box-shadow: var(--ombre-douce); padding: 14px 18px; }
 
-/* -- encadré : bande de couleur à gauche (sens selon la classe sémantique) -- */
+/* -- encadré : carte blanche à contour encre et ombre décalée ;
+      le mot de tête (premier <b>) devient une pastille colorée selon le sens -- */
 .encadre, .callout {
-  background: var(--papier-2); border-left: 6px solid var(--jaune); border-radius: 0 var(--r-petit) var(--r-petit) 0;
-  padding: 12px 18px; margin: 18px 0;
+  background: var(--blanc); border: 2px solid var(--encre); border-radius: var(--r-carte);
+  box-shadow: var(--ombre-decalee); padding: 14px 18px; margin: 18px 0;
+}
+.encadre > :is(b, strong):first-child, .callout > :is(b, strong):first-child {
+  display: inline-block; margin-right: 6px; padding: 0 10px 1px; border: 1.5px solid var(--encre); border-radius: 999px;
+  background: var(--sens-pale, var(--jaune)); font-weight: 900; font-size: .9em;
 }
 .encadre > :last-child, .callout > :last-child { margin-bottom: 0; }
 
@@ -192,12 +197,12 @@ caption { caption-side: bottom; font-size: .88rem; color: var(--encre-3); paddin
 .succes  { --sens: var(--vert);  --sens-pale: var(--vert-pale); }
 .info    { --sens: var(--bleu);  --sens-pale: var(--bleu-pale); }
 .accent  { --sens: var(--jaune-fonce); --sens-pale: var(--jaune-pale); }
-.encadre:is(.danger, .succes, .info, .accent), .callout:is(.danger, .succes, .info, .accent) { border-left-color: var(--sens); background: var(--sens-pale); }
+.encadre:is(.danger, .succes, .info, .accent) > :is(b, strong):first-child, .callout:is(.danger, .succes, .info, .accent) > :is(b, strong):first-child { background: var(--sens-pale); }
 .tag:is(.danger, .succes), .pill:is(.danger, .succes) { border-color: var(--sens); color: var(--sens); background: var(--sens-pale); }
 .tag.danger, .pill.danger { color: var(--rouge-texte); }
 .tag.info, .pill.info { background: var(--bleu); border-color: var(--encre); }
 .tag.accent, .pill.accent, .tag.jaune, .pill.jaune { background: var(--jaune); border-color: var(--encre); }
-.carte:is(.danger, .succes, .info, .accent), .card:is(.danger, .succes, .info, .accent) { border-top: 6px solid var(--sens); }
+.carte:is(.danger, .succes, .info, .accent), .card:is(.danger, .succes, .info, .accent) { border: 2px solid var(--encre); background: var(--sens-pale); box-shadow: var(--ombre-decalee); }
 .texte-danger { color: var(--rouge-texte); }
 .texte-succes { color: var(--vert); }
 .texte-discret { color: var(--encre-3); }

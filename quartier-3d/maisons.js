@@ -10,7 +10,7 @@
    (boutons « Version 2,5D » et « Version 2D » ; facultatifs), et `urlPage` celui de
    sa page HTML interactive (bouton « Page du projet » ; facultatif). Les maisons se répartissent
    seules autour du carrefour (4 places au minimum).
-   `prop` = petit objet devant la porte : 'printer', 'radar', 'kit' ou null.
+   `prop` = petit objet devant la porte : 'printer', 'radar', 'kit', 'boite', 'station' ou null.
    `color` = couleur d'identité du projet (la même en 2D et en 3D).
    Script classique (pas un module) : fonctionne aussi en ouvrant le fichier directement.
    ===================================================================== */
@@ -24,6 +24,10 @@ var Q = window.QUARTIER = {
     url25: '../Projet apprenti 1/livrables/pages-html/architecture-2-5d.html',
     url2d: '../Projet apprenti 1/livrables/pages-html/architecture-2d.html',
     urlPage: '../Projet apprenti 1/livrables/pages-html/service-augmente.html' },
+  { who: 'Yaksan', n: 2, color: '#4ea8ff', prop: 'station',
+    title: 'Station de contrôle des portables', sub: 'refroidissement · connectivité · écran',
+    desc: 'Un portable rendu passe sur la station : un ESP32 mesure l’air soufflé et la lumière de l’écran, un script sans droits teste le réseau. Chaque fiche entre dans un journal qui ne s’efface pas. Maquette 3D à venir.',
+    url: null },   /* nouveau projet du 25/11 : pas encore de maquette 3D ni de schéma 2D (ceux de Projet apprenti 2/livrables/ montrent l'ancienne « boîte noire »). Son chapitre existe dans presentation-projets.html */
   { who: 'Lorenzo', n: 3, color: '#c18cff', prop: 'radar',
     title: 'CyberSentinel', sub: 'un radar pour le poste, un leurre pour le réseau',
     desc: 'Un radar LD2410 voit que l’agent est parti et le poste Windows se verrouille seul. Un second ESP32 joue une fausse imprimante : toute connexion devient un signal à examiner.',
@@ -36,10 +40,6 @@ var Q = window.QUARTIER = {
     url: '../Projet apprenti 4/apprentie4-aziza/livrables/animation-3d/maquette-3d.html',
     url25: '../Projet apprenti 4/apprentie4-aziza/livrables/pages-html/architecture-2-5d.html',
     url2d: '../Projet apprenti 4/apprentie4-aziza/livrables/pages-html/architecture-2d.html' },
-  { who: 'Yaksan', n: 2, color: '#4fb3ff', prop: 'station',
-    title: 'Station de contrôle des portables', sub: 'refroidissement · connectivité · écran',
-    desc: 'Un portable rendu passe sur la station : un ESP32 mesure l’air soufflé et la lumière de l’écran, un script sans droits teste le réseau. Chaque fiche entre dans un journal qui ne s’efface pas. Maquette 3D à venir.',
-    url: null },   /* pas encore de maquette 3D : la maison reste « à venir » dans le quartier ; son chapitre existe dans presentation-projets.html */
   ],
   /* les trois vues d'une maquette : champ de l'URL, nom du bouton (et nom court sur téléphone), suffixe du titre */
   vues: [
@@ -80,7 +80,13 @@ Q.illus = function (kind, col) {
      ${sh('M12 32h86v56H12z')}<path d="M12 32h86v56H12z" fill="${col}"/><path d="M12 52h86" fill="none"/>
      <path d="M48 48h14v10H48z" fill="${W}"/>
      <g class="bob">${sh('M74 58a14 14 0 1 0 0.1 0z')}<circle cx="74" cy="72" r="14" fill="${W}"/><path d="M67 72l5 5 9-10" fill="none"/></g>` + foot;
-  if (kind === 'station') return head +   /* portable sur le banc : air chaud qui sort, sonde, thermomètre */
+  if (kind === 'boite') return head +
+    `<ellipse cx="55" cy="97" rx="40" ry="5" fill="${K}" stroke="none"/>
+     ${sh('M14 30h82v58H14z')}<path d="M14 30h82v58H14z" fill="${col}"/>
+     <path d="M24 40h62v30H24z" fill="${W}"/><path d="M28 56h12l5-10 7 20 6-14 4 4h14" fill="none"/>
+     <path d="M24 78h26M60 78h26" fill="none"/>
+     <g class="bob"><circle cx="86" cy="22" r="7" fill="var(--rouge,#C8372D)"/></g>` + foot;
+  if (kind === 'station') return head +   /* portable sur le banc : air chaud qui sort, thermomètre */
     `<ellipse cx="52" cy="97" rx="42" ry="5" fill="${K}" stroke="none"/>
      ${sh('M20 30h56v40H20z')}<path d="M20 30h56v40H20z" fill="${W}"/><path d="M28 38h40v24H28z" fill="${col}"/>
      <path d="M10 76h76l-6 12H16z" fill="${W}"/><path d="M28 82h40" fill="none"/>

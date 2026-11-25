@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Laboratoire de diagnostic</title>
+<meta name="description" content="Projet de Wassim : un simulateur pas à pas du diagnostic à distance des imprimantes. Réalité simulée, observations, raisonnement du moteur de règles et ticket GLPI enrichi.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="../../../theme.css">
+<link rel="stylesheet" href="labo.css">
+</head>
+<body>
+<header class="entete wrap large">
+  <div>
+    <span class="label">Projet de Wassim · diagnostic à distance des imprimantes · V1</span>
+    <h1>Laboratoire interactif de diagnostic</h1>
+    <p class="lead">Choisis une situation. Regarde ce qui se passe <b>vraiment</b>, ce que le programme <b>observe</b>, ce qu'il <b>déduit</b>, puis le ticket qu'il écrit. Tout est simulé : pas de vrai GLPI, pas d'imprimante, pas d'ESP32.</p>
+  </div>
+  <div class="outils" role="group" aria-label="Choix du scénario et des modes">
+    <label class="choix"><span class="label">Scénario</span><select id="choixScenario"></select></label>
+    <button class="btn petit" id="bHasard" type="button" hidden>Tirer une panne</button>
+    <button class="btn petit" id="bReel" type="button" aria-pressed="true" title="Montrer ou cacher la réalité simulée dans la scène">Réalité visible</button>
+    <button class="btn petit" id="bMasque" type="button" aria-pressed="false" title="Cacher la panne réelle pour observer le diagnostic sans connaître la réponse">Panne masquée</button>
+    <button class="btn petit" id="bComparer" type="button" aria-pressed="false" title="Comparer deux scénarios">Comparer</button>
+  </div>
+</header>
+
+<main id="vueLabo" class="wrap large">
+  <div class="grille-labo">
+    <section class="colonne-scene" aria-label="Scène animée">
+      <figure class="scene-cadre">
+        <svg id="scene" role="img" aria-label="Bureau de l'hôpital en vue isométrique : PC de Nadia, imprimante avec son boîtier ESP32, switch, borne Wi-Fi, serveur Ubuntu et poste du technicien."></svg>
+        <div class="legende-couches" aria-hidden="true">
+          <span><i class="pastille-reel"></i>réalité simulée</span>
+          <span><i class="pastille-obs"></i>observé par le programme</span>
+          <span><i class="pastille-inc"></i>inconnu</span>
+        </div>
+        <div id="ticketCouche" class="ticket-couche" hidden></div>
+      </figure>
+      <div class="narration" aria-live="polite">
+        <span class="label" id="nEtape">Prêt</span>
+        <p class="bandeau" id="nTitre">Choisis un scénario, puis appuie sur <b>Lecture</b> ou <b>Suivant</b>.</p>
+        <p id="nTexte" class="n-texte"></p>
+      </div>
+    </section>
+
+    <section class="carte panneau" aria-label="Ce que voit et pense le programme">
+      <div class="onglets" role="tablist" aria-label="Panneaux">
+        <button role="tab" type="button" class="btn petit" data-onglet="raisonnement" aria-selected="true">Raisonnement</button>
+        <button role="tab" type="button" class="btn petit" data-onglet="temoins" aria-selected="false">Témoins</button>
+        <button role="tab" type="button" class="btn petit" data-onglet="journal" aria-selected="false">Journal réseau</button>
+        <button role="tab" type="button" class="btn petit" data-onglet="message" aria-selected="false">Message</button>
+        <button role="tab" type="button" class="btn petit" data-onglet="ticket" aria-selected="false">Ticket</button>
+      </div>
+      <div class="contenu-onglet" id="o-raisonnement" role="tabpanel"></div>
+      <div class="contenu-onglet" id="o-temoins" role="tabpanel" hidden></div>
+      <div class="contenu-onglet" id="o-journal" role="tabpanel" hidden></div>
+      <div class="contenu-onglet" id="o-message" role="tabpanel" hidden></div>
+      <div class="contenu-onglet" id="o-ticket" role="tabpanel" hidden></div>
+    </section>
+  </div>
+
+  <section class="carte courbe-carte" aria-label="Courbe de vibration">
+    <div class="courbe-tete"><h3>Vibration mesurée par le boîtier</h3><span class="tag jaune">données simulées</span></div>
+    <svg id="courbe" viewBox="0 0 720 190" role="img" aria-label="Courbe de vibration RMS en fonction du temps, avec le seuil de détection"></svg>
+  </section>
+
+  <nav class="commande carte" aria-label="Lecture du scénario">
+    <ol class="frise" id="frise"></ol>
+    <div class="boutons">
+      <button class="btn petit" id="bReinit" type="button" title="Recommencer (R)">↺ Recommencer</button>
+      <button class="btn petit" id="bPrec" type="button" title="Temps précédent (←)">← Précédent</button>
+      <button class="btn principal" id="bLecture" type="button" title="Lecture ou pause (Espace)">▶ Lecture</button>
+      <button class="btn" id="bSuiv" type="button" title="Temps suivant (→)">Suivant →</button>
+      <label class="vitesse">Vitesse
+        <select id="vitesse"><option value="0.5">× 0,5</option><option value="1" selected>× 1</option><option value="1.5">× 1,5</option><option value="2">× 2</option></select>
+      </label>
+      <span class="compteur" id="compteur">0 / 0</span>
+    </div>
+  </nav>
+
+  <section class="regles-bas zone-2" aria-label="Règles du projet respectées">
+    <div class="grille">
+      <p class="encadre info"><b>Réalité, observation, déduction.</b> Le moteur de règles ne lit que les observations. Il ne connaît jamais la panne choisie : deux pannes aux mêmes observations donnent la même conclusion.</p>
+      <p class="encadre accent"><b>V1 en lecture seule.</b> SNMP en lecture, JEA à liste fermée. Aucun redémarrage automatique : le programme propose, un humain décide. AD, Samba et capteur de feuilles FC-51 : V2.</p>
+      <p class="encadre danger"><b>Inconnu n'est pas zéro.</b> Pas de réponse SNMP ≠ éteinte. File vide ≠ pages sorties. Vibration ≠ impression réussie. Le diagnostic peut rester indéterminé.</p>
+      <p class="encadre"><b>Contrat JEA élargi : proposé.</b> Le guide (§ 12.6) ne rend que <code>PendingJobs</code>. Ce simulateur ajoute <code>SpoolerRunning</code>, <code>PrinterStatus</code>, <code>JobsInError</code> (lecture seule, sans paramètre), à ajouter au guide et à tester.</p>
+    </div>
+  </section>
+</main>
+
+<main id="vueComparer" class="wrap large" hidden>
+  <section class="carte comparer">
+    <div class="comparer-tete">
+      <h2>Comparer deux scénarios</h2>
+      <label class="choix"><span class="label">Scénario A</span><select id="compA"></select></label>
+      <label class="choix"><span class="label">Scénario B</span><select id="compB"></select></label>
+    </div>
+    <div id="compAlerte"></div>
+    <div class="defile"><table id="compTable"></table></div>
+  </section>
+</main>
+
+<script src="js/scenarios.js"></script>
+<script src="js/simulation.js"></script>
+<script src="js/regles.js"></script>
+<script src="js/ticket.js"></script>
+<script src="js/scene.js"></script>
+<script src="js/animation.js"></script>
+<script src="js/interface.js"></script>
+</body>
+</html>
