@@ -110,3 +110,16 @@ Station centrale (ESP32 + serveur Ubuntu + historique) et quatre axes : optique 
 Il manque aussi le **capot fermé**, le seul problème venu de Yaksan : à garder en V2 (rattaché aux axes thermique et informatique).
 
 Point fort à garder : **comparer le même PC à la remise et à la restitution** (valorisation de la donnée : écart mesuré, et non « il a l'air d'aller »).
+
+## 9. Décision de l'enseignant (25/11)
+- **On garde trois axes : thermique, connectivité, optique.** Acoustique et capot fermé abandonnés.
+- **Les doublons de physique ne gênent pas** (expérience du jury) : la thermique peut aussi utiliser la constante de temps τ, comme Aziza.
+- Usage proposé de τ : ajuster le début de la montée en température (3 à 5 min) pour **prédire l'état final** et raccourcir le contrôle. Bilan `Q·ΔT` gardé pour le diagnostic (aération bouchée).
+
+| Version | Contenu | Heures (ordre de grandeur, avec IA) |
+|---|---|---|
+| V1 obligatoire | socle (serveur Ubuntu, SQLite, journal chaîné, tableau de bord) ; **thermique** (physique principale) ; **connectivité** (script en mode utilisateur : Wi-Fi, Ethernet, ports USB, DHCP, DNS, NTP ; captures) | ≈ 110 h |
+| V2 visée | **optique** : luminosité, uniformité sur 5 zones, couleurs (capteur spectral), étalonnage au luxmètre ; comparaison remise / restitution | ≈ 35 h |
+| Extensions | à définir | — |
+
+Reste ouvert : le besoin doit maintenant venir du tuteur (PC qui chauffent, écrans usés, ports ou Wi-Fi en panne au retour). Le problème du capot n'est plus l'appui du récit.
