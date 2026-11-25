@@ -2,6 +2,8 @@
 
 > **19/11/2026 : changement de projet.** Tout ce qui suit concerne l'ancien projet « Boîte noire du poste », abandonné. Nouveau projet : `nouveau-projet-carte.md` (carte agent : PC + imprimante).
 >
+> **25/11/2026 : nouvelles pistes « banc des portables »** (refroidissement, écran, station d'accueil, armoire, mise en veille) → analyse dans `piste-banc-portables.md`. Proposition : réunir refroidissement (V1) et capot fermé (V2). **À décider** : remplace-t-elle la carte agent et ALCASAR ? Faits nouveaux à confirmer : pas de droits d'administrateur, contrôle des portables rendus, problème de fermeture du capot.
+>
 > **19/11 (suite)** : le tuteur a cité ALCASAR → piste prioritaire `piste-alcasar.md`. Pistes de secours : carte + imprimante, borne USB.
 >
 > Prochaines étapes du nouveau projet :

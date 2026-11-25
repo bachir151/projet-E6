@@ -1,5 +1,15 @@
 # Journal de travail – Projets E6
 
+## 25 novembre 2026 — Yaksan (2) : pistes « banc des portables »
+
+**Fait :** analyse comparative de cinq pistes reçues par l'enseignant → `Projet apprenti 2/piste-banc-portables.md`. Armoire de prêt écartée (doublon RFID d'Aziza) ; station d'accueil en extension (physique faible) ; écran = plan B ; proposition : refroidissement par bilan d'énergie de l'air (V1, sans constante de temps pour ne pas doubler Aziza) + capot fermé (V2). Question de sécurité inchangée (journal chaîné des fiches de restitution).
+
+**Vérifié :** `powercfg /sleepstudy` demande des droits d'administrateur (Microsoft Learn). Température WMI : droits requis selon des forums seulement. Événements 506/507 : Microsoft Q&A seulement.
+
+**À décider :** cette piste remplace-t-elle la carte agent et ALCASAR ? Les « quatre axes » annoncés dans la proposition reçue manquent.
+
+---
+
 ## 20 novembre 2026 — Refonte de Lorenzo : CyberSentinel
 
 **Décision de l'enseignant :** suppression de la gestion des mises à jour. Projet désormais articulé autour de deux démonstrateurs : radar LD2410 + ESP32 pour le verrouillage Windows ; leurre réseau imitant une imprimante HTTP avec ESP32 + W5500, supervision Ubuntu.

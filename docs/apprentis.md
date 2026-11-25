@@ -1,5 +1,7 @@
 # Les 4 projets E6 : état au 20 novembre 2026
 
+> **25/11/2026 — Yaksan (2)** : nouvelles pistes « banc des portables » analysées dans `Projet apprenti 2/piste-banc-portables.md` (proposition : refroidissement + capot fermé, sans droits d'administrateur). Rien n'est décidé ; carte agent et ALCASAR pas encore abandonnés. Doublons repérés : armoire RFID (Aziza), constante de temps thermique (Aziza), Fourier (Wassim).
+
 > **24/11/2026 — précisions sur Wassim (1)**, rapportées, à confirmer par le tuteur : tickets reçus par GLPI, téléphone, mail et chat ; pas de supervision centralisée des imprimantes ; déplacements inutiles (câble non branché au PC) ; imprimantes en USB, sans-fil (Bluetooth cité, Wi-Fi plus probable) ou réseau selon les bureaux. Notes : `Projet apprenti 1/entretien-wassim-2026-11-16.md`, § 8.
 > **24/11/2026, décisions de l'enseignant** : (1) **AD et Samba en V2 seulement** : la V1 n'a qu'un serveur Ubuntu et un PC Windows en compte local, le DNS et l'heure sont fournis par le serveur (guide § 2.5) ; propagé dans la fiche, le guide, la page HTML, les schémas 2D et 2,5D, les questions du jury et les présentations. (2) **Option B** : la sonde reste en **lecture seule** ; le redémarrage à distance est une extension (palier 1 en V1). (3) Nouveau titre professionnel : « Diagnostic à distance des imprimantes : valorisation des données et ticket enrichi ». À tester d'abord : l'accès JEA sans domaine.
 >
