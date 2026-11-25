@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Maquette 3D boîte noire</title>
+<title>Station de contrôle 3D</title>
 <link rel="icon" href="data:,">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -119,13 +119,13 @@ h1,h2{font-weight:1000}
 }}
 </script>
 <body>
-<canvas id="scene" aria-label="Maquette 3D animée : poste Windows d'un agent avec son boîtier témoin ESP32, routeur, switch, serveur Ubuntu et poste du support"></canvas>
+<canvas id="scene" aria-label="Maquette 3D animée : un portable rendu sur la station de contrôle (ESP32, sonde d'air), réseau en place, portail ALCASAR, serveur Ubuntu et poste de Yaksan"></canvas>
 <div id="labels"></div>
 
 <div id="top">
   <div id="brand">
     <div class="eye">Projet E6 · apprenti 2 · Yaksan</div>
-    <h1>Analyse post-incident des postes<br>maquette en 3D</h1>
+    <h1>Station de contrôle des portables<br>maquette en 3D</h1>
   </div>
   <div id="tools">
     <button class="tbtn" id="bLab" aria-pressed="true">Étiquettes</button>
@@ -147,12 +147,12 @@ h1,h2{font-weight:1000}
     <div id="dots"></div>
   </div>
   <div id="legend">
-    <span style="--c:#f2f4f6">battement, récit (USB)</span>
-    <span style="--c:#ffd84a">installation</span>
-    <span style="--c:#c18cff">capteurs des voyants</span>
+    <span style="--c:#ff7a3d">air chaud</span>
+    <span style="--c:#c18cff">mesures (capteurs, MQTT)</span>
     <span style="--c:#4aa8ff">HTTPS (API)</span>
     <span style="--c:#3ddc84">DHCP, DNS, NTP</span>
-    <span style="--c:#ff5a4d">arrêt, coupure</span>
+    <span style="--c:#9fd0ff">Wi-Fi</span>
+    <span style="--c:#ff5a4d">alerte</span>
   </div>
 </div>
 <div id="hint">Glisser : tourner · Molette : zoom · Clic droit : déplacer<br>Flèches ← → : étapes · R : rejouer</div>
@@ -682,7 +682,7 @@ function rings(pos, hex, r = 6, n = 3, axis = 'y', dur = 1.1) {
 }
 
 /* =====================================================================
-   6. Projet de Yaksan : poste Windows, boîtier témoin, réseau en place
+   6. Projet de Yaksan : banc de contrôle d'un portable rendu, réseau en place
    Unité : 1 = 1 cm. Le dessus du bureau est à y = 0.
    ===================================================================== */
 const V = (x, y, z) => new THREE.Vector3(x, y, z);
@@ -697,154 +697,87 @@ const FONT = '"Nunito", Arial, sans-serif', MONO = 'ui-monospace, Consolas, mono
 const glowBasic = (hex, k = 3) => new THREE.MeshBasicMaterial({ color: new THREE.Color(hex).multiplyScalar(k), toneMapped: false });
 
 /* ---------------------------------------------------------------------
-   6.1 La tour du PC de l'agent : voyants d'alimentation et du disque à l'avant
+   6.1 Le portable rendu, posé sur un support réglable
    --------------------------------------------------------------------- */
-const TW = { w: 18, h: 42, d: 40 };
-const towerFront = canvasTex(360, 840, (g, w, h) => {
-  g.fillStyle = '#1c1f23'; g.fillRect(0, 0, w, h);
-  g.fillStyle = '#25292e'; g.fillRect(24, 40, w - 48, 90);
-  g.strokeStyle = '#353a41'; g.lineWidth = 3; g.strokeRect(24, 40, w - 48, 90);
-  g.fillStyle = '#0d0f11';
-  for (let y = 330; y < h - 60; y += 20) for (let x = 40 + ((y / 20) % 2) * 10; x < w - 36; x += 20) { g.beginPath(); g.arc(x, y, 6, 0, 7); g.fill(); }
-  g.fillStyle = '#9aa6b0'; g.font = 'bold 22px Arial'; g.fillText('ALIM', 100, 196); g.fillText('HDD', 214, 196);
-  g.fillStyle = '#8a96a0'; g.font = '20px Arial'; g.fillText('PC de bureau · Windows 11', 40, h - 24);
-});
-function makeTower() {
-  const g = new THREE.Group();
-  mesh(RB(TW.w, TW.h, TW.d, 0.6), std(0x202327, 0.45, 0.6), 0, TW.h / 2, 0, g);
-  front(TW.w - 0.6, TW.h - 0.6, std(0xffffff, 0.5, 0.3, { map: towerFront.tex }), 0, TW.h / 2, TW.d / 2 + 0.05, g);
-  /* bouton marche/arrêt (il s'enfonce quand l'agent appuie) */
-  const button = mesh(new THREE.CylinderGeometry(1.1, 1.1, 0.8, 24), std(0x2e3238, 0.35, 0.6), 0, 36.5, TW.d / 2 + 0.3, g);
-  button.rotation.x = Math.PI / 2;
-  mesh(new THREE.TorusGeometry(1.2, 0.12, 8, 28), M.chrome, 0, 36.5, TW.d / 2 + 0.1, g);
-  /* voyants : alimentation (vert) et disque (orange) */
-  const pwr = mesh(new THREE.CircleGeometry(0.42, 20), glowBasic(0x32ff7a, 3), -4.2, 33.4, TW.d / 2 + 0.12, g, false);
-  const hdd = mesh(new THREE.CircleGeometry(0.42, 20), glowBasic(0xffa31a, 0.05), 4.2, 33.4, TW.d / 2 + 0.12, g, false);
-  /* ports USB en façade */
-  for (const x of [-2.2, 2.2]) mesh(BOX(1.4, 0.55, 0.2), M.plBlack, x, 29.4, TW.d / 2 + 0.1, g, false);
-  for (const [x, z] of [[-7, -17], [7, -17], [-7, 17], [7, 17]]) mesh(new THREE.CylinderGeometry(1.2, 1.2, 0.8, 16), M.rubber, x, 0, z, g);
-  g.userData = { pwr, hdd, button };
-  return g;
-}
-const tower = makeTower(); tower.position.set(-95, 0, -25); scene.add(tower);
-const TFRONT = TW.d / 2;   // face avant de la tour, en coordonnées locales
-
-/* deux photocapteurs collés sur les voyants : petits tubes noirs (ils voient la lumière du voyant, pas celle de la pièce) */
-function makeSensorCap() {
-  const g = new THREE.Group();
-  const tube = mesh(new THREE.CylinderGeometry(0.85, 0.85, 0.9, 24, 1, true), std(0x111214, 0.7, 0, { side: THREE.DoubleSide }), 0, 0, 0, g, false);
-  tube.rotation.x = Math.PI / 2;
-  mesh(BOX(2.2, 0.5, 0.08), std(0xe9e3c9, 0.9), 0, -1.05, -0.4, g, false);   // ruban adhésif
-  return g;
-}
-const capP = makeSensorCap(); capP.position.set(-4.2, 33.4, TFRONT + 0.55); tower.add(capP);
-const capD = makeSensorCap(); capD.position.set(4.2, 33.4, TFRONT + 0.55); tower.add(capD);
+const LP = { w: 34, d: 23 };
+const LPX = -72, LPZ = -12, LPY = 2.2;
+for (const x of [-12, 12]) mesh(RB(3, LPY, 26, 0.4), M.alu, LPX + x, LPY / 2, LPZ);
+const lap = makeLaptop({ body: 0x2c3138, w: LP.w, d: LP.d });
+lap.g.position.set(LPX, LPY, LPZ); scene.add(lap.g);
+/* grille d'aération sur le côté droit : c'est par là que sort l'air chaud */
+const ventTex = canvasTex(400, 60, (g, w, h) => { g.fillStyle = '#25292e'; g.fillRect(0, 0, w, h); g.fillStyle = '#07080a'; for (let x = 12; x < w - 8; x += 22) g.fillRect(x, 10, 12, h - 20); });
+const vent = front(11, 1.1, std(0xffffff, 0.6, 0.3, { map: ventTex.tex }), LP.w / 2 + 0.03, 0.9, -3, lap.g);
+vent.rotation.y = Math.PI / 2;
+/* feuille de papier qui bouche une partie de la grille (essai « aération bouchée ») */
+const papier = mesh(BOX(0.12, 2.4, 11.4), std(0xf4f2ec, 0.9), LP.w / 2 + 0.35, 1.0, -3, lap.g, false);
+papier.visible = false;
+/* port Ethernet sur le côté gauche */
+mesh(BOX(0.25, 0.9, 1.4), M.plBlack, -LP.w / 2 - 0.05, 0.9, -5, lap.g, false);
+/* capteur de lumière (V2) : petit cache noir posé contre l'écran, déplacé sur 5 zones */
+const lux = new THREE.Group(); lap.pivot.add(lux);
+const hood = mesh(new THREE.CylinderGeometry(1.5, 1.5, 1.4, 28), std(0x111214, 0.7), 0, 0, 0, lux);
+hood.rotation.x = Math.PI / 2;
+mesh(new THREE.CircleGeometry(0.5, 20), std(0x2a6fd6, 0.3, 0.2), 0, 0, -0.72, lux, false).rotation.y = Math.PI;
+lux.visible = false;
+const LH = lap.lh;
+const ZONES = [[0, 0], [-1, 1], [1, 1], [-1, -1], [1, -1]].map(([a, b]) => V(a * (LP.w - 6) / 2, LH / 2 + 0.2 + b * (LH - 7) / 2, 1.2));
+lux.position.copy(ZONES[0]);
+scene.updateMatrixWorld(true);
+const VENT = W(lap.g, V(LP.w / 2 + 0.1, 0.9, -3));
 
 /* ---------------------------------------------------------------------
-   6.2 L'écran et le clavier de l'agent
+   6.2 La sonde devant la grille : température de l'air soufflé et vitesse de l'air
    --------------------------------------------------------------------- */
-const mon = makeMonitor(); mon.g.position.set(-46, 0, -22); mon.g.rotation.y = 0.12; scene.add(mon.g);
-mesh(RB(42, 1.6, 14, 0.5), std(0x1b1d20, 0.6), -44, 0.8, 8, scene).rotation.y = 0.12;    // clavier
-mesh(RB(6, 2.2, 10, 1.6), std(0x1b1d20, 0.5), -14, 1.1, 10, scene);                      // souris
+const probe = new THREE.Group(); probe.position.set(VENT.x + 6.5, 0, VENT.z); scene.add(probe);
+mesh(new THREE.CylinderGeometry(2.6, 2.8, 0.8, 28), M.darkMetal, 0, 0.4, 0, probe);
+mesh(new THREE.CylinderGeometry(0.3, 0.3, VENT.y + 0.6, 12), M.steel, 0, (VENT.y + 0.6) / 2, 0, probe);
+const head = new THREE.Group(); head.position.set(0, VENT.y, 0); probe.add(head);
+mesh(BOX(1.2, 0.8, 1.4), M.plBlack, 0, 0, 0, head);                               // pince
+mesh(BOX(3.2, 0.12, 1.6), M.pcbBlue, -2.0, 0.55, 0, head);                         // anémomètre thermique (petite carte)
+mesh(new THREE.SphereGeometry(0.22, 12, 8), std(0x6b4a2a, 0.5), -3.6, 0.6, 0, head);  // la perle chauffée
+const tube = mesh(new THREE.CylinderGeometry(0.22, 0.22, 4.2, 14), M.steel, -2.3, -0.4, 0, head); // sonde de température (tube inox)
+tube.rotation.z = Math.PI / 2;
+scene.updateMatrixWorld(true);
+const HEADP = W(head, V(-3.6, 0.2, 0));
 
 /* ---------------------------------------------------------------------
-   6.3 Le boîtier témoin : plexiglas posé devant la tour
+   6.3 L'ESP32 sur sa plaque à essais, et la sonde de température de la pièce
    --------------------------------------------------------------------- */
-const BX = { w: 16, h: 6, d: 12 };
-const box = new THREE.Group(); box.position.set(-92, 0, 13); scene.add(box);
-mesh(RB(BX.w, 0.4, BX.d, 0.3), std(0x1a1c1f, 0.6), 0, 0.2, 0, box);
-const acryl = new THREE.MeshPhysicalMaterial({ color: 0xb9d4e2, roughness: 0.18, transparent: true, opacity: 0.16, clearcoat: 0.25, clearcoatRoughness: 0.2, envMapIntensity: 0.6, depthWrite: false, side: THREE.DoubleSide });
-mesh(BOX(BX.w, BX.h, 0.3), acryl, 0, BX.h / 2, BX.d / 2, box, false);
-mesh(BOX(BX.w, BX.h, 0.3), acryl, 0, BX.h / 2, -BX.d / 2, box, false);
-mesh(BOX(0.3, BX.h, BX.d), acryl, BX.w / 2, BX.h / 2, 0, box, false);
-mesh(BOX(0.3, BX.h, BX.d), acryl, -BX.w / 2, BX.h / 2, 0, box, false);
-mesh(BOX(BX.w + 0.4, 0.3, BX.d + 0.4), acryl, 0, BX.h + 0.15, 0, box, false);
-for (const [x, z] of [[-7.5, -5.5], [7.5, -5.5], [-7.5, 5.5], [7.5, 5.5]]) mesh(new THREE.CylinderGeometry(0.25, 0.25, BX.h, 10), M.steel, x, BX.h / 2, z, box);
-for (const [x, z] of [[-7, -5], [7, -5], [-7, 5], [7, 5]]) mesh(new THREE.CylinderGeometry(0.6, 0.6, 0.3, 12), M.rubber, x, -0.05, z, box);
-
-/* ESP32 sur plaque à essais, prise USB vers l'arrière (vers la tour) */
-const bb = makeBreadboard(8.2, 5.5); bb.rotation.y = -Math.PI / 2; bb.position.set(-3.2, 0.4 + 0.85, 0.6); box.add(bb);
-const esp = makeESP32(); esp.rotation.y = -Math.PI / 2; esp.position.set(-3.2, 0.4 + 0.85 + 0.75, 0.6); box.add(esp);
-
-/* module horloge DS3231 (carte bleue + pile bouton) */
-function makeDS3231() {
+const bb = makeBreadboard(8.2, 5.5); bb.position.set(-40, 0.85, 14); scene.add(bb);
+const esp = makeESP32(); esp.position.set(-40.6, 0.85 + 0.75, 14); scene.add(esp);
+function makeTO92() {
   const g = new THREE.Group();
-  const t = canvasTex(380, 220, (c, w, h) => {
-    c.fillStyle = '#1f55ad'; c.fillRect(0, 0, w, h);
-    c.fillStyle = '#fff'; c.font = 'bold 30px Arial'; c.fillText('DS3231', 20, 46); c.font = '20px Arial'; c.fillText('horloge précise', 20, 78);
-    c.fillStyle = '#101114'; c.fillRect(30, 110, 80, 60);
-  });
-  mesh(BOX(3.8, 0.16, 2.2), M.pcbBlue, 0, 0, 0, g);
-  flat(3.8, 2.2, std(0xffffff, 0.45, 0.1, { map: t.tex }), 0, 0.082, 0, g);
-  mesh(new THREE.CylinderGeometry(0.85, 0.85, 0.32, 28), M.steel, 0.9, 0.24, 0.2, g);   // pile CR2032
+  const b = mesh(new THREE.CylinderGeometry(0.25, 0.25, 0.5, 16, 1, false, 0, Math.PI), M.chip, 0, 0.85, 0, g); b.rotation.y = Math.PI / 2;
+  for (const x of [-0.127, 0, 0.127]) mesh(new THREE.CylinderGeometry(0.02, 0.02, 0.6, 6), M.steel, x, 0.3, 0, g, false);
   return g;
 }
-const rtc = makeDS3231(); rtc.position.set(4.6, 1.0, -3.0); box.add(rtc);
-/* module carte microSD */
-function makeSD() {
-  const g = new THREE.Group();
-  mesh(BOX(4.2, 0.16, 2.4), M.pcbBlue, 0, 0, 0, g);
-  mesh(BOX(1.6, 0.25, 1.5), M.shield, 0.9, 0.2, 0, g);
-  mesh(BOX(1.1, 0.08, 1.2), std(0x24324a, 0.4), 1.25, 0.36, 0, g);   // la carte microSD
-  const t = canvasTex(200, 110, (c, w, h) => { c.clearRect(0, 0, w, h); c.fillStyle = '#fff'; c.font = 'bold 26px Arial'; c.fillText('microSD', 8, 40); });
-  flat(2.0, 1.1, new THREE.MeshStandardMaterial({ map: t.tex, transparent: true }), -1.0, 0.085, 0, g);
-  return g;
-}
-const sd = makeSD(); sd.position.set(4.6, 1.0, 2.4); box.add(sd);
-/* supercondensateur 1 F : la réserve d'énergie */
-const capTex = canvasTex(256, 128, (c, w, h) => { c.fillStyle = '#16181b'; c.fillRect(0, 0, w, h); c.fillStyle = '#e8c130'; c.font = 'bold 44px Arial'; c.fillText('1 F 5,5 V', 18, 80); });
-const scap = mesh(new THREE.CylinderGeometry(1.0, 1.0, 2.6, 28), std(0xffffff, 0.4, 0.2, { map: capTex.tex }), -6.2, 1.7, -3.4, box);
-mesh(new THREE.CylinderGeometry(1.02, 1.02, 0.12, 28), M.steel, -6.2, 3.05, -3.4, box);
-/* trois LED sur le couvercle : verte (tout va bien), orange (installation, V2), rouge (coupure) */
-const ledV = makeLED('vert', 0x22ff55); ledV.position.set(-5.5, BX.h + 0.3, 4.4); box.add(ledV);
-const ledO = makeLED('orange', 0xffa31a); ledO.position.set(-3.8, BX.h + 0.3, 4.4); box.add(ledO);
-const ledR = makeLED('rouge', 0xff3020); ledR.position.set(-2.1, BX.h + 0.3, 4.4); box.add(ledR);
-
-/* multiprise et chargeur USB (le boîtier a sa propre alimentation, branchée sur la même multiprise que le PC) */
-const strip = new THREE.Group(); strip.position.set(-62, 0, -62); scene.add(strip);
+const roomT = makeTO92(); roomT.position.set(-36.8, 0.85, 15.8); scene.add(roomT);
+const strip = new THREE.Group(); strip.position.set(-60, 0, -62); scene.add(strip);
 mesh(RB(30, 3.6, 5.5, 0.6), M.plWhite, 0, 1.8, 0, strip);
 for (let i = 0; i < 4; i++) mesh(new THREE.CylinderGeometry(1.5, 1.5, 0.2, 24), std(0xb9b9b9, 0.5), -10 + i * 6.5, 3.62, 0, strip);
-const stripLed = mesh(BOX(2, 0.6, 1), glowBasic(0xff5a2a, 2), 12.5, 3.62, 0, strip, false);
-mesh(RB(4.5, 3.6, 4.5, 0.5), M.plWhite, -10, 5.4, 0, strip);       // chargeur USB du boîtier
-mesh(RB(4, 3, 5, 0.4), M.plBlack, -3.5, 5.0, 0, strip);           // fiche du PC
-
+mesh(BOX(2, 0.6, 1), glowBasic(0xff5a2a, 2), 12.5, 3.62, 0, strip, false);
+mesh(RB(4.5, 3.6, 4.5, 0.5), M.plWhite, -10, 5.4, 0, strip);   // chargeur USB de l'ESP32
+mesh(RB(6, 3.4, 5, 0.6), M.plBlack, -2, 5.2, 0, strip);        // chargeur du portable
 scene.updateMatrixWorld(true);
 
-/* ---------------------------------------------------------------------
-   6.4 Câblage : USB données, photocapteurs, alimentations, fils dans le boîtier
-   --------------------------------------------------------------------- */
 const ESPA = { D34: 3, D35: 4, GND: 13 };
-const ESPB = { D23: 0, D22: 1, D21: 4, D19: 5, D18: 6, D5: 7, GND: 13, V33: 14 };
+const ESPB = { D4: 10, GND: 13, V33: 14 };
 const pA = (k, o = 0.55) => W(esp, espHole('A', ESPA[k], o));
 const pB = (k, o = 0.55) => W(esp, espHole('B', ESPB[k], o));
 const wires = {};
-const rtcPin = i => W(rtc, V(-1.75, 0.3, -0.6 + i * 0.4));
-const sdPin = i => W(sd, V(-2.0, 0.3, -0.75 + i * 0.3));
-wires.rtcSDA = wire(rtcPin(0), pB('D21'), 0x3498db, 1.2);
-wires.rtcSCL = wire(rtcPin(1), pB('D22'), 0xf4d03f, 1.4);
-wire(rtcPin(2), pB('V33', 0.8), 0xe74c3c, 1.0); wire(rtcPin(3), pB('GND', 0.8), 0x222222, 0.9);
-wires.sdSCK = wire(sdPin(0), pB('D18'), 0xf4d03f, 1.6);
-wires.sdMOSI = wire(sdPin(1), pB('D23'), 0x2ecc71, 1.8);
-wire(sdPin(2), pB('D19'), 0x3498db, 2.0); wire(sdPin(3), pB('D5'), 0xff8c1a, 2.2);
-/* capteurs des voyants : du devant de la tour jusqu'aux entrées analogiques D34 et D35 */
-const entree = W(box, V(-BX.w / 2 + 2, 2.2, -BX.d / 2));
-function capCable(cap, dx, pin) {
-  const a = W(cap, V(0, -1.0, -0.2)), front = W(tower, V(cap.position.x, 0, TFRONT + 0.4));
-  const c = cable([a, a.clone().add(V(0, -2, 0.3)), V(a.x, 12, front.z + 0.2), V(a.x, 0.25, front.z + 1.5), V(entree.x + dx, 0.25, entree.z - 2), entree.clone().add(V(dx, 0, 0)), pA(pin, 1.2)], wireMat(0x8e44ad), 0.09, 90);
-  return c;
-}
-wires.capP = capCable(capP, -0.6, 'D34');
-wires.capD = capCable(capD, 0.6, 'D35');
-/* câble USB : ESP32 → façade de la tour (données série) */
-const usbA = W(esp, V(-2.75, 0.22, 0)), usbT = W(tower, V(2.2, 29.4, TFRONT + 0.3));
-const cUSB = cable([usbA, usbA.clone().add(V(0, 0, -1.4)), W(box, V(1, 1.2, -BX.d / 2 - 0.4)), V(usbT.x + 3, 0.25, usbT.z + 4), V(usbT.x + 1, 6, usbT.z + 0.8), V(usbT.x, 20, usbT.z + 1.0), usbT.clone().add(V(0, -0.4, 1.2)), usbT], M.cableBlack, 0.2, 140);
-/* alimentation du boîtier : son chargeur USB sur la multiprise */
-const cPwrBox = cable([W(box, V(BX.w / 2 + 0.2, 1.2, -3)), W(box, V(BX.w / 2 + 3, 0.25, -5)), V(-70, 0.25, -20), V(-70, 0.25, -50), V(-72, 0.25, -58), W(strip, V(-10, 4, 2.5))], M.cableGray, 0.18);
-/* alimentation de la tour */
-cable([W(tower, V(0, 30, -TW.d / 2 - 0.2)), W(tower, V(0, 20, -TW.d / 2 - 3)), V(-95, 0.3, -52), V(-75, 0.3, -64), W(strip, V(-3.5, 4, 2.6))], M.cableBlack, 0.35);
+/* câbles de la sonde jusqu'à l'ESP32 : vitesse de l'air (analogique, D34) et température (1-Wire, D4) */
+const pied = W(probe, V(0, 0.3, 2.4));
+wires.vent = cable([W(head, V(-1, 0.6, 0.8)), W(probe, V(0.4, VENT.y - 1, 0.6)), W(probe, V(0.4, 1, 2.2)), pied, V(-42, 0.3, 6), V(-41.9, 0.3, 10.2), pA('D34', 1.2)], wireMat(0x8e44ad), 0.1, 90);
+wires.temp = cable([W(head, V(-0.2, -0.4, 0.8)), W(probe, V(-0.4, VENT.y - 1.5, 0.6)), W(probe, V(-0.4, 1, 2.6)), pied.clone().add(V(-0.8, 0, 0.4)), V(-38, 0.3, 21), V(-38.4, 0.3, 18), pB('D4', 1.2)], wireMat(0xe8c130), 0.1, 90);
+wire(W(roomT, V(-0.127, 0, 0)), pB('V33', 0.9), 0xe74c3c, 0.8, 0.035);
+wire(W(roomT, V(0.127, 0, 0)), pB('GND', 0.9), 0x222222, 0.7, 0.035);
+/* alimentations : ESP32 et portable sur la multiprise */
+const usbA = W(esp, V(-2.75, 0.22, 0));
+cable([usbA, usbA.clone().add(V(-2, -0.9, 0)), V(-50, 0.25, 12), V(-92, 0.25, 8), V(-96, 0.25, -50), W(strip, V(-10, 4, 2.6))], M.cableBlack, 0.18);
+cable([W(lap.g, V(-LP.w / 2 - 0.1, 0.9, 4)), W(lap.g, V(-LP.w / 2 - 3, -LPY + 0.3, 4)), V(-100, 0.3, -20), V(-90, 0.3, -56), W(strip, V(-2, 4, 2.6))], M.cableBlack, 0.3);
 
 /* ---------------------------------------------------------------------
-   6.5 Réseau en place : routeur, switch, serveur, poste du support
+   6.4 Réseau en place : routeur, switch, borne Wi-Fi, serveur, poste de Yaksan ; ALCASAR (V2)
    --------------------------------------------------------------------- */
 const rtFront = canvasTex(1760, 176, (g, w, h) => {
   g.fillStyle = '#23272c'; g.fillRect(0, 0, w, h);
@@ -857,77 +790,92 @@ function makeRouter() {
   const g = new THREE.Group();
   mesh(RB(44, 4.4, 30, 0.25), std(0x2a2e33, 0.5, 0.6), 0, 2.2, 0, g);
   front(44, 4.4, std(0xffffff, 0.45, 0.5, { map: rtFront.tex }), 0, 2.2, 15.05, g);
-  const led = mesh(new THREE.PlaneGeometry(0.4, 0.4), glowBasic(0x2bff6a, 3), 19, 3.2, 15.1, g, false);
+  mesh(new THREE.PlaneGeometry(0.4, 0.4), glowBasic(0x2bff6a, 3), 19, 3.2, 15.1, g, false);
   for (const x of [-20, 20]) for (const z of [-13, 13]) mesh(new THREE.CylinderGeometry(0.8, 0.8, 0.3, 12), M.rubber, x, 0.15, z, g);
   return g;
 }
+const alcTex = canvasTex(256, 900, (g, w, h) => { g.fillStyle = '#202327'; g.fillRect(0, 0, w, h); g.save(); g.translate(150, h - 40); g.rotate(-Math.PI / 2); g.fillStyle = '#9fd0ff'; g.font = 'bold 54px Arial'; g.fillText('ALCASAR', 0, 0); g.fillStyle = '#8a96a0'; g.font = '30px Arial'; g.fillText('portail captif', 0, 50); g.restore(); });
 const rt = makeRouter(); rt.position.set(22, 0, -60); scene.add(rt);
 const sw = makeSwitch(); sw.position.set(22, 4.7, -57); scene.add(sw);
+const ap = makeAP(); ap.position.set(-22, 0, -56); scene.add(ap);
 const server = makeServer(); server.position.set(92, 0, -42); scene.add(server);
+const alc = makeSFF(); alc.position.set(60, 0, -58); scene.add(alc);
+front(8.4, 29, std(0xffffff, 0.5, 0.3, { map: alcTex.tex }), 4.52, 15, 0, alc).rotation.y = Math.PI / 2;
 const monT = makeMonitor(); monT.g.position.set(58, 0, 4); monT.g.rotation.y = -0.18; scene.add(monT.g);
 const sff = makeSFF(); sff.position.set(96, 0, 2); sff.rotation.y = -0.18; scene.add(sff);
 mesh(RB(42, 1.6, 14, 0.5), std(0x1b1d20, 0.6), 58, 0.8, 28, scene).rotation.y = -0.18;
 scene.updateMatrixWorld(true);
 
-const P_SRV = 0, P_RT = 2, P_PC = 4, P_TEC = 6;
+const P_SRV = 0, P_RT = 2, P_PC = 4, P_TEC = 6, P_AP = 8, P_ALC = 10;
 const swP = i => W(sw, swPortLocal(i));
 const out = (p, dz = 2.5) => p.clone().add(V(0, 0, dz));
 function plug(p) { mesh(BOX(1.3, 1.1, 1.8), new THREE.MeshPhysicalMaterial({ color: 0xdfe8ee, transparent: true, opacity: 0.6, roughness: 0.1 }), p.x, p.y, p.z + 0.9); }
 const rtPort = W(rt, V(10.3, 2.4, 15.2));
+const lapPort = W(lap.g, V(-LP.w / 2 - 0.2, 0.9, -5));
 const cSrv = cable([swP(P_SRV), out(swP(P_SRV)), V(14, 0.3, -38), V(50, 0.3, -36), V(78, 0.3, -36), V(81.5, 4, -40), W(server, V(-10.1, 8, 2))], M.cableBlue);
 const cRt = cable([swP(P_RT), out(swP(P_RT), 3), V(swP(P_RT).x + 6, 4, -40), out(rtPort, 4), rtPort], M.cableGray, 0.28);
-const cPC = cable([swP(P_PC), out(swP(P_PC), 3), V(4, 0.3, -38), V(-40, 0.3, -42), V(-76, 0.3, -50), V(-92, 0.3, -50), W(tower, V(3, 8, -TW.d / 2 - 0.5)), W(tower, V(3, 10, -TW.d / 2))], M.cableBlue);
+const cPC = cable([swP(P_PC), out(swP(P_PC), 3), V(4, 0.3, -38), V(-40, 0.3, -36), V(-92, 0.3, -30), V(-94, 0.3, -17), lapPort.clone().add(V(-3, -LPY + 0.3, 0)), lapPort.clone().add(V(-1.2, 0, 0)), lapPort], M.cableBlue);
 const cTec = cable([swP(P_TEC), out(swP(P_TEC), 3), V(40, 0.3, -38), V(76, 0.3, -24), V(90, 0.3, -14), W(sff, V(0, 10, -14.2))], M.cableYellow);
-for (const i of [P_SRV, P_RT, P_PC, P_TEC]) { plug(swP(i)); portLEDs[i].used = true; }
+const cAP = cable([swP(P_AP), out(swP(P_AP), 3), V(30, 0.3, -40), V(-6, 0.3, -44), V(-16, 0.3, -50), W(ap, V(4, 1.4, 7))], M.cableGray, 0.26);
+const cAlc = cable([swP(P_ALC), out(swP(P_ALC), 3), V(40, 0.3, -40), V(54, 0.3, -42), W(alc, V(-4.6, 6, 10))], M.cableBlue);
+for (const i of [P_SRV, P_RT, P_PC, P_TEC, P_AP, P_ALC]) { plug(swP(i)); portLEDs[i].used = true; }
 
 /* =====================================================================
    7. Chemins des messages
    ===================================================================== */
 const paths = {};
 function addPath(name, curve, o = {}) { paths[name] = { curve, len: curve.getLength(), size: 1.1, speed: 75, ...o }; }
-addPath('usb', reverseCurve(cUSB), { speed: 30, size: 0.45 });     // tour → boîtier
-addPath('pcLink', reverseCurve(cPC), { port: P_PC });               // tour → switch
+function airCurve(name, a, b, lift) { return new THREE.CatmullRomCurve3([a, a.clone().lerp(b, 0.5).add(V(0, lift, 0)), b]); }
+const ESPANT = W(esp, V(2.2, 0.4, 0)), APTOP = W(ap, V(0, 14, -6)), LAPTOP = W(lap.pivot, V(0, LH + 0.5, 0));
+addPath('air', airCurve('air', VENT, HEADP, 0.2), { speed: 11, size: 0.32 });
+addPath('air2', airCurve('air2', VENT.clone().add(V(0, 0.3, 2.5)), HEADP.clone().add(V(0.8, 0.6, 2)), 0.5), { speed: 9, size: 0.26 });
+addPath('air3', airCurve('air3', VENT.clone().add(V(0, -0.2, -2.5)), HEADP.clone().add(V(0.6, -0.2, -2)), 0.4), { speed: 10, size: 0.26 });
+addPath('espWifi', airCurve('ew', ESPANT, APTOP, 40), { wifi: true, speed: 90, size: 0.7 });
+addPath('lapWifi', airCurve('lw', LAPTOP, APTOP, 22), { wifi: true, speed: 90, size: 0.7 });
+addPath('lapLink', reverseCurve(cPC), { port: P_PC });
 addPath('srvLink', cSrv, { port: P_SRV, srv: true });
 addPath('rtLink', cRt, { port: P_RT });
 addPath('tecLink', cTec, { port: P_TEC });
-addPath('pwrBox', reverseCurve(cPwrBox), { speed: 60, size: 0.6 });
-for (const k in wires) addPath('w_' + k, wires[k], { speed: 14, size: 0.2 });
-const TO_SRV = ['pcLink', 'srvLink'], SRV_TO_TEC = ['-srvLink', 'tecLink'], TEC_TO_SRV = ['-tecLink', 'srvLink'];
-const TO_RT = ['pcLink', 'rtLink'], FROM_RT = ['-rtLink', '-pcLink'];
+addPath('apLink', reverseCurve(cAP), { port: P_AP });
+addPath('alcLink', cAlc, { port: P_ALC });
+addPath('w_vent', reverseCurve(wires.vent), { speed: 16, size: 0.22 });
+addPath('w_temp', reverseCurve(wires.temp), { speed: 16, size: 0.22 });
+const PC_TO_SRV = ['lapLink', 'srvLink'], ESP_TO_SRV = ['espWifi', 'apLink', 'srvLink'];
+const SRV_TO_TEC = ['-srvLink', 'tecLink'], TEC_TO_SRV = ['-tecLink', 'srvLink'];
+const PC_TO_RT = ['lapLink', 'rtLink'], RT_TO_PC = ['-rtLink', '-lapLink'];
+const PC_TO_ALC = ['lapLink', 'alcLink'], ALC_TO_PC = ['-alcLink', '-lapLink'];
 
-Object.assign(COL, { hb: 0xf2f4f6, inst: 0xffd84a, https: 0x4aa8ff, net: 0x3ddc84, sens: 0xc18cff, err: 0xff5a4d });
-Object.assign(CSS, { hb: '#f2f4f6', inst: '#ffd84a', https: '#4aa8ff', net: '#3ddc84', sens: '#c18cff', err: '#ff5a4d' });
+Object.assign(COL, { air: 0xff7a3d, mes: 0xc18cff, https: 0x4aa8ff, net: 0x3ddc84, err: 0xff5a4d, lum: 0xfff2b0, wifi: 0x9fd0ff });
+Object.assign(CSS, { air: '#ff7a3d', mes: '#c18cff', https: '#4aa8ff', net: '#3ddc84', err: '#ff5a4d', lum: '#fff2b0', wifi: '#9fd0ff' });
 
 /* =====================================================================
    8. Étiquettes 3D
    ===================================================================== */
-const labelGroups = { overview: [], boitier: [] };
+const labelGroups = { overview: [], banc: [] };
 function label(group, pos, title, sub, cls = '') {
   const d = document.createElement('div'); d.className = 'lab ' + cls;
   d.innerHTML = `<b>${title}</b>${sub ? `<span>${sub}</span>` : ''}`;
   const o = new CSS2DObject(d); o.position.copy(pos); scene.add(o); labelGroups[group].push(o); return o;
 }
-label('overview', W(tower, V(0, TW.h + 5, 0)), 'Tour du PC de l\'agent', 'Windows 11 · agent PowerShell');
-label('overview', W(box, V(0, 11, 0)), 'Boîtier témoin', 'ESP32 · horloge · carte SD · réserve 1 F');
-label('overview', W(mon.g, V(0, 48, 0)), 'Écran de l\'agent', 'mise à jour obligatoire');
+label('overview', W(lap.pivot, V(0, LH + 4, 0)), 'Portable rendu', 'Windows · script en compte utilisateur');
+label('overview', V(-44, 12, 14), 'Station de contrôle', 'ESP32 · sonde d\'air · température de la pièce');
+label('overview', W(ap, V(0, 20, 0)), 'Borne Wi-Fi', 'réseau en place');
 label('overview', V(22, 16, -62), 'Routeur et switch', 'réseau en place · DHCP · DNS · NTP');
-label('overview', V(92, 50, -42), 'Serveur Ubuntu', 'API HTTPS · SQLite · page des causes');
-label('overview', V(58, 50, 4), 'Poste du support', 'page des causes des incidents');
-label('boitier', W(strip, V(0, 9, 0)), 'Multiprise', 'PC et boîtier sur la même prise', 'small');
-label('boitier', W(esp, V(0.9, 0.7, 0)), 'ESP32 DevKit', 'relié au PC en USB série', 'small');
-label('boitier', W(rtc, V(0, 0.6, 0)), 'Horloge DS3231', 'garde l\'heure exacte · I²C', 'small');
-label('boitier', W(sd, V(0, 0.6, 0)), 'Carte microSD', 'le récit · SPI', 'small');
-label('boitier', W(box, V(-6.2, 3.6, -3.4)), 'Supercondensateur 1 F', 'quelques secondes pour écrire', 'small');
-label('boitier', W(box, V(-3.8, BX.h + 2.2, 4.4)), 'LED vert · orange · rouge', 'état du boîtier', 'small');
-label('boitier', W(capP, V(0, 1.6, 0)), 'Capteur du voyant d\'alimentation', 'photocapteur collé · D34', 'small');
-label('boitier', W(capD, V(0, 1.6, 0)), 'Capteur du voyant disque', 'photocapteur collé · D35', 'small');
-label('boitier', W(tower, V(2.2, 27.6, TFRONT + 1)), 'USB série', 'battement, messages, récit', 'small');
+label('overview', W(alc, V(0, 36, 0)), 'ALCASAR (V2)', 'portail captif');
+label('overview', V(92, 50, -42), 'Serveur Ubuntu', 'SQLite · journal chaîné · API HTTPS');
+label('overview', V(58, 50, 4), 'Poste de Yaksan', 'tableau de bord des fiches');
+label('banc', W(lap.g, V(LP.w / 2 + 1, 3.5, -3)), 'Grille d\'aération', 'sortie de l\'air chaud', 'small');
+label('banc', W(head, V(-2, 2.2, 0)), 'Sonde d\'air', 'anémomètre thermique + sonde inox', 'small');
+label('banc', W(esp, V(0.9, 0.9, 0)), 'ESP32 DevKit', 'mesure, horodate, envoie en Wi-Fi', 'small');
+label('banc', W(roomT, V(0, 1.6, 0)), 'Température de la pièce', 'DS18B20 · 1-Wire', 'small');
+label('banc', W(lap.g, V(-LP.w / 2 - 1, 3, -5)), 'Câble Ethernet', 'test du réseau filaire', 'small');
+label('banc', W(lap.g, V(-6, 0.2, LP.d / 2 + 2)), 'Support réglable', 'la grille face à la sonde', 'small');
 function mkRead(pos, col) { const d = document.createElement('div'); d.className = 'read'; d.style.borderLeftColor = col; const o = new CSS2DObject(d); o.position.copy(pos); o.visible = false; scene.add(o); return o; }
-const readSens = mkRead(W(tower, V(0, 41, TFRONT + 2)), '#c18cff');
-const readBox = mkRead(W(box, V(9, 9, 0)), '#f2f4f6');
-const readPC = mkRead(W(tower, V(-2, 18, TFRONT + 3)), '#ffd84a');
+const readProbe = mkRead(W(head, V(-5, 6.5, 0)), '#ff7a3d');
+const readEsp = mkRead(W(esp, V(0, 6, 3)), '#c18cff');
+const readPC = mkRead(W(lap.pivot, V(-LP.w / 2 - 4, LH * 0.6, 0)), '#ffd84a');
 const readSrv = mkRead(V(92, 62, -42), '#4aa8ff');
-const READS = [readSens, readBox, readPC, readSrv];
+const READS = [readProbe, readEsp, readPC, readSrv];
 
 let showLabels = true, labelMode = 'overview';
 function refreshLabels() {
@@ -951,40 +899,50 @@ function beep(freq = 2400, dur = 0.08, vol = 0.04) {
 /* =====================================================================
    10. État du monde et écrans
    ===================================================================== */
-/* pc : 'on' (allumé), 'fige' (figé : voyant allumé, disque immobile, plus de battement), 'off' (éteint) ; secteur : courant présent */
-const world = { pc: 'on', secteur: true, srvAct: -9, incidents: [], recit: [], courbe: false };
+/* vue du tableau de bord : 'fiches', 'courbe' (physique), 'journal' (chaîne des fiches) */
+const world = { srvAct: -9, fiches: [], vue: 'fiches', chaine: null, air: 0 };
 
-function drawAgent(mode, o = {}) {
-  mon.screen.redraw((g, w, h) => {
+function drawLap(mode, o = {}) {
+  lap.screen.redraw((g, w, h) => {
     if (mode === 'noir') { g.fillStyle = '#000'; g.fillRect(0, 0, w, h); return; }
-    if (mode === 'boot') { g.fillStyle = '#000'; g.fillRect(0, 0, w, h); g.fillStyle = '#3d8bd9'; for (let i = 0; i < 4; i++) { g.fillRect(w / 2 - 70 + (i % 2) * 74, h / 2 - 110 + Math.floor(i / 2) * 74, 66, 66); } g.fillStyle = '#ccc'; g.font = `30px ${FONT}`; g.fillText('Redémarrage…', w / 2 - 95, h / 2 + 90); return; }
+    if (mode === 'mire') { g.fillStyle = o.c || '#fff'; g.fillRect(0, 0, w, h); return; }
     drawScreenBg(g, w, h, '#2b5f8a', '#173a5c');
-    g.fillStyle = 'rgba(0,0,0,.35)'; g.fillRect(0, h - 50, w, 50);
-    g.fillStyle = '#d6e4ee'; g.font = `24px ${FONT}`; g.fillText(o.heure || '10:02', w - 100, h - 16);
-    const x = 140, y = 90, ww = w - 280, hh = h - 220;
-    if (mode === 'bureau') {
-      g.fillStyle = '#f4f7f9'; g.fillRect(x, y, ww, hh); g.fillStyle = '#1d5a86'; g.fillRect(x, y, ww, 54);
-      g.fillStyle = '#fff'; g.font = `bold 28px ${FONT}`; g.fillText('Dossier en cours.docx', x + 20, y + 37);
-      for (let i = 0; i < 8; i++) { g.fillStyle = '#c9d3da'; g.fillRect(x + 36, y + 96 + i * 40, ww * (i % 3 ? 0.78 : 0.55), 16); }
+    g.fillStyle = 'rgba(0,0,0,.35)'; g.fillRect(0, h - 46, w, 46);
+    g.fillStyle = '#d6e4ee'; g.font = `22px ${FONT}`; g.fillText(o.heure || '09:12', w - 90, h - 15);
+    const x = 70, y = 50, ww = w - 140, hh = h - 130;
+    if (mode === 'bureau') return;
+    if (mode === 'charge' || mode === 'reseau') {
+      g.fillStyle = '#0c1824'; g.fillRect(x, y, ww, hh); g.fillStyle = '#1d5a86'; g.fillRect(x, y, ww, 50);
+      g.fillStyle = '#fff'; g.font = `bold 26px ${FONT}`; g.fillText('Contrôle de restitution · PC-27 · compte utilisateur', x + 18, y + 34);
+      g.font = `24px ${MONO}`;
+      if (mode === 'charge') {
+        g.fillStyle = '#9fd0ff'; g.fillText('> charge processeur fixe : ' + Math.round(o.t || 0) + ' s / 300 s', x + 22, y + 100);
+        g.fillStyle = '#1c2a34'; g.fillRect(x + 22, y + 122, ww - 44, 30);
+        g.fillStyle = '#ff7a3d'; g.fillRect(x + 22, y + 122, (ww - 44) * Math.min(1, (o.t || 0) / 300), 30);
+        g.fillStyle = '#e6edf3'; g.fillText('processeur occupé : 100 %', x + 22, y + 200);
+        g.fillStyle = (o.perf ?? 98) < 85 ? '#ff8a80' : '#9fe0b0';
+        g.fillText(`% performance du processeur : ${o.perf ?? 98} %`, x + 22, y + 240);
+        g.fillStyle = '#8a96a0'; g.font = `20px ${MONO}`; g.fillText('(sous 85 % : il ralentit pour ne pas chauffer)', x + 22, y + 276);
+      } else {
+        (o.lignes || []).forEach(([t, c], i) => { g.fillStyle = c || '#e6edf3'; g.fillText(t, x + 22, y + 96 + i * 38); });
+      }
       return;
     }
-    if (mode === 'install' || mode === 'fige') {
-      g.fillStyle = '#f4f7f9'; g.fillRect(x, y, ww, hh); g.fillStyle = '#c98a00'; g.fillRect(x, y, ww, 54);
-      g.fillStyle = '#fff'; g.font = `bold 28px ${FONT}`; g.fillText('Mise à jour obligatoire', x + 20, y + 37);
-      g.fillStyle = '#13222c'; g.font = `bold 34px ${FONT}`; g.fillText('Logiciel métier 4.2', x + 40, y + 120);
-      g.font = `26px ${FONT}`; g.fillStyle = '#56656f'; g.fillText(mode === 'fige' ? 'Ne répond pas' : 'Installation en cours…', x + 40, y + 168);
-      g.fillStyle = '#e1e7ea'; g.fillRect(x + 40, y + 210, ww - 80, 34);
-      g.fillStyle = mode === 'fige' ? '#9aa6b0' : '#2e8b57'; g.fillRect(x + 40, y + 210, (ww - 80) * (o.pct || 0) / 100, 34);
-      g.fillStyle = '#13222c'; g.font = `bold 26px ${FONT}`; g.fillText(`${Math.round(o.pct || 0)} %`, x + 40, y + 290);
-      if (o.v2) { g.fillStyle = '#c98a00'; rr(g, x + 40, y + 320, ww - 80, 60, 12); g.fill(); g.fillStyle = '#fff'; g.font = `bold 26px ${FONT}`; g.fillText('Ne pas éteindre le PC pendant l\'installation', x + 62, y + 359); }
-      if (mode === 'fige') { g.fillStyle = 'rgba(255,255,255,.55)'; g.fillRect(x, y, ww, hh); g.fillStyle = '#c2382e'; g.font = `bold 30px ${FONT}`; g.fillText('(Pas de réponse)', x + ww - 290, y + 37); }
-      return;
-    }
-    if (mode === 'analyse') {
-      g.fillStyle = '#0c2348'; g.fillRect(x, y, ww, hh); g.fillStyle = '#1d5a86'; g.fillRect(x, y, ww, 54);
-      g.fillStyle = '#fff'; g.font = `bold 28px ${FONT}`; g.fillText('Analyse de l\'incident (lecture seule)', x + 20, y + 37);
-      g.font = `25px ${MONO}`;
-      (o.lignes || []).forEach(([t, c], i) => { g.fillStyle = c || '#e6edf3'; g.fillText(t, x + 24, y + 100 + i * 40); });
+    if (mode === 'portail') {
+      const e = o.etape || 0;
+      g.fillStyle = '#f4f7f9'; g.fillRect(x, y, ww, hh); g.fillStyle = '#dfe5ea'; g.fillRect(x, y, ww, 46);
+      g.fillStyle = '#13222c'; g.font = `22px ${MONO}`; g.fillText(e < 1 ? 'http://exemple.test' : e < 3 ? 'https://alcasar.labo/intercept' : 'http://exemple.test', x + 20, y + 31);
+      if (e === 0) { g.fillStyle = '#56656f'; g.font = `28px ${FONT}`; g.fillText('Chargement…', x + 40, y + 120); return; }
+      if (e < 3) {
+        g.fillStyle = '#1d5a86'; g.font = `bold 34px ${FONT}`; g.fillText('Portail captif · connexion', x + 40, y + 110);
+        g.fillStyle = '#fff'; g.strokeStyle = '#9aa6b0'; g.lineWidth = 2;
+        for (const [i, t] of [[0, e > 1 ? 'test.restitution' : 'Identifiant'], [1, e > 1 ? '••••••••' : 'Mot de passe']]) { g.fillRect(x + 40, y + 150 + i * 70, ww - 80, 50); g.strokeRect(x + 40, y + 150 + i * 70, ww - 80, 50); g.fillStyle = e > 1 ? '#13222c' : '#9aa6b0'; g.font = `24px ${FONT}`; g.fillText(t, x + 56, y + 184 + i * 70); g.fillStyle = '#fff'; }
+        g.fillStyle = '#1d5a86'; rr(g, x + 40, y + 300, 200, 50, 25); g.fill(); g.fillStyle = '#fff'; g.font = `bold 24px ${FONT}`; g.fillText('Se connecter', x + 66, y + 333);
+        return;
+      }
+      g.fillStyle = '#2e8b57'; g.font = `bold 34px ${FONT}`; g.fillText('Accès ouvert : page atteinte', x + 40, y + 120);
+      g.fillStyle = '#13222c'; g.font = `24px ${MONO}`;
+      ['DNS 14 ms · redirection 90 ms', 'page du portail 310 ms', 'authentification 420 ms', 'total 0,9 s (valeurs d\'exemple)'].forEach((t, i) => g.fillText(t, x + 40, y + 180 + i * 40));
     }
   });
 }
@@ -992,53 +950,69 @@ function drawTech() {
   monT.screen.redraw((g, w, h) => {
     g.fillStyle = '#f3f6f7'; g.fillRect(0, 0, w, h);
     g.fillStyle = '#2a3a4a'; g.fillRect(0, 0, w, 66);
-    g.fillStyle = '#fff'; g.font = `bold 30px ${FONT}`; g.fillText('Support · causes des incidents', 26, 44);
-    if (world.courbe) { drawCourbe(g, w, h); return; }
-    g.fillStyle = '#56656f'; g.font = `bold 22px ${FONT}`; g.fillText('Poste', 30, 110); g.fillText('Heure', 190, 110); g.fillText('Cause probable', 330, 110);
-    if (!world.incidents.length) { g.fillStyle = '#6c7a84'; g.font = `26px ${FONT}`; g.fillText('Aucun incident', 30, 160); }
-    world.incidents.forEach((t, i) => {
-      const y = 160 + i * 150;
-      g.fillStyle = t.flash ? '#fff4c2' : '#fff'; g.fillRect(16, y - 36, w - 32, 136);
-      g.fillStyle = '#13222c'; g.font = `bold 26px ${FONT}`; g.fillText(t.pc, 30, y); g.font = `24px ${FONT}`; g.fillText(t.h, 190, y);
-      g.fillStyle = t.col; g.font = `bold 26px ${FONT}`; g.fillText(t.cause, 330, y);
-      g.fillStyle = '#56656f'; g.font = `22px ${FONT}`; g.fillText(t.preuve, 330, y + 36); g.fillText('À faire : ' + t.faire, 330, y + 70);
+    g.fillStyle = '#fff'; g.font = `bold 30px ${FONT}`; g.fillText('Station de contrôle · fiches de restitution', 26, 44);
+    if (world.vue === 'courbe') { drawCourbe(g, w, h); return; }
+    if (world.vue === 'journal') { drawJournal(g, w, h); return; }
+    g.fillStyle = '#56656f'; g.font = `bold 22px ${FONT}`; ['PC', 'Refroidissement', 'Réseau', 'Écran (V2)'].forEach((t, i) => g.fillText(t, [30, 200, 640, 920][i], 110));
+    if (!world.fiches.length) { g.fillStyle = '#6c7a84'; g.font = `26px ${FONT}`; g.fillText('Aucune fiche pour l\'instant', 30, 160); }
+    world.fiches.forEach((f, i) => {
+      const y = 160 + i * 132;
+      g.fillStyle = f.flash ? '#fff4c2' : '#fff'; g.fillRect(16, y - 36, w - 32, 118);
+      g.fillStyle = '#13222c'; g.font = `bold 26px ${FONT}`; g.fillText(f.pc, 30, y); g.font = `20px ${FONT}`; g.fillStyle = '#56656f'; g.fillText(f.h, 30, y + 32);
+      const v = (t, c, xx) => { g.fillStyle = c; g.font = `bold 25px ${FONT}`; g.fillText(t, xx, y); };
+      v(f.th, f.thc, 200); v(f.re, f.rec, 640); v(f.ec, f.ecc, 920);
+      g.fillStyle = '#56656f'; g.font = `20px ${FONT}`; g.fillText(f.detail, 200, y + 32);
+      g.font = `18px ${MONO}`; g.fillText('empreinte ' + f.hash, 200, y + 62);
     });
   });
 }
-/* volet physique : décharge du supercondensateur (modèle linéaire à courant constant + points de mesure d'exemple) */
+/* volet physique : montée de ΔT et prédiction de la valeur finale à partir des premières minutes */
 function drawCourbe(g, w, h) {
-  const X0 = 110, Y0 = h - 90, LW = w - 180, LH = h - 230;
-  g.fillStyle = '#13222c'; g.font = `bold 26px ${FONT}`; g.fillText('Réserve d\'énergie : tension du supercondensateur', 30, 112);
-  g.strokeStyle = '#13222c'; g.lineWidth = 2; g.beginPath(); g.moveTo(X0, Y0 - LH); g.lineTo(X0, Y0); g.lineTo(X0 + LW, Y0); g.stroke();
-  const tx = t => X0 + t / 25 * LW, vy = v => Y0 - (v - 2.5) / 3 * LH;
+  const X0 = 110, Y0 = h - 90, LW = w - 180, LH2 = h - 240;
+  g.fillStyle = '#13222c'; g.font = `bold 26px ${FONT}`; g.fillText('Écart de température de l\'air soufflé : ΔT(t)', 30, 112);
+  g.strokeStyle = '#13222c'; g.lineWidth = 2; g.beginPath(); g.moveTo(X0, Y0 - LH2); g.lineTo(X0, Y0); g.lineTo(X0 + LW, Y0); g.stroke();
+  const tx = t => X0 + t / 600 * LW, vy = v => Y0 - v / 25 * LH2;
   g.fillStyle = '#56656f'; g.font = `20px ${FONT}`;
-  for (const v of [3, 4, 5]) { g.fillText(v + ' V', X0 - 56, vy(v) + 6); g.fillStyle = '#e1e7ea'; g.fillRect(X0 + 1, vy(v), LW, 1); g.fillStyle = '#56656f'; }
-  for (const t of [0, 5, 10, 15, 20, 25]) g.fillText(t + ' s', tx(t) - 12, Y0 + 28);
-  g.strokeStyle = '#c2382e'; g.setLineDash([8, 6]); g.beginPath(); g.moveTo(X0, vy(3.3)); g.lineTo(X0 + LW, vy(3.3)); g.stroke(); g.setLineDash([]);
-  g.fillStyle = '#c2382e'; g.fillText('seuil de l\'ESP32 : 3,3 V', tx(16), vy(3.3) - 10);
-  g.strokeStyle = '#1d5a86'; g.lineWidth = 4; g.beginPath(); g.moveTo(tx(0), vy(5)); g.lineTo(tx(25), vy(5 - 0.1 * 25)); g.stroke();
-  g.fillStyle = '#1d5a86'; g.font = `bold 22px ${FONT}`; g.fillText('modèle : V = 5 − I·t / C', tx(1), vy(3.0));
+  for (const v of [5, 10, 15, 20]) { g.fillText(v + ' °C', X0 - 66, vy(v) + 6); g.fillStyle = '#e1e7ea'; g.fillRect(X0 + 1, vy(v), LW, 1); g.fillStyle = '#56656f'; }
+  for (const t of [0, 2, 4, 6, 8, 10]) g.fillText(t + ' min', tx(t * 60) - 18, Y0 + 28);
+  g.fillStyle = 'rgba(29,90,134,.10)'; g.fillRect(X0 + 1, Y0 - LH2, tx(180) - X0, LH2);
+  g.fillStyle = '#1d5a86'; g.fillText('mesuré (3 min)', X0 + 10, Y0 - LH2 + 24);
+  g.strokeStyle = '#c2382e'; g.setLineDash([8, 6]); g.beginPath(); g.moveTo(X0, vy(21)); g.lineTo(X0 + LW, vy(21)); g.stroke(); g.setLineDash([]);
+  g.fillStyle = '#c2382e'; g.fillText('valeur finale prédite : 21 °C', tx(330), vy(21) - 10);
+  g.strokeStyle = '#1d5a86'; g.lineWidth = 4; g.beginPath();
+  for (let t = 0; t <= 600; t += 5) { const v = 21 * (1 - Math.exp(-t / 95)); t ? g.lineTo(tx(t), vy(v)) : g.moveTo(tx(t), vy(v)); } g.stroke();
+  g.fillStyle = '#1d5a86'; g.font = `bold 22px ${FONT}`; g.fillText('modèle : ΔT = ΔT∞ · (1 − e^(−t/τ))', tx(250), vy(12));
   g.fillStyle = '#c98a00';
-  [[0, 5.0], [3, 4.66], [6, 4.37], [9, 4.06], [12, 3.78], [15, 3.49], [18, 3.22]].forEach(([t, v]) => { g.beginPath(); g.arc(tx(t), vy(v), 7, 0, 7); g.fill(); });
-  g.fillStyle = '#13222c'; g.font = `22px ${FONT}`; g.fillText('● mesures (valeurs d\'exemple)   ·   écriture sur la carte : < 1 s', 30, h - 26);
+  [[20, 3.9], [40, 7.2], [60, 9.9], [80, 12.4], [100, 13.9], [120, 15.4], [150, 17.0], [180, 17.9]].forEach(([t, v]) => { g.beginPath(); g.arc(tx(t), vy(v), 7, 0, 7); g.fill(); });
+  g.fillStyle = '#13222c'; g.font = `22px ${FONT}`; g.fillText('● mesures (valeurs d\'exemple)   ·   contrôle arrêté à 3 min au lieu de 10', 30, h - 26);
 }
-function incident(o) {
-  world.incidents.unshift({ ...o, flash: true }); drawTech();
-  setTimeout(() => { world.incidents.forEach(x => x.flash = false); drawTech(); }, 1200);
+/* le journal chaîné : chaque fiche contient l'empreinte de la précédente */
+function drawJournal(g, w, h) {
+  const L = world.chaine || [];
+  g.fillStyle = '#13222c'; g.font = `bold 26px ${FONT}`; g.fillText('Vérification du journal chaîné', 30, 112);
+  L.forEach((f, i) => {
+    const y = 150 + i * 118, bad = f.etat === 'casse', gone = f.etat === 'efface';
+    g.fillStyle = gone ? '#fbe3e1' : '#fff'; g.fillRect(30, y, w - 60, 96);
+    g.strokeStyle = bad || gone ? '#c2382e' : '#c9d3da'; g.lineWidth = bad || gone ? 4 : 2; g.strokeRect(30, y, w - 60, 96);
+    g.fillStyle = gone ? '#c2382e' : '#13222c'; g.font = `bold 24px ${FONT}`; g.fillText(gone ? 'Fiche n° ' + f.n + ' : effacée' : `Fiche n° ${f.n} · ${f.pc}`, 50, y + 36);
+    g.font = `20px ${MONO}`; g.fillStyle = '#56656f';
+    if (!gone) g.fillText(`précédente : ${f.prev}   ·   la sienne : ${f.hash}`, 50, y + 72);
+    if (bad) { g.fillStyle = '#c2382e'; g.font = `bold 22px ${FONT}`; g.fillText('✗ la précédente ne correspond pas', w - 420, y + 36); }
+    else if (!gone && f.ok) { g.fillStyle = '#2e8b57'; g.font = `bold 22px ${FONT}`; g.fillText('✓ chaîne intacte', w - 240, y + 36); }
+  });
+  if (L.some(f => f.etat === 'casse')) { g.fillStyle = '#c2382e'; g.font = `bold 28px ${FONT}`; g.fillText('Alerte : une fiche a été effacée entre n° 41 et n° 43', 30, h - 30); }
 }
-/* récit du boîtier : lignes horodatées affichées au-dessus de lui */
-function recit(ligne, col = '#e6edf3') {
-  world.recit.push([ligne, col]); if (world.recit.length > 4) world.recit.shift();
-  setRead(readBox, '<b>Récit du boîtier</b><br>' + world.recit.map(([t, c]) => `<span style="color:${c}">${t}</span>`).join('<br>'));
+function fiche(o) {
+  world.fiches.unshift({ ...o, flash: true }); if (world.fiches.length > 4) world.fiches.pop(); drawTech();
+  setTimeout(() => { world.fiches.forEach(x => x.flash = false); drawTech(); }, 1200);
 }
-function boxLed(v, o, r) { setLED('vert', v); setLED('orange', o); setLED('rouge', r); }
 
 function baseline(i) {
-  world.pc = 'on'; world.secteur = true; world.incidents = []; world.recit = []; world.courbe = false;
-  drawAgent('bureau'); drawTech(); boxLed(true, false, false);
+  world.fiches = []; world.vue = 'fiches'; world.chaine = null; world.air = 0;
+  drawLap('bureau'); drawTech();
   for (const r of READS) { r.userData.on = false; r.visible = false; }
-  tower.userData.button.position.z = TFRONT + 0.3;
-  stripLed.material.color.setRGB(1, 0.35, 0.16).multiplyScalar(2);
+  papier.visible = false; papier.scale.set(1, 1, 1);
+  lux.visible = false; lux.position.copy(ZONES[0]);
 }
 
 /* =====================================================================
@@ -1051,210 +1025,224 @@ function flyTo(pos, target, dur = 1.8) {
 }
 const cam = { k: 1, dur: 1 };
 const srv = html => setRead(readSrv, html);
-/* battement : chaque seconde, le PC envoie « je suis vivant » au boîtier */
-async function battements(n = Infinity) {
-  for (let i = 0; i < n; i++) { if (world.pc === 'on') go('usb', { kind: 'hb', size: 0.45 }).catch(() => {}); await sleep(1000); }
+/* souffle : de l'air chaud sort de la grille tant que world.air > 0 (plus de bouffées si le débit est fort) */
+async function souffle() {
+  const P = ['air', 'air2', 'air3'];
+  for (let i = 0; ; i++) {
+    if (world.air > 0) go(P[i % 3], { kind: 'air', noTrail: i % 2 === 1, speed: 6 + 7 * world.air }).catch(() => {});
+    await sleep(world.air > 0 ? 260 / Math.max(0.4, world.air) : 400);
+  }
 }
-async function capteurs() { await Promise.all([go('w_capP', { kind: 'sens', size: 0.22, noTrail: true }), go('w_capD', { kind: 'sens', size: 0.22, noTrail: true })]); }
-async function ecrireSD() { await Promise.all([go('w_sdSCK', { kind: 'sens', size: 0.16, noTrail: true }), go('w_sdMOSI', { kind: 'sens', size: 0.16, noTrail: true })]); }
-async function appuiBouton() {
-  const b = tower.userData.button;
-  await anim(0.25, k => { b.position.z = TFRONT + 0.3 - 0.35 * k; });
-  await sleep(1500);
-  await anim(0.25, k => { b.position.z = TFRONT - 0.05 + 0.35 * k; });
-}
-async function progression(de, a, dur) { await anim(dur, k => drawAgent('install', { pct: lerp(de, a, k), heure: '10:03' }), k => k); }
+async function mesures() { await Promise.all([go('w_vent', { kind: 'mes', noTrail: true }), go('w_temp', { kind: 'mes', noTrail: true })]); }
+async function chargeCPU(de, a, dur, perf) { await anim(dur, k => drawLap('charge', { t: lerp(de, a, k), perf: typeof perf === 'function' ? perf(k) : perf, heure: '09:14' }), k => k); }
 
 const CAM_ALL = [[-10, 160, 250], [0, 12, -20]];
-const CAM_POSTE = [[-40, 62, 92], [-82, 18, -8]];
-const CAM_BOX = [[-66, 30, 46], [-91, 10, 4]];
+const CAM_BANC = [[-24, 46, 58], [-56, 6, -6]];
+const CAM_VENT = [[-36, 13, 4], [-54, 4, -15]];
+const CAM_TECH = [[34, 62, 100], [58, 26, 0]];
+const CAM_ECRAN = [[-66, 30, 46], [-72, 14, -18]];
 
 const steps = [
 {
   title: 'Vue d\'ensemble',
-  text: `<p>La maquette. À gauche, le <b>poste Windows</b> d'un agent : la tour, l'écran, le clavier. Devant la tour, le petit <b>boîtier témoin</b> (ESP32), relié au PC en USB.</p>
-         <p>Au fond, le <b>réseau en place</b> : routeur et switch. À droite, le <b>serveur Ubuntu</b> et le <b>poste du support</b>.</p>
-         <p>Les points lumineux sont des <b>messages</b>. Tourne la scène à la souris, puis clique sur <b>Suivant</b>.</p>`,
+  text: `<p>La maquette. À gauche, la <b>station de contrôle</b> : un <b>portable rendu</b> posé sur son support, une <b>sonde d'air</b> devant sa grille d'aération, et un <b>ESP32</b>.</p>
+         <p>Au fond, le <b>réseau en place</b> : borne Wi-Fi, switch, routeur et, pour la V2, le portail <b>ALCASAR</b>. À droite, le <b>serveur Ubuntu</b> et le <b>poste de Yaksan</b>.</p>
+         <p>Les points lumineux sont des <b>messages</b>, et les points orange de l'<b>air chaud</b>. Tourne la scène à la souris, puis clique sur <b>Suivant</b>.</p>`,
   cam: CAM_ALL, labels: 'overview',
   async run() {
-    battements().catch(() => {});
-    while (true) { await sleep(5000); route(TO_SRV, { kind: 'https', size: 0.8 }).catch(() => {}); }
+    world.air = 0.6; souffle().catch(() => {});
+    while (true) { await sleep(4000); route(ESP_TO_SRV, { kind: 'mes', size: 0.7 }).catch(() => {}); }
   }
 },
 {
-  title: '1. Le boîtier témoin, de près',
-  text: `<p>Un petit boîtier en plexiglas, posé devant la tour. <b>On n'ouvre pas le PC.</b> Dedans, des modules du commerce :</p>
-         <p>• <b>ESP32</b> : le petit ordinateur, relié au PC par <b>USB série</b>.<br>• <b>Horloge DS3231</b> : l'heure exacte, même sans le PC.<br>• <b>Carte microSD</b> : le récit des événements.<br>• <b>Supercondensateur 1 F</b> : une réserve d'énergie pour écrire pendant une coupure.<br>• Deux <b>photocapteurs</b> collés sur les voyants de la tour : alimentation et disque.</p>
-         <p>Le boîtier a <b>son propre chargeur</b>, sur la même multiprise que le PC.</p>`,
-  cam: CAM_BOX, labels: 'boitier',
+  title: '1. Le banc, de près',
+  text: `<p>Un agent rend son portable. Yaksan le pose sur un <b>support réglable</b>, la <b>grille d'aération</b> face à la sonde.</p>
+         <p>• <b>Sonde d'air</b> : un anémomètre thermique (vitesse de l'air) et une sonde inox (température de l'air soufflé).<br>• <b>DS18B20</b> sur la plaque : la température de la pièce.<br>• <b>ESP32</b> : il lit les capteurs, met l'heure sur chaque mesure et envoie tout en <b>Wi-Fi</b>.</p>
+         <p>Rien n'est ouvert, rien n'est branché dans le PC à part le câble réseau. <b>Pas de mesure électrique.</b></p>`,
+  cam: CAM_BANC, labels: 'banc',
   async run() {
-    battements().catch(() => {});
-    while (true) {
-      await capteurs();
-      setRead(readSens, 'voyant alim. : <b>allumé</b> · voyant disque : <b>clignote</b>');
-      await sleep(1800);
+    world.air = 0.3; souffle().catch(() => {});
+    while (true) { await mesures(); setRead(readEsp, 'pièce : <b>21,0 °C</b> · air : <b>22,4 °C</b> · <b>0,3 m/s</b>'); await sleep(1500); }
+  }
+},
+{
+  title: '2. Le PC travaille fort, l\'ESP32 mesure l\'air',
+  text: `<p>Yaksan lance un script <b>PowerShell en compte utilisateur</b>, sans droits d'administrateur. Il fait travailler le processeur à fond pendant quelques minutes.</p>
+         <p>Le ventilateur accélère, <b>l'air sort plus chaud et plus vite</b>. L'ESP32 mesure chaque seconde. Le script lit un compteur Windows : le processeur <b>ralentit-il</b> pour ne pas chauffer ?</p>
+         <p>Ici, un PC propre du même modèle : c'est la <b>référence</b>.</p>`,
+  cam: CAM_VENT, labels: 'banc',
+  async run() {
+    souffle().catch(() => {});
+    drawLap('charge', { t: 0, perf: 99 });
+    setRead(readPC, 'script : <b>charge processeur fixe</b>');
+    const pr = chargeCPU(0, 300, 16, 98); pr.catch(() => {});
+    for (let k = 0; k <= 10; k++) {
+      world.air = 0.3 + 0.07 * k;
+      const ta = 22.4 + 1.96 * k, v = 0.3 + 0.13 * k;
+      await mesures();
+      setRead(readProbe, `air soufflé : <b>${ta.toFixed(1).replace('.', ',')} °C</b> · vitesse : <b>${v.toFixed(1).replace('.', ',')} m/s</b>`);
+      setRead(readEsp, 'pièce : <b>21,0 °C</b> · ΔT : <b>' + (ta - 21).toFixed(1).replace('.', ',') + ' °C</b>');
+      if (k % 3 === 0) route(ESP_TO_SRV, { kind: 'mes', size: 0.6, label: k ? 'MQTT · mesures horodatées' : '' }).catch(() => {});
+      await sleep(900);
     }
+    await pr;
+    setRead(readPC, '% performance : <b>98 %</b> · pas de ralentissement');
+    await route(PC_TO_SRV, { kind: 'https', label: 'HTTPS · compteurs du PC' });
+    srv('référence du modèle : <b>air 42 °C · 1,6 m/s</b>');
   }
 },
 {
-  title: '2. Le battement : « je suis vivant »',
-  text: `<p>Sur le PC, un petit programme <b>PowerShell</b> envoie un <b>battement</b> au boîtier, chaque seconde, par USB.</p>
-         <p>Tant que les battements arrivent, le PC répond. S'ils s'arrêtent alors que le voyant reste allumé, c'est que <b>le PC est figé</b>.</p>
-         <p>Le boîtier note tout dans son <b>récit</b>, avec l'heure de sa propre horloge.</p>`,
-  cam: CAM_POSTE, labels: 'overview',
+  title: '3. Un refroidissement dégradé',
+  text: `<p>Le portable de Sophie revient après trois ans. Sa grille est <b>encrassée</b>. Sur la maquette, on la bouche en partie avec une <b>feuille de papier</b>.</p>
+         <p>L'air sort <b>moins vite</b> et <b>plus chaud</b>. Le processeur <b>ralentit</b> pour ne pas surchauffer : le compteur Windows le montre.</p>
+         <p>Comparé à la référence du modèle, le verdict tombe : <b>à nettoyer</b>.</p>`,
+  cam: CAM_VENT, labels: 'banc',
   async run() {
-    recit('10:02:12 battement OK'); recit('10:02:13 battement OK');
-    for (let s = 14; ; s++) { if (world.pc === 'on') await go('usb', { kind: 'hb', size: 0.5, label: 'battement' }); recit(`10:02:${String(s % 60).padStart(2, '0')} battement OK`); await sleep(400); }
+    world.air = 0.95; souffle().catch(() => {});
+    papier.visible = true;
+    await anim(1.2, k => { papier.scale.z = 0.05 + 0.6 * k; papier.position.z = -3 - (1 - (0.05 + 0.6 * k)) * 5.7; });
+    shadowFrames = 3;
+    drawLap('charge', { t: 0, perf: 98 });
+    const pr = chargeCPU(0, 300, 14, k => Math.round(98 - 24 * k)); pr.catch(() => {});
+    for (let k = 0; k <= 10; k++) {
+      world.air = 0.95 - 0.04 * k;
+      const ta = 42 + k, v = 1.6 - 0.065 * k;
+      await mesures();
+      setRead(readProbe, `air soufflé : <b>${ta.toFixed(0)} °C</b> · vitesse : <b>${v.toFixed(2).replace('.', ',')} m/s</b>`);
+      if (k % 3 === 0) route(ESP_TO_SRV, { kind: 'mes', size: 0.6 }).catch(() => {});
+      await sleep(800);
+    }
+    await pr;
+    setRead(readPC, '% performance : <b>74 %</b> · <span style="color:#ff8a80">il ralentit</span>');
+    setRead(readEsp, 'air <b>52 °C</b> (réf. 42) · débit <b>−40 %</b>');
+    await route(PC_TO_SRV, { kind: 'https', label: 'HTTPS · compteurs du PC' });
+    srv('verdict refroidissement : <b style="color:#ff8a80">à nettoyer</b>');
   }
 },
 {
-  title: '3. Une installation commence',
-  text: `<p>L'outil de déploiement lance une <b>mise à jour obligatoire</b> d'un logiciel. La barre de progression avance.</p>
-         <p>Le programme du poste prévient le boîtier : <b>« installation en cours »</b>. Le boîtier l'écrit dans son récit.</p>`,
-  cam: CAM_POSTE, labels: 'overview',
+  title: '4. Le PC communique-t-il bien ?',
+  text: `<p>Le même script teste la <b>connectivité</b>, toujours sans droits : le câble réseau, le <b>Wi-Fi</b>, l'adresse reçue par <b>DHCP</b>, les noms trouvés par <b>DNS</b>, l'heure comparée au serveur <b>NTP</b>, et les <b>ports USB</b>.</p>
+         <p>Chaque test dit « bon » ou donne la panne trouvée. C'est le cœur du <b>C10</b> : Yaksan <b>exploite</b> le réseau en place, il ne le reconfigure pas.</p>`,
+  cam: [[-30, 100, 130], [-30, 10, -36]], labels: 'overview',
   async run() {
-    battements().catch(() => {});
-    recit('10:02:30 battement OK');
-    drawAgent('install', { pct: 0, heure: '10:02' });
-    await go('usb', { kind: 'inst', size: 0.6, label: '« installation en cours »', speed: 22 });
-    recit('10:02:31 installation en cours', '#ffd84a'); ecrireSD().catch(() => {});
-    setRead(readPC, 'outil de déploiement : <b>Logiciel métier 4.2</b>');
-    await progression(0, 61, 8);
-  }
-},
-{
-  title: '4. Le PC se fige, l\'agent force l\'arrêt',
-  text: `<p>À 61 %, le PC <b>ne répond plus</b>. Le voyant reste allumé, mais <b>les battements s'arrêtent</b> : le boîtier note « PC figé ».</p>
-         <p>L'agent attend, puis <b>maintient le bouton</b>. Le voyant s'éteint <b>sans message d'arrêt</b> de Windows : le boîtier note « arrêt au bouton ».</p>
-         <p>Windows, lui, n'a rien pu écrire.</p>`,
-  cam: CAM_POSTE, labels: 'overview',
-  async run() {
-    drawAgent('install', { pct: 61, heure: '10:03' });
-    recit('10:02:31 installation en cours', '#ffd84a');
-    for (let i = 0; i < 2; i++) { await go('usb', { kind: 'hb', size: 0.45 }); await sleep(500); }
-    world.pc = 'fige'; drawAgent('fige', { pct: 61, heure: '10:04' });
-    await sleep(2500);
-    await capteurs();
-    setRead(readSens, 'voyant alim. : <b>allumé</b> · plus de battement');
-    recit('10:04:02 plus de battement, voyant allumé', '#ff8a80'); recit('→ PC figé', '#ff8a80'); ecrireSD().catch(() => {});
-    await sleep(2500);
-    setRead(readPC, 'l\'agent <b>maintient le bouton</b> 5 s');
-    await appuiBouton();
-    world.pc = 'off'; drawAgent('noir'); beep(320, 0.25, 0.05);
-    rings(W(tower, V(0, 33.4, TFRONT + 1)), COL.err, 8, 3, 'cam', 1.0);
-    await capteurs();
-    setRead(readSens, 'voyant alim. : <b>éteint</b> · aucun message « j\'éteins »');
-    recit('10:06:10 voyant éteint sans message', '#ff8a80'); recit('→ arrêt au bouton (boîtier alimenté)', '#ff8a80'); ecrireSD().catch(() => {});
-    setRead(readPC, '');
-  }
-},
-{
-  title: '5. Au redémarrage, l\'enquêteur explique',
-  text: `<p>Le PC redémarre. Le programme du poste lit le <b>récit du boîtier</b> par USB, puis les <b>journaux de Windows</b> : arrêt inattendu (Kernel-Power 41) et échec de l'installation (MsiInstaller).</p>
-         <p>Il croise les heures. Conclusion : <b>installation interrompue par un arrêt au bouton, après un blocage du PC</b>. Si les sources ne sont pas d'accord, il écrit « non concluant ».</p>`,
-  cam: CAM_POSTE, labels: 'overview',
-  async run() {
-    world.pc = 'off'; drawAgent('noir'); await sleep(700);
-    world.pc = 'on'; drawAgent('boot'); await sleep(2000);
-    const L = [['> récit du boîtier…', '#9fd0ff']]; drawAgent('analyse', { lignes: L, heure: '10:08' });
-    await go('-usb', { kind: 'hb', size: 0.6, label: 'récit · 4 lignes', speed: 22 });
-    L.push(['  10:02 installation en cours', '#ffd84a'], ['  10:04 PC figé · 10:06 arrêt au bouton', '#ff8a80']); drawAgent('analyse', { lignes: L, heure: '10:08' });
-    await sleep(1200);
-    L.push(['> journaux de Windows…', '#9fd0ff'], ['  10:06 Kernel-Power 41 (arrêt inattendu)', '#e6edf3'], ['  10:06 MsiInstaller : échec', '#e6edf3']); drawAgent('analyse', { lignes: L, heure: '10:08' });
-    setRead(readPC, 'journaux : <b>Kernel-Power 41</b> · <b>MsiInstaller</b> échec');
-    await sleep(1600);
-    L.push(['> cause probable :', '#9fd0ff'], ['  installation interrompue par un arrêt', '#ffd84a'], ['  au bouton, après un blocage du PC', '#ffd84a']); drawAgent('analyse', { lignes: L, heure: '10:08' });
-    setRead(readPC, 'cause probable : <b>arrêt au bouton après blocage</b>');
-  }
-},
-{
-  title: '6. Le support lit la cause',
-  text: `<p>Le poste envoie la conclusion au <b>serveur Ubuntu</b> en HTTPS, avec un jeton. Si le serveur ne répond pas, elle attend dans une file.</p>
-         <p>Le technicien ouvre la page du support : <b>la cause probable, les preuves, et quoi faire</b>. Plus besoin de réparer à l'aveugle.</p>
-         <p>Le système est en <b>lecture seule</b> : il explique, il ne répare rien sur le poste.</p>`,
-  cam: [[30, 120, 170], [30, 15, -25]], labels: 'overview',
-  async run() {
-    battements().catch(() => {});
-    await route(TO_SRV, { kind: 'https', label: 'HTTPS · jeton · conclusion' });
-    srv('API : incident <b>PC-42</b> enregistré (SQLite)');
+    const L = [['> test de la connectivité…', '#9fd0ff']]; drawLap('reseau', { lignes: L });
+    const T = [
+      [PC_TO_RT, RT_TO_PC, 'DHCP · adresse ?', '10.10.0.27', '✓ câble : 1 Gbit/s · DHCP : 10.10.0.27'],
+      [PC_TO_RT, RT_TO_PC, 'DNS · srv.labo ?', '10.10.0.20', '✓ DNS : srv.labo → 10.10.0.20'],
+    ];
+    for (const [a, b, q, r, ligne] of T) {
+      await route(a, { kind: 'net', label: q, size: 0.9 }); await route(b, { kind: 'net', label: r, size: 0.9 });
+      L.push([ligne, '#9fe0b0']); drawLap('reseau', { lignes: L }); setRead(readPC, q.split(' ·')[0] + ' : <b>' + r + '</b>');
+    }
+    await go('lapWifi', { kind: 'wifi', label: 'Wi-Fi · association' }); await go('-lapWifi', { kind: 'wifi' });
+    L.push(['✓ Wi-Fi : associé, −58 dBm', '#9fe0b0']); drawLap('reseau', { lignes: L });
     await sleep(500);
-    await route(TEC_TO_SRV, { kind: 'https', label: 'GET /incidents', size: 0.8 });
-    await route(SRV_TO_TEC, { kind: 'https', size: 0.8 });
-    incident({ pc: 'PC-42', h: '10:06', cause: 'Installation interrompue', col: '#c2382e', preuve: 'arrêt au bouton après 2 min de blocage · MsiInstaller échec', faire: 'relancer, puis chercher pourquoi le PC se fige' });
-    flyTo([40, 55, 75], [58, 26, 0], 1.6);
+    L.push(['✓ ports USB : 3 sur 3 reconnus', '#9fe0b0'], ['✓ serveur joint en HTTPS', '#9fe0b0']); drawLap('reseau', { lignes: L });
+    await route(PC_TO_SRV, { kind: 'https', label: 'HTTPS · résultats des tests' });
+    setRead(readPC, 'connectivité : <b style="color:#9fe0b0">bon</b>');
   }
 },
 {
-  title: '7. Et si le courant est coupé ?',
-  text: `<p>Coupure : le boîtier perd <b>son alimentation au même instant</b> que le PC. C'est ce qui la distingue d'un arrêt au bouton, où le boîtier reste alimenté.</p>
-         <p>Sa <b>réserve d'énergie</b> (supercondensateur) lui laisse quelques secondes pour écrire « coupure de courant » et l'heure sur la carte.</p>`,
-  cam: [[-40, 70, 70], [-80, 8, -25]], labels: 'overview',
-  async run() {
-    battements().catch(() => {});
-    drawAgent('install', { pct: 34, heure: '14:20' });
-    await sleep(2200);
-    world.secteur = false; world.pc = 'off'; drawAgent('noir');
-    stripLed.material.color.setRGB(0.02, 0.01, 0.01);
-    rings(W(strip, V(0, 4, 0)), COL.err, 12, 3, 'y', 1.2); beep(220, 0.3, 0.05);
-    go('-pwrBox', { kind: 'err', size: 0.7, label: 'plus de courant', speed: 80 }).catch(() => {});
-    boxLed(false, false, true);
-    setRead(readSens, 'voyant alim. : <b>éteint</b> · alimentation du boîtier : <b>perdue</b>');
-    await sleep(900);
-    await ecrireSD();
-    recit('14:20:07 coupure de courant', '#ff8a80'); recit('(écrit sur la réserve d\'énergie)', '#ff8a80');
-    await sleep(2500);
-    boxLed(false, false, false);
-  }
-},
-{
-  title: '8. Le réseau en place (C10)',
-  text: `<p>Le routeur donne l'adresse du poste (<b>DHCP</b>), traduit le nom du serveur (<b>DNS</b>) et donne l'heure (<b>NTP</b>).</p>
-         <p>L'heure est essentielle : le récit du boîtier et les journaux de Windows doivent être <b>sur la même horloge</b> pour être croisés.</p>
-         <p>Yaksan <b>exploite</b> ce réseau : il observe, il vérifie, il ne reconfigure rien.</p>`,
+  title: '5. Une seule horloge pour tout le monde (NTP)',
+  text: `<p>Les mesures viennent de <b>deux appareils</b> : l'ESP32 (l'air) et le PC (le compteur du processeur). Pour les croiser seconde par seconde, ils doivent avoir <b>la même heure</b>.</p>
+         <p>Tous deux demandent l'heure au serveur <b>NTP</b> du réseau en place. Le serveur mesure l'<b>écart d'horloge</b> restant : quelques millisecondes.</p>`,
   cam: [[-20, 110, 150], [-20, 10, -40]], labels: 'overview',
   async run() {
-    const Q = [['DHCP · adresse ?', '10.10.0.42'], ['DNS · srv.labo ?', '10.10.0.20'], ['NTP · heure ?', '10:06:10.004']];
-    for (const [q, r] of Q) {
-      await route(TO_RT, { kind: 'net', label: q, size: 0.9 });
-      await route(FROM_RT, { kind: 'net', label: r, size: 0.9 });
-      setRead(readPC, `${q.split(' ·')[0]} : <b>${r}</b>`);
-      await sleep(400);
+    await Promise.all([
+      route(['espWifi', 'apLink', 'rtLink'], { kind: 'net', label: 'NTP · heure ?', size: 0.8 }).then(() => route(['-rtLink', '-apLink', '-espWifi'], { kind: 'net', label: '09:14:07.512', size: 0.8 })),
+      route(PC_TO_RT, { kind: 'net', label: 'NTP · heure ?', size: 0.8 }).then(() => route(RT_TO_PC, { kind: 'net', label: '09:14:07.513', size: 0.8 })),
+    ]);
+    setRead(readEsp, 'ESP32 : <b>09:14:07.512</b>'); setRead(readPC, 'PC : <b>09:14:07.513</b>');
+    srv('écart d\'horloge mesuré : <b>1 ms</b> · séries alignées');
+  }
+},
+{
+  title: '6. La fiche, scellée dans le journal',
+  text: `<p>Le serveur assemble la <b>fiche de restitution</b> : quel PC, quand, rendu par qui (personne fictive sur la maquette), et les verdicts.</p>
+         <p>La fiche entre dans un <b>journal chaîné</b> : elle contient l'<b>empreinte</b> (SHA-256) de la fiche précédente. Yaksan la lit sur son <b>tableau de bord</b>.</p>
+         <p>La station est en <b>lecture seule</b> : elle mesure et donne un avis, elle ne change aucun réglage du PC.</p>`,
+  cam: CAM_TECH, labels: 'overview',
+  async run() {
+    srv('API : fiche <b>n° 43</b> · empreinte <b>9c41…e07a</b>');
+    await sleep(600);
+    await route(TEC_TO_SRV, { kind: 'https', label: 'GET /fiches', size: 0.8 });
+    await route(SRV_TO_TEC, { kind: 'https', size: 0.8 });
+    fiche({ pc: 'PC-21', h: 'lun. 16:40', th: 'bon', thc: '#2e8b57', re: 'bon', rec: '#2e8b57', ec: 'bon', ecc: '#2e8b57', detail: 'air 41 °C · 1,7 m/s · performance 97 %', hash: '5b0d…11c3' });
+    await sleep(900);
+    fiche({ pc: 'PC-27 · Sophie', h: 'mar. 09:20', th: 'à nettoyer', thc: '#c2382e', re: 'bon', rec: '#2e8b57', ec: '−15 % · bon', ecc: '#2e8b57', detail: 'air 52 °C (réf. 42) · débit −40 % · performance 74 %', hash: '9c41…e07a' });
+  }
+},
+{
+  title: '7. Une fiche effacée ? Ça se voit.',
+  text: `<p>La question de sécurité de Yaksan : <b>« quelqu'un a-t-il effacé ou modifié ce qui s'est passé ? »</b></p>
+         <p>Démonstration : on supprime la fiche n° 42 directement dans la base. L'outil de vérification parcourt la chaîne : la fiche n° 43 annonce une précédente qui <b>n'existe plus</b>.</p>
+         <p>La dernière empreinte est aussi gardée <b>hors du serveur</b>, pour qu'on ne puisse pas tout recalculer en douce.</p>`,
+  cam: CAM_TECH, labels: 'overview',
+  async run() {
+    world.vue = 'journal';
+    world.chaine = [{ n: 41, pc: 'PC-14', prev: '77ae…02f1', hash: '3f9b…a6d2', ok: true }, { n: 42, pc: 'PC-21', prev: '3f9b…a6d2', hash: '5b0d…11c3', ok: true }, { n: 43, pc: 'PC-27', prev: '5b0d…11c3', hash: '9c41…e07a', ok: true }];
+    drawTech(); await sleep(2200);
+    srv('<span style="color:#ff8a80">DELETE fiche n° 42 (essai)</span>');
+    world.chaine = [world.chaine[0], { n: 42, etat: 'efface' }, { ...world.chaine[2], prev: '5b0d…11c3', ok: false, etat: 'casse' }];
+    await route(TEC_TO_SRV, { kind: 'https', label: 'vérifier la chaîne', size: 0.8 });
+    await route(SRV_TO_TEC, { kind: 'err', size: 0.8 });
+    drawTech(); beep(330, 0.25, 0.05);
+    srv('vérification : <b style="color:#ff8a80">ligne effacée détectée</b>');
+  }
+},
+{
+  title: '8. Le volet physique : prédire la fin, contrôler plus vite',
+  text: `<p>L'air emporte la chaleur : <b>P = ρ · c<sub>p</sub> · Q · ΔT</b>, avec Q le débit d'air. À charge fixe, Q · ΔT reste constant tant que le processeur ne ralentit pas.</p>
+         <p>ΔT monte en suivant <b>ΔT = ΔT∞ · (1 − e<sup>−t/τ</sup>)</b>. En ajustant les <b>3 premières minutes</b>, on prédit la valeur finale : le contrôle est plus court.</p>
+         <p>On <b>confronte</b> ces modèles aux mesures, avec leurs incertitudes. Les valeurs à l'écran sont des exemples.</p>`,
+  cam: CAM_TECH, labels: 'overview',
+  async run() { world.vue = 'courbe'; drawTech(); }
+},
+{
+  title: '9. V2 : la lumière de l\'écran',
+  text: `<p>En V2, la station contrôle aussi l'<b>écran</b>. Le PC affiche du <b>blanc</b>, puis du <b>noir</b>.</p>
+         <p>Un capteur de lumière, dans un <b>cache noir</b> contre l'écran, mesure <b>5 zones</b> : le centre et les quatre coins. On en tire la luminosité et l'<b>uniformité</b>.</p>
+         <p>On compare avec la mesure faite à la <b>remise</b> du même PC : ici, −15 %, verdict « bon ».</p>`,
+  cam: CAM_ECRAN, labels: 'banc',
+  async run() {
+    drawLap('mire', { c: '#ffffff' }); lux.visible = true; shadowFrames = 3;
+    const vals = [312, 288, 291, 279, 284];
+    for (let i = 0; i < 5; i++) {
+      const a = lux.position.clone(), b = ZONES[i];
+      await anim(0.8, k => lux.position.lerpVectors(a, b, k));
+      rings(W(lap.pivot, ZONES[i].clone().add(V(0, 0, 0.8))), COL.lum, 3, 2, 'cam', 0.8);
+      setRead(readPC, `zone ${i + 1} / 5 : <b>${vals[i]} cd/m²</b>`);
+      await sleep(700);
     }
-    setRead(readPC, 'même horloge : récit et journaux <b>comparables</b>');
+    drawLap('mire', { c: '#000000' }); setRead(readPC, 'noir : <b>0,4 cd/m²</b>'); await sleep(1200);
+    drawLap('bureau');
+    setRead(readPC, 'uniformité : <b>0,89</b> · remise : <b>340</b> → <b>−15 %</b> · bon');
+    route(ESP_TO_SRV, { kind: 'mes', size: 0.7, label: 'mesures de l\'écran' }).catch(() => {});
   }
 },
 {
-  title: '9. Le volet physique : seuils et réserve d\'énergie',
-  text: `<p><b>Photocapteurs</b> : on mesure la lumière du voyant allumé et éteint, avec la lumière de la pièce allumée ou non. On en tire un <b>seuil</b> fiable.</p>
-         <p><b>Réserve d'énergie</b> : à courant constant, la tension baisse en ligne droite, <b>V = 5 − I·t / C</b>. Avec I ≈ 0,1 A et C = 1 F, l'ESP32 tient environ <b>17 s</b> avant 3,3 V : bien plus que la seconde utile pour écrire.</p>
-         <p>On <b>confronte</b> ce modèle aux mesures, avec leurs incertitudes. Les valeurs à l'écran sont des exemples.</p>`,
-  cam: [[40, 55, 75], [58, 26, 0]], labels: 'overview',
+  title: '10. V2 : le portail captif ALCASAR',
+  text: `<p>Le tuteur envisage <b>ALCASAR</b>, un portail captif libre. En V2, la station vérifie que le PC rendu <b>passe le portail</b>.</p>
+         <p>Le PC demande une page : ALCASAR l'<b>intercepte</b> et renvoie sa page de connexion. Le script se connecte avec un <b>compte de test</b>, puis vérifie que la page demandée s'ouvre.</p>
+         <p>Chaque étape est <b>chronométrée</b> et capturée à Wireshark. Les durées à l'écran sont des exemples.</p>`,
+  cam: [[20, 120, 170], [14, 10, -38]], labels: 'overview',
   async run() {
-    world.courbe = true; drawTech();
-    await capteurs();
-    setRead(readSens, 'voyant allumé : <b>2 900</b> · éteint : <b>310</b> · seuil : <b>1 600</b> (exemple)');
-  }
-},
-{
-  title: '10. V2 : prévenir avant l\'arrêt',
-  text: `<p>En V2, le projet ne se contente plus d'expliquer : il <b>prévient</b>.</p>
-         <p>Pendant une installation, la <b>LED orange</b> du boîtier s'allume et une notification demande de <b>ne pas éteindre le PC</b>.</p>
-         <p>On compare ensuite le nombre d'arrêts au bouton <b>avant et après</b> : l'indicateur mesure l'effet de la V2.</p>`,
-  cam: CAM_POSTE, labels: 'overview',
-  async run() {
-    battements().catch(() => {});
-    await go('usb', { kind: 'inst', size: 0.6, label: '« installation en cours »', speed: 22 });
-    boxLed(true, true, false);
-    await anim(6, k => drawAgent('install', { pct: lerp(10, 80, k), heure: '11:15', v2: true }), k => k);
-    drawAgent('bureau', { heure: '11:16' }); boxLed(true, false, false);
-    recit('11:15:02 installation en cours', '#ffd84a'); recit('11:16:01 installation terminée', '#9fe0b0');
+    drawLap('portail', { etape: 0 });
+    await route(PC_TO_ALC, { kind: 'net', label: 'HTTP · exemple.test', size: 0.9 });
+    await route(ALC_TO_PC, { kind: 'https', label: 'redirection → portail', size: 0.9 });
+    drawLap('portail', { etape: 1 }); setRead(readPC, 'page du portail : <b>affichée</b>'); await sleep(1000);
+    drawLap('portail', { etape: 2 });
+    await route(PC_TO_ALC, { kind: 'https', label: 'HTTPS · compte de test', size: 0.9 });
+    await route(ALC_TO_PC, { kind: 'https', label: 'accès ouvert', size: 0.9 });
+    drawLap('portail', { etape: 3 }); setRead(readPC, 'portail : <b style="color:#9fe0b0">passé en 0,9 s</b>');
+    await route(PC_TO_SRV, { kind: 'https', label: 'HTTPS · temps par étape' });
   }
 },
 ];
 /* « ?cadre » (diaporama) : sans le volet physique */
 const CADRE = /[?&]cadre\b/.test(location.search);
 if (CADRE) {
-  for (let i = steps.length - 1; i >= 0; i--) if (/physique|humidit/i.test(steps[i].title)) steps.splice(i, 1);
+  for (let i = steps.length - 1; i >= 0; i--) if (/physique/i.test(steps[i].title)) steps.splice(i, 1);
   let n = 0; steps.forEach(s => { if (/^\d+\.\s/.test(s.title)) s.title = s.title.replace(/^\d+\./, ++n + '.'); });
 }
 
@@ -1335,17 +1323,12 @@ function tick() {
     const k = f.t / f.dur; f.m.scale.setScalar(0.2 + k * f.r); f.m.material.opacity = 0.9 * (1 - k);
     if (k >= 1) { scene.remove(f.m); f.m.material.dispose(); fx.splice(i, 1); }
   }
-  /* voyants de la tour : alimentation allumée sauf si le PC est éteint ; disque qui clignote seulement si le PC travaille */
-  const td = tower.userData;
-  td.pwr.material.color.setRGB(0.2, 1, 0.45).multiplyScalar(world.pc === 'off' ? 0.03 : 3);
-  const busy = world.pc === 'on' && (Math.sin(now * 7.3) + Math.sin(now * 3.1)) > 0.4;
-  td.hdd.material.color.setRGB(1, 0.6, 0.1).multiplyScalar(busy ? 3 : 0.04);
   const sv = server.userData;
   sv.pwr.material.color.setRGB(0.2, 1, 0.45).multiplyScalar(3);
   const dAct = now - world.srvAct < 0.6 || Math.sin(now * 2.1) > 0.97;
   sv.disk.material.color.setRGB(1, 0.6, 0.1).multiplyScalar(dAct && Math.sin(now * 40) > 0 ? 3 : 0.05);
-  esp.userData.pled.material.color.setRGB(1, 0.16, 0.1).multiplyScalar(world.secteur ? 4 : 0.05);
-  if (tweens.length) shadowFrames = 2;          // bouton de la tour
+  esp.userData.pled.material.color.setRGB(1, 0.16, 0.1).multiplyScalar(4);
+  if (tweens.length) shadowFrames = 2;          // papier, capteur de lumière
   if (shadowFrames > 0) { renderer.shadowMap.needsUpdate = true; shadowFrames--; }
   composer.render();
   labelRenderer.render(scene, camera);

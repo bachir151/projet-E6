@@ -26,8 +26,8 @@ var Q = window.QUARTIER = {
     urlPage: '../Projet apprenti 1/livrables/pages-html/service-augmente.html' },
   { who: 'Yaksan', n: 2, color: '#4ea8ff', prop: 'station',
     title: 'Station de contrôle de santé des portables', sub: 'refroidissement · connectivité · écran',
-    desc: 'Un portable rendu passe sur la station : un ESP32 mesure l’air soufflé et la lumière de l’écran, un script sans droits teste le réseau. Chaque fiche entre dans un journal qui ne s’efface pas. Maquette 3D à venir.',
-    url: null },   /* nouveau projet du 25/11 : pas encore de maquette 3D ni de schéma 2D (ceux de Projet apprenti 2/livrables/ montrent l'ancienne « boîte noire »). Son chapitre existe dans presentation-projets.html */
+    desc: 'Un portable rendu passe sur la station : un ESP32 mesure l’air soufflé et la lumière de l’écran, un script sans droits teste le réseau. Chaque fiche entre dans un journal qui ne s’efface pas.',
+    url: '../Projet apprenti 2/livrables/animation-3d/maquette-3d.html' },   /* nouveau projet du 25/11 ; l'ancienne maquette (boîte noire) est dans quartier-3d/archives/ */
   { who: 'Lorenzo', n: 3, color: '#c18cff', prop: 'radar',
     title: 'Capteur de présence authentifié', sub: 'un radar pour le poste, un leurre pour le réseau',
     desc: 'Un radar LD2410 voit que l’agent est parti et le poste Windows se verrouille seul. Un second ESP32 joue une fausse imprimante : toute connexion devient un signal à examiner.',

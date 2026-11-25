@@ -1,0 +1,1385 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Archive · maquette 3D boîte noire</title>
+<link rel="icon" href="data:,">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@200..1000&display=swap">
+<style>
+/* Scène 3D plein écran, toujours sur fond sombre (lumières et paquets lumineux).
+   Le panneau d'explication suit le thème clair / sombre. */
+:root{
+  --bg:#0b1016; --panel:rgba(255,255,255,.92); --ink:#13222c; --muted:#56656f; --line:#d3dde2;
+  --accent:#1d5a86; --chip:#eef3f6;
+  --kit:#3ddc84; --req:#9fd0ff; --rep:#4aa8ff; --borne:#ffb020; --capt:#c18cff; --err:#ff5a4d;
+  --f-display:"Nunito",ui-rounded,"Segoe UI",system-ui,sans-serif;
+  --f-body:"Nunito",ui-rounded,"Segoe UI",system-ui,sans-serif;
+  --f-mono:ui-monospace,"SF Mono",Consolas,"Liberation Mono",monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --panel:rgba(16,24,31,.88); --ink:#e4ecf0; --muted:#9aabb5; --line:#2a3a45; --accent:#6fb0de; --chip:#1c2a34; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --panel:rgba(16,24,31,.88); --ink:#e4ecf0; --muted:#9aabb5; --line:#2a3a45; --accent:#6fb0de; --chip:#1c2a34; color-scheme:dark}
+
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);font-family:var(--f-body);color:var(--ink)}
+canvas#scene{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none}
+#labels{position:fixed;inset:0;pointer-events:none}
+button{font:inherit;cursor:pointer}
+:focus-visible{outline:3px solid #f0b93a;outline-offset:2px}
+
+/* étiquettes 3D */
+.lab{font-family:var(--f-body);font-size:12px;line-height:1.25;color:#e9f1f5;background:rgba(10,16,22,.78);
+  border:1px solid rgba(255,255,255,.18);border-radius:7px;padding:4px 8px;white-space:nowrap;transform:translateY(-14px)}
+/* les étiquettes bougent à chaque image : une couche GPU chacune, sans ombre portée (moins de travail pour le navigateur) */
+#labels>div{will-change:transform}
+.lab b{font-family:var(--f-display);font-weight:600;font-size:15px;letter-spacing:.01em;display:block}
+.lab span{color:#a9bac4}
+.lab.small{font-size:11px;padding:2px 6px}
+.lab.small b{font-size:13px}
+.pkt{font-family:var(--f-mono);font-size:11.5px;color:#fff;background:rgba(8,12,16,.82);border:1px solid currentColor;
+  border-radius:999px;padding:2px 8px;white-space:nowrap;transform:translateY(-16px)}
+.pkt i{font-style:normal;color:#fff}
+.read{font-family:var(--f-mono);font-size:12px;color:#fff;background:rgba(8,12,16,.85);border-left:3px solid var(--capt);
+  border-radius:4px;padding:3px 8px;white-space:nowrap}
+
+/* barre du haut */
+#top{position:fixed;top:max(12px,env(safe-area-inset-top));left:max(16px,env(safe-area-inset-left));right:max(16px,env(safe-area-inset-right));
+  display:flex;justify-content:space-between;align-items:flex-start;gap:10px;pointer-events:none}
+#top>*{pointer-events:auto}
+#brand{color:#e4ecf0;text-shadow:0 1px 8px rgba(0,0,0,.6)}
+#brand .eye{font-family:var(--f-mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#6fb0de}
+#brand h1{font-family:var(--f-display);font-size:26px;line-height:1.05;margin:2px 0 0;font-weight:700}
+#tools{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.seg{display:flex;background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:3px;backdrop-filter:blur(8px)}
+.seg button{border:0;background:transparent;color:var(--muted);padding:6px 10px;border-radius:6px;font-size:13px;font-weight:700}
+.seg button[aria-pressed="true"]{background:var(--accent);color:#fff}
+.tbtn{background:var(--panel);border:1px solid var(--line);color:var(--ink);border-radius:9px;padding:7px 11px;font-size:13px;backdrop-filter:blur(8px)}
+.tbtn[aria-pressed="false"]{color:var(--muted);text-decoration:line-through}
+
+/* panneau d'explication */
+#panel{position:fixed;left:max(16px,env(safe-area-inset-left));bottom:max(16px,env(safe-area-inset-bottom));width:min(470px,calc(100vw - 32px));
+  background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 16px 12px;backdrop-filter:blur(10px);
+  box-shadow:0 8px 30px rgba(0,0,0,.35)}
+#stepno{font-family:var(--f-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent)}
+#title{font-family:var(--f-display);font-size:25px;font-weight:700;line-height:1.08;margin:3px 0 6px}
+#text{font-size:14.5px;line-height:1.5;margin:0;max-height:34vh;overflow:auto}
+#text p{margin:0 0 6px}
+#text code{font-family:var(--f-mono);font-size:.86em;background:var(--chip);padding:0 4px;border-radius:4px}
+#note{font-size:13px;color:var(--muted);margin-top:4px;border-left:3px solid #f0b93a;padding-left:8px;display:none}
+#ctrl{display:flex;align-items:center;gap:6px;margin-top:10px}
+#ctrl button{border:1px solid var(--line);background:var(--chip);color:var(--ink);border-radius:8px;padding:7px 11px;font-size:14px;font-weight:700}
+#ctrl button.main{background:var(--accent);border-color:var(--accent);color:#fff}
+#dots{display:flex;gap:5px;margin-left:auto}
+#dots button{width:10px;height:10px;padding:0!important;border-radius:50%!important;background:var(--line)!important;border:0!important}
+#dots button.on{background:var(--accent)!important;transform:scale(1.25)}
+#legend{display:flex;flex-wrap:wrap;gap:4px 12px;margin-top:9px;font-size:12px;color:var(--muted)}
+#legend span::before{content:"";display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px;background:var(--c);box-shadow:0 0 6px var(--c);vertical-align:-1px}
+#hint{position:fixed;right:max(16px,env(safe-area-inset-right));bottom:max(16px,env(safe-area-inset-bottom));font-size:12px;color:#8fa3ae;text-align:right;text-shadow:0 1px 4px #000}
+#err{position:fixed;inset:0;display:none;place-items:center;color:#e4ecf0;font-size:18px;padding:30px;text-align:center}
+@media (max-width:720px){
+  #brand h1{font-size:20px}
+  #title{font-size:21px}
+  #text{font-size:13.5px;max-height:24vh}
+  #hint{display:none}
+  #legend{display:none}
+  .lab{font-size:10.5px;padding:3px 6px}.lab b{font-size:13px}
+}
+
+/* ---- charte « encre sur papier » appliquée à l'interface (la scène 3D garde son ambiance de nuit) ---- */
+h1,h2{font-weight:1000}
+#ctrl button,.tbtn,.seg button,#dots button{border-radius:999px}
+#ctrl button,.tbtn,.seg button{font-weight:800;white-space:nowrap}
+
+/* ---- panneau d'explication : plus discret pour laisser voir la maquette ---- */
+#panel{width:min(420px,calc(100vw - 32px));padding:12px 14px 10px;
+  background:color-mix(in srgb,var(--panel-fond,var(--panel)) var(--voile,62%),transparent);
+  backdrop-filter:blur(16px) saturate(150%);-webkit-backdrop-filter:blur(16px) saturate(150%);
+  transition:background .25s ease,opacity .25s ease}
+#panel:hover,#panel:focus-within{background:var(--panel-fond,var(--panel))}
+#title{font-size:21px;padding-right:34px}
+#text{font-size:13.5px;max-height:26vh}
+#legend{font-size:11px;gap:2px 10px}
+#bMini{position:absolute;top:9px;right:9px;width:28px;height:28px;padding:0;border-radius:50%;border:1px solid var(--line);
+  background:transparent;color:var(--ink);font-size:16px;font-weight:900;line-height:1;cursor:pointer;opacity:.75}
+#bMini:hover{opacity:1}
+#panel.mini #text,#panel.mini #legend,#panel.mini #note{display:none}
+#panel.mini #title{font-size:17px;margin-bottom:2px}
+#ctrl{gap:5px}
+#dots{gap:4px;flex-wrap:wrap;justify-content:flex-end;min-width:0}
+#dots button{width:8px!important;height:8px!important}
+</style>
+<script type="importmap">
+{"imports":{
+  "three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+  "three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+}}
+</script>
+<body>
+<canvas id="scene" aria-label="Maquette 3D animée : poste Windows d'un agent avec son boîtier témoin ESP32, routeur, switch, serveur Ubuntu et poste du support"></canvas>
+<div id="labels"></div>
+
+<div id="top">
+  <div id="brand">
+    <div class="eye">Projet E6 · apprenti 2 · Yaksan</div>
+    <h1>Analyse post-incident des postes<br>maquette en 3D</h1>
+  </div>
+  <div id="tools">
+    <button class="tbtn" id="bLab" aria-pressed="true">Étiquettes</button>
+    <button class="tbtn" id="bSnd" aria-pressed="true">Son</button>
+  </div>
+</div>
+
+<div id="panel" role="region" aria-live="polite">
+  <button id="bMini" type="button" aria-expanded="true" aria-controls="text" title="Réduire le panneau (H)">–</button>
+  <div id="stepno"></div>
+  <div id="title"></div>
+  <div id="text"></div>
+  <div id="note"></div>
+  <div id="ctrl">
+    <button id="bPrev" aria-label="Étape précédente">◀</button>
+    <button id="bReplay" aria-label="Rejouer l'étape">↻ Rejouer</button>
+    <button id="bNext" class="main" aria-label="Étape suivante">Suivant ▶</button>
+    <button id="bAuto" aria-pressed="false" title="Enchaîner les étapes">Auto</button>
+    <div id="dots"></div>
+  </div>
+  <div id="legend">
+    <span style="--c:#f2f4f6">battement, récit (USB)</span>
+    <span style="--c:#ffd84a">installation</span>
+    <span style="--c:#c18cff">capteurs des voyants</span>
+    <span style="--c:#4aa8ff">HTTPS (API)</span>
+    <span style="--c:#3ddc84">DHCP, DNS, NTP</span>
+    <span style="--c:#ff5a4d">arrêt, coupure</span>
+  </div>
+</div>
+<div id="hint">Glisser : tourner · Molette : zoom · Clic droit : déplacer<br>Flèches ← → : étapes · R : rejouer</div>
+<div id="err">Cette animation a besoin de WebGL. Ouvre la page dans un navigateur récent (Chrome, Edge, Firefox).</div>
+
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
+import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+
+/* =====================================================================
+   1. Moteur : rendu, caméra, lumières, post-traitement
+   Unité : 1 = 1 cm. Le dessus du bureau est à y = 0.
+   ===================================================================== */
+const $ = s => document.querySelector(s);
+/* ?lite : mode léger pour les PC peu puissants (moins de pixels, pas de halo lumineux, ombres simples) */
+const LITE = new URLSearchParams(location.search).has('lite');
+const PR = LITE ? 1 : Math.min(devicePixelRatio, 2);
+let renderer;
+try {
+  renderer = new THREE.WebGLRenderer({ canvas: $('#scene'), antialias: !LITE, powerPreference: 'high-performance' });
+} catch (e) { $('#err').style.display = 'grid'; throw e; }
+renderer.setPixelRatio(PR);
+renderer.setSize(innerWidth, innerHeight);
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = LITE ? THREE.PCFShadowMap : THREE.PCFSoftShadowMap;
+/* ombres recalculées seulement quand un objet bouge (voir tick) : la scène a ~340 objets, cela évite de tout redessiner deux fois par image */
+renderer.shadowMap.autoUpdate = false;
+renderer.shadowMap.needsUpdate = true;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 0.9;
+
+const scene = new THREE.Scene();
+const BG = 0x0b1016;
+scene.background = new THREE.Color(BG);
+scene.fog = new THREE.Fog(BG, 520, 1300);
+
+/* near = 1 (et non 0,5) : plus de précision de profondeur, plus de grésillement sur les écrans vus de loin */
+const camera = new THREE.PerspectiveCamera(38, innerWidth / innerHeight, 1, 4000);
+camera.position.set(70, 160, 250);
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+controls.dampingFactor = 0.08;
+controls.target.set(0, 5, -12);
+controls.maxPolarAngle = Math.PI * 0.495;
+controls.minDistance = 6;
+controls.maxDistance = 800;
+controls.autoRotateSpeed = 0.35;
+
+const pmrem = new THREE.PMREMGenerator(renderer);
+scene.environment = pmrem.fromScene(new RoomEnvironment(renderer), 0.04).texture;
+
+scene.add(new THREE.HemisphereLight(0xbfd4ff, 0x20160e, 0.35));
+const key = new THREE.DirectionalLight(0xfff0dc, 1.6);
+key.position.set(110, 280, 170);
+key.target.position.set(0, 0, -10);
+key.castShadow = true;
+key.shadow.mapSize.setScalar(LITE ? 1024 : 4096);
+Object.assign(key.shadow.camera, { left: -150, right: 150, top: 110, bottom: -110, near: 50, far: 700 });
+key.shadow.bias = -0.0004;
+key.shadow.normalBias = 0.04;
+key.shadow.radius = 3;
+scene.add(key, key.target);
+const rim = new THREE.DirectionalLight(0x86b8ff, 0.9);
+rim.position.set(-220, 140, -220);
+scene.add(rim);
+
+const composer = new EffectComposer(renderer);
+composer.setPixelRatio(PR);
+composer.addPass(new RenderPass(scene, camera));
+const bloom = new UnrealBloomPass(new THREE.Vector2(innerWidth, innerHeight), 0.8, 0.45, 2.2);
+if (!LITE) composer.addPass(bloom);   // le halo coûte une dizaine de passes plein écran
+composer.addPass(new OutputPass());
+
+const labelRenderer = new CSS2DRenderer({ element: $('#labels') });
+labelRenderer.setSize(innerWidth, innerHeight);
+
+/* =====================================================================
+   2. Petits outils : géométries, textures dessinées, matériaux
+   ===================================================================== */
+function RB(w, h, d, r = 0.3, seg = 3) {
+  const rr = Math.max(0.001, Math.min(r, w / 2 - 0.001, h / 2 - 0.001, d / 2 - 0.001));
+  return new RoundedBoxGeometry(w, h, d, seg, rr);
+}
+const BOX = (w, h, d) => new THREE.BoxGeometry(w, h, d);
+function mesh(geo, mat, x = 0, y = 0, z = 0, parent = scene, shadow = true) {
+  const m = new THREE.Mesh(geo, mat);
+  m.position.set(x, y, z);
+  m.castShadow = shadow; m.receiveShadow = true;
+  parent.add(m);
+  return m;
+}
+function canvasTex(w, h, draw) {
+  const c = document.createElement('canvas'); c.width = w; c.height = h;
+  const g = c.getContext('2d'); draw(g, w, h);
+  const t = new THREE.CanvasTexture(c);
+  t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8;
+  return { tex: t, canvas: c, ctx: g, redraw(fn) { fn(g, w, h); t.needsUpdate = true; } };
+}
+/* plan posé à plat (face vers le haut) */
+function flat(w, d, mat, x, y, z, parent) {
+  const m = new THREE.Mesh(new THREE.PlaneGeometry(w, d), mat);
+  m.rotation.x = -Math.PI / 2; m.position.set(x, y, z); m.receiveShadow = true;
+  parent.add(m); return m;
+}
+/* plan vertical (face vers +z) */
+function front(w, h, mat, x, y, z, parent) {
+  const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), mat);
+  m.position.set(x, y, z); m.receiveShadow = true; parent.add(m); return m;
+}
+const std = (color, roughness = 0.5, metalness = 0, extra = {}) =>
+  new THREE.MeshStandardMaterial({ color, roughness, metalness, ...extra });
+
+const M = {
+  pcbBlack: std(0x16191d, 0.5, 0.1),
+  pcbBlue: std(0x1f55ad, 0.45, 0.1),
+  modPCB: std(0x1d2733, 0.5, 0.1),
+  shield: std(0xd9dce1, 0.42, 1, { envMapIntensity: 0.6 }),   // métal brossé : pas de reflet éblouissant en gros plan
+  chrome: std(0xdfe2e6, 0.25, 1, { envMapIntensity: 0.7 }),
+  gold: std(0xd8aa4c, 0.28, 1),
+  chip: std(0x101114, 0.4, 0.05),
+  plBlack: std(0x121314, 0.55, 0),
+  plWhite: std(0xcfcdc6, 0.5, 0),
+  plGray: std(0x8e959b, 0.4, 0.55),
+  alu: std(0xc9cdd2, 0.5, 1, { envMapIntensity: 0.6 }),   // alu brossé : pas d'éblouissement
+  steel: std(0xb8bcc2, 0.25, 1),
+  darkMetal: std(0x24282d, 0.42, 0.75),
+  rubber: std(0x1a1a1a, 0.85, 0),
+  orangeRub: std(0xd2621c, 0.7, 0),
+  nylon: std(0xf3f0e6, 0.6, 0),
+  cork: std(0xa57a52, 0.95, 0),
+  acrylic: new THREE.MeshPhysicalMaterial({ color: 0x8fa6b4, roughness: 0.15, metalness: 0, transparent: true, opacity: 0.22, clearcoat: 0.6, envMapIntensity: 0.4 }),
+  cableBlue: std(0x2a6fd6, 0.45, 0),
+  cableYellow: std(0xe8c130, 0.45, 0),
+  cableGray: std(0x9aa1a8, 0.5, 0),
+  cableBlack: std(0x1b1c1e, 0.5, 0),
+  glassDark: std(0x050608, 0.15, 0),
+};
+const wireMats = {};
+const wireMat = c => wireMats[c] || (wireMats[c] = std(c, 0.45, 0));
+
+/* =====================================================================
+   3. La pièce : sol, bureau
+   ===================================================================== */
+const floorTex = canvasTex(1024, 1024, (g, w, h) => {
+  g.fillStyle = '#1b1f23'; g.fillRect(0, 0, w, h);
+  for (let i = 0; i < 9000; i++) { g.fillStyle = `rgba(255,255,255,${Math.random() * 0.035})`; g.fillRect(Math.random() * w, Math.random() * h, 2, 2); }
+  g.strokeStyle = 'rgba(0,0,0,.55)'; g.lineWidth = 3;
+  for (let i = 0; i <= 4; i++) { g.beginPath(); g.moveTo(i * w / 4, 0); g.lineTo(i * w / 4, h); g.stroke(); g.beginPath(); g.moveTo(0, i * h / 4); g.lineTo(w, i * h / 4); g.stroke(); }
+});
+floorTex.tex.wrapS = floorTex.tex.wrapT = THREE.RepeatWrapping; floorTex.tex.repeat.set(10, 10);
+const floor = new THREE.Mesh(new THREE.PlaneGeometry(3000, 3000), std(0xffffff, 0.85, 0, { map: floorTex.tex }));
+floor.rotation.x = -Math.PI / 2; floor.position.y = -76; floor.receiveShadow = true; scene.add(floor);
+
+const deskTex = canvasTex(2048, 1024, (g, w, h) => {
+  g.fillStyle = '#7d7a74'; g.fillRect(0, 0, w, h);
+  for (let i = 0; i < 26000; i++) { const a = Math.random() * 0.05; g.fillStyle = Math.random() < .5 ? `rgba(0,0,0,${a})` : `rgba(255,255,255,${a})`; g.fillRect(Math.random() * w, Math.random() * h, 3, 1.5); }
+});
+const deskTop = mesh(RB(240, 4, 122, 0.8), std(0xffffff, 0.78, 0, { map: deskTex.tex, envMapIntensity: 0.5 }), 0, -2, -10);
+deskTop.castShadow = false;
+mesh(BOX(240.4, 1.2, 122.4), std(0x2c2f33, 0.5, 0.2), 0, -3.4, -10);
+for (const [x, z] of [[-114, -66], [114, -66], [-114, 46], [114, 46]]) mesh(BOX(5, 72, 5), M.darkMetal, x, -40, z);
+mesh(BOX(232, 4, 3), M.darkMetal, 0, -60, -66);
+
+/* =====================================================================
+   4. Composants électroniques (cartes, capteurs, LED, fils)
+   ===================================================================== */
+const pinGeo = BOX(0.064, 0.62, 0.064);
+const dotGeo = BOX(0.12, 0.06, 0.12);
+
+const espSilk = canvasTex(520, 285, (g, w, h) => {
+  g.clearRect(0, 0, w, h); g.fillStyle = '#f2f2f2'; g.font = 'bold 15px Arial';
+  g.fillText('ESP32 DEVKIT V1', 150, 148);
+  g.font = '10px Arial';
+  const A = ['EN', 'VP', 'VN', 'D34', 'D35', 'D32', 'D33', 'D25', 'D26', 'D27', 'D14', 'D12', 'D13', 'GND', 'VIN'];
+  const B = ['D23', 'D22', 'TX0', 'RX0', 'D21', 'D19', 'D18', 'D5', 'TX2', 'RX2', 'D4', 'D2', 'D15', 'GND', '3V3'];
+  for (let i = 0; i < 15; i++) {
+    const x = (2.6 - 0.35 + 1.778 - i * 0.254) / 5.2 * w;
+    g.save(); g.translate(x + 3, 46); g.rotate(-Math.PI / 2); g.fillText(A[i], -18, 0); g.restore();
+    g.save(); g.translate(x + 3, h - 30); g.rotate(-Math.PI / 2); g.fillText(B[i], -18, 0); g.restore();
+  }
+  g.strokeStyle = '#f2f2f2'; g.lineWidth = 2; g.strokeRect(20, 105, 70, 75);
+  g.fillText('EN', 16, 30); g.fillText('BOOT', 16, h - 12);
+});
+const espSilkMat = new THREE.MeshStandardMaterial({ map: espSilk.tex, transparent: true, roughness: 0.6 });
+const modMark = canvasTex(256, 256, (g, w, h) => {
+  g.clearRect(0, 0, w, h); g.fillStyle = 'rgba(40,44,50,.85)';
+  g.font = 'bold 26px Arial'; g.fillText('ESP32-WROOM-32', 14, 92);
+  g.font = '18px Arial'; g.fillText('Wi-Fi + Bluetooth', 14, 128); g.fillText('2,4 GHz', 14, 156);
+  g.strokeStyle = 'rgba(40,44,50,.6)'; g.lineWidth = 3; g.strokeRect(10, 50, 236, 130);
+});
+const modMarkMat = new THREE.MeshStandardMaterial({ map: modMark.tex, transparent: true, roughness: 0.3, metalness: 1, color: 0xdddddd });
+const antTex = canvasTex(140, 360, (g, w, h) => {
+  g.fillStyle = '#1d2733'; g.fillRect(0, 0, w, h);
+  g.strokeStyle = '#c99a45'; g.lineWidth = 12; g.beginPath();
+  let y = 20; g.moveTo(20, h - 10); g.lineTo(20, y);
+  for (let i = 0; i < 4; i++) { g.lineTo(115, y); y += 40; g.lineTo(115, y); g.lineTo(45, y); y += 40; g.lineTo(45, y); }
+  g.stroke();
+});
+const antMat = std(0xffffff, 0.4, 0.2, { map: antTex.tex });
+
+/** Carte ESP32 DevKit (30 broches). Antenne vers +x, USB vers -x. Origine = centre du circuit imprimé. */
+function makeESP32() {
+  const g = new THREE.Group();
+  mesh(BOX(5.2, 0.16, 2.85), M.pcbBlack, 0, 0, 0, g);
+  flat(5.2, 2.85, espSilkMat, 0, 0.082, 0, g);
+  mesh(BOX(2.55, 0.08, 1.8), M.modPCB, 1.3, 0.12, 0, g);
+  mesh(RB(1.76, 0.3, 1.72, 0.04, 2), M.shield, 0.92, 0.31, 0, g);
+  flat(1.6, 1.6, modMarkMat, 0.92, 0.462, 0, g);
+  flat(0.72, 1.8, antMat, 2.21, 0.161, 0, g);
+  mesh(RB(0.6, 0.28, 0.76, 0.06, 2), M.chrome, -2.42, 0.22, 0, g);
+  mesh(BOX(0.5, 0.1, 0.5), M.chip, -1.15, 0.13, 0.35, g);
+  mesh(BOX(0.35, 0.12, 0.25), M.chip, -1.7, 0.14, -0.55, g);
+  mesh(BOX(0.25, 0.1, 0.18), M.chip, -0.4, 0.13, -0.6, g);
+  for (const z of [-1.0, 1.0]) {
+    mesh(BOX(0.6, 0.12, 0.38), M.chrome, -1.95, 0.14, z, g);
+    mesh(new THREE.CylinderGeometry(0.1, 0.1, 0.1, 16), M.plBlack, -1.95, 0.24, z, g);
+  }
+  const pled = mesh(BOX(0.12, 0.06, 0.08), new THREE.MeshBasicMaterial({ color: new THREE.Color(0xff2a1a).multiplyScalar(4), toneMapped: false }), -0.95, 0.11, -1.05, g, false);
+  for (const z of [-1.27, 1.27]) mesh(BOX(3.81, 0.25, 0.25), M.plBlack, -0.35, -0.205, z, g);
+  const legs = new THREE.InstancedMesh(pinGeo, M.gold, 30);
+  const dots = new THREE.InstancedMesh(dotGeo, M.gold, 30);
+  const mtx = new THREE.Matrix4(); let k = 0;
+  for (const z of [-1.27, 1.27]) for (let i = 0; i < 15; i++) {
+    const x = -0.35 + 1.778 - i * 0.254;
+    mtx.makeTranslation(x, -0.48, z); legs.setMatrixAt(k, mtx);
+    mtx.makeTranslation(x, 0.09, z); dots.setMatrixAt(k, mtx); k++;
+  }
+  g.add(legs, dots);
+  g.userData.pled = pled;
+  return g;
+}
+/** Position locale (dans la carte) du trou de la plaque à essais à côté d'une broche. côté A = -z (EN…VIN), côté B = +z (D23…3V3). i = 0 près de l'antenne. */
+function espHole(side, i, out = 0.55) {
+  return new THREE.Vector3(-0.35 + 1.778 - i * 0.254, -0.3, side === 'A' ? -1.27 - out : 1.27 + out);
+}
+const ESP_B = { D23: 0, D22: 1, D21: 4, D19: 5, D18: 6, D5: 7, D4: 10, GND: 13, '3V3': 14 };
+const ESP_A = { D25: 7, D26: 8, D27: 9, GND: 13 };
+
+function bbTex(w, h) {
+  return canvasTex(Math.round(w * 100), Math.round(h * 100), (g, W, H) => {
+    g.fillStyle = '#f1efe8'; g.fillRect(0, 0, W, H);
+    g.fillStyle = '#d9d6cc'; g.fillRect(0, H / 2 - 9, W, 18);
+    const p = 25.4;
+    for (let x = p / 2; x < W; x += p) {
+      for (let r = 0; r < 5; r++) {
+        g.fillStyle = '#4c4c48';
+        g.fillRect(x - 4, H / 2 - 22 - r * p - 4, 8, 8);
+        g.fillRect(x - 4, H / 2 + 22 + r * p - 4, 8, 8);
+      }
+      if (H > 400) { g.fillRect(x - 4, 22, 8, 8); g.fillRect(x - 4, H - 30, 8, 8); }
+    }
+    if (H > 400) { g.fillStyle = '#c0392b'; g.fillRect(0, 40, W, 3); g.fillStyle = '#2a5db0'; g.fillRect(0, H - 42, W, 3); }
+  });
+}
+/** Plaque à essais blanche. Origine = centre du dessus. */
+function makeBreadboard(w = 8.2, d = 5.5) {
+  const g = new THREE.Group();
+  mesh(RB(w, 0.85, d, 0.08, 2), M.plWhite, 0, -0.425, 0, g);
+  flat(w, d, std(0xcfcdc6, 0.6, 0, { map: bbTex(w, d).tex }), 0, 0.012, 0, g);
+  return g;
+}
+
+const rcTex = canvasTex(400, 600, (g, w, h) => {
+  g.fillStyle = '#1f55ad'; g.fillRect(0, 0, w, h);
+  g.strokeStyle = '#d29a4a'; g.lineWidth = 7;
+  for (let i = 0; i < 4; i++) { const m = 30 + i * 16; rr(g, m, m, w - 2 * m, 360 - m, 30); g.stroke(); }
+  g.fillStyle = '#101114'; g.fillRect(150, 400, 100, 100);
+  g.fillStyle = '#c9c9c9'; g.fillRect(60, 420, 60, 28);
+  g.fillStyle = '#ffffff'; g.font = 'bold 26px Arial'; g.fillText('RFID-RC522', 120, 200);
+  g.font = '15px Arial';
+  const pins = ['SDA', 'SCK', 'MOSI', 'MISO', 'IRQ', 'GND', 'RST', '3.3V'];
+  pins.forEach((p, k) => { const x = w / 2 + (k - 3.5) * 25.4 * 1; g.save(); g.translate(x + 5, 560); g.rotate(-Math.PI / 2); g.fillText(p, 0, 0); g.restore(); });
+  for (let k = 0; k < 8; k++) { g.fillStyle = '#d8aa4c'; g.beginPath(); g.arc(w / 2 + (k - 3.5) * 25.4, h - 18, 9, 0, 7); g.fill(); }
+});
+function rr(g, x, y, w, h, r) { g.beginPath(); g.moveTo(x + r, y); g.arcTo(x + w, y, x + w, y + h, r); g.arcTo(x + w, y + h, x, y + h, r); g.arcTo(x, y + h, x, y, r); g.arcTo(x, y, x + w, y, r); g.closePath(); }
+
+/** Lecteur RFID RC522 : 4 cm (x) × 6 cm (z), connecteur 8 broches sur le bord -z. Origine = centre du circuit. */
+function makeRC522(standUp = false) {
+  const g = new THREE.Group();
+  mesh(BOX(4, 0.16, 6), M.pcbBlue, 0, 0, 0, g);
+  flat(4, 6, std(0xffffff, 0.45, 0.1, { map: rcTex.tex }), 0, 0.082, 0, g);
+  mesh(BOX(1, 0.12, 1), M.chip, 0, 0.14, 1.0, g);
+  for (const [x, z] of [[-1.6, -2.6], [1.6, -2.6], [-1.6, 2.6], [1.6, 2.6]]) mesh(new THREE.CylinderGeometry(0.18, 0.18, 1.2, 12), M.nylon, x, standUp ? 0.68 : -0.68, z, g);
+  mesh(BOX(2.03, 0.25, 0.25), M.plBlack, 0, 0.205, -2.7, g);
+  for (let k = 0; k < 8; k++) mesh(pinGeo, M.gold, (k - 3.5) * 0.254, 0.4, -2.7, g, false);
+  return g;
+}
+const rcPin = k => new THREE.Vector3((k - 3.5) * 0.254, 0.75, -2.7);
+const RC = { SDA: 0, SCK: 1, MOSI: 2, MISO: 3, IRQ: 4, GND: 5, RST: 6, V33: 7 };
+
+/** LED 5 mm. Origine = point d'entrée dans la plaque. */
+const ledLights = {};
+function makeLED(name, color) {
+  const g = new THREE.Group();
+  const mat = new THREE.MeshPhysicalMaterial({ color, roughness: 0.12, transparent: true, opacity: 0.82, emissive: color, emissiveIntensity: 0.05, clearcoat: 1 });
+  for (const x of [-0.127, 0.127]) mesh(new THREE.CylinderGeometry(0.025, 0.025, 0.5, 6), M.steel, x, 0.25, 0, g, false);
+  mesh(new THREE.CylinderGeometry(0.29, 0.29, 0.08, 24), mat, 0, 0.54, 0, g);
+  mesh(new THREE.CylinderGeometry(0.25, 0.25, 0.5, 24), mat, 0, 0.8, 0, g);
+  mesh(new THREE.SphereGeometry(0.25, 24, 12, 0, Math.PI * 2, 0, Math.PI / 2), mat, 0, 1.05, 0, g);
+  const pl = new THREE.PointLight(color, 0, 30, 2); pl.position.set(0, 1.0, 0.2); g.add(pl);
+  ledLights[name] = { mat, pl };
+  return g;
+}
+function setLED(name, on) {
+  const L = ledLights[name]; if (!L) return;
+  L.mat.emissiveIntensity = on ? 14 : 0.05; L.pl.intensity = on ? 40 : 0;
+}
+function makeResistor(bands) {
+  const g = new THREE.Group();
+  const body = mesh(new THREE.CylinderGeometry(0.1, 0.1, 0.62, 16), std(0xd9c49a, 0.6), 0, 0.55, 0, g);
+  body.rotation.z = Math.PI / 2;
+  bands.forEach((c, i) => { const b = mesh(new THREE.CylinderGeometry(0.105, 0.105, 0.06, 16), std(c, 0.5), -0.18 + i * 0.12, 0.55, 0, g, false); b.rotation.z = Math.PI / 2; });
+  for (const s of [-1, 1]) {
+    const h = mesh(new THREE.CylinderGeometry(0.02, 0.02, 0.2, 6), M.steel, s * 0.41, 0.55, 0, g, false); h.rotation.z = Math.PI / 2;
+    mesh(new THREE.CylinderGeometry(0.02, 0.02, 0.55, 6), M.steel, s * 0.51, 0.28, 0, g, false);
+  }
+  return g;
+}
+/** Fil de liaison (« dupont ») entre deux points du monde. Renvoie la courbe. */
+function wire(a, b, color, lift = 1.6, r = 0.045) {
+  const mid = a.clone().lerp(b, 0.5); mid.y = Math.max(a.y, b.y) + lift;
+  const c = new THREE.CatmullRomCurve3([a, a.clone().add(new THREE.Vector3(0, lift * 0.55, 0)), mid, b.clone().add(new THREE.Vector3(0, lift * 0.55, 0)), b]);
+  const t = new THREE.Mesh(new THREE.TubeGeometry(c, 40, r, 8, false), wireMat(color));
+  t.castShadow = true; scene.add(t);
+  for (const p of [a, b]) mesh(BOX(0.24, 0.55, 0.24), M.plBlack, p.x, p.y + 0.27, p.z);
+  return c;
+}
+
+/* =====================================================================
+   5. Gros appareils : serveur, switch, borne Wi-Fi, PC, téléphone, écran
+   ===================================================================== */
+function drawScreenBg(g, w, h, top = '#173a5c', bot = '#0d1e30') {
+  const gr = g.createLinearGradient(0, 0, w, h); gr.addColorStop(0, top); gr.addColorStop(1, bot);
+  g.fillStyle = gr; g.fillRect(0, 0, w, h);
+}
+function makeScreenMat(ct) {
+  return new THREE.MeshStandardMaterial({ color: 0x000000, emissive: 0xffffff, emissiveMap: ct.tex, emissiveIntensity: 0.9, roughness: 0.18, metalness: 0 });
+}
+const keyTex = canvasTex(1024, 420, (g, w, h) => {
+  g.fillStyle = '#1b1d20'; g.fillRect(0, 0, w, h);
+  const rows = [14, 14, 13, 12, 9]; const kh = 70, gap = 12;
+  rows.forEach((n, r) => {
+    const kw = (w - gap * (n + 1)) / n;
+    for (let i = 0; i < n; i++) {
+      let ww = kw; if (r === 4 && i === 4) ww = kw * 3;
+      if (r === 4 && i > 4) continue;
+      g.fillStyle = '#2b2e33'; rr(g, gap + i * (kw + gap), gap + r * (kh + gap / 1.5), ww, kh, 8); g.fill();
+    }
+  });
+});
+/** Ordinateur portable. Origine = centre du dessous. Écran animé (canvas). */
+function makeLaptop({ body = 0x3a3f46, rugged = false, w = 32, d = 22 } = {}) {
+  const g = new THREE.Group();
+  const bmat = std(body, 0.45, 0.6);
+  mesh(RB(w, 1.8, d, 0.7), bmat, 0, 0.9, 0, g);
+  flat(w - 4, d * 0.42, std(0xffffff, 0.7, 0, { map: keyTex.tex }), 0, 1.84, -d * 0.12, g);
+  flat(10, 6, std(body, 0.3, 0.5, { color: new THREE.Color(body).multiplyScalar(1.15) }), 0, 1.85, d * 0.3, g);
+  const pivot = new THREE.Group(); pivot.position.set(0, 1.8, -d / 2 + 0.4); g.add(pivot);
+  const lh = d - 0.8;
+  mesh(RB(w, lh, 0.7, 0.35), bmat, 0, lh / 2, -0.1, pivot);
+  const sc = canvasTex(1024, 640, () => {});
+  const scr = front(w - 2.2, lh - 2.4, makeScreenMat(sc), 0, lh / 2 + 0.2, 0.36, pivot);
+  mesh(BOX(w - 1.4, lh - 1.6, 0.05), M.glassDark, 0, lh / 2 + 0.2, 0.29, pivot, false);
+  pivot.rotation.x = -0.24;
+  if (rugged) {
+    for (const [x, z] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) mesh(RB(3.2, 2.4, 3.2, 0.5), M.orangeRub, x * (w / 2 - 1.2), 1.0, z * (d / 2 - 1.2), g);
+    for (const x of [-1, 1]) mesh(RB(3.2, 3.2, 1.2, 0.4), M.orangeRub, x * (w / 2 - 1.2), lh - 1.3, -0.1, pivot);
+    mesh(RB(w * 0.5, 0.35, 2.6, 0.15), M.rubber, 0, 1.0, d / 2 + 0.3, g);
+  }
+  return { g, pivot, screen: sc, lh };
+}
+
+/** Serveur tour Ubuntu. */
+const srvFront = canvasTex(400, 880, (g, w, h) => {
+  g.fillStyle = '#1b1e22'; g.fillRect(0, 0, w, h);
+  g.fillStyle = '#25292e'; for (let i = 0; i < 2; i++) g.fillRect(30, 40 + i * 90, w - 60, 72);
+  g.strokeStyle = '#3a3f46'; g.lineWidth = 3; for (let i = 0; i < 2; i++) g.strokeRect(30, 40 + i * 90, w - 60, 72);
+  g.fillStyle = '#0d0f11';
+  for (let y = 260; y < h - 70; y += 22) for (let x = 40 + ((y / 22) % 2) * 11; x < w - 40; x += 22) { g.beginPath(); g.arc(x, y, 7, 0, 7); g.fill(); }
+  g.fillStyle = '#c8d0d6'; g.font = 'bold 26px Arial'; g.fillText('SERVEUR', 30, h - 30);
+  g.font = '18px Arial'; g.fillStyle = '#8a96a0'; g.fillText('Ubuntu Server 24.04', 170, h - 32);
+});
+function makeServer() {
+  const g = new THREE.Group();
+  mesh(RB(20, 44, 46, 0.8), M.darkMetal, 0, 22, 0, g);
+  front(19, 41.8, std(0xffffff, 0.5, 0.4, { map: srvFront.tex }), 0, 22, 23.08, g);
+  mesh(new THREE.TorusGeometry(0.9, 0.18, 12, 32), M.chrome, 6.5, 41, 23.16, g);
+  const glow = (c) => new THREE.MeshBasicMaterial({ color: new THREE.Color(c).multiplyScalar(3), toneMapped: false });
+  const pwr = mesh(new THREE.CircleGeometry(0.35, 20), glow(0x32ff7a), 6.5, 41, 23.2, g, false);
+  const disk = mesh(new THREE.CircleGeometry(0.3, 20), glow(0xffa31a), 4.0, 41, 23.2, g, false);
+  for (const [x, z] of [[-8, -20], [8, -20], [-8, 20], [8, 20]]) mesh(new THREE.CylinderGeometry(1.2, 1.2, 0.8, 16), M.rubber, x, -0.4 + 0.4, z, g);
+  g.userData = { pwr, disk };
+  return g;
+}
+
+/** Switch 24 ports déjà en place. */
+const SW = { w: 44, h: 4.4, d: 24 };
+const portPx = i => ({ x: 760 + Math.floor(i / 2) * 80 + 30, y: i % 2 ? 123 : 63 });
+const swFront = canvasTex(1760, 176, (g, w, h) => {
+  const gr = g.createLinearGradient(0, 0, 0, h); gr.addColorStop(0, '#a3aab0'); gr.addColorStop(1, '#868d93');
+  g.fillStyle = gr; g.fillRect(0, 0, w, h);
+  g.fillStyle = '#20262c'; g.font = 'bold 34px Arial'; g.fillText('SWITCH 24 PORTS', 60, 80);
+  g.font = '24px Arial'; g.fillText('réseau en place', 60, 120);
+  for (let i = 0; i < 24; i++) {
+    const p = portPx(i);
+    g.fillStyle = '#111417'; g.fillRect(p.x - 28, p.y - 22, 56, 44);
+    g.fillStyle = '#2a2f35'; g.fillRect(p.x - 12, p.y + 14, 24, 8);
+    g.fillStyle = '#b8902f'; for (let k = 0; k < 8; k++) g.fillRect(p.x - 20 + k * 5.5, p.y - 20, 2.4, 8);
+    g.fillStyle = '#3a3f45'; g.fillRect(p.x - 38, p.y - 18, 6, 6);
+  }
+});
+const portLEDs = [];
+function makeSwitch() {
+  const g = new THREE.Group();
+  mesh(RB(SW.w, SW.h, SW.d, 0.25), M.plGray, 0, SW.h / 2, 0, g);
+  front(SW.w, SW.h, std(0xffffff, 0.45, 0.5, { map: swFront.tex }), 0, SW.h / 2, SW.d / 2 + 0.05, g);
+  for (let i = 0; i < 24; i++) {
+    const p = portPx(i);
+    const m = new THREE.MeshBasicMaterial({ color: new THREE.Color(0x2bff6a).multiplyScalar(0.15), toneMapped: false });
+    const led = mesh(new THREE.PlaneGeometry(0.16, 0.16), m, (p.x - 35) / 1760 * SW.w - SW.w / 2, SW.h - (p.y - 15) / 176 * SW.h, SW.d / 2 + 0.09, g, false);
+    portLEDs.push({ m, last: -9, used: false });
+  }
+  for (const x of [-20, 20]) for (const z of [-10, 10]) mesh(new THREE.CylinderGeometry(0.8, 0.8, 0.3, 12), M.rubber, x, 0.15, z, g);
+  return g;
+}
+function swPortLocal(i) { const p = portPx(i); return new THREE.Vector3(p.x / 1760 * SW.w - SW.w / 2, SW.h - p.y / 176 * SW.h, SW.d / 2); }
+
+function makeAP() {
+  const g = new THREE.Group();
+  mesh(RB(18, 3.4, 14, 1.4, 4), M.plWhite, 0, 1.7, 0, g);
+  for (const x of [-6, 6]) {
+    const a = mesh(RB(1.2, 15, 0.7, 0.3), M.plBlack, x, 9, -6.6, g); a.rotation.z = x < 0 ? 0.12 : -0.12;
+  }
+  const led = mesh(new THREE.CircleGeometry(0.3, 16), new THREE.MeshBasicMaterial({ color: new THREE.Color(0x3d9bff).multiplyScalar(3), toneMapped: false }), 0, 1.4, 7.06, g, false);
+  return g;
+}
+
+function makeMonitor() {
+  const g = new THREE.Group();
+  mesh(RB(22, 1.2, 16, 0.5), M.darkMetal, 0, 0.6, 0, g);
+  mesh(RB(4, 18, 2.4, 0.6), M.darkMetal, 0, 9, -3, g);
+  const panel = new THREE.Group(); panel.position.set(0, 26, -1.5); panel.rotation.x = -0.06; g.add(panel);
+  mesh(RB(56, 33.5, 2.4, 0.6), std(0x16181b, 0.4, 0.4), 0, 0, 0, panel);
+  const sc = canvasTex(1280, 740, () => {});
+  front(54, 31.2, makeScreenMat(sc), 0, 0.3, 1.28, panel);
+  return { g, screen: sc };
+}
+
+function makeSFF() {
+  const g = new THREE.Group();
+  mesh(RB(9, 30, 28, 0.6), std(0x202327, 0.45, 0.6), 0, 15, 0, g);
+  const glow = new THREE.MeshBasicMaterial({ color: new THREE.Color(0x4fc3ff).multiplyScalar(3), toneMapped: false });
+  mesh(new THREE.CircleGeometry(0.4, 16), glow, 0, 27, 14.06, g, false);
+  for (const y of [21, 19]) mesh(BOX(1.4, 0.6, 0.1), M.plBlack, 0, y, 14.08, g, false);
+  return g;
+}
+
+/** Antenne relais 4G (mode terrain), au loin. */
+/* =====================================================================
+   9. Animations : paquets, effets, attentes annulables
+   ===================================================================== */
+class Cancel extends Error {}
+let runId = 0;
+const packets = [], tweens = [], fx = [];
+const sphereGeo = new THREE.SphereGeometry(1, 20, 12);
+const glowMat = (hex, k = 3) => new THREE.MeshBasicMaterial({ color: new THREE.Color(hex).multiplyScalar(k), toneMapped: false, transparent: true });
+const COL = { kit: 0x3ddc84, req: 0x9fd0ff, rep: 0x4aa8ff, borne: 0xffb020, capt: 0xc18cff, err: 0xff5a4d, spi: 0xf4d03f };
+const CSS = { kit: '#3ddc84', req: '#9fd0ff', rep: '#4aa8ff', borne: '#ffb020', capt: '#c18cff', err: '#ff5a4d' };
+
+function tag(text, col) {
+  const d = document.createElement('div'); d.className = 'pkt'; d.style.color = col; d.innerHTML = `<i>${text}</i>`;
+  return new CSS2DObject(d);
+}
+/** Envoie un paquet lumineux sur un chemin. Renvoie 'ok' ou 'lost'. */
+function go(name, o = {}) {
+  const P = paths[name.replace(/^-/, '')];
+  const reverse = name.startsWith('-') !== !!o.reverse;
+  const id = runId;
+  return new Promise((res, rej) => {
+    const kind = o.kind || 'req';
+    const m = new THREE.Mesh(sphereGeo, glowMat(COL[kind] ?? kind, o.glow ?? 7));
+    m.scale.setScalar(o.size ?? P.size); scene.add(m);
+    const trail = [];
+    if (!o.noTrail) for (let i = 0; i < 6; i++) { const t = new THREE.Mesh(sphereGeo, glowMat(COL[kind] ?? kind, 3)); t.scale.setScalar((o.size ?? P.size) * (0.8 - i * 0.11)); t.material.opacity = 0.5 - i * 0.07; t.visible = false; scene.add(t); trail.push(t); }
+    let lab = null;
+    if (o.label && showLabels) { lab = tag(o.label, CSS[kind] || '#fff'); lab.position.set(0, 1.2, 0); m.add(lab); }
+    packets.push({ m, trail, hist: [], lab, P, t: reverse ? 1 : 0, dir: reverse ? -1 : 1, speed: o.speed ?? P.speed, dropAt: o.dropAt, res, rej, id, seed: Math.random() * 10, falling: false });
+    if (P.wifi) rings(reverse ? P.curve.getPoint(1) : P.curve.getPoint(0), COL[kind] ?? kind, 6);
+  });
+}
+function killPacket(p) {
+  if (p.lab) { p.m.remove(p.lab); p.lab.element.remove(); }
+  scene.remove(p.m); p.m.material.dispose();
+  for (const t of p.trail) { scene.remove(t); t.material.dispose(); }
+}
+/** Enchaîne plusieurs chemins (préfixe « - » = sens inverse). */
+async function route(list, o = {}) {
+  for (const n of list) { const r = await go(n, o); if (r === 'lost') return 'lost'; }
+  return 'ok';
+}
+function anim(dur, fn, ease = easeIO) {
+  const id = runId;
+  return new Promise((res, rej) => tweens.push({ t: 0, dur, fn, ease, res, rej, id }));
+}
+function sleep(ms) {
+  const id = runId;
+  return new Promise((res, rej) => setTimeout(() => (id === runId ? res() : rej(new Cancel())), ms));
+}
+const easeIO = k => k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2;
+const lerp = (a, b, k) => a + (b - a) * k;
+
+const ringGeo = new THREE.RingGeometry(0.92, 1, 64);
+function rings(pos, hex, r = 6, n = 3, axis = 'y', dur = 1.1) {
+  for (let i = 0; i < n; i++) {
+    const m = new THREE.Mesh(ringGeo, new THREE.MeshBasicMaterial({ color: new THREE.Color(hex).multiplyScalar(2.5), transparent: true, opacity: 0.9, side: THREE.DoubleSide, depthWrite: false, toneMapped: false, blending: THREE.AdditiveBlending }));
+    if (axis === 'y') m.rotation.x = -Math.PI / 2; else m.lookAt(camera.position);
+    m.position.copy(pos); m.scale.setScalar(0.01); scene.add(m);
+    fx.push({ m, t: -i * 0.22, dur, r });
+  }
+}
+
+/* =====================================================================
+   6. Projet de Yaksan : poste Windows, boîtier témoin, réseau en place
+   Unité : 1 = 1 cm. Le dessus du bureau est à y = 0.
+   ===================================================================== */
+const V = (x, y, z) => new THREE.Vector3(x, y, z);
+const W = (obj, v) => { obj.updateWorldMatrix(true, false); return obj.localToWorld(v.clone()); };
+function cable(points, mat, r = 0.3, seg = 140) {
+  const c = new THREE.CatmullRomCurve3(points, false, 'catmullrom', 0.5);
+  const t = new THREE.Mesh(new THREE.TubeGeometry(c, seg, r, 10, false), mat); t.castShadow = true; t.receiveShadow = true; scene.add(t);
+  return c;
+}
+function reverseCurve(c) { return new THREE.CatmullRomCurve3(c.points.slice().reverse(), false, 'catmullrom', 0.5); }
+const FONT = '"Nunito", Arial, sans-serif', MONO = 'ui-monospace, Consolas, monospace';
+const glowBasic = (hex, k = 3) => new THREE.MeshBasicMaterial({ color: new THREE.Color(hex).multiplyScalar(k), toneMapped: false });
+
+/* ---------------------------------------------------------------------
+   6.1 La tour du PC de l'agent : voyants d'alimentation et du disque à l'avant
+   --------------------------------------------------------------------- */
+const TW = { w: 18, h: 42, d: 40 };
+const towerFront = canvasTex(360, 840, (g, w, h) => {
+  g.fillStyle = '#1c1f23'; g.fillRect(0, 0, w, h);
+  g.fillStyle = '#25292e'; g.fillRect(24, 40, w - 48, 90);
+  g.strokeStyle = '#353a41'; g.lineWidth = 3; g.strokeRect(24, 40, w - 48, 90);
+  g.fillStyle = '#0d0f11';
+  for (let y = 330; y < h - 60; y += 20) for (let x = 40 + ((y / 20) % 2) * 10; x < w - 36; x += 20) { g.beginPath(); g.arc(x, y, 6, 0, 7); g.fill(); }
+  g.fillStyle = '#9aa6b0'; g.font = 'bold 22px Arial'; g.fillText('ALIM', 100, 196); g.fillText('HDD', 214, 196);
+  g.fillStyle = '#8a96a0'; g.font = '20px Arial'; g.fillText('PC de bureau · Windows 11', 40, h - 24);
+});
+function makeTower() {
+  const g = new THREE.Group();
+  mesh(RB(TW.w, TW.h, TW.d, 0.6), std(0x202327, 0.45, 0.6), 0, TW.h / 2, 0, g);
+  front(TW.w - 0.6, TW.h - 0.6, std(0xffffff, 0.5, 0.3, { map: towerFront.tex }), 0, TW.h / 2, TW.d / 2 + 0.05, g);
+  /* bouton marche/arrêt (il s'enfonce quand l'agent appuie) */
+  const button = mesh(new THREE.CylinderGeometry(1.1, 1.1, 0.8, 24), std(0x2e3238, 0.35, 0.6), 0, 36.5, TW.d / 2 + 0.3, g);
+  button.rotation.x = Math.PI / 2;
+  mesh(new THREE.TorusGeometry(1.2, 0.12, 8, 28), M.chrome, 0, 36.5, TW.d / 2 + 0.1, g);
+  /* voyants : alimentation (vert) et disque (orange) */
+  const pwr = mesh(new THREE.CircleGeometry(0.42, 20), glowBasic(0x32ff7a, 3), -4.2, 33.4, TW.d / 2 + 0.12, g, false);
+  const hdd = mesh(new THREE.CircleGeometry(0.42, 20), glowBasic(0xffa31a, 0.05), 4.2, 33.4, TW.d / 2 + 0.12, g, false);
+  /* ports USB en façade */
+  for (const x of [-2.2, 2.2]) mesh(BOX(1.4, 0.55, 0.2), M.plBlack, x, 29.4, TW.d / 2 + 0.1, g, false);
+  for (const [x, z] of [[-7, -17], [7, -17], [-7, 17], [7, 17]]) mesh(new THREE.CylinderGeometry(1.2, 1.2, 0.8, 16), M.rubber, x, 0, z, g);
+  g.userData = { pwr, hdd, button };
+  return g;
+}
+const tower = makeTower(); tower.position.set(-95, 0, -25); scene.add(tower);
+const TFRONT = TW.d / 2;   // face avant de la tour, en coordonnées locales
+
+/* deux photocapteurs collés sur les voyants : petits tubes noirs (ils voient la lumière du voyant, pas celle de la pièce) */
+function makeSensorCap() {
+  const g = new THREE.Group();
+  const tube = mesh(new THREE.CylinderGeometry(0.85, 0.85, 0.9, 24, 1, true), std(0x111214, 0.7, 0, { side: THREE.DoubleSide }), 0, 0, 0, g, false);
+  tube.rotation.x = Math.PI / 2;
+  mesh(BOX(2.2, 0.5, 0.08), std(0xe9e3c9, 0.9), 0, -1.05, -0.4, g, false);   // ruban adhésif
+  return g;
+}
+const capP = makeSensorCap(); capP.position.set(-4.2, 33.4, TFRONT + 0.55); tower.add(capP);
+const capD = makeSensorCap(); capD.position.set(4.2, 33.4, TFRONT + 0.55); tower.add(capD);
+
+/* ---------------------------------------------------------------------
+   6.2 L'écran et le clavier de l'agent
+   --------------------------------------------------------------------- */
+const mon = makeMonitor(); mon.g.position.set(-46, 0, -22); mon.g.rotation.y = 0.12; scene.add(mon.g);
+mesh(RB(42, 1.6, 14, 0.5), std(0x1b1d20, 0.6), -44, 0.8, 8, scene).rotation.y = 0.12;    // clavier
+mesh(RB(6, 2.2, 10, 1.6), std(0x1b1d20, 0.5), -14, 1.1, 10, scene);                      // souris
+
+/* ---------------------------------------------------------------------
+   6.3 Le boîtier témoin : plexiglas posé devant la tour
+   --------------------------------------------------------------------- */
+const BX = { w: 16, h: 6, d: 12 };
+const box = new THREE.Group(); box.position.set(-92, 0, 13); scene.add(box);
+mesh(RB(BX.w, 0.4, BX.d, 0.3), std(0x1a1c1f, 0.6), 0, 0.2, 0, box);
+const acryl = new THREE.MeshPhysicalMaterial({ color: 0xb9d4e2, roughness: 0.18, transparent: true, opacity: 0.16, clearcoat: 0.25, clearcoatRoughness: 0.2, envMapIntensity: 0.6, depthWrite: false, side: THREE.DoubleSide });
+mesh(BOX(BX.w, BX.h, 0.3), acryl, 0, BX.h / 2, BX.d / 2, box, false);
+mesh(BOX(BX.w, BX.h, 0.3), acryl, 0, BX.h / 2, -BX.d / 2, box, false);
+mesh(BOX(0.3, BX.h, BX.d), acryl, BX.w / 2, BX.h / 2, 0, box, false);
+mesh(BOX(0.3, BX.h, BX.d), acryl, -BX.w / 2, BX.h / 2, 0, box, false);
+mesh(BOX(BX.w + 0.4, 0.3, BX.d + 0.4), acryl, 0, BX.h + 0.15, 0, box, false);
+for (const [x, z] of [[-7.5, -5.5], [7.5, -5.5], [-7.5, 5.5], [7.5, 5.5]]) mesh(new THREE.CylinderGeometry(0.25, 0.25, BX.h, 10), M.steel, x, BX.h / 2, z, box);
+for (const [x, z] of [[-7, -5], [7, -5], [-7, 5], [7, 5]]) mesh(new THREE.CylinderGeometry(0.6, 0.6, 0.3, 12), M.rubber, x, -0.05, z, box);
+
+/* ESP32 sur plaque à essais, prise USB vers l'arrière (vers la tour) */
+const bb = makeBreadboard(8.2, 5.5); bb.rotation.y = -Math.PI / 2; bb.position.set(-3.2, 0.4 + 0.85, 0.6); box.add(bb);
+const esp = makeESP32(); esp.rotation.y = -Math.PI / 2; esp.position.set(-3.2, 0.4 + 0.85 + 0.75, 0.6); box.add(esp);
+
+/* module horloge DS3231 (carte bleue + pile bouton) */
+function makeDS3231() {
+  const g = new THREE.Group();
+  const t = canvasTex(380, 220, (c, w, h) => {
+    c.fillStyle = '#1f55ad'; c.fillRect(0, 0, w, h);
+    c.fillStyle = '#fff'; c.font = 'bold 30px Arial'; c.fillText('DS3231', 20, 46); c.font = '20px Arial'; c.fillText('horloge précise', 20, 78);
+    c.fillStyle = '#101114'; c.fillRect(30, 110, 80, 60);
+  });
+  mesh(BOX(3.8, 0.16, 2.2), M.pcbBlue, 0, 0, 0, g);
+  flat(3.8, 2.2, std(0xffffff, 0.45, 0.1, { map: t.tex }), 0, 0.082, 0, g);
+  mesh(new THREE.CylinderGeometry(0.85, 0.85, 0.32, 28), M.steel, 0.9, 0.24, 0.2, g);   // pile CR2032
+  return g;
+}
+const rtc = makeDS3231(); rtc.position.set(4.6, 1.0, -3.0); box.add(rtc);
+/* module carte microSD */
+function makeSD() {
+  const g = new THREE.Group();
+  mesh(BOX(4.2, 0.16, 2.4), M.pcbBlue, 0, 0, 0, g);
+  mesh(BOX(1.6, 0.25, 1.5), M.shield, 0.9, 0.2, 0, g);
+  mesh(BOX(1.1, 0.08, 1.2), std(0x24324a, 0.4), 1.25, 0.36, 0, g);   // la carte microSD
+  const t = canvasTex(200, 110, (c, w, h) => { c.clearRect(0, 0, w, h); c.fillStyle = '#fff'; c.font = 'bold 26px Arial'; c.fillText('microSD', 8, 40); });
+  flat(2.0, 1.1, new THREE.MeshStandardMaterial({ map: t.tex, transparent: true }), -1.0, 0.085, 0, g);
+  return g;
+}
+const sd = makeSD(); sd.position.set(4.6, 1.0, 2.4); box.add(sd);
+/* supercondensateur 1 F : la réserve d'énergie */
+const capTex = canvasTex(256, 128, (c, w, h) => { c.fillStyle = '#16181b'; c.fillRect(0, 0, w, h); c.fillStyle = '#e8c130'; c.font = 'bold 44px Arial'; c.fillText('1 F 5,5 V', 18, 80); });
+const scap = mesh(new THREE.CylinderGeometry(1.0, 1.0, 2.6, 28), std(0xffffff, 0.4, 0.2, { map: capTex.tex }), -6.2, 1.7, -3.4, box);
+mesh(new THREE.CylinderGeometry(1.02, 1.02, 0.12, 28), M.steel, -6.2, 3.05, -3.4, box);
+/* trois LED sur le couvercle : verte (tout va bien), orange (installation, V2), rouge (coupure) */
+const ledV = makeLED('vert', 0x22ff55); ledV.position.set(-5.5, BX.h + 0.3, 4.4); box.add(ledV);
+const ledO = makeLED('orange', 0xffa31a); ledO.position.set(-3.8, BX.h + 0.3, 4.4); box.add(ledO);
+const ledR = makeLED('rouge', 0xff3020); ledR.position.set(-2.1, BX.h + 0.3, 4.4); box.add(ledR);
+
+/* multiprise et chargeur USB (le boîtier a sa propre alimentation, branchée sur la même multiprise que le PC) */
+const strip = new THREE.Group(); strip.position.set(-62, 0, -62); scene.add(strip);
+mesh(RB(30, 3.6, 5.5, 0.6), M.plWhite, 0, 1.8, 0, strip);
+for (let i = 0; i < 4; i++) mesh(new THREE.CylinderGeometry(1.5, 1.5, 0.2, 24), std(0xb9b9b9, 0.5), -10 + i * 6.5, 3.62, 0, strip);
+const stripLed = mesh(BOX(2, 0.6, 1), glowBasic(0xff5a2a, 2), 12.5, 3.62, 0, strip, false);
+mesh(RB(4.5, 3.6, 4.5, 0.5), M.plWhite, -10, 5.4, 0, strip);       // chargeur USB du boîtier
+mesh(RB(4, 3, 5, 0.4), M.plBlack, -3.5, 5.0, 0, strip);           // fiche du PC
+
+scene.updateMatrixWorld(true);
+
+/* ---------------------------------------------------------------------
+   6.4 Câblage : USB données, photocapteurs, alimentations, fils dans le boîtier
+   --------------------------------------------------------------------- */
+const ESPA = { D34: 3, D35: 4, GND: 13 };
+const ESPB = { D23: 0, D22: 1, D21: 4, D19: 5, D18: 6, D5: 7, GND: 13, V33: 14 };
+const pA = (k, o = 0.55) => W(esp, espHole('A', ESPA[k], o));
+const pB = (k, o = 0.55) => W(esp, espHole('B', ESPB[k], o));
+const wires = {};
+const rtcPin = i => W(rtc, V(-1.75, 0.3, -0.6 + i * 0.4));
+const sdPin = i => W(sd, V(-2.0, 0.3, -0.75 + i * 0.3));
+wires.rtcSDA = wire(rtcPin(0), pB('D21'), 0x3498db, 1.2);
+wires.rtcSCL = wire(rtcPin(1), pB('D22'), 0xf4d03f, 1.4);
+wire(rtcPin(2), pB('V33', 0.8), 0xe74c3c, 1.0); wire(rtcPin(3), pB('GND', 0.8), 0x222222, 0.9);
+wires.sdSCK = wire(sdPin(0), pB('D18'), 0xf4d03f, 1.6);
+wires.sdMOSI = wire(sdPin(1), pB('D23'), 0x2ecc71, 1.8);
+wire(sdPin(2), pB('D19'), 0x3498db, 2.0); wire(sdPin(3), pB('D5'), 0xff8c1a, 2.2);
+/* capteurs des voyants : du devant de la tour jusqu'aux entrées analogiques D34 et D35 */
+const entree = W(box, V(-BX.w / 2 + 2, 2.2, -BX.d / 2));
+function capCable(cap, dx, pin) {
+  const a = W(cap, V(0, -1.0, -0.2)), front = W(tower, V(cap.position.x, 0, TFRONT + 0.4));
+  const c = cable([a, a.clone().add(V(0, -2, 0.3)), V(a.x, 12, front.z + 0.2), V(a.x, 0.25, front.z + 1.5), V(entree.x + dx, 0.25, entree.z - 2), entree.clone().add(V(dx, 0, 0)), pA(pin, 1.2)], wireMat(0x8e44ad), 0.09, 90);
+  return c;
+}
+wires.capP = capCable(capP, -0.6, 'D34');
+wires.capD = capCable(capD, 0.6, 'D35');
+/* câble USB : ESP32 → façade de la tour (données série) */
+const usbA = W(esp, V(-2.75, 0.22, 0)), usbT = W(tower, V(2.2, 29.4, TFRONT + 0.3));
+const cUSB = cable([usbA, usbA.clone().add(V(0, 0, -1.4)), W(box, V(1, 1.2, -BX.d / 2 - 0.4)), V(usbT.x + 3, 0.25, usbT.z + 4), V(usbT.x + 1, 6, usbT.z + 0.8), V(usbT.x, 20, usbT.z + 1.0), usbT.clone().add(V(0, -0.4, 1.2)), usbT], M.cableBlack, 0.2, 140);
+/* alimentation du boîtier : son chargeur USB sur la multiprise */
+const cPwrBox = cable([W(box, V(BX.w / 2 + 0.2, 1.2, -3)), W(box, V(BX.w / 2 + 3, 0.25, -5)), V(-70, 0.25, -20), V(-70, 0.25, -50), V(-72, 0.25, -58), W(strip, V(-10, 4, 2.5))], M.cableGray, 0.18);
+/* alimentation de la tour */
+cable([W(tower, V(0, 30, -TW.d / 2 - 0.2)), W(tower, V(0, 20, -TW.d / 2 - 3)), V(-95, 0.3, -52), V(-75, 0.3, -64), W(strip, V(-3.5, 4, 2.6))], M.cableBlack, 0.35);
+
+/* ---------------------------------------------------------------------
+   6.5 Réseau en place : routeur, switch, serveur, poste du support
+   --------------------------------------------------------------------- */
+const rtFront = canvasTex(1760, 176, (g, w, h) => {
+  g.fillStyle = '#23272c'; g.fillRect(0, 0, w, h);
+  g.fillStyle = '#1aa3d9'; g.font = 'bold 46px Arial'; g.fillText('cisco', 60, 80);
+  g.fillStyle = '#c8d0d6'; g.font = '26px Arial'; g.fillText('ISR 4331 · DHCP · DNS · NTP', 60, 128);
+  for (let i = 0; i < 3; i++) { g.fillStyle = '#111417'; g.fillRect(1100 + i * 110, 60, 70, 56); g.fillStyle = '#b8902f'; for (let k = 0; k < 8; k++) g.fillRect(1108 + i * 110 + k * 7, 64, 3, 10); }
+  g.fillStyle = '#3a3f45'; g.fillRect(800, 50, 220, 80);
+});
+function makeRouter() {
+  const g = new THREE.Group();
+  mesh(RB(44, 4.4, 30, 0.25), std(0x2a2e33, 0.5, 0.6), 0, 2.2, 0, g);
+  front(44, 4.4, std(0xffffff, 0.45, 0.5, { map: rtFront.tex }), 0, 2.2, 15.05, g);
+  const led = mesh(new THREE.PlaneGeometry(0.4, 0.4), glowBasic(0x2bff6a, 3), 19, 3.2, 15.1, g, false);
+  for (const x of [-20, 20]) for (const z of [-13, 13]) mesh(new THREE.CylinderGeometry(0.8, 0.8, 0.3, 12), M.rubber, x, 0.15, z, g);
+  return g;
+}
+const rt = makeRouter(); rt.position.set(22, 0, -60); scene.add(rt);
+const sw = makeSwitch(); sw.position.set(22, 4.7, -57); scene.add(sw);
+const server = makeServer(); server.position.set(92, 0, -42); scene.add(server);
+const monT = makeMonitor(); monT.g.position.set(58, 0, 4); monT.g.rotation.y = -0.18; scene.add(monT.g);
+const sff = makeSFF(); sff.position.set(96, 0, 2); sff.rotation.y = -0.18; scene.add(sff);
+mesh(RB(42, 1.6, 14, 0.5), std(0x1b1d20, 0.6), 58, 0.8, 28, scene).rotation.y = -0.18;
+scene.updateMatrixWorld(true);
+
+const P_SRV = 0, P_RT = 2, P_PC = 4, P_TEC = 6;
+const swP = i => W(sw, swPortLocal(i));
+const out = (p, dz = 2.5) => p.clone().add(V(0, 0, dz));
+function plug(p) { mesh(BOX(1.3, 1.1, 1.8), new THREE.MeshPhysicalMaterial({ color: 0xdfe8ee, transparent: true, opacity: 0.6, roughness: 0.1 }), p.x, p.y, p.z + 0.9); }
+const rtPort = W(rt, V(10.3, 2.4, 15.2));
+const cSrv = cable([swP(P_SRV), out(swP(P_SRV)), V(14, 0.3, -38), V(50, 0.3, -36), V(78, 0.3, -36), V(81.5, 4, -40), W(server, V(-10.1, 8, 2))], M.cableBlue);
+const cRt = cable([swP(P_RT), out(swP(P_RT), 3), V(swP(P_RT).x + 6, 4, -40), out(rtPort, 4), rtPort], M.cableGray, 0.28);
+const cPC = cable([swP(P_PC), out(swP(P_PC), 3), V(4, 0.3, -38), V(-40, 0.3, -42), V(-76, 0.3, -50), V(-92, 0.3, -50), W(tower, V(3, 8, -TW.d / 2 - 0.5)), W(tower, V(3, 10, -TW.d / 2))], M.cableBlue);
+const cTec = cable([swP(P_TEC), out(swP(P_TEC), 3), V(40, 0.3, -38), V(76, 0.3, -24), V(90, 0.3, -14), W(sff, V(0, 10, -14.2))], M.cableYellow);
+for (const i of [P_SRV, P_RT, P_PC, P_TEC]) { plug(swP(i)); portLEDs[i].used = true; }
+
+/* =====================================================================
+   7. Chemins des messages
+   ===================================================================== */
+const paths = {};
+function addPath(name, curve, o = {}) { paths[name] = { curve, len: curve.getLength(), size: 1.1, speed: 75, ...o }; }
+addPath('usb', reverseCurve(cUSB), { speed: 30, size: 0.45 });     // tour → boîtier
+addPath('pcLink', reverseCurve(cPC), { port: P_PC });               // tour → switch
+addPath('srvLink', cSrv, { port: P_SRV, srv: true });
+addPath('rtLink', cRt, { port: P_RT });
+addPath('tecLink', cTec, { port: P_TEC });
+addPath('pwrBox', reverseCurve(cPwrBox), { speed: 60, size: 0.6 });
+for (const k in wires) addPath('w_' + k, wires[k], { speed: 14, size: 0.2 });
+const TO_SRV = ['pcLink', 'srvLink'], SRV_TO_TEC = ['-srvLink', 'tecLink'], TEC_TO_SRV = ['-tecLink', 'srvLink'];
+const TO_RT = ['pcLink', 'rtLink'], FROM_RT = ['-rtLink', '-pcLink'];
+
+Object.assign(COL, { hb: 0xf2f4f6, inst: 0xffd84a, https: 0x4aa8ff, net: 0x3ddc84, sens: 0xc18cff, err: 0xff5a4d });
+Object.assign(CSS, { hb: '#f2f4f6', inst: '#ffd84a', https: '#4aa8ff', net: '#3ddc84', sens: '#c18cff', err: '#ff5a4d' });
+
+/* =====================================================================
+   8. Étiquettes 3D
+   ===================================================================== */
+const labelGroups = { overview: [], boitier: [] };
+function label(group, pos, title, sub, cls = '') {
+  const d = document.createElement('div'); d.className = 'lab ' + cls;
+  d.innerHTML = `<b>${title}</b>${sub ? `<span>${sub}</span>` : ''}`;
+  const o = new CSS2DObject(d); o.position.copy(pos); scene.add(o); labelGroups[group].push(o); return o;
+}
+label('overview', W(tower, V(0, TW.h + 5, 0)), 'Tour du PC de l\'agent', 'Windows 11 · agent PowerShell');
+label('overview', W(box, V(0, 11, 0)), 'Boîtier témoin', 'ESP32 · horloge · carte SD · réserve 1 F');
+label('overview', W(mon.g, V(0, 48, 0)), 'Écran de l\'agent', 'mise à jour obligatoire');
+label('overview', V(22, 16, -62), 'Routeur et switch', 'réseau en place · DHCP · DNS · NTP');
+label('overview', V(92, 50, -42), 'Serveur Ubuntu', 'API HTTPS · SQLite · page des causes');
+label('overview', V(58, 50, 4), 'Poste du support', 'page des causes des incidents');
+label('boitier', W(strip, V(0, 9, 0)), 'Multiprise', 'PC et boîtier sur la même prise', 'small');
+label('boitier', W(esp, V(0.9, 0.7, 0)), 'ESP32 DevKit', 'relié au PC en USB série', 'small');
+label('boitier', W(rtc, V(0, 0.6, 0)), 'Horloge DS3231', 'garde l\'heure exacte · I²C', 'small');
+label('boitier', W(sd, V(0, 0.6, 0)), 'Carte microSD', 'le récit · SPI', 'small');
+label('boitier', W(box, V(-6.2, 3.6, -3.4)), 'Supercondensateur 1 F', 'quelques secondes pour écrire', 'small');
+label('boitier', W(box, V(-3.8, BX.h + 2.2, 4.4)), 'LED vert · orange · rouge', 'état du boîtier', 'small');
+label('boitier', W(capP, V(0, 1.6, 0)), 'Capteur du voyant d\'alimentation', 'photocapteur collé · D34', 'small');
+label('boitier', W(capD, V(0, 1.6, 0)), 'Capteur du voyant disque', 'photocapteur collé · D35', 'small');
+label('boitier', W(tower, V(2.2, 27.6, TFRONT + 1)), 'USB série', 'battement, messages, récit', 'small');
+function mkRead(pos, col) { const d = document.createElement('div'); d.className = 'read'; d.style.borderLeftColor = col; const o = new CSS2DObject(d); o.position.copy(pos); o.visible = false; scene.add(o); return o; }
+const readSens = mkRead(W(tower, V(0, 41, TFRONT + 2)), '#c18cff');
+const readBox = mkRead(W(box, V(9, 9, 0)), '#f2f4f6');
+const readPC = mkRead(W(tower, V(-2, 18, TFRONT + 3)), '#ffd84a');
+const readSrv = mkRead(V(92, 62, -42), '#4aa8ff');
+const READS = [readSens, readBox, readPC, readSrv];
+
+let showLabels = true, labelMode = 'overview';
+function refreshLabels() {
+  for (const g in labelGroups) for (const o of labelGroups[g]) o.visible = showLabels && g === labelMode;
+  for (const r of READS) r.visible = !!r.userData.on && showLabels;
+}
+function setRead(o, html) { o.element.innerHTML = html; o.userData.on = !!html; o.visible = o.userData.on && showLabels; }
+
+/* ---- son ---- */
+let soundOn = true, actx = null;
+function beep(freq = 2400, dur = 0.08, vol = 0.04) {
+  if (!soundOn) return;
+  try {
+    actx = actx || new (window.AudioContext || window.webkitAudioContext)();
+    const o = actx.createOscillator(), g = actx.createGain();
+    o.type = 'sine'; o.frequency.value = freq; g.gain.value = vol;
+    o.connect(g).connect(actx.destination); o.start(); o.stop(actx.currentTime + dur);
+  } catch (e) { /* pas de son */ }
+}
+
+/* =====================================================================
+   10. État du monde et écrans
+   ===================================================================== */
+/* pc : 'on' (allumé), 'fige' (figé : voyant allumé, disque immobile, plus de battement), 'off' (éteint) ; secteur : courant présent */
+const world = { pc: 'on', secteur: true, srvAct: -9, incidents: [], recit: [], courbe: false };
+
+function drawAgent(mode, o = {}) {
+  mon.screen.redraw((g, w, h) => {
+    if (mode === 'noir') { g.fillStyle = '#000'; g.fillRect(0, 0, w, h); return; }
+    if (mode === 'boot') { g.fillStyle = '#000'; g.fillRect(0, 0, w, h); g.fillStyle = '#3d8bd9'; for (let i = 0; i < 4; i++) { g.fillRect(w / 2 - 70 + (i % 2) * 74, h / 2 - 110 + Math.floor(i / 2) * 74, 66, 66); } g.fillStyle = '#ccc'; g.font = `30px ${FONT}`; g.fillText('Redémarrage…', w / 2 - 95, h / 2 + 90); return; }
+    drawScreenBg(g, w, h, '#2b5f8a', '#173a5c');
+    g.fillStyle = 'rgba(0,0,0,.35)'; g.fillRect(0, h - 50, w, 50);
+    g.fillStyle = '#d6e4ee'; g.font = `24px ${FONT}`; g.fillText(o.heure || '10:02', w - 100, h - 16);
+    const x = 140, y = 90, ww = w - 280, hh = h - 220;
+    if (mode === 'bureau') {
+      g.fillStyle = '#f4f7f9'; g.fillRect(x, y, ww, hh); g.fillStyle = '#1d5a86'; g.fillRect(x, y, ww, 54);
+      g.fillStyle = '#fff'; g.font = `bold 28px ${FONT}`; g.fillText('Dossier en cours.docx', x + 20, y + 37);
+      for (let i = 0; i < 8; i++) { g.fillStyle = '#c9d3da'; g.fillRect(x + 36, y + 96 + i * 40, ww * (i % 3 ? 0.78 : 0.55), 16); }
+      return;
+    }
+    if (mode === 'install' || mode === 'fige') {
+      g.fillStyle = '#f4f7f9'; g.fillRect(x, y, ww, hh); g.fillStyle = '#c98a00'; g.fillRect(x, y, ww, 54);
+      g.fillStyle = '#fff'; g.font = `bold 28px ${FONT}`; g.fillText('Mise à jour obligatoire', x + 20, y + 37);
+      g.fillStyle = '#13222c'; g.font = `bold 34px ${FONT}`; g.fillText('Logiciel métier 4.2', x + 40, y + 120);
+      g.font = `26px ${FONT}`; g.fillStyle = '#56656f'; g.fillText(mode === 'fige' ? 'Ne répond pas' : 'Installation en cours…', x + 40, y + 168);
+      g.fillStyle = '#e1e7ea'; g.fillRect(x + 40, y + 210, ww - 80, 34);
+      g.fillStyle = mode === 'fige' ? '#9aa6b0' : '#2e8b57'; g.fillRect(x + 40, y + 210, (ww - 80) * (o.pct || 0) / 100, 34);
+      g.fillStyle = '#13222c'; g.font = `bold 26px ${FONT}`; g.fillText(`${Math.round(o.pct || 0)} %`, x + 40, y + 290);
+      if (o.v2) { g.fillStyle = '#c98a00'; rr(g, x + 40, y + 320, ww - 80, 60, 12); g.fill(); g.fillStyle = '#fff'; g.font = `bold 26px ${FONT}`; g.fillText('Ne pas éteindre le PC pendant l\'installation', x + 62, y + 359); }
+      if (mode === 'fige') { g.fillStyle = 'rgba(255,255,255,.55)'; g.fillRect(x, y, ww, hh); g.fillStyle = '#c2382e'; g.font = `bold 30px ${FONT}`; g.fillText('(Pas de réponse)', x + ww - 290, y + 37); }
+      return;
+    }
+    if (mode === 'analyse') {
+      g.fillStyle = '#0c2348'; g.fillRect(x, y, ww, hh); g.fillStyle = '#1d5a86'; g.fillRect(x, y, ww, 54);
+      g.fillStyle = '#fff'; g.font = `bold 28px ${FONT}`; g.fillText('Analyse de l\'incident (lecture seule)', x + 20, y + 37);
+      g.font = `25px ${MONO}`;
+      (o.lignes || []).forEach(([t, c], i) => { g.fillStyle = c || '#e6edf3'; g.fillText(t, x + 24, y + 100 + i * 40); });
+    }
+  });
+}
+function drawTech() {
+  monT.screen.redraw((g, w, h) => {
+    g.fillStyle = '#f3f6f7'; g.fillRect(0, 0, w, h);
+    g.fillStyle = '#2a3a4a'; g.fillRect(0, 0, w, 66);
+    g.fillStyle = '#fff'; g.font = `bold 30px ${FONT}`; g.fillText('Support · causes des incidents', 26, 44);
+    if (world.courbe) { drawCourbe(g, w, h); return; }
+    g.fillStyle = '#56656f'; g.font = `bold 22px ${FONT}`; g.fillText('Poste', 30, 110); g.fillText('Heure', 190, 110); g.fillText('Cause probable', 330, 110);
+    if (!world.incidents.length) { g.fillStyle = '#6c7a84'; g.font = `26px ${FONT}`; g.fillText('Aucun incident', 30, 160); }
+    world.incidents.forEach((t, i) => {
+      const y = 160 + i * 150;
+      g.fillStyle = t.flash ? '#fff4c2' : '#fff'; g.fillRect(16, y - 36, w - 32, 136);
+      g.fillStyle = '#13222c'; g.font = `bold 26px ${FONT}`; g.fillText(t.pc, 30, y); g.font = `24px ${FONT}`; g.fillText(t.h, 190, y);
+      g.fillStyle = t.col; g.font = `bold 26px ${FONT}`; g.fillText(t.cause, 330, y);
+      g.fillStyle = '#56656f'; g.font = `22px ${FONT}`; g.fillText(t.preuve, 330, y + 36); g.fillText('À faire : ' + t.faire, 330, y + 70);
+    });
+  });
+}
+/* volet physique : décharge du supercondensateur (modèle linéaire à courant constant + points de mesure d'exemple) */
+function drawCourbe(g, w, h) {
+  const X0 = 110, Y0 = h - 90, LW = w - 180, LH = h - 230;
+  g.fillStyle = '#13222c'; g.font = `bold 26px ${FONT}`; g.fillText('Réserve d\'énergie : tension du supercondensateur', 30, 112);
+  g.strokeStyle = '#13222c'; g.lineWidth = 2; g.beginPath(); g.moveTo(X0, Y0 - LH); g.lineTo(X0, Y0); g.lineTo(X0 + LW, Y0); g.stroke();
+  const tx = t => X0 + t / 25 * LW, vy = v => Y0 - (v - 2.5) / 3 * LH;
+  g.fillStyle = '#56656f'; g.font = `20px ${FONT}`;
+  for (const v of [3, 4, 5]) { g.fillText(v + ' V', X0 - 56, vy(v) + 6); g.fillStyle = '#e1e7ea'; g.fillRect(X0 + 1, vy(v), LW, 1); g.fillStyle = '#56656f'; }
+  for (const t of [0, 5, 10, 15, 20, 25]) g.fillText(t + ' s', tx(t) - 12, Y0 + 28);
+  g.strokeStyle = '#c2382e'; g.setLineDash([8, 6]); g.beginPath(); g.moveTo(X0, vy(3.3)); g.lineTo(X0 + LW, vy(3.3)); g.stroke(); g.setLineDash([]);
+  g.fillStyle = '#c2382e'; g.fillText('seuil de l\'ESP32 : 3,3 V', tx(16), vy(3.3) - 10);
+  g.strokeStyle = '#1d5a86'; g.lineWidth = 4; g.beginPath(); g.moveTo(tx(0), vy(5)); g.lineTo(tx(25), vy(5 - 0.1 * 25)); g.stroke();
+  g.fillStyle = '#1d5a86'; g.font = `bold 22px ${FONT}`; g.fillText('modèle : V = 5 − I·t / C', tx(1), vy(3.0));
+  g.fillStyle = '#c98a00';
+  [[0, 5.0], [3, 4.66], [6, 4.37], [9, 4.06], [12, 3.78], [15, 3.49], [18, 3.22]].forEach(([t, v]) => { g.beginPath(); g.arc(tx(t), vy(v), 7, 0, 7); g.fill(); });
+  g.fillStyle = '#13222c'; g.font = `22px ${FONT}`; g.fillText('● mesures (valeurs d\'exemple)   ·   écriture sur la carte : < 1 s', 30, h - 26);
+}
+function incident(o) {
+  world.incidents.unshift({ ...o, flash: true }); drawTech();
+  setTimeout(() => { world.incidents.forEach(x => x.flash = false); drawTech(); }, 1200);
+}
+/* récit du boîtier : lignes horodatées affichées au-dessus de lui */
+function recit(ligne, col = '#e6edf3') {
+  world.recit.push([ligne, col]); if (world.recit.length > 4) world.recit.shift();
+  setRead(readBox, '<b>Récit du boîtier</b><br>' + world.recit.map(([t, c]) => `<span style="color:${c}">${t}</span>`).join('<br>'));
+}
+function boxLed(v, o, r) { setLED('vert', v); setLED('orange', o); setLED('rouge', r); }
+
+function baseline(i) {
+  world.pc = 'on'; world.secteur = true; world.incidents = []; world.recit = []; world.courbe = false;
+  drawAgent('bureau'); drawTech(); boxLed(true, false, false);
+  for (const r of READS) { r.userData.on = false; r.visible = false; }
+  tower.userData.button.position.z = TFRONT + 0.3;
+  stripLed.material.color.setRGB(1, 0.35, 0.16).multiplyScalar(2);
+}
+
+/* =====================================================================
+   11. Les étapes (le scénario)
+   ===================================================================== */
+function flyTo(pos, target, dur = 1.8) {
+  const asp = camera.aspect, p = V(...pos), t = V(...target);
+  if (asp < 1) p.sub(t).multiplyScalar(1.15 / asp).add(t);
+  cam.from = { p: camera.position.clone(), t: controls.target.clone() }; cam.to = { p, t }; cam.k = 0; cam.dur = dur;
+}
+const cam = { k: 1, dur: 1 };
+const srv = html => setRead(readSrv, html);
+/* battement : chaque seconde, le PC envoie « je suis vivant » au boîtier */
+async function battements(n = Infinity) {
+  for (let i = 0; i < n; i++) { if (world.pc === 'on') go('usb', { kind: 'hb', size: 0.45 }).catch(() => {}); await sleep(1000); }
+}
+async function capteurs() { await Promise.all([go('w_capP', { kind: 'sens', size: 0.22, noTrail: true }), go('w_capD', { kind: 'sens', size: 0.22, noTrail: true })]); }
+async function ecrireSD() { await Promise.all([go('w_sdSCK', { kind: 'sens', size: 0.16, noTrail: true }), go('w_sdMOSI', { kind: 'sens', size: 0.16, noTrail: true })]); }
+async function appuiBouton() {
+  const b = tower.userData.button;
+  await anim(0.25, k => { b.position.z = TFRONT + 0.3 - 0.35 * k; });
+  await sleep(1500);
+  await anim(0.25, k => { b.position.z = TFRONT - 0.05 + 0.35 * k; });
+}
+async function progression(de, a, dur) { await anim(dur, k => drawAgent('install', { pct: lerp(de, a, k), heure: '10:03' }), k => k); }
+
+const CAM_ALL = [[-10, 160, 250], [0, 12, -20]];
+const CAM_POSTE = [[-40, 62, 92], [-82, 18, -8]];
+const CAM_BOX = [[-66, 30, 46], [-91, 10, 4]];
+
+const steps = [
+{
+  title: 'Vue d\'ensemble',
+  text: `<p>La maquette. À gauche, le <b>poste Windows</b> d'un agent : la tour, l'écran, le clavier. Devant la tour, le petit <b>boîtier témoin</b> (ESP32), relié au PC en USB.</p>
+         <p>Au fond, le <b>réseau en place</b> : routeur et switch. À droite, le <b>serveur Ubuntu</b> et le <b>poste du support</b>.</p>
+         <p>Les points lumineux sont des <b>messages</b>. Tourne la scène à la souris, puis clique sur <b>Suivant</b>.</p>`,
+  cam: CAM_ALL, labels: 'overview',
+  async run() {
+    battements().catch(() => {});
+    while (true) { await sleep(5000); route(TO_SRV, { kind: 'https', size: 0.8 }).catch(() => {}); }
+  }
+},
+{
+  title: '1. Le boîtier témoin, de près',
+  text: `<p>Un petit boîtier en plexiglas, posé devant la tour. <b>On n'ouvre pas le PC.</b> Dedans, des modules du commerce :</p>
+         <p>• <b>ESP32</b> : le petit ordinateur, relié au PC par <b>USB série</b>.<br>• <b>Horloge DS3231</b> : l'heure exacte, même sans le PC.<br>• <b>Carte microSD</b> : le récit des événements.<br>• <b>Supercondensateur 1 F</b> : une réserve d'énergie pour écrire pendant une coupure.<br>• Deux <b>photocapteurs</b> collés sur les voyants de la tour : alimentation et disque.</p>
+         <p>Le boîtier a <b>son propre chargeur</b>, sur la même multiprise que le PC.</p>`,
+  cam: CAM_BOX, labels: 'boitier',
+  async run() {
+    battements().catch(() => {});
+    while (true) {
+      await capteurs();
+      setRead(readSens, 'voyant alim. : <b>allumé</b> · voyant disque : <b>clignote</b>');
+      await sleep(1800);
+    }
+  }
+},
+{
+  title: '2. Le battement : « je suis vivant »',
+  text: `<p>Sur le PC, un petit programme <b>PowerShell</b> envoie un <b>battement</b> au boîtier, chaque seconde, par USB.</p>
+         <p>Tant que les battements arrivent, le PC répond. S'ils s'arrêtent alors que le voyant reste allumé, c'est que <b>le PC est figé</b>.</p>
+         <p>Le boîtier note tout dans son <b>récit</b>, avec l'heure de sa propre horloge.</p>`,
+  cam: CAM_POSTE, labels: 'overview',
+  async run() {
+    recit('10:02:12 battement OK'); recit('10:02:13 battement OK');
+    for (let s = 14; ; s++) { if (world.pc === 'on') await go('usb', { kind: 'hb', size: 0.5, label: 'battement' }); recit(`10:02:${String(s % 60).padStart(2, '0')} battement OK`); await sleep(400); }
+  }
+},
+{
+  title: '3. Une installation commence',
+  text: `<p>L'outil de déploiement lance une <b>mise à jour obligatoire</b> d'un logiciel. La barre de progression avance.</p>
+         <p>Le programme du poste prévient le boîtier : <b>« installation en cours »</b>. Le boîtier l'écrit dans son récit.</p>`,
+  cam: CAM_POSTE, labels: 'overview',
+  async run() {
+    battements().catch(() => {});
+    recit('10:02:30 battement OK');
+    drawAgent('install', { pct: 0, heure: '10:02' });
+    await go('usb', { kind: 'inst', size: 0.6, label: '« installation en cours »', speed: 22 });
+    recit('10:02:31 installation en cours', '#ffd84a'); ecrireSD().catch(() => {});
+    setRead(readPC, 'outil de déploiement : <b>Logiciel métier 4.2</b>');
+    await progression(0, 61, 8);
+  }
+},
+{
+  title: '4. Le PC se fige, l\'agent force l\'arrêt',
+  text: `<p>À 61 %, le PC <b>ne répond plus</b>. Le voyant reste allumé, mais <b>les battements s'arrêtent</b> : le boîtier note « PC figé ».</p>
+         <p>L'agent attend, puis <b>maintient le bouton</b>. Le voyant s'éteint <b>sans message d'arrêt</b> de Windows : le boîtier note « arrêt au bouton ».</p>
+         <p>Windows, lui, n'a rien pu écrire.</p>`,
+  cam: CAM_POSTE, labels: 'overview',
+  async run() {
+    drawAgent('install', { pct: 61, heure: '10:03' });
+    recit('10:02:31 installation en cours', '#ffd84a');
+    for (let i = 0; i < 2; i++) { await go('usb', { kind: 'hb', size: 0.45 }); await sleep(500); }
+    world.pc = 'fige'; drawAgent('fige', { pct: 61, heure: '10:04' });
+    await sleep(2500);
+    await capteurs();
+    setRead(readSens, 'voyant alim. : <b>allumé</b> · plus de battement');
+    recit('10:04:02 plus de battement, voyant allumé', '#ff8a80'); recit('→ PC figé', '#ff8a80'); ecrireSD().catch(() => {});
+    await sleep(2500);
+    setRead(readPC, 'l\'agent <b>maintient le bouton</b> 5 s');
+    await appuiBouton();
+    world.pc = 'off'; drawAgent('noir'); beep(320, 0.25, 0.05);
+    rings(W(tower, V(0, 33.4, TFRONT + 1)), COL.err, 8, 3, 'cam', 1.0);
+    await capteurs();
+    setRead(readSens, 'voyant alim. : <b>éteint</b> · aucun message « j\'éteins »');
+    recit('10:06:10 voyant éteint sans message', '#ff8a80'); recit('→ arrêt au bouton (boîtier alimenté)', '#ff8a80'); ecrireSD().catch(() => {});
+    setRead(readPC, '');
+  }
+},
+{
+  title: '5. Au redémarrage, l\'enquêteur explique',
+  text: `<p>Le PC redémarre. Le programme du poste lit le <b>récit du boîtier</b> par USB, puis les <b>journaux de Windows</b> : arrêt inattendu (Kernel-Power 41) et échec de l'installation (MsiInstaller).</p>
+         <p>Il croise les heures. Conclusion : <b>installation interrompue par un arrêt au bouton, après un blocage du PC</b>. Si les sources ne sont pas d'accord, il écrit « non concluant ».</p>`,
+  cam: CAM_POSTE, labels: 'overview',
+  async run() {
+    world.pc = 'off'; drawAgent('noir'); await sleep(700);
+    world.pc = 'on'; drawAgent('boot'); await sleep(2000);
+    const L = [['> récit du boîtier…', '#9fd0ff']]; drawAgent('analyse', { lignes: L, heure: '10:08' });
+    await go('-usb', { kind: 'hb', size: 0.6, label: 'récit · 4 lignes', speed: 22 });
+    L.push(['  10:02 installation en cours', '#ffd84a'], ['  10:04 PC figé · 10:06 arrêt au bouton', '#ff8a80']); drawAgent('analyse', { lignes: L, heure: '10:08' });
+    await sleep(1200);
+    L.push(['> journaux de Windows…', '#9fd0ff'], ['  10:06 Kernel-Power 41 (arrêt inattendu)', '#e6edf3'], ['  10:06 MsiInstaller : échec', '#e6edf3']); drawAgent('analyse', { lignes: L, heure: '10:08' });
+    setRead(readPC, 'journaux : <b>Kernel-Power 41</b> · <b>MsiInstaller</b> échec');
+    await sleep(1600);
+    L.push(['> cause probable :', '#9fd0ff'], ['  installation interrompue par un arrêt', '#ffd84a'], ['  au bouton, après un blocage du PC', '#ffd84a']); drawAgent('analyse', { lignes: L, heure: '10:08' });
+    setRead(readPC, 'cause probable : <b>arrêt au bouton après blocage</b>');
+  }
+},
+{
+  title: '6. Le support lit la cause',
+  text: `<p>Le poste envoie la conclusion au <b>serveur Ubuntu</b> en HTTPS, avec un jeton. Si le serveur ne répond pas, elle attend dans une file.</p>
+         <p>Le technicien ouvre la page du support : <b>la cause probable, les preuves, et quoi faire</b>. Plus besoin de réparer à l'aveugle.</p>
+         <p>Le système est en <b>lecture seule</b> : il explique, il ne répare rien sur le poste.</p>`,
+  cam: [[30, 120, 170], [30, 15, -25]], labels: 'overview',
+  async run() {
+    battements().catch(() => {});
+    await route(TO_SRV, { kind: 'https', label: 'HTTPS · jeton · conclusion' });
+    srv('API : incident <b>PC-42</b> enregistré (SQLite)');
+    await sleep(500);
+    await route(TEC_TO_SRV, { kind: 'https', label: 'GET /incidents', size: 0.8 });
+    await route(SRV_TO_TEC, { kind: 'https', size: 0.8 });
+    incident({ pc: 'PC-42', h: '10:06', cause: 'Installation interrompue', col: '#c2382e', preuve: 'arrêt au bouton après 2 min de blocage · MsiInstaller échec', faire: 'relancer, puis chercher pourquoi le PC se fige' });
+    flyTo([40, 55, 75], [58, 26, 0], 1.6);
+  }
+},
+{
+  title: '7. Et si le courant est coupé ?',
+  text: `<p>Coupure : le boîtier perd <b>son alimentation au même instant</b> que le PC. C'est ce qui la distingue d'un arrêt au bouton, où le boîtier reste alimenté.</p>
+         <p>Sa <b>réserve d'énergie</b> (supercondensateur) lui laisse quelques secondes pour écrire « coupure de courant » et l'heure sur la carte.</p>`,
+  cam: [[-40, 70, 70], [-80, 8, -25]], labels: 'overview',
+  async run() {
+    battements().catch(() => {});
+    drawAgent('install', { pct: 34, heure: '14:20' });
+    await sleep(2200);
+    world.secteur = false; world.pc = 'off'; drawAgent('noir');
+    stripLed.material.color.setRGB(0.02, 0.01, 0.01);
+    rings(W(strip, V(0, 4, 0)), COL.err, 12, 3, 'y', 1.2); beep(220, 0.3, 0.05);
+    go('-pwrBox', { kind: 'err', size: 0.7, label: 'plus de courant', speed: 80 }).catch(() => {});
+    boxLed(false, false, true);
+    setRead(readSens, 'voyant alim. : <b>éteint</b> · alimentation du boîtier : <b>perdue</b>');
+    await sleep(900);
+    await ecrireSD();
+    recit('14:20:07 coupure de courant', '#ff8a80'); recit('(écrit sur la réserve d\'énergie)', '#ff8a80');
+    await sleep(2500);
+    boxLed(false, false, false);
+  }
+},
+{
+  title: '8. Le réseau en place (C10)',
+  text: `<p>Le routeur donne l'adresse du poste (<b>DHCP</b>), traduit le nom du serveur (<b>DNS</b>) et donne l'heure (<b>NTP</b>).</p>
+         <p>L'heure est essentielle : le récit du boîtier et les journaux de Windows doivent être <b>sur la même horloge</b> pour être croisés.</p>
+         <p>Yaksan <b>exploite</b> ce réseau : il observe, il vérifie, il ne reconfigure rien.</p>`,
+  cam: [[-20, 110, 150], [-20, 10, -40]], labels: 'overview',
+  async run() {
+    const Q = [['DHCP · adresse ?', '10.10.0.42'], ['DNS · srv.labo ?', '10.10.0.20'], ['NTP · heure ?', '10:06:10.004']];
+    for (const [q, r] of Q) {
+      await route(TO_RT, { kind: 'net', label: q, size: 0.9 });
+      await route(FROM_RT, { kind: 'net', label: r, size: 0.9 });
+      setRead(readPC, `${q.split(' ·')[0]} : <b>${r}</b>`);
+      await sleep(400);
+    }
+    setRead(readPC, 'même horloge : récit et journaux <b>comparables</b>');
+  }
+},
+{
+  title: '9. Le volet physique : seuils et réserve d\'énergie',
+  text: `<p><b>Photocapteurs</b> : on mesure la lumière du voyant allumé et éteint, avec la lumière de la pièce allumée ou non. On en tire un <b>seuil</b> fiable.</p>
+         <p><b>Réserve d'énergie</b> : à courant constant, la tension baisse en ligne droite, <b>V = 5 − I·t / C</b>. Avec I ≈ 0,1 A et C = 1 F, l'ESP32 tient environ <b>17 s</b> avant 3,3 V : bien plus que la seconde utile pour écrire.</p>
+         <p>On <b>confronte</b> ce modèle aux mesures, avec leurs incertitudes. Les valeurs à l'écran sont des exemples.</p>`,
+  cam: [[40, 55, 75], [58, 26, 0]], labels: 'overview',
+  async run() {
+    world.courbe = true; drawTech();
+    await capteurs();
+    setRead(readSens, 'voyant allumé : <b>2 900</b> · éteint : <b>310</b> · seuil : <b>1 600</b> (exemple)');
+  }
+},
+{
+  title: '10. V2 : prévenir avant l\'arrêt',
+  text: `<p>En V2, le projet ne se contente plus d'expliquer : il <b>prévient</b>.</p>
+         <p>Pendant une installation, la <b>LED orange</b> du boîtier s'allume et une notification demande de <b>ne pas éteindre le PC</b>.</p>
+         <p>On compare ensuite le nombre d'arrêts au bouton <b>avant et après</b> : l'indicateur mesure l'effet de la V2.</p>`,
+  cam: CAM_POSTE, labels: 'overview',
+  async run() {
+    battements().catch(() => {});
+    await go('usb', { kind: 'inst', size: 0.6, label: '« installation en cours »', speed: 22 });
+    boxLed(true, true, false);
+    await anim(6, k => drawAgent('install', { pct: lerp(10, 80, k), heure: '11:15', v2: true }), k => k);
+    drawAgent('bureau', { heure: '11:16' }); boxLed(true, false, false);
+    recit('11:15:02 installation en cours', '#ffd84a'); recit('11:16:01 installation terminée', '#9fe0b0');
+  }
+},
+];
+/* « ?cadre » (diaporama) : sans le volet physique */
+const CADRE = /[?&]cadre\b/.test(location.search);
+if (CADRE) {
+  for (let i = steps.length - 1; i >= 0; i--) if (/physique|humidit/i.test(steps[i].title)) steps.splice(i, 1);
+  let n = 0; steps.forEach(s => { if (/^\d+\.\s/.test(s.title)) s.title = s.title.replace(/^\d+\./, ++n + '.'); });
+}
+
+
+/* =====================================================================
+   12. Interface : étapes, boutons, clavier
+   ===================================================================== */
+let cur = 0, auto = false;
+const dots = $('#dots');
+steps.forEach((s, i) => { const b = document.createElement('button'); b.setAttribute('aria-label', 'Étape ' + i + ' : ' + s.title); b.onclick = () => goStep(i); dots.appendChild(b); });
+function clearAnims() {
+  for (const p of packets) { killPacket(p); p.rej(new Cancel()); }
+  packets.length = 0;
+  for (const t of tweens) t.rej(new Cancel());
+  tweens.length = 0;
+}
+async function goStep(i) {
+  i = Math.max(0, Math.min(steps.length - 1, i));
+  runId++; const id = runId; clearAnims(); cur = i;
+  const s = steps[i];
+  baseline(i); shadowFrames = 3;
+  labelMode = s.labels; refreshLabels();
+  $('#stepno').textContent = i === 0 ? 'Introduction' : `Étape ${i} / ${steps.length - 1}`;
+  $('#title').textContent = s.title;
+  $('#text').innerHTML = s.text;
+  $('#note').style.display = 'none';
+  [...dots.children].forEach((d, k) => d.classList.toggle('on', k === i));
+  $('#bNext').disabled = i === steps.length - 1;
+  flyTo(...s.cam);
+  controls.autoRotate = false;
+  try {
+    await s.run();
+    if (auto && id === runId && i < steps.length - 1) { await sleep(2500); goStep(i + 1); }
+  } catch (e) { if (!(e instanceof Cancel)) console.error(e); }
+}
+$('#bPrev').onclick = () => goStep(cur - 1);
+$('#bNext').onclick = () => goStep(cur + 1);
+$('#bReplay').onclick = () => goStep(cur);
+$('#bAuto').onclick = e => { auto = !auto; e.currentTarget.setAttribute('aria-pressed', auto); e.currentTarget.classList.toggle('main', auto); if (auto) goStep(cur + 1 < steps.length ? cur : 0); };
+$('#bLab').onclick = e => { showLabels = !showLabels; e.currentTarget.setAttribute('aria-pressed', showLabels); refreshLabels(); };
+$('#bSnd').onclick = e => { soundOn = !soundOn; e.currentTarget.setAttribute('aria-pressed', soundOn); };
+addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') goStep(cur + 1);
+  else if (e.key === 'ArrowLeft') goStep(cur - 1);
+  else if (e.key === 'r' || e.key === 'R') goStep(cur);
+});
+controls.addEventListener('start', () => { cam.k = 1; });
+
+/* =====================================================================
+   13. Boucle d'animation
+   ===================================================================== */
+const clock = new THREE.Clock();
+let shadowFrames = 3;   // nombre d'images où l'on recalcule encore les ombres
+function tick() {
+  const dt = Math.min(clock.getDelta(), 0.05), now = clock.elapsedTime;
+  if (cam.k < 1) {
+    cam.k = Math.min(1, cam.k + dt / cam.dur); const e = easeIO(cam.k);
+    camera.position.lerpVectors(cam.from.p, cam.to.p, e); controls.target.lerpVectors(cam.from.t, cam.to.t, e);
+    if (cam.k >= 1 && cur === 0) controls.autoRotate = true;
+  }
+  controls.update();
+  for (let i = tweens.length - 1; i >= 0; i--) {
+    const t = tweens[i]; t.t += dt; const k = Math.min(1, t.t / t.dur); t.fn(t.ease(k));
+    if (k >= 1) { tweens.splice(i, 1); t.res(); }
+  }
+  for (let i = packets.length - 1; i >= 0; i--) {
+    const p = packets[i];
+    p.t += p.dir * p.speed * dt / p.P.len;
+    const done = p.dir > 0 ? p.t >= 1 : p.t <= 0;
+    p.P.curve.getPointAt(Math.max(0, Math.min(1, p.t)), p.m.position);
+    p.hist.unshift(p.m.position.clone()); if (p.hist.length > 18) p.hist.pop();
+    p.trail.forEach((t, k) => { const h = p.hist[(k + 1) * 3]; if (h) { t.position.copy(h); t.visible = true; } });
+    if (p.P.port !== undefined) portLEDs[p.P.port].last = now;
+    if (done) { if (p.P.srv && p.dir > 0) world.srvAct = now; killPacket(p); packets.splice(i, 1); p.res('ok'); }
+  }
+  for (let i = fx.length - 1; i >= 0; i--) {
+    const f = fx[i]; f.t += dt; if (f.t < 0) { f.m.visible = false; continue; } f.m.visible = true;
+    const k = f.t / f.dur; f.m.scale.setScalar(0.2 + k * f.r); f.m.material.opacity = 0.9 * (1 - k);
+    if (k >= 1) { scene.remove(f.m); f.m.material.dispose(); fx.splice(i, 1); }
+  }
+  /* voyants de la tour : alimentation allumée sauf si le PC est éteint ; disque qui clignote seulement si le PC travaille */
+  const td = tower.userData;
+  td.pwr.material.color.setRGB(0.2, 1, 0.45).multiplyScalar(world.pc === 'off' ? 0.03 : 3);
+  const busy = world.pc === 'on' && (Math.sin(now * 7.3) + Math.sin(now * 3.1)) > 0.4;
+  td.hdd.material.color.setRGB(1, 0.6, 0.1).multiplyScalar(busy ? 3 : 0.04);
+  const sv = server.userData;
+  sv.pwr.material.color.setRGB(0.2, 1, 0.45).multiplyScalar(3);
+  const dAct = now - world.srvAct < 0.6 || Math.sin(now * 2.1) > 0.97;
+  sv.disk.material.color.setRGB(1, 0.6, 0.1).multiplyScalar(dAct && Math.sin(now * 40) > 0 ? 3 : 0.05);
+  esp.userData.pled.material.color.setRGB(1, 0.16, 0.1).multiplyScalar(world.secteur ? 4 : 0.05);
+  if (tweens.length) shadowFrames = 2;          // bouton de la tour
+  if (shadowFrames > 0) { renderer.shadowMap.needsUpdate = true; shadowFrames--; }
+  composer.render();
+  labelRenderer.render(scene, camera);
+  requestAnimationFrame(tick);
+}
+function viewShift() {
+  const w = innerWidth, h = innerHeight, panelW = $('#panel').offsetWidth + 16;
+  if (w > 860) camera.setViewOffset(w, h, -panelW / 2, 0, w, h); else camera.clearViewOffset();
+}
+addEventListener('resize', () => {
+  camera.aspect = innerWidth / innerHeight; viewShift(); camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight); composer.setSize(innerWidth, innerHeight);
+  labelRenderer.setSize(innerWidth, innerHeight);
+});
+camera.aspect = innerWidth / innerHeight; viewShift(); camera.updateProjectionMatrix();
+(document.fonts ? document.fonts.ready : Promise.resolve()).then(() => { if (cur === 0) baseline(0); });
+goStep(0);
+tick();
+window.__goStep = goStep;
+/* aide pour vérifier de près dans la console : __view([x, y, z], [cible x, y, z]) */
+window.__stats = () => ({ appels: renderer.info.render.calls, triangles: renderer.info.render.triangles, objets: (() => { let n = 0; scene.traverse(o => { if (o.isMesh) n++; }); return n; })() });
+window.__view = (p, t) => { cam.k = 1; controls.autoRotate = false; camera.position.set(...p); controls.target.set(...t); controls.update(); };
+</script>
+<script>
+/* Réduire / agrandir le panneau d'explication (bouton « – » ou touche H). Le choix est gardé pour la prochaine visite. */
+(function(){
+  var p = document.getElementById('panel'), b = document.getElementById('bMini'); if (!p || !b) return;
+  function set(mini){ p.classList.toggle('mini', mini); b.textContent = mini ? '+' : '–'; b.setAttribute('aria-expanded', String(!mini));
+    b.title = mini ? 'Agrandir le panneau (H)' : 'Réduire le panneau (H)'; try { localStorage.setItem('panneauMini', mini ? '1' : '0'); } catch (e) {} }
+  var start = false; try { start = localStorage.getItem('panneauMini') === '1'; } catch (e) {}
+  set(start);
+  b.addEventListener('click', function(){ set(!p.classList.contains('mini')); });
+  addEventListener('keydown', function(e){ if ((e.key === 'h' || e.key === 'H') && !e.ctrlKey && !e.metaKey && !e.altKey && !/INPUT|TEXTAREA/.test((document.activeElement||{}).tagName||'')) set(!p.classList.contains('mini')); });
+})();
+</script>
+</body>
+</html>
