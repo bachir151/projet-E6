@@ -65,6 +65,23 @@ var HW = {
       '<g class="feuilles"></g>' + R(-56, 10, 112, 8, 'var(--m-alu)', 'tr', 1) + R(-60, 30, 120, 14, 'var(--m-alu)', 'tr', 2) + '<path d="M-14 37h28" class="tr"/>' +
       R(30, -34, 26, 14, 'var(--m-ecran)', 'fin', 2) + '<text class="lcd" x="43" y="-24.5" text-anchor="middle" style="font-size:6.5px;font-weight:900;fill:var(--vert)">Prête</text>' + ledD(22, -27, 2.4, 'vert');
   } },
+  /* tour de PC vue de face : voyant d'alimentation (led 0) et voyant d'activité du disque (led 1) */
+  tour: { w: 64, h: 124, s: function () {
+    var s = R(-30, -62, 60, 124, 'var(--m-noir)', 'tr', 5) + R(-22, -52, 44, 7, 'var(--m-noir-2)', 'ns', 1.5) + R(-22, -40, 44, 7, 'var(--m-noir-2)', 'ns', 1.5);
+    for (var j = 0; j < 6; j++) s += R(-20, 18 + j * 6, 40, 2.4, 'var(--m-noir-2)', 'ns');
+    return s + '<circle cx="-6" cy="-14" r="8" class="tr" style="fill:var(--m-noir-2)"/>' + ledD(-6, -14, 3.6, 'vert') + ledD(12, -14, 2.6, '') +
+      Tx(-6, 2, '⏻', 'font-size:7px;font-weight:900;fill:var(--m-alu)', 'middle') + Tx(12, 2, 'HDD', 'font-size:5px;font-weight:900;fill:var(--m-alu)', 'middle');
+  } },
+  /* boîtier témoin (boîte noire) : ESP32, horloge, carte mémoire, réserve d'énergie, LED (led 0) */
+  temoin: { w: 130, h: 80, s: function () {
+    return R(-62, -36, 124, 72, 'color-mix(in srgb,var(--encre) 12%,var(--blanc))', 'tr', 6) +
+      R(-54, -28, 40, 22, 'var(--m-noir)', 'tr', 2) + R(-50, -24, 14, 14, 'var(--m-alu)', 'ns', 1) + Tx(-33, -14, 'ESP32', 'font-size:6px;font-weight:900;fill:var(--blanc)') +
+      R(-8, -28, 22, 14, 'var(--m-pcb)', 'fin', 1.5) + Tx(3, -18.5, 'HORLOGE', 'font-size:3.8px;font-weight:900;fill:var(--blanc)', 'middle') +
+      R(20, -28, 14, 18, 'var(--m-alu)', 'fin', 1.5) + Tx(27, -16, 'SD', 'font-size:5px;font-weight:900', 'middle') +
+      '<rect x="-54" y="2" width="30" height="26" rx="13" class="tr" style="fill:var(--m-noir-2)"/>' + Tx(-39, 18, '1 F', 'font-size:6px;font-weight:900;fill:var(--blanc)', 'middle') +
+      R(-16, 4, 46, 22, 'var(--blanc)', 'tr', 1.5) + '<text class="epaper" x="7" y="18" text-anchor="middle" style="font-size:6px;font-weight:1000">RÉCIT</text>' +
+      ledD(46, 0, 5, 'vert') + '<path d="M62 -18h10M62 -10h10" class="fin"/>';
+  } },
   boitier: { w: 130, h: 80, s: function () {
     return R(-62, -36, 124, 72, 'color-mix(in srgb,var(--bleu-pale) 60%,var(--blanc))', 'tr', 6) +
       R(-54, -28, 40, 22, 'var(--m-noir)', 'tr', 2) + R(-50, -24, 14, 14, 'var(--m-alu)', 'ns', 1) + Tx(-33, -14, 'ESP32', 'font-size:6px;font-weight:900;fill:var(--blanc)') +
@@ -128,6 +145,20 @@ function pill(parent, x, y, lines) {
   g.setAttribute('transform', 'translate(' + r1(x) + ' ' + r1(y - b.y + 4.5) + ')');
   return { g: g, w: w, h: h };
 }
+/* « ?cadre » (diaporama) : pas de volet physique (matériel de mesure masqué, étapes « physique » retirées) */
+var PHYS = {};
+if (document.documentElement.classList.contains('cadre')) {
+  D.noeuds.forEach(function (n) { if (/^(oscillo|banc-papier|banc-froid)$/.test(n.k)) { PHYS[n.id] = 1; n.cache = true; } });
+  var phys = function (e) { return /physique|humidit/i.test(e.t) || (e.on || []).some(function (id) { return PHYS[id]; }); };
+  D.etapes = D.etapes.filter(function (e) { return !phys(e); });
+  var num = 0;
+  D.etapes.forEach(function (e) { if (/^\d+\.\s/.test(e.t)) e.t = e.t.replace(/^\d+\./, ++num + '.'); });
+  D.etapes.forEach(function (e) {
+    e.x = e.x.replace(/, le <b>PC de supervision<\/b> \(tableau de bord\) et le <b>banc de physique<\/b>/g, ' et le <b>PC de supervision</b> (tableau de bord)')
+             .replace(/ Devant à droite, le <b>banc de physique<\/b>\./g, '')
+             .replace(/,? et le <b>banc de physique<\/b>/g, '');
+  });
+}
 D.noeuds.forEach(function (n) {
   var hw = HW[n.k], g = el('g', { 'class': 'noeud', 'data-id': n.id, transform: 'translate(' + n.x + ' ' + n.y + ')' }, layNoeud);
   var dessin = el('g', { 'class': 'dessin' }, g); dessin.innerHTML = hw.s();
@@ -140,8 +171,18 @@ D.noeuds.forEach(function (n) {
   var et = el('g', { 'class': 'etat', style: 'display:none' }, g);
   N[n.id] = { n: n, g: g, hw: hw, etat: et, etatY: -hw.h / 2 - 16 };
 });
+/* lignes droites : chaque segment oblique devient un angle droit (horizontal puis vertical, ou l'inverse) */
+function orthogonal(pts) {
+  var out = [pts[0]];
+  for (var i = 1; i < pts.length; i++) {
+    var p = out[out.length - 1], q = pts[i], dx = q[0] - p[0], dy = q[1] - p[1];
+    if (Math.abs(dx) > 1 && Math.abs(dy) > 1) out.push(Math.abs(dx) >= Math.abs(dy) ? [q[0], p[1]] : [p[0], q[1]]);
+    out.push(q);
+  }
+  return out;
+}
 D.liens.forEach(function (l) {
-  var a = N[l[0]].n, b = N[l[1]].n, o = l[4] || {}, pts = [[a.x, a.y]].concat(o.via || []).concat([[b.x, b.y]]);
+  var a = N[l[0]].n, b = N[l[1]].n, o = l[4] || {}, pts = orthogonal([[a.x, a.y]].concat(o.via || []).concat([[b.x, b.y]]));
   var g = el('g', { 'class': 'lien-g' }, layLien);
   var p = el('path', { d: 'M' + pts.map(function (q) { return q.join(' '); }).join('L'), 'class': 'lien ' + (l[2] || 'eth') }, g);
   if (l[3]) {
@@ -152,6 +193,7 @@ D.liens.forEach(function (l) {
   L.push({ a: l[0], b: l[1], pts: pts, g: g, p: p });
 });
 /* cadrage (en comptant les nœuds cachés au départ, qui apparaissent pendant une étape), puis on les cache */
+D.noeuds.forEach(function (n) { if (PHYS[n.id]) { N[n.id].g.classList.add('cache'); L.forEach(function (l) { if (l.a === n.id || l.b === n.id) l.g.classList.add('cache'); }); } });
 (function () { var b = svg.getBBox(), m = 24; svg.setAttribute('viewBox', [r1(b.x - m), r1(b.y - m - 30), r1(b.width + 2 * m), r1(b.height + 2 * m + 30)].join(' ')); })();
 D.noeuds.forEach(function (n) { if (n.cache) { N[n.id].g.classList.add('cache'); L.forEach(function (l) { if (l.a === n.id || l.b === n.id) l.g.classList.add('cache'); }); } });
 
@@ -169,12 +211,13 @@ function chemin(ids) {
   for (var i = 0; i < ids.length - 1; i++) {
     var a = ids[i], b = ids[i + 1], seg = null;
     L.forEach(function (l) { if (l.a === a && l.b === b) seg = l.pts; else if (l.a === b && l.b === a) seg = l.pts.slice().reverse(); });
-    if (!seg) seg = [[N[a].n.x, N[a].n.y], [N[b].n.x, N[b].n.y]];
+    if (!seg) seg = orthogonal([[N[a].n.x, N[a].n.y], [N[b].n.x, N[b].n.y]]);
     out = out.concat(i ? seg.slice(1) : seg);
   }
   return out;
 }
 function go(ids, kind, label, o) {
+  if (ids.some(function (id) { return PHYS[id]; })) return Promise.resolve();
   o = o || {}; var id = RUN, pts = chemin(ids);
   return new Promise(function (res, rej) {
     var tr = el('path', { d: 'M' + pts.map(function (q) { return q.join(' '); }).join('L'), 'class': 'trace k-' + (kind || 'bleu') }, layTrace), Lg = tr.getTotalLength();
@@ -204,6 +247,7 @@ function go(ids, kind, label, o) {
   });
 }
 function bulle(id, lines, o) {
+  if (PHYS[id]) return;
   o = o || {}; sans(id);
   var nd = N[id], hw = nd.hw, cote = o.cote || 'haut', ax = nd.n.x, ay = nd.n.y;
   var off = { haut: [0, -hw.h / 2], bas: [0, hw.h / 2], gauche: [-hw.w / 2, 0], droite: [hw.w / 2, 0] }[cote];
@@ -245,6 +289,7 @@ function ecranTxt(id, lines, fond) {
 }
 function lien(a, b, cls, on) { L.forEach(function (l) { if ((l.a === a && l.b === b) || (l.a === b && l.b === a)) l.p.classList.toggle(cls, on !== false); }); }
 function montre(id, on) {
+  if (PHYS[id]) on = false;
   N[id].g.classList.toggle('cache', !on);
   L.forEach(function (l) { if (l.a === id || l.b === id) l.g.classList.toggle('cache', !on); });
 }

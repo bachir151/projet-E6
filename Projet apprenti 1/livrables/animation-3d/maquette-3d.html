@@ -556,7 +556,7 @@ function makeServer() {
   return g;
 }
 
-/** Switch 24 ports du lycée. */
+/** Switch 24 ports déjà en place. */
 const SW = { w: 44, h: 4.4, d: 24 };
 const portPx = i => ({ x: 760 + Math.floor(i / 2) * 80 + 30, y: i % 2 ? 123 : 63 });
 const swFront = canvasTex(1760, 176, (g, w, h) => {
@@ -1219,7 +1219,7 @@ async function normalPrint() {
 const steps = [
 {
   title: 'Vue d\'ensemble',
-  text: `<p>La maquette du lycée. À gauche, une <b>imprimante réseau</b> avec, fixé dessus, le <b>boîtier ESP32</b> et ses capteurs.</p>
+  text: `<p>La maquette. À gauche, une <b>imprimante réseau</b> avec, fixé dessus, le <b>boîtier ESP32</b> et ses capteurs.</p>
          <p>Au fond, le réseau en place : <b>point d'accès Wi-Fi</b> et <b>switch</b>. À droite, le <b>serveur Ubuntu</b> (le « cerveau ») et le <b>poste du technicien</b> (GLPI). Devant, le <b>PC de la secrétaire</b>.</p>
          <p>Les points lumineux sont des <b>messages</b>. Tourne la scène à la souris, puis clique sur <b>Suivant</b>.</p>`,
   cam: [[60, 150, 230], [5, 12, -22]], labels: 'overview',
@@ -1324,7 +1324,7 @@ const steps = [
   title: '5. L\'humidité du local (V2)',
   text: `<p>Le <b>SHT31</b> mesure la température et l'humidité de l'air autour de l'imprimante, toutes les minutes.</p>
          <p>Quand l'air devient trop humide, le papier absorbe de l'eau, gonfle et se coince plus souvent. Au-delà du <b>seuil</b> (ici 65 %), le serveur ouvre un <b>ticket préventif</b>.</p>
-         <p><b>Physique :</b> au lycée, Wassim pèse des feuilles gardées 48 h à humidité basse puis haute (≈ 75 %, au-dessus d'eau salée). Le seuil vient de ces mesures, avec leurs incertitudes.</p>`,
+         <p><b>Physique :</b> Wassim pèse des feuilles gardées 48 h à humidité basse puis haute (≈ 75 %, au-dessus d'eau salée). Le seuil vient de ces mesures, avec leurs incertitudes.</p>`,
   cam: [[-23, 50, -20], [-42, 34, -40]], labels: 'boitier',
   async run() {
     setRead(readHum, 'SHT31 : <b>46 %</b> · 22,4 °C');
@@ -1403,6 +1403,13 @@ const steps = [
   }
 },
 ];
+/* « ?cadre » (diaporama) : sans le volet physique */
+const CADRE = /[?&]cadre\b/.test(location.search);
+if (CADRE) {
+  for (let i = steps.length - 1; i >= 0; i--) if (/physique|humidit/i.test(steps[i].title)) steps.splice(i, 1);
+  let n = 0; steps.forEach(s => { if (/^\d+\.\s/.test(s.title)) s.title = s.title.replace(/^\d+\./, ++n + '.'); });
+}
+
 
 /* =====================================================================
    12. Interface : étapes, boutons, clavier

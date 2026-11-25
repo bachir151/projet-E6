@@ -134,11 +134,11 @@ h1,h2{font-weight:1000}
 <div id="top">
   <div id="brand">
     <div class="eye">Projet E6 · apprentie 4</div>
-    <h1>Kit de maintenance signé<br>maquette en 3D</h1>
+    <h1>Maintien en condition opérationnelle<br>d'un parc de PC · maquette 3D</h1>
   </div>
   <div id="tools">
     <div class="seg" role="group" aria-label="Lieu">
-      <button id="mMaq" aria-pressed="true" title="Ce qui est construit au lycée">Maquette</button>
+      <button id="mMaq" aria-pressed="true" title="Ce qui est construit sur la maquette">Maquette</button>
       <button id="mTer" aria-pressed="false" title="Ce qui se passe en vrai">Terrain</button>
     </div>
     <button class="tbtn" id="bAmb" title="Changer l'ambiance lumineuse de la pièce">Ambiance : nuit</button>
@@ -701,14 +701,14 @@ function makeServer() {
   return g;
 }
 
-/** Switch 24 ports du lycée. */
+/** Switch 24 ports déjà en place. */
 const SW = { w: 44, h: 4.4, d: 24 };
 const portPx = i => ({ x: 760 + Math.floor(i / 2) * 80 + 30, y: i % 2 ? 123 : 63 });
 const swFront = canvasTex(1760, 176, (g, w, h) => {
   const gr = g.createLinearGradient(0, 0, 0, h); gr.addColorStop(0, '#a3aab0'); gr.addColorStop(1, '#868d93');
   g.fillStyle = gr; g.fillRect(0, 0, w, h);
   g.fillStyle = '#20262c'; g.font = 'bold 34px Arial'; g.fillText('SWITCH 24 PORTS', 60, 80);
-  g.font = '24px Arial'; g.fillText('réseau du lycée (en place)', 60, 120);
+  g.font = '24px Arial'; g.fillText('réseau en place', 60, 120);
   for (let i = 0; i < 24; i++) {
     const p = portPx(i);
     g.fillStyle = '#111417'; g.fillRect(p.x - 28, p.y - 22, 56, 44);
@@ -898,7 +898,7 @@ const i2c = {
 wire(shtPin(0), W(esp2, espHole('B', ESP_B['3V3'], 0.8)), 0xe74c3c, 1.8);
 wire(shtPin(1), W(esp2, espHole('B', ESP_B.GND, 0.8)), 0x222222, 1.6);
 const owCable = cable([W(banc, V(-0.2, 2.1, 0)), W(banc, V(0.6, 2.0, 0.6)), W(banc, V(1.6, 0.8, 2.6)), W(banc, V(3.2, 1.0, 2.8)), W(esp2, espHole('B', ESP_B.D4, 0.9))], M.cableBlack, 0.12, 60);
-/* câble USB banc → PC du lycée (données série) */
+/* câble USB banc → PC de supervision (données série) */
 const usbA = W(esp2, V(-2.75, 0.22, 0));
 const usbBanc = cable([usbA, usbA.clone().add(V(-1.5, -0.6, 0)), V(usbA.x - 4, 0.25, usbA.z - 6), V(96, 0.25, -12), V(99, 0.25, -24), W(sff, V(0, 20, 14.3))], M.cableBlack, 0.22);
 
@@ -985,14 +985,14 @@ function label(group, pos, title, sub, cls = '') {
   const o = new CSS2DObject(d); o.position.copy(pos); scene.add(o); labelGroups[group].push(o); return o;
 }
 label('overview', V(-92, 50, -40), 'Serveur', 'Ubuntu · nginx HTTPS · Flask · SQLite');
-label('overview', V(-40, 6, -60), 'Switch du lycée', 'réseau en place (C10)');
+label('overview', V(-40, 6, -60), 'Switch', 'réseau en place (C10)');
 label('overview', V(10, 20, -56), 'Borne Wi-Fi du bureau', '');
 label('overview', V(-82, 26, 4), 'Poste du référent', 'Windows 11 · signe le kit');
 label('overview', V(-42, 16, 8), 'PC de maintenance', 'agent PowerShell · BITS');
 label('overview', V(2, 3, 34), 'Téléphone', 'partage de connexion 4G');
 label('overview', V(40, 5, 24), 'Borne de sortie', 'ESP32 + lecteur RFID');
 label('overview', V(84, 7, 16), 'Banc de physique', 'ESP32 + 2 capteurs');
-label('overview', V(62, 48, -46), 'PC du lycée', 'tableau de bord');
+label('overview', V(62, 48, -46), 'PC de supervision', 'tableau de bord');
 label('borne', W(esp1, V(0.9, 0.6, 0)), 'ESP32-WROOM-32', 'Wi-Fi, HTTPS', 'small');
 label('borne', W(rc, V(0, 0.4, 1.4)), 'Lecteur RC522', 'bus SPI · 13,56 MHz', 'small');
 label('borne', W(ledG, V(-0.8, 1.4, 0.5)), 'LED verte', 'GPIO 25', 'small');
@@ -1036,6 +1036,7 @@ function tag(text, col) {
 }
 /** Envoie un paquet lumineux sur un chemin. Renvoie 'ok' ou 'lost'. */
 function go(name, o = {}) {
+  if (typeof CADRE !== 'undefined' && CADRE && name === 'usbBanc') return Promise.resolve();
   const P = paths[name.replace(/^-/, '')];
   const reverse = name.startsWith('-') !== !!o.reverse;
   const id = runId;
@@ -1253,7 +1254,7 @@ async function laptopHome() {
 const steps = [
 {
   title: 'Vue d\'ensemble',
-  text: `<p>La maquette du lycée, à l'échelle réelle. Au fond : le <b>serveur</b>, le <b>switch</b> et la <b>borne Wi-Fi</b> du réseau existant, et le <b>PC du lycée</b> avec le tableau de bord.</p>
+  text: `<p>La maquette, à l'échelle réelle. Au fond : le <b>serveur</b>, le <b>switch</b> et la <b>borne Wi-Fi</b> du réseau existant, et le <b>PC de supervision</b> avec le tableau de bord.</p>
          <p>Devant : le <b>poste du référent</b>, le <b>PC de maintenance</b> et le téléphone, la <b>borne de sortie</b> (ESP32 + lecteur RFID) et le <b>banc de physique</b>.</p>
          <p>Les points lumineux sont des <b>messages</b> qui circulent. Tourne la scène à la souris, puis clique sur <b>Suivant</b>.</p>`,
   cam: [[70, 150, 245], [0, 5, -14]], labels: 'overview',
@@ -1471,6 +1472,16 @@ const steps = [
   }
 },
 ];
+/* « ?cadre » (diaporama) : sans le volet physique */
+const CADRE = /[?&]cadre\b/.test(location.search);
+if (CADRE) {
+  for (let i = steps.length - 1; i >= 0; i--) if (/physique|humidit/i.test(steps[i].title)) steps.splice(i, 1);
+  let n = 0; steps.forEach(s => { if (/^\d+\.\s/.test(s.title)) s.title = s.title.replace(/^\d+\./, ++n + '.'); });
+  banc.visible = false; usbBanc.visible = false;
+  labelGroups.overview = labelGroups.overview.filter(o => { const b = /Banc de physique/.test(o.element.textContent); if (b) { scene.remove(o); o.element.remove(); } return !b; });
+  steps.forEach(s => { s.text = s.text.replace(/,? et le <b>banc de[^<]*<\/b>[^.<]*/g, '').replace(/, le banc mesure/g, ''); });
+}
+
 
 /* =====================================================================
    12. Interface : étapes, boutons, clavier
@@ -1499,7 +1510,7 @@ async function goStep(i) {
     note.style.display = 'block';
     note.innerHTML = world.terrain
       ? 'Vue <b>terrain</b> : le PC passe par le partage de connexion du téléphone, puis par Internet.'
-      : 'Vue <b>maquette</b> : au lycée, la 4G est imitée par <code>tc netem</code> sur la carte réseau du serveur (manchon orange) : retard, débit limité, pertes, coupure à volonté.';
+      : 'Vue <b>maquette</b> : sur la maquette, la 4G est imitée par <code>tc netem</code> sur la carte réseau du serveur (manchon orange) : retard, débit limité, pertes, coupure à volonté.';
   } else note.style.display = 'none';
   [...dots.children].forEach((d, k) => d.classList.toggle('on', k === i));
   $('#bNext').disabled = i === steps.length - 1;

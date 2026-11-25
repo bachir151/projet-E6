@@ -1,0 +1,319 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Diagnostic en 4 indices</title>
+<link rel="stylesheet" href="../../../theme.css">
+<style>
+  html, body { margin: 0; background: var(--papier); color: var(--encre); font-family: var(--police); }
+  .page { box-sizing: border-box; min-height: 100vh; display: grid; grid-template-rows: auto minmax(0, 1fr) auto; gap: 14px; padding: 16px 20px; max-width: 1600px; margin: 0 auto; }
+  h1 { font-weight: 1000; text-transform: uppercase; font-size: 1.5rem; margin: 0 0 8px; letter-spacing: .01em; }
+  body.cadre h1 { display: none; }
+  .choix { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .choix .label { margin-right: 4px; }
+  .milieu { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 18px; min-height: 0; }
+  .scene-carte { padding: 8px; display: flex; min-height: 0; }
+  #scene { width: 100%; height: 100%; max-height: 64vh; display: block; }
+  .bulle-boit rect { fill: var(--blanc); stroke: var(--encre); stroke-width: 2; }
+  .bulle-boit text { font: 900 13px var(--police); fill: var(--encre); text-anchor: middle; }
+  .droite { display: grid; grid-template-rows: auto auto; gap: 12px; align-content: start; }
+  .indices { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .indice { padding: 12px 14px; border-radius: var(--r-carte); border: 2px dashed var(--contour); background: var(--papier-2); transition: background .3s, border-color .3s, transform .3s; min-height: 92px; }
+  .indice .label { display: block; margin-bottom: 2px; }
+  .indice .q { font-weight: 900; font-size: 1.05rem; margin: 0; }
+  .indice .r { font-size: 1.15rem; font-weight: 800; margin: 6px 0 0; min-height: 1.4em; }
+  .indice .r::before { margin-right: 6px; }
+  .indice.ok { background: var(--vert-pale); border: 2px solid var(--vert); }
+  .indice.ok .r::before { content: "✓"; color: var(--vert); }
+  .indice.alerte { background: var(--rouge-pale); border: 2px solid var(--rouge); }
+  .indice.alerte .r { color: var(--rouge-texte); }
+  .indice.alerte .r::before { content: "✗"; }
+  .indice.neutre { background: var(--blanc); border: 2px solid var(--contour); }
+  .indice.neutre .r::before { content: "–"; color: var(--encre-2); }
+  .indice.inconnu { background: var(--blanc); border: 2px dashed var(--encre-2); }
+  .indice.inconnu .r { color: var(--encre-2); }
+  .indice.inconnu .r::before { content: "?"; }
+  .indice.actif { transform: translateY(-3px); box-shadow: var(--ombre-decalee); }
+  .conclusion { padding: 14px 18px; opacity: .35; transition: opacity .3s; }
+  .conclusion.vu { opacity: 1; background: var(--jaune-pale); border: 2.5px solid var(--encre); }
+  .conclusion .cause { font-weight: 900; font-size: 1.25rem; margin: 2px 0 8px; }
+  .conclusion p { margin: 4px 0; font-size: 1.02rem; line-height: 1.35; }
+  .bas { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 14px; align-items: center; }
+  .bandeau { margin: 0; font-size: 1.2rem; padding: 12px 18px; }
+  .nav { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .points { display: flex; gap: 6px; margin: 0 6px; }
+  .points i { width: 12px; height: 12px; border-radius: 50%; border: 2px solid var(--encre); background: var(--blanc); }
+  .points i.fait { background: var(--encre); }
+  .points i.ici { background: var(--jaune); }
+  /* dessin */
+  .t { fill: none; stroke: var(--encre); stroke-width: 3; stroke-linejoin: round; stroke-linecap: round; }
+  .f-blanc { fill: var(--blanc); } .f-papier2 { fill: var(--papier-2); } .f-encre { fill: var(--encre); }
+  .nom { font: 900 17px var(--police); fill: var(--encre); text-anchor: middle; }
+  .sous { font: 700 12.5px var(--police); fill: var(--encre-2); text-anchor: middle; }
+  .ecran { font: 800 13px var(--police); text-anchor: middle; }
+  .reseau { fill: none; stroke: var(--encre-3); stroke-width: 5; stroke-linecap: round; }
+  .wifi { fill: none; stroke: var(--encre-3); stroke-width: 2.5; stroke-dasharray: 6 6; }
+  .objet { transition: filter .3s; }
+  .objet.actif .t { stroke: var(--encre); stroke-width: 4.5; }
+  .halo { fill: var(--jaune); opacity: 0; transition: opacity .3s; }
+  .objet.actif .halo { opacity: .55; }
+  .jeton circle { stroke: var(--encre); stroke-width: 2.5; }
+  .jeton text { font: 900 12px var(--police); text-anchor: middle; fill: var(--encre); }
+  @media (max-width: 900px) {
+    .milieu, .bas { grid-template-columns: 1fr; }
+    #scene { max-height: none; }
+  }
+  @media (max-width: 520px) { .indices { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<div class="page">
+  <header>
+    <h1>Pourquoi l'imprimante n'imprime pas ?</h1>
+    <div class="choix" id="choix" role="group" aria-label="Choisir la panne">
+      <span class="label">Choisis une situation</span>
+    </div>
+  </header>
+
+  <div class="milieu">
+    <div class="carte scene-carte">
+      <svg id="scene" viewBox="25 92 560 304" role="img" aria-label="Le PC de Nadia, l'imprimante avec son boîtier, et le serveur de diagnostic reliés par le réseau">
+        <!-- réseau -->
+        <path class="reseau" d="M105 335 V372 H510 V335 M310 335 V372"/>
+        <text class="sous" x="208" y="389">réseau du service</text>
+        <path class="wifi" d="M385 196 Q445 120 490 130"/>
+        <text class="sous" x="438" y="240">1 résumé</text><text class="sous" x="438" y="254">par seconde</text>
+
+        <!-- PC de Nadia -->
+        <g class="objet" id="o-pc">
+          <rect class="halo" x="30" y="150" width="150" height="190" rx="16"/>
+          <rect class="t f-blanc" x="45" y="175" width="120" height="85" rx="6"/>
+          <rect class="f-papier2" x="53" y="183" width="104" height="69" rx="3"/>
+          <text class="ecran" id="ecranPC" x="105" y="222" style="fill:var(--encre)">Imprimer · 5 p.</text>
+          <path class="t" d="M105 260 V285 M80 287 H130"/>
+          <rect class="t f-blanc" x="55" y="300" width="100" height="22" rx="4"/>
+          <text class="nom" x="105" y="160">PC de Nadia</text>
+        </g>
+
+        <!-- imprimante + boîtier -->
+        <g class="objet" id="o-imp">
+          <rect class="halo" x="225" y="170" width="170" height="170" rx="16"/>
+          <rect class="t f-papier2" x="258" y="218" width="104" height="18" rx="3"/>
+          <rect class="t f-blanc" x="240" y="232" width="140" height="92" rx="8"/>
+          <rect class="t f-encre" x="252" y="246" width="70" height="26" rx="4"/>
+          <text class="ecran" id="ecranImp" x="287" y="264" style="fill:var(--jaune)">Prête</text>
+          <rect class="t f-papier2" x="258" y="292" width="104" height="8" rx="2"/>
+          <g id="feuilles"></g>
+        </g>
+        <g class="objet" id="o-boit">
+          <rect class="halo" x="340" y="176" width="70" height="56" rx="10"/>
+          <rect class="t f-blanc" x="350" y="186" width="50" height="34" rx="5"/>
+          <rect x="356" y="192" width="26" height="12" rx="2" style="fill:var(--papier-2)"/>
+          <circle id="bouton" cx="391" cy="203" r="6" style="fill:var(--rouge);stroke:var(--encre);stroke-width:2"/>
+          <g class="bulle-boit" id="bulleBoit" style="display:none"><rect id="bulleFond" x="300" y="128" width="150" height="26" rx="8"/><path d="M370 154 l6 10 l6 -10" style="fill:var(--blanc);stroke:var(--encre);stroke-width:2"/><text id="ecranBoit" x="350" y="146"></text></g>
+        </g>
+        <text class="nom" x="310" y="352" style="paint-order:stroke;stroke:var(--blanc);stroke-width:6px">Imprimante + boîtier</text>
+
+        <!-- serveur -->
+        <g class="objet" id="o-srv">
+          <rect class="halo" x="455" y="110" width="110" height="230" rx="16"/>
+          <rect class="t f-encre" x="478" y="140" width="64" height="185" rx="6"/>
+          <path d="M490 165 H530 M490 180 H530 M490 195 H530" style="stroke:var(--papier);stroke-width:3"/>
+          <circle cx="510" cy="300" r="5" style="fill:var(--jaune)"/>
+          <text class="nom" x="510" y="104">Serveur</text>
+          <text class="sous" x="510" y="122">programme de diagnostic</text>
+        </g>
+
+        <g id="flux"></g>
+        <g id="jetons"></g>
+      </svg>
+    </div>
+
+    <div class="droite">
+      <div class="indices">
+        <div class="indice" id="i1"><span class="label">Indice 1 · le PC</span><p class="q">Le document est-il parti ?</p><p class="r"></p></div>
+        <div class="indice" id="i2"><span class="label">Indice 2 · l'imprimante</span><p class="q">Que dit l'imprimante ?</p><p class="r"></p></div>
+        <div class="indice" id="i3"><span class="label">Indice 3 · le compteur</span><p class="q">Combien de pages sorties ?</p><p class="r"></p></div>
+        <div class="indice" id="i4"><span class="label">Indice 4 · le boîtier</span><p class="q">Les moteurs ont-ils tourné ?</p><p class="r"></p></div>
+      </div>
+      <div class="carte conclusion" id="concl">
+        <span class="label">Conclusion du programme</span>
+        <p class="cause" id="cCause">…</p>
+        <p id="cAction"></p>
+        <p class="petit" style="color:var(--encre-2)">Le programme ne voit pas la panne : il la <b>déduit</b> des 4 indices. Il propose, <b>un humain décide</b>.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="bas">
+    <p class="bandeau" id="bandeau" aria-live="polite"></p>
+    <div class="nav">
+      <button class="btn" id="bPrec" type="button">← Précédent</button>
+      <span class="points" id="points" aria-hidden="true"></span>
+      <button class="btn principal" id="bSuiv" type="button">Suivant →</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+  if (/[?&]cadre/.test(location.search)) document.body.classList.add('cadre');
+
+  // [état, texte] : ok = normal, alerte = anormal, neutre = rien à signaler, inconnu = pas de réponse
+  var S = {
+    ok:      { nom: 'Tout va bien', imp: 'Prête', pages: 5, part: true,
+               i: [['ok', 'Oui, file vide'], ['ok', '« Prête »'], ['ok', '5 pages sur 5'], ['ok', 'Oui, ils ont tourné']],
+               cause: 'Aucune panne : les 5 pages sont sorties.', action: 'Rien à faire. Aucun ticket.', boit: '' },
+    papier:  { nom: 'Plus de papier', imp: 'Bac vide', pages: 0, part: true,
+               i: [['ok', 'Oui, file vide'], ['alerte', '« Plus de papier »'], ['alerte', '0 page sur 5'], ['alerte', 'Non']],
+               cause: 'Le bac à papier est vide.', action: 'Le boîtier affiche « Bac vide » : Nadia remet du papier. Pas de déplacement.', boit: 'Bac vide' },
+    bourrage:{ nom: 'Feuille coincée', imp: 'Bourrage', pages: 2, coince: true, part: true,
+               i: [['ok', 'Oui, file vide'], ['alerte', '« Bourrage »'], ['alerte', '2 pages sur 5'], ['alerte', 'Oui, puis arrêt']],
+               cause: 'Une feuille est coincée après 2 pages.', action: 'Wassim appelle Nadia et la guide pour retirer la feuille.', boit: 'Feuille coincée' },
+    toner:   { nom: 'Toner vide', imp: 'Toner vide', pages: 0, part: true,
+               i: [['ok', 'Oui, file vide'], ['alerte', '« Toner vide »'], ['alerte', '0 page sur 5'], ['alerte', 'Non']],
+               cause: 'Le toner est épuisé.', action: 'Wassim apporte la bonne cartouche du premier coup.', boit: 'Toner : Wassim prévenu' },
+    figee:   { nom: 'Imprimante figée', imp: 'Prête', pages: 0, part: true,
+               i: [['ok', 'Oui, file vide'], ['ok', '« Prête »… ?'], ['alerte', '0 page sur 5'], ['alerte', 'Non']],
+               cause: 'Imprimante probablement figée.', action: 'Elle dit « prête », mais le compteur et les moteurs disent le contraire. Il faut la redémarrer : Nadia ou Wassim le fait. Le programme ne redémarre rien.', boit: 'Bloquée : Wassim prévenu' },
+    pc:      { nom: 'Problème sur le PC', imp: 'Prête', pages: 0, part: false, bloque: 'pc',
+               i: [['alerte', 'Non, document bloqué'], ['ok', '« Prête »'], ['neutre', 'Rien reçu'], ['neutre', 'Rien reçu']],
+               cause: 'Le document n\'a jamais quitté le PC.', action: 'Wassim regarde le PC de Nadia à distance. L\'imprimante n\'y est pour rien.', boit: 'Problème sur le PC' },
+    eteinte: { nom: 'Imprimante injoignable', imp: '', pages: 0, part: false, bloque: 'imp',
+               i: [['alerte', 'Non, en attente'], ['inconnu', 'Pas de réponse'], ['inconnu', 'Pas de réponse'], ['neutre', 'Non']],
+               cause: 'Imprimante injoignable : éteinte, câble ou réseau ?', action: 'Les indices ne suffisent pas pour trancher (« pas de réponse » ne veut pas dire « zéro »). Wassim appelle Nadia pour vérifier l\'interrupteur et le câble.', boit: 'Hors réseau' }
+  };
+  var ORDRE = ['ok', 'papier', 'bourrage', 'toner', 'figee', 'pc', 'eteinte'];
+  var ETAPES = 6; // 0 impression, 1-4 indices, 5 conclusion
+  var cur = 'figee', k = 0;
+  var $ = function (id) { return document.getElementById(id); };
+  var NS = 'http://www.w3.org/2000/svg';
+
+  // boutons de situation
+  ORDRE.forEach(function (id) {
+    var b = document.createElement('button'); b.type = 'button'; b.className = 'btn petit'; b.textContent = S[id].nom; b.dataset.s = id;
+    b.addEventListener('click', function () { cur = id; k = 0; rendre(true); });
+    $('choix').appendChild(b);
+  });
+  for (var n = 0; n < ETAPES; n++) $('points').appendChild(document.createElement('i'));
+
+  // chemins des jetons (le long du réseau)
+  var P = { pc: [105, 322], srv: [510, 325], imp: [310, 324], boit: [385, 196] };
+  var CHEMINS = {
+    'pc-imp':  [P.pc, [105, 372], [310, 372], P.imp],
+    'srv-pc':  [P.srv, [510, 372], [105, 372], P.pc],
+    'srv-imp': [P.srv, [510, 372], [310, 372], P.imp],
+    'boit-srv':[P.boit, [445, 140], [490, 130], [510, 140]]
+  };
+  var anims = [];
+  function jeton(nomChemin, texte, couleur, retour, arretA, groupe, rayon) {
+    var pts = CHEMINS[nomChemin].slice(); if (retour) pts.reverse();
+    var g = document.createElementNS(NS, 'g'); g.setAttribute('class', 'jeton');
+    g.innerHTML = '<circle r="' + (rayon || 15) + '" style="fill:var(' + couleur + ')"/>' + (texte ? '<text y="4">' + texte + '</text>' : '');
+    (groupe || $('jetons')).appendChild(g);
+    var seg = [], tot = 0;
+    for (var i = 1; i < pts.length; i++) { var d = Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]); seg.push(d); tot += d; }
+    var fin = arretA ? tot * arretA : tot, t0 = null, dur = groupe ? 1800 : 1100 * fin / 500 + 300;
+    return new Promise(function (ok) {
+      function pas(ts) {
+        if (!g.isConnected) return ok();
+        if (t0 === null) t0 = ts;
+        var dist = Math.min(1, (ts - t0) / dur) * fin, i = 0;
+        while (i < seg.length - 1 && dist > seg[i]) { dist -= seg[i]; i++; }
+        var a = pts[i], b = pts[i + 1], r = seg[i] ? Math.min(1, dist / seg[i]) : 1;
+        g.setAttribute('transform', 'translate(' + (a[0] + (b[0] - a[0]) * r) + ' ' + (a[1] + (b[1] - a[1]) * r) + ')');
+        if ((ts - t0) < dur) requestAnimationFrame(pas); else ok(g);
+      }
+      requestAnimationFrame(pas);
+    });
+  }
+  var gen = 0;
+  function effacer() { $('jetons').innerHTML = ''; anims = []; gen++; }
+
+  function feuilles(nb, coince) {
+    var h = '';
+    for (var i = 0; i < nb; i++) h += '<rect x="' + (272 + i * 3) + '" y="' + (300 - i * 4) + '" width="76" height="12" rx="1" style="fill:var(--blanc);stroke:var(--encre);stroke-width:1.5"/>';
+    if (coince) h += '<path d="M290 232 l8 -16 l10 10 l9 -14 l9 12 l8 -10 l6 18 z" style="fill:var(--rouge-pale);stroke:var(--rouge);stroke-width:2.5"/>';
+    $('feuilles').innerHTML = h;
+  }
+
+  var TEXTES = [
+    function (s) { return s.part === false && s.bloque === 'pc' ? 'Nadia imprime 5 pages… mais rien ne sort. Elle appuie sur le <b>bouton rouge</b> du boîtier.'
+                         : s.pages === 5 ? 'Nadia imprime 5 pages. Les pages sortent.' : 'Nadia imprime 5 pages… mais rien ne sort. Elle appuie sur le <b>bouton rouge</b> du boîtier.'; },
+    function () { return 'Indice 1 : le serveur demande au <b>PC</b> si le document est parti (lecture seule).'; },
+    function () { return 'Indice 2 : le serveur demande à l\'<b>imprimante</b> son état (SNMP).'; },
+    function () { return 'Indice 3 : le serveur lit le <b>compteur de pages</b> de l\'imprimante.'; },
+    function () { return 'Indice 4 : le <b>boîtier</b> envoie un résumé de vibration <b>chaque seconde</b>. Le serveur regarde ceux reçus pendant l\'impression.'; },
+    function (s) { return 'Le programme <b>croise les 4 indices</b> et propose une cause dans le ticket.'; }
+  ];
+
+  function rendre(anim) {
+    var s = S[cur];
+    document.querySelectorAll('#choix .btn').forEach(function (b) { b.setAttribute('aria-pressed', b.dataset.s === cur ? 'true' : 'false'); });
+    [].forEach.call($('points').children, function (p, i) { p.className = i < k ? 'fait' : i === k ? 'ici' : ''; });
+    $('bPrec').disabled = k === 0; $('bSuiv').disabled = k === ETAPES - 1;
+    $('bandeau').innerHTML = TEXTES[k](s);
+
+    // dessin
+    $('ecranImp').textContent = s.imp;
+    $('ecranImp').style.fill = s.imp === '' ? 'var(--encre)' : (s.imp === 'Prête' ? 'var(--jaune)' : 'var(--rouge-pale)');
+    $('ecranPC').textContent = k >= 1 && s.bloque ? (s.bloque === 'pc' ? 'Document bloqué' : 'En attente…') : 'Imprimer · 5 p.';
+    $('ecranPC').style.fill = k >= 1 && s.bloque ? 'var(--rouge-texte)' : 'var(--encre)';
+    feuilles(k === 0 && anim ? 0 : s.pages, s.coince && !(k === 0 && anim));
+    $('ecranBoit').textContent = k === 5 ? s.boit : '';
+    $('bulleBoit').style.display = k === 5 && s.boit ? '' : 'none';
+    if (k === 5 && s.boit) { var w = $('ecranBoit').getComputedTextLength() + 22; $('bulleFond').setAttribute('width', w); $('bulleFond').setAttribute('x', 350 - w / 2); }
+    var actif = [null, 'o-pc', 'o-imp', 'o-imp', 'o-boit', 'o-srv'][k];
+    ['o-pc', 'o-imp', 'o-boit', 'o-srv'].forEach(function (id) { $(id).classList.toggle('actif', id === actif); });
+
+    // indices
+    for (var i = 1; i <= 4; i++) {
+      var el = $('i' + i), vu = k >= i;
+      el.className = 'indice' + (vu ? ' ' + s.i[i - 1][0] : '') + (k === i ? ' actif' : '');
+      el.querySelector('.r').textContent = vu ? s.i[i - 1][1] : '';
+    }
+    $('concl').classList.toggle('vu', k === 5);
+    $('cCause').textContent = k === 5 ? s.cause : '…';
+    $('cAction').textContent = k === 5 ? s.action : '';
+
+    // mouvements
+    effacer();
+    var g0 = gen, encore = function () { return g0 === gen; };
+    if (!anim) return;
+    if (k === 0) {
+      var stop = s.bloque === 'pc' ? .12 : null;
+      jeton('pc-imp', '5 p.', '--blanc', false, stop).then(function () {
+        if (!encore()) return;
+        if (s.bloque === 'imp') { $('jetons').lastChild && $('jetons').lastChild.querySelector('circle').style.setProperty('fill', 'var(--rouge-pale)'); }
+        if (!s.bloque) feuilles(s.pages, s.coince);
+        if (s.pages < 5) $('bouton').animate([{ r: 6 }, { r: 10 }, { r: 6 }], { duration: 500, iterations: 2 });
+      });
+    }
+    if (k === 1) jeton('srv-pc', '?', '--bleu-pale').then(function () { if (!encore()) return; effacer(); return jeton('srv-pc', s.i[0][0] === 'ok' ? '✓' : '✗', s.i[0][0] === 'ok' ? '--vert-pale' : '--rouge-pale', true); });
+    if (k === 2 || k === 3) {
+      var muet = s.i[k - 1][0] === 'inconnu';
+      jeton('srv-imp', '?', '--bleu-pale').then(function () { if (!encore()) return; effacer(); if (!muet) return jeton('srv-imp', k === 2 ? 'état' : 'n°', '--blanc', true); });
+    }
+  }
+
+  function aller(d) { var n = Math.max(0, Math.min(ETAPES - 1, k + d)); if (n !== k) { k = n; rendre(true); } }
+  $('bSuiv').addEventListener('click', function () { aller(1); });
+  $('bPrec').addEventListener('click', function () { aller(-1); });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'Enter') { e.preventDefault(); aller(1); }
+    if (e.key === 'ArrowLeft') { e.preventDefault(); aller(-1); }
+  });
+  // flux continu : un résumé de vibration par seconde, du boîtier vers le serveur (MQTT)
+  setInterval(function () {
+    if (document.hidden) return;
+    var gros = k === 4;
+    jeton('boit-srv', '', gros ? '--jaune' : '--jaune-pale', false, null, $('flux'), gros ? 9 : 6).then(function (g) { if (g) g.remove(); });
+  }, 1000);
+  rendre(true);
+  window.SIMPLE = { aller: aller, choisir: function (id) { cur = id; k = 0; rendre(true); }, S: S };
+})();
+</script>
+</body>
+</html>

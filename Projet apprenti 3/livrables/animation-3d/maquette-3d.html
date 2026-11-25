@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>CyberSentinel — maquette 3D du projet E6 de Lorenzo</title>
+<title>Capteur de présence authentifié — maquette 3D du projet E6 de Lorenzo</title>
 <link rel="icon" href="data:,">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -142,7 +142,7 @@ h1,h2{font-weight:1000}
 </script>
 </head>
 <body>
-<canvas id="scene" aria-label="Maquette 3D CyberSentinel : radar ESP32 pour le verrouillage Windows, leurre ESP32 Ethernet imitant une imprimante, serveur Ubuntu pour les alertes"></canvas>
+<canvas id="scene" aria-label="Maquette 3D du capteur de présence authentifié : radar ESP32 pour le verrouillage Windows, leurre ESP32 Ethernet imitant une imprimante, serveur Ubuntu pour les alertes"></canvas>
 <div id="scrim"></div>
 <div id="labels"></div>
 
@@ -646,14 +646,14 @@ function makeServer() {
   return g;
 }
 
-/** Switch 24 ports du lycée. */
+/** Switch 24 ports déjà en place. */
 const SW = { w: 44, h: 4.4, d: 24 };
 const portPx = i => ({ x: 760 + Math.floor(i / 2) * 80 + 30, y: i % 2 ? 123 : 63 });
 const swFront = canvasTex(1760, 176, (g, w, h) => {
   const gr = g.createLinearGradient(0, 0, 0, h); gr.addColorStop(0, '#a3aab0'); gr.addColorStop(1, '#868d93');
   g.fillStyle = gr; g.fillRect(0, 0, w, h);
   g.fillStyle = '#20262c'; g.font = 'bold 34px Arial'; g.fillText('SWITCH 24 PORTS', 60, 80);
-  g.font = '24px Arial'; g.fillText('réseau du lycée (en place)', 60, 120);
+  g.font = '24px Arial'; g.fillText('réseau en place', 60, 120);
   for (let i = 0; i < 24; i++) {
     const p = portPx(i);
     g.fillStyle = '#111417'; g.fillRect(p.x - 28, p.y - 22, 56, 44);
@@ -1033,7 +1033,7 @@ const rtFront = canvasTex(1760, 176, (g, w, h) => {
   const gr = g.createLinearGradient(0, 0, 0, h); gr.addColorStop(0, '#2b3036'); gr.addColorStop(1, '#1b1f24');
   g.fillStyle = gr; g.fillRect(0, 0, w, h);
   g.fillStyle = '#d7dde2'; g.font = 'bold 34px Arial'; g.fillText('ISR 4331', 60, 80);
-  g.font = '24px Arial'; g.fillStyle = '#9aa7b0'; g.fillText('routeur du lycée (en place)', 60, 120);
+  g.font = '24px Arial'; g.fillStyle = '#9aa7b0'; g.fillText('routeur (en place)', 60, 120);
   for (let i = 0; i < 24; i++) {
     const p = portPx(i); if (i > 11 && i < 22) continue;
     g.fillStyle = '#0a0c0e'; g.fillRect(p.x - 28, p.y - 22, 56, 44);
@@ -1256,9 +1256,9 @@ function mkRead(pos) { const d = document.createElement('div'); d.className = 'r
 label('overview', V(-30, 12, 9), 'Boîtier de présence', 'radar + ESP32 + lumière', '');
 label('fake', V(-30, 9, 4), 'Vrai boîtier', 'connaît le code secret', 'small');
 label('fake', V(30, 9, 4), 'Faux boîtier', 'ne le connaît pas', 'small');
-label('fake', V(12, 34, -42), 'PC Ubuntu du lycée', 'ports USB', 'small');
+label('fake', V(12, 34, -42), 'PC Ubuntu de la maquette', 'ports USB', 'small');
 label('overview', V(-30, 58, -39), 'Windows 11', 'machine virtuelle sur le PC Ubuntu');
-label('overview', V(12, 34, -42), 'PC Ubuntu du lycée', 'hôte VirtualBox · USB', 'small');
+label('overview', V(12, 34, -42), 'PC Ubuntu de la maquette', 'hôte VirtualBox · USB', 'small');
 label('overview', V(62, 16, -52), 'Switch HP + routeur Cisco', 'réseau en place (C10)', 'small');
 label('overview', V(104, 48, -40), 'Serveur Ubuntu', 'API Python · SQLite');
 label('overview', V(116, 32, 40), 'Leurre imprimante HTTP', 'ESP32 + W5500 · simulateur', 'small');
@@ -1449,7 +1449,7 @@ function baseline(i) {
    13. Les étapes
    ===================================================================== */
 label('net', V(62, 16, -52), 'Switch + routeur', 'DHCP · DNS · NTP fournis par le routeur', 'small');
-label('net', V(12, 34, -42), 'PC Ubuntu du lycée', 'Windows 11 en machine virtuelle', 'small');
+label('net', V(12, 34, -42), 'PC Ubuntu de la maquette', 'Windows 11 en machine virtuelle', 'small');
 label('net', V(104, 48, -40), 'Serveur Ubuntu', 'nginx HTTPS · API Python', 'small');
 label('net', V(80, 40, 14), 'PC de test / technicien', 'capture Wireshark', 'small');
 label('net', V(116, 32, 40), 'Leurre réseau', 'HTTP fictif sur ESP32', 'small');
@@ -1459,7 +1459,7 @@ const cap = (a, b, c, d, e, col = '#ffffff') => { world.pkts.push([world.pkts.le
 const steps = [
 {
   title: 'Vue d\'ensemble',
-  text: `<p><b>CyberSentinel</b> est une maquette de sécurité en profondeur : un radar LD2410 et un ESP32 verrouillent le poste de Martine quand elle s'absente ; à droite, un <b>deuxième ESP32 Ethernet (W5500)</b> imite une imprimante réseau et enregistre les consultations de son faux service HTTP.</p>
+  text: `<p>Le <b>capteur de présence authentifié</b> est une maquette de sécurité en profondeur : un radar LD2410 et un ESP32 verrouillent le poste de Martine quand elle s'absente ; à droite, un <b>deuxième ESP32 Ethernet (W5500)</b> imite une imprimante réseau et enregistre les consultations de son faux service HTTP.</p>
          <p>Le <b>serveur Ubuntu</b> centralise deux familles d'événements techniques : verrouillage Windows et interactions avec le leurre. Le dispositif ne surveille pas les déplacements des agents.</p>
          <p><b>Scénario pédagogique simulé</b> : ni connexion au SI de la DGFiP, ni preuve de détection d'une intrusion réelle. Utilise Suivant pour explorer les deux défenses.</p>`,
   cam: [[165, 128, 262], [-6, 6, -4]], labels: 'overview', rotate: true,
@@ -1556,7 +1556,7 @@ const steps = [
   title: '5. Le réseau en place (C10)',
   text: `<p>Lorenzo exploite le réseau isolé du laboratoire : <b>DHCP</b> pour l'adressage, <b>DNS</b> pour joindre Ubuntu, <b>NTP</b> pour dater les événements et <b>HTTPS/TLS</b> pour transmettre les journaux du poste.</p>
          <p>Le leurre dispose d'une adresse IP propre et d'un <b>service HTTP factice</b> ; son événement peut être envoyé à Ubuntu par une API authentifiée. Wireshark sert à observer les échanges et à vérifier la cohérence des horodatages.</p>`,
-  note: 'Adresses d\'exemple. Dans la maquette du lycée, le routeur fournit DHCP, DNS et NTP : aucun VLAN ni ACL à créer.',
+  note: 'Adresses d\'exemple. Dans la maquette, le routeur fournit DHCP, DNS et NTP : aucun VLAN ni ACL à créer.',
   cam: [[88, 66, 66], [60, 6, -28]], labels: 'net',
   async run() {
     const toRtr = ['pcToSw', 'swToRtr'], fromRtr = ['-swToRtr', '-pcToSw'];
@@ -1733,6 +1733,13 @@ const steps = [
 },
 
 ];
+/* « ?cadre » (diaporama) : sans le volet physique */
+const CADRE = /[?&]cadre\b/.test(location.search);
+if (CADRE) {
+  for (let i = steps.length - 1; i >= 0; i--) if (/physique|humidit/i.test(steps[i].title)) steps.splice(i, 1);
+  let n = 0; steps.forEach(s => { if (/^\d+\.\s/.test(s.title)) s.title = s.title.replace(/^\d+\./, ++n + '.'); });
+}
+
 
 /* =====================================================================
    14. Caméra, interface : étapes, boutons, clavier
